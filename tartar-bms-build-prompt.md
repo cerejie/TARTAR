@@ -83,16 +83,17 @@ Rules: no duplicated logic; shared tables/forms/modals are one reusable componen
 
 ## 4. Authentication (read carefully — non-standard)
 
-- **Only ONE Supabase Auth account exists: the `superAdmin` (the Owner).** This is the sole email/password login handled by Supabase Auth.
-- **All other users do NOT use email and do NOT use Supabase Auth.** They live in a custom **`users` table** with: `username`, hashed password, `role`, `access_flags`, `approval_status`, `branch_access`.
-- Non-admin login authenticates against the `users` table via backend logic (Supabase RPC / Edge Function). Hash passwords server-side (pgcrypto); never store plaintext. Enforce Row Level Security.
-- **SuperAdmin (Owner) can:** add users, delete users, update user credentials, approve pending registrations, assign roles + access flags. Owner's page has a dedicated **Users** tab for this.
+- **Only ONE Supabase Auth account exists: the `superAdmin` (the Developer).** This is the sole email/password login handled by Supabase Auth. It is deliberately kept to a single account to stay within the free-tier auth limit. The superAdmin has overall access.
+- **All other users — INCLUDING the `admin` (the business Owner) — do NOT use email and do NOT use Supabase Auth.** They live in a custom **`users` table** with: `username`, hashed password, `role`, `access_flags`, `approval_status`, `branch_access`, and authenticate against that table via backend logic (Supabase RPC). Hash passwords server-side (pgcrypto); never store plaintext. Enforce Row Level Security.
+- **superAdmin (Developer) can:** everything — add/delete users, update credentials, approve registrations, and assign **any** role (admin, accountant, employee, and future roles). Only the superAdmin can create/modify admins. Nobody can manage the superAdmin (it is the only one).
+- **admin (Owner) can:** run the whole business (dashboards, financial standing, branch monitoring, approve vouchers) and manage **non-admin** users (accountants, employees, other roles) — approve their registrations, assign their roles/flags/branches. The admin **cannot** manage the superAdmin or other admins. The admin has its own **Users** tab for managing non-admin users.
 
 ## 5. Roles & Permissions
 
 | Role | Can do | Cannot do |
 |------|--------|-----------|
-| **Owner** (superAdmin) | Everything | — |
+| **superAdmin** (Developer) | Everything; sole email/Supabase-Auth login; assign all roles incl. admins | — |
+| **Admin** (Owner) | Full business control: dashboards, financial standing, branch monitoring, approve vouchers; manage non-admin users | Manage the superAdmin; create/modify other admins |
 | **Accountant** | View Expenses & Income (for BIR) | View financial standing |
 | **Employee** | Encode transactions, view reminders | View financial standing |
 
@@ -125,7 +126,7 @@ Sales · Expenses · Customer Payments · Supplier Payments · Cash Deposit · P
 
 Company money is held in: **Cash Drawer** and **Bank Account**. Track balances for both.
 
-## 11. Owner Dashboard (shown immediately after Owner login)
+## 11. Admin Dashboard (shown immediately after Admin/superAdmin login)
 
 Current Cash · Today's Sales · Today's Expenses · Accounts Receivable · Accounts Payable · Monthly Summary · Bank Balance · **daily sales graph** (chart of daily sales standing, built with `@ant-design/charts`).
 
@@ -133,7 +134,7 @@ Current Cash · Today's Sales · Today's Expenses · Accounts Receivable · Acco
 
 Daily · Weekly · Monthly · Cash Flow · Receivables · Payables · Expenses.
 
-## 13. Branch Monitoring (Owner view, per branch)
+## 13. Branch Monitoring (Admin/superAdmin view, per branch)
 
 Cash Balance · Sales · Expenses · Receivables · Payables.
 
@@ -148,7 +149,7 @@ Searchable/filterable by: Customer · Supplier · Reference Number · Date · Am
 
 ## 16. Voucher Approval Workflow
 
-Create **check/cash vouchers** for expenses and purchases. Flow: **Employee creates voucher → Owner must approve → only after approval is it released for printing.** Unapproved vouchers cannot be printed.
+Create **check/cash vouchers** for expenses and purchases. Flow: **Employee creates voucher → Admin (or superAdmin) must approve → only after approval is it released for printing.** Unapproved vouchers cannot be printed.
 
 ---
 
