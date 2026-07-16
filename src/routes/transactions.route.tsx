@@ -5,6 +5,7 @@ import type { ColumnsType } from 'antd/es/table'
 import type { DefaultValues } from 'react-hook-form'
 import { appLayoutRoute } from './app.route'
 import { PageHeader } from '../components/PageHeader'
+import { SectionCard } from '../components/SectionCard'
 import { DataTable } from '../components/DataTable'
 import { LedgerFilterBar } from '../components/LedgerFilterBar'
 import { EntityFormModal } from '../components/form/EntityFormModal'
@@ -170,12 +171,14 @@ function TransactionsPage() {
 
       <LedgerFilterBar />
 
-      <DataTable<Transaction>
-        columns={columns}
-        data={list.data ?? []}
-        loading={list.loading}
-        emptyText="No transactions match the current filters"
-      />
+      <SectionCard title="All Transactions" subtitle="Matching the current filters" flush>
+        <DataTable<Transaction>
+          columns={columns}
+          data={list.data ?? []}
+          loading={list.loading}
+          emptyText="No transactions match the current filters"
+        />
+      </SectionCard>
 
       <EntityFormModal<TransactionInput>
         open={modal.open}

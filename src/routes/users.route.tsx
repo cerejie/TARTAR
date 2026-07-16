@@ -1,10 +1,12 @@
 import { createRoute, redirect } from '@tanstack/react-router'
-import { Button, Popconfirm, Space, Tag } from 'antd'
-import { KeyOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Popconfirm, Space, Tag, Tooltip } from 'antd'
+import { DeleteOutlined, EditOutlined, KeyOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { DefaultValues } from 'react-hook-form'
 import { appLayoutRoute } from './app.route'
 import { PageHeader } from '../components/PageHeader'
+import { SectionCard } from '../components/SectionCard'
+import { NameCell } from '../components/TableDecor'
 import { DataTable } from '../components/DataTable'
 import { EntityFormModal } from '../components/form/EntityFormModal'
 import type { FieldConfig } from '../components/form/FormField'
@@ -124,7 +126,11 @@ function UsersPage() {
   }
 
   const columns: ColumnsType<User> = [
-    { title: 'Username', dataIndex: 'username' },
+    {
+      title: 'Username',
+      dataIndex: 'username',
+      render: (v: string) => <NameCell icon={<UserOutlined />}>{v}</NameCell>,
+    },
     { title: 'Full name', dataIndex: 'full_name', render: (v: string | null) => v || '—' },
     { title: 'Role', dataIndex: 'role', render: (r: UserRole) => <Tag>{labels.userRole[r]}</Tag> },
     {
@@ -151,23 +157,39 @@ function UsersPage() {
     },
     { title: 'Created', dataIndex: 'created_at', render: formatDate },
     {
-      title: '',
+      title: 'Actions',
       key: 'actions',
-      width: 220,
+      width: 150,
+      align: 'center',
       render: (_, u) => (
-        <Space>
-          <Button type="link" size="small" onClick={() => openModal(EDIT, u.id)}>
-            Edit
-          </Button>
-          <Button type="link" size="small" icon={<KeyOutlined />} onClick={() => openModal(RESET, u.id)}>
-            Reset
-          </Button>
+        <span className="tartar-row-actions">
+          <Tooltip title="Edit user">
+            <Button
+              className="tartar-icon-btn"
+              icon={<EditOutlined />}
+              aria-label={`Edit ${u.username}`}
+              onClick={() => openModal(EDIT, u.id)}
+            />
+          </Tooltip>
+          <Tooltip title="Reset password">
+            <Button
+              className="tartar-icon-btn"
+              icon={<KeyOutlined />}
+              aria-label={`Reset password for ${u.username}`}
+              onClick={() => openModal(RESET, u.id)}
+            />
+          </Tooltip>
           <Popconfirm title="Delete this user?" onConfirm={() => void remove.mutate(u.id)}>
-            <Button type="link" danger size="small">
-              Delete
-            </Button>
+            <Tooltip title="Delete user">
+              <Button
+                className="tartar-icon-btn"
+                danger
+                icon={<DeleteOutlined />}
+                aria-label={`Delete ${u.username}`}
+              />
+            </Tooltip>
           </Popconfirm>
-        </Space>
+        </span>
       ),
     },
   ]
@@ -188,7 +210,9 @@ function UsersPage() {
         }
       />
 
-      <DataTable<User> columns={columns} data={users} loading={list.loading} emptyText="No users yet" />
+      <SectionCard title="All Users" subtitle="Accounts, roles and branch access" flush>
+        <DataTable<User> columns={columns} data={users} loading={list.loading} emptyText="No users yet" />
+      </SectionCard>
 
       <EntityFormModal<CreateUserInput>
         open={createModal.open}

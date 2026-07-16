@@ -1,10 +1,12 @@
-import { Button, Popconfirm, Space, Tag } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { Button, Popconfirm, Space, Tag, Tooltip } from 'antd'
+import { DeleteOutlined, DollarOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { DefaultValues, FieldValues } from 'react-hook-form'
 import type { ZodType } from 'zod'
 import dayjs from 'dayjs'
 import { PageHeader } from '../PageHeader'
+import { SectionCard } from '../SectionCard'
+import { NameCell } from '../TableDecor'
 import { DataTable } from '../DataTable'
 import { LedgerFilterBar } from '../LedgerFilterBar'
 import { EntityFormModal } from '../form/EntityFormModal'
@@ -98,7 +100,11 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
         </Space>
       ),
     },
-    { title: props.partyLabel, key: 'name', render: (_, r) => props.nameOf(r) },
+    {
+      title: props.partyLabel,
+      key: 'name',
+      render: (_, r) => <NameCell icon={<UserOutlined />}>{props.nameOf(r)}</NameCell>,
+    },
     { title: 'Branch', dataIndex: 'branch', render: branchName },
     { title: 'Amount', dataIndex: 'amount', align: 'right', render: (v: number) => formatMoney(v) },
     { title: 'Paid', dataIndex: 'paid_amount', align: 'right', render: (v: number) => formatMoney(v) },
@@ -115,27 +121,33 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
     },
     { title: 'Reference', dataIndex: 'reference_number', render: (v: string | null) => v || '—' },
     {
-      title: '',
+      title: 'Actions',
       key: 'actions',
-      width: 200,
+      width: 120,
+      align: 'center',
       render: (_, r) => (
-        <Space>
-          <Button
-            type="link"
-            size="small"
-            disabled={r.status === 'paid'}
-            onClick={() => openModal(settleKey, r.id)}
-          >
-            Record payment
-          </Button>
+        <span className="tartar-row-actions">
+          <Tooltip title={r.status === 'paid' ? 'Fully paid' : 'Record payment'}>
+            {/* Tooltip needs a live child to hover, so the span keeps the
+                disabled button's title reachable. */}
+            <span>
+              <Button
+                className="tartar-icon-btn"
+                icon={<DollarOutlined />}
+                aria-label="Record payment"
+                disabled={r.status === 'paid'}
+                onClick={() => openModal(settleKey, r.id)}
+              />
+            </span>
+          </Tooltip>
           <RequirePermission can="isManager" fallback={null}>
             <Popconfirm title="Delete this record?" onConfirm={() => void remove.mutate(r.id)}>
-              <Button type="link" danger size="small">
-                Delete
-              </Button>
+              <Tooltip title="Delete record">
+                <Button className="tartar-icon-btn" danger icon={<DeleteOutlined />} aria-label="Delete record" />
+              </Tooltip>
             </Popconfirm>
           </RequirePermission>
-        </Space>
+        </span>
       ),
     },
   ]
@@ -154,7 +166,16 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
 
       <LedgerFilterBar />
 
-      <DataTable<Row> columns={columns} data={rows} loading={list.loading} emptyText="No records match the filters" />
+      {/* The page header already carries `props.title`/`props.subtitle`, so the
+          card names the *contents* instead of repeating them. */}
+      <SectionCard title={`All ${props.title}`} subtitle="Matching the current filters" flush>
+        <DataTable<Row>
+          columns={columns}
+          data={rows}
+          loading={list.loading}
+          emptyText="No records match the filters"
+        />
+      </SectionCard>
 
       <EntityFormModal<Input>
         open={formModal.open}

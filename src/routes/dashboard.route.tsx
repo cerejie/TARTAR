@@ -1,9 +1,11 @@
 import { createRoute, redirect } from '@tanstack/react-router'
-import { Alert, Card, Col, Empty, Row, Space, Spin, Typography } from 'antd'
+import { Alert, Col, Empty, Row, Space, Spin, Typography } from 'antd'
 import { Column } from '@ant-design/charts'
 import { appLayoutRoute } from './app.route'
 import { PageHeader } from '../components/PageHeader'
+import { SectionCard } from '../components/SectionCard'
 import { StatCard } from '../components/StatCard'
+import { colors } from '../styles/theme.css'
 import { useQuery } from '../hooks/useQuery'
 import { useAuthStore } from '../stores/auth.store'
 import * as dashboardService from '../services/dashboard.service'
@@ -47,7 +49,7 @@ function DashboardPage() {
         <StatTile span={6} title="Monthly Expenses" value={s?.monthlyExpenses} loading={summary.loading} tone="negative" />
       </Row>
 
-      <Card className="tartar-chart-card" title="Daily Sales — last 30 days">
+      <SectionCard title="Daily Sales" subtitle="Last 30 days">
         {daily.loading ? (
           <Spin />
         ) : series.length ? (
@@ -56,13 +58,16 @@ function DashboardPage() {
             xField="date"
             yField="total"
             height={300}
+            // Charts sit outside antd's token system, so the brand colour has to
+            // be handed to them explicitly or they fall back to antd blue.
+            style={{ fill: colors.brand, radiusTopLeft: 4, radiusTopRight: 4 }}
             axis={{ x: { labelFormatter: (v: string) => v.slice(5) } }}
             tooltip={{ items: [{ channel: 'y', valueFormatter: (v: number) => formatMoney(v) }] }}
           />
         ) : (
           <Empty description="No sales recorded yet" />
         )}
-      </Card>
+      </SectionCard>
 
       <DueAlerts data={alerts.data} loading={alerts.loading} />
     </>
@@ -94,7 +99,7 @@ function DueAlerts({ data, loading }: { data?: dashboardService.DueAlerts; loadi
   if (nothing) return null
 
   return (
-    <Card className="tartar-chart-card" title="Notifications & Alerts">
+    <SectionCard title="Notifications & Alerts" subtitle="Overdue and near-due items needing attention">
       <Space direction="vertical" className="tartar-block" size="small">
         {overdueReceivables.map((r) => (
           <Alert
@@ -136,6 +141,6 @@ function DueAlerts({ data, loading }: { data?: dashboardService.DueAlerts; loadi
       <Typography.Text type="secondary" className="tartar-alerts-hint">
         Near-due window: 7 days
       </Typography.Text>
-    </Card>
+    </SectionCard>
   )
 }

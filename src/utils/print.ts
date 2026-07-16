@@ -1,6 +1,7 @@
 import type { Voucher } from '../models'
 import { labels } from '../models'
 import { formatMoney, formatDateTime } from './format'
+import { colors, fontBody } from '../styles/theme.css'
 
 /**
  * Opens a print-ready window for an approved voucher (build spec §16). This is
@@ -28,16 +29,16 @@ export function printVoucher(v: Voucher, branchName: string): void {
   <meta charset="utf-8" />
   <title>Voucher ${v.voucher_no ?? ''}</title>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1f1f1f; padding: 40px; }
-    h1 { color: #c1121f; letter-spacing: .08em; margin: 0 0 4px; }
-    .sub { color: #6b7280; margin-bottom: 24px; }
+    body { font-family: ${fontBody}; color: ${colors.text}; padding: 40px; }
+    h1 { color: ${colors.brandDark}; letter-spacing: .08em; margin: 0 0 4px; }
+    .sub { color: ${colors.textMuted}; margin-bottom: 24px; }
     table { width: 100%; border-collapse: collapse; }
-    td { padding: 10px 8px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    td.label { color: #6b7280; width: 180px; }
+    td { padding: 10px 8px; border-bottom: 1px solid ${colors.border}; vertical-align: top; }
+    td.label { color: ${colors.textMuted}; width: 180px; }
     td.value { font-weight: 600; }
-    .amount { font-size: 20px; color: #c1121f; }
+    .amount { font-size: 20px; color: ${colors.brandDark}; }
     .sign { margin-top: 64px; display: flex; justify-content: space-between; }
-    .sign div { border-top: 1px solid #1f1f1f; padding-top: 6px; width: 220px; text-align: center; color: #6b7280; }
+    .sign div { border-top: 1px solid ${colors.text}; padding-top: 6px; width: 220px; text-align: center; color: ${colors.textMuted}; }
   </style>
 </head>
 <body>

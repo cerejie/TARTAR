@@ -1,11 +1,25 @@
 import { createRoute, redirect } from '@tanstack/react-router'
-import { Button, Popconfirm, Space, Tag } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { Badge, Button, Popconfirm, Tag, Tooltip } from 'antd'
+import {
+  BankOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FallOutlined,
+  FileTextOutlined,
+  PlusOutlined,
+  RiseOutlined,
+  ShopOutlined,
+  SolutionOutlined,
+  UndoOutlined,
+  WalletOutlined,
+} from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { DefaultValues } from 'react-hook-form'
 import { appLayoutRoute } from './app.route'
 import { PageHeader } from '../components/PageHeader'
+import { SectionCard } from '../components/SectionCard'
 import { DataTable } from '../components/DataTable'
+import { ColumnLabel, NameCell } from '../components/TableDecor'
 import { EntityFormModal } from '../components/form/EntityFormModal'
 import type { FieldConfig } from '../components/form/FormField'
 import { useQuery } from '../hooks/useQuery'
@@ -73,44 +87,69 @@ function BranchesPage() {
   }
 
   const columns: ColumnsType<Branch> = [
-    { title: 'Name', dataIndex: 'name' },
-    { title: 'Slug', dataIndex: 'slug', width: 160, render: (v: string) => <Tag>{v}</Tag> },
-    { title: 'Order', dataIndex: 'sort', width: 90 },
+    {
+      title: 'Branch Name',
+      dataIndex: 'name',
+      render: (name: string) => <NameCell icon={<ShopOutlined />}>{name}</NameCell>,
+    },
+    {
+      title: 'Slug',
+      dataIndex: 'slug',
+      width: 160,
+      render: (v: string) => <Tag className="tartar-slug">{v}</Tag>,
+    },
+    { title: 'Order', dataIndex: 'sort', width: 90, align: 'center' },
     {
       title: 'Status',
       dataIndex: 'active',
       width: 120,
-      render: (active: boolean) => (active ? <Tag color="green">Active</Tag> : <Tag>Archived</Tag>),
+      align: 'center',
+      render: (active: boolean) =>
+        active ? <Badge status="success" text="Active" /> : <Badge status="default" text="Archived" />,
     },
     {
-      title: '',
+      title: 'Actions',
       key: 'actions',
-      width: 200,
+      width: 120,
+      align: 'center',
       render: (_, b) => (
-        <Space>
-          <Button type="link" size="small" onClick={() => openModal(EDIT, b.slug)}>
-            Edit
-          </Button>
+        <span className="tartar-row-actions">
+          <Tooltip title="Edit branch">
+            <Button
+              className="tartar-icon-btn"
+              icon={<EditOutlined />}
+              aria-label={`Edit ${b.name}`}
+              onClick={() => openModal(EDIT, b.slug)}
+            />
+          </Tooltip>
           {b.active ? (
             <Popconfirm
               title="Archive this branch?"
               description="It is hidden from selectors but its history is kept."
               onConfirm={() => void setActive.mutate({ slug: b.slug, active: false })}
             >
-              <Button type="link" danger size="small">
-                Archive
-              </Button>
+              {/* Archive, not delete — the tooltip and confirm copy carry that,
+                  since the icon alone would imply the record is destroyed. */}
+              <Tooltip title="Archive branch">
+                <Button
+                  className="tartar-icon-btn"
+                  danger
+                  icon={<DeleteOutlined />}
+                  aria-label={`Archive ${b.name}`}
+                />
+              </Tooltip>
             </Popconfirm>
           ) : (
-            <Button
-              type="link"
-              size="small"
-              onClick={() => void setActive.mutate({ slug: b.slug, active: true })}
-            >
-              Restore
-            </Button>
+            <Tooltip title="Restore branch">
+              <Button
+                className="tartar-icon-btn"
+                icon={<UndoOutlined />}
+                aria-label={`Restore ${b.name}`}
+                onClick={() => void setActive.mutate({ slug: b.slug, active: true })}
+              />
+            </Tooltip>
           )}
-        </Space>
+        </span>
       ),
     },
   ]
@@ -123,44 +162,78 @@ function BranchesPage() {
     { enabled: branches.length > 0 },
   )
   const monitorColumns: ColumnsType<BranchMonitorRow> = [
-    { title: 'Branch', dataIndex: 'branchName' },
-    { title: 'Cash Balance', dataIndex: 'cashBalance', align: 'right', render: (v: number) => formatMoney(v) },
-    { title: 'Sales', dataIndex: 'sales', align: 'right', render: (v: number) => formatMoney(v) },
-    { title: 'Expenses', dataIndex: 'expenses', align: 'right', render: (v: number) => formatMoney(v) },
-    { title: 'Receivables', dataIndex: 'receivables', align: 'right', render: (v: number) => formatMoney(v) },
-    { title: 'Payables', dataIndex: 'payables', align: 'right', render: (v: number) => formatMoney(v) },
+    {
+      title: <ColumnLabel icon={<BankOutlined />}>Branch</ColumnLabel>,
+      dataIndex: 'branchName',
+      render: (name: string) => <NameCell icon={<ShopOutlined />}>{name}</NameCell>,
+    },
+    {
+      title: <ColumnLabel icon={<WalletOutlined />}>Cash Balance</ColumnLabel>,
+      dataIndex: 'cashBalance',
+      align: 'right',
+      render: (v: number) => formatMoney(v),
+    },
+    {
+      title: <ColumnLabel icon={<RiseOutlined />}>Sales</ColumnLabel>,
+      dataIndex: 'sales',
+      align: 'right',
+      render: (v: number) => formatMoney(v),
+    },
+    {
+      title: <ColumnLabel icon={<FallOutlined />}>Expenses</ColumnLabel>,
+      dataIndex: 'expenses',
+      align: 'right',
+      render: (v: number) => formatMoney(v),
+    },
+    {
+      title: <ColumnLabel icon={<SolutionOutlined />}>Receivables</ColumnLabel>,
+      dataIndex: 'receivables',
+      align: 'right',
+      render: (v: number) => formatMoney(v),
+    },
+    {
+      title: <ColumnLabel icon={<FileTextOutlined />}>Payables</ColumnLabel>,
+      dataIndex: 'payables',
+      align: 'right',
+      render: (v: number) => formatMoney(v),
+    },
   ]
 
   return (
     <>
       <PageHeader
-        title="Branches"
-        subtitle="Add, rename, re-order and archive business units"
+        title="Branch Monitoring"
+        subtitle="Monitor cash, sales, expenses, receivables and payables per branch"
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal(CREATE)}>
-            Add branch
+            Add Branch
           </Button>
         }
       />
-      <DataTable<Branch>
-        columns={columns}
-        data={allBranches}
-        loading={branchList.loading}
-        rowKey="slug"
-        emptyText="No branches yet — add your first one"
-      />
 
-      <PageHeader
+      <SectionCard title="Branches" subtitle="Add, rename, re-order and archive business units" flush>
+        <DataTable<Branch>
+          columns={columns}
+          data={allBranches}
+          loading={branchList.loading}
+          rowKey="slug"
+          emptyText="No branches yet — add your first one"
+        />
+      </SectionCard>
+
+      <SectionCard
         title="Branch Monitoring"
         subtitle="Cash, sales, expenses, receivables and payables per branch"
-      />
-      <DataTable<BranchMonitorRow>
-        columns={monitorColumns}
-        data={monitor.data ?? []}
-        loading={monitor.loading}
-        rowKey="branch"
-        emptyText="No branch data"
-      />
+        flush
+      >
+        <DataTable<BranchMonitorRow>
+          columns={monitorColumns}
+          data={monitor.data ?? []}
+          loading={monitor.loading}
+          rowKey="branch"
+          emptyText="No branch data"
+        />
+      </SectionCard>
 
       <EntityFormModal<BranchInput>
         open={createModal.open}

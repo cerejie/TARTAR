@@ -5,6 +5,7 @@ import type { ColumnsType } from 'antd/es/table'
 import type { DefaultValues } from 'react-hook-form'
 import { appLayoutRoute } from './app.route'
 import { PageHeader } from '../components/PageHeader'
+import { SectionCard } from '../components/SectionCard'
 import { DataTable } from '../components/DataTable'
 import { EntityFormModal } from '../components/form/EntityFormModal'
 import type { FieldConfig } from '../components/form/FormField'
@@ -156,12 +157,14 @@ function VouchersPage() {
         }
       />
 
-      <DataTable<Voucher>
-        columns={columns}
-        data={list.data ?? []}
-        loading={list.loading}
-        emptyText="No vouchers yet"
-      />
+      <SectionCard title="All Vouchers" subtitle="Draft, pending approval, approved and printed" flush>
+        <DataTable<Voucher>
+          columns={columns}
+          data={list.data ?? []}
+          loading={list.loading}
+          emptyText="No vouchers yet"
+        />
+      </SectionCard>
 
       <EntityFormModal<VoucherInput>
         open={modal.open}

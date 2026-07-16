@@ -4,6 +4,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { appLayoutRoute } from './app.route'
 import { PageHeader } from '../components/PageHeader'
+import { SectionCard } from '../components/SectionCard'
 import { DataTable } from '../components/DataTable'
 import { StatCard } from '../components/StatCard'
 import { useQuery } from '../hooks/useQuery'
@@ -136,7 +137,14 @@ function PeriodReport({ txns, loading }: { txns: Transaction[]; loading: boolean
           <StatCard title="Net" value={sales - expenses} loading={loading} tone="brand" />
         </Col>
       </Row>
-      <DataTable<Transaction> columns={columns} data={txns} loading={loading} emptyText="No transactions in this period" />
+      <SectionCard title="Transactions" subtitle="Every movement in the selected period" flush>
+        <DataTable<Transaction>
+          columns={columns}
+          data={txns}
+          loading={loading}
+          emptyText="No transactions in this period"
+        />
+      </SectionCard>
     </>
   )
 }
@@ -171,7 +179,9 @@ function CashFlowReport({ txns, loading }: { txns: Transaction[]; loading: boole
           <StatCard title="Net Cash Flow" value={inflow - outflow} loading={loading} tone="brand" />
         </Col>
       </Row>
-      <DataTable columns={columns} data={byType} loading={loading} rowKey="key" />
+      <SectionCard title="Cash Flow by Category" subtitle="Inflows and outflows by transaction type" flush>
+        <DataTable columns={columns} data={byType} loading={loading} rowKey="key" />
+      </SectionCard>
     </>
   )
 }
@@ -189,7 +199,11 @@ function ExpensesReport({ txns, loading }: { txns: Transaction[]; loading: boole
     { title: 'Total', dataIndex: 'total', align: 'right', render: (v: number) => formatMoney(v) },
   ]
 
-  return <DataTable columns={columns} data={byType} loading={loading} rowKey="key" />
+  return (
+    <SectionCard title="Expenses by Type" subtitle="Totals for the selected period" flush>
+      <DataTable columns={columns} data={byType} loading={loading} rowKey="key" />
+    </SectionCard>
+  )
 }
 
 function LedgerReport<Row extends Receivable | Payable>({
@@ -216,5 +230,9 @@ function LedgerReport<Row extends Receivable | Payable>({
     },
     { title: 'Status', dataIndex: 'status', render: (s: string) => labels.ledgerStatus[s as keyof typeof labels.ledgerStatus] },
   ]
-  return <DataTable<Row> columns={columns} data={rows} loading={loading} emptyText="Nothing outstanding" />
+  return (
+    <SectionCard title={`Outstanding ${label}s`} subtitle="Unsettled balances" flush>
+      <DataTable<Row> columns={columns} data={rows} loading={loading} emptyText="Nothing outstanding" />
+    </SectionCard>
+  )
 }

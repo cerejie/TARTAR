@@ -56,6 +56,9 @@ export function AppLayout({ menuItems, selectedKey, onMenuSelect, children }: Ap
           items={menuItems}
           onClick={({ key }) => onMenuSelect(key)}
         />
+        {/* Purely decorative farm scene filling the space below the nav. It is
+            drawn in CSS (see styles/farmScene.ts) and carries no meaning. */}
+        <div className="tartar-sider-art" aria-hidden="true" />
       </Layout.Sider>
 
       <Layout>
