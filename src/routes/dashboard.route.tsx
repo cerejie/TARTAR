@@ -38,7 +38,7 @@ function DashboardPage() {
     <>
       <PageHeader title="Dashboard" subtitle="Company-wide standing across all branches" />
 
-      <Row gutter={[16, 16]}>
+      <Row gutter={[16, 16]} className="tartar-stat-grid">
         <StatTile span={6} title="Current Cash" value={s?.currentCash} loading={summary.loading} tone="brand" />
         <StatTile span={6} title="Bank Balance" value={s?.bankBalance} loading={summary.loading} />
         <StatTile span={6} title="Today's Sales" value={s?.todaysSales} loading={summary.loading} tone="positive" />

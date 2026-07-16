@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form'
 import { DatePicker, Form, Input, InputNumber, Select } from 'antd'
 import dayjs from 'dayjs'
@@ -15,6 +16,10 @@ export interface FieldConfig<TValues extends FieldValues = FieldValues> {
   placeholder?: string
   /** Prefix for money inputs, e.g. '₱'. */
   prefix?: string
+  /** Prefix icon for text/password inputs (used by the auth forms). */
+  icon?: ReactNode
+  /** Browser autofill hint, e.g. 'username' / 'current-password'. */
+  autoComplete?: string
   allowClear?: boolean
   /** Hide the field based on current form values (cross-field conditional). */
   hidden?: (values: TValues) => boolean
@@ -60,7 +65,14 @@ function renderControl<TValues extends FieldValues>(config: FieldConfig<TValues>
         <Input.TextArea {...field} rows={3} placeholder={config.placeholder} allowClear={config.allowClear} />
       )
     case 'password':
-      return <Input.Password {...field} placeholder={config.placeholder} autoComplete="new-password" />
+      return (
+        <Input.Password
+          {...field}
+          placeholder={config.placeholder}
+          prefix={config.icon}
+          autoComplete={config.autoComplete ?? 'new-password'}
+        />
+      )
     case 'number':
       return (
         <InputNumber
@@ -110,6 +122,15 @@ function renderControl<TValues extends FieldValues>(config: FieldConfig<TValues>
         />
       )
     default:
-      return <Input {...field} value={field.value ?? ''} placeholder={config.placeholder} allowClear={config.allowClear} />
+      return (
+        <Input
+          {...field}
+          value={field.value ?? ''}
+          placeholder={config.placeholder}
+          prefix={config.icon}
+          autoComplete={config.autoComplete}
+          allowClear={config.allowClear}
+        />
+      )
   }
 }

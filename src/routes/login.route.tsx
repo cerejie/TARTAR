@@ -1,8 +1,10 @@
 import { createRoute, redirect, useNavigate, Link } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Card, Flex, Form, Typography } from 'antd'
+import { Button, Form, Popover, Typography } from 'antd'
+import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { rootRoute } from './__root'
+import { AuthShell } from '../components/auth/AuthShell'
 import { FormField } from '../components/form/FormField'
 import { useAuth } from '../hooks/useAuth'
 import { useMutation } from '../hooks/useMutation'
@@ -24,6 +26,10 @@ export const loginRoute = createRoute({
  * login type — no tabs, no role selector, no developer toggle: an email routes
  * to the superAdmin's Supabase Auth login; anything else logs in a regular
  * user by username.
+ *
+ * Deliberately no "remember me": sessions are always persisted (auth.store),
+ * so the checkbox would be decorative. "Forgot password?" is a hint popover,
+ * not a flow — resets are handled by an admin in this auth model.
  */
 function LoginPage() {
   const navigate = useNavigate()
@@ -43,32 +49,66 @@ function LoginPage() {
   )
 
   return (
-    <Flex className="tartar-auth-wrap" align="center" justify="center">
-      <Card className="tartar-auth-card">
-        <Typography.Title level={2} className="tartar-brand tartar-auth-brand">
-          TARTAR
-        </Typography.Title>
-        <Typography.Text type="secondary">Business Management System</Typography.Text>
+    <AuthShell title="Welcome back" subtitle="Sign in to continue managing your business.">
+      <Form
+        layout="vertical"
+        className="tartar-auth-form"
+        onFinish={handleSubmit((v) => void mutate(v))}
+      >
+        <FormField
+          config={{
+            name: 'identifier',
+            label: 'Email or username',
+            type: 'text',
+            placeholder: 'you@company.com or username',
+            icon: <UserOutlined />,
+            autoComplete: 'username',
+          }}
+          control={control}
+        />
+        <FormField
+          config={{
+            name: 'password',
+            label: 'Password',
+            type: 'password',
+            placeholder: 'Enter your password',
+            icon: <LockOutlined />,
+            autoComplete: 'current-password',
+          }}
+          control={control}
+        />
 
-        <Form
-          layout="vertical"
-          className="tartar-auth-tabs"
-          onFinish={handleSubmit((v) => void mutate(v))}
+        <div className="tartar-auth-meta">
+          <Popover
+            trigger="click"
+            placement="topRight"
+            content={
+              <div className="tartar-auth-pop">
+                Password resets are handled by your administrator — ask them to
+                set a new one for your account.
+              </div>
+            }
+          >
+            <Button type="link" className="tartar-auth-hint">
+              Forgot password?
+            </Button>
+          </Popover>
+        </div>
+
+        <Button
+          type="primary"
+          htmlType="submit"
+          block
+          loading={loading}
+          className="tartar-auth-submit"
         >
-          <FormField
-            config={{ name: 'identifier', label: 'Username', type: 'text', placeholder: 'username' }}
-            control={control}
-          />
-          <FormField config={{ name: 'password', label: 'Password', type: 'password' }} control={control} />
-          <Button type="primary" htmlType="submit" block loading={loading}>
-            Sign in
-          </Button>
-        </Form>
+          Sign in
+        </Button>
+      </Form>
 
-        <Typography.Text type="secondary">
-          New employee? <Link to="/register">Create an account</Link>
-        </Typography.Text>
-      </Card>
-    </Flex>
+      <Typography.Text className="tartar-auth-alt">
+        New employee? <Link to="/register">Create an account</Link>
+      </Typography.Text>
+    </AuthShell>
   )
 }

@@ -1,8 +1,10 @@
 import { createRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Card, Flex, Form, Typography } from 'antd'
+import { Button, Form, Typography } from 'antd'
+import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { rootRoute } from './__root'
+import { AuthShell } from '../components/auth/AuthShell'
 import { FormField } from '../components/form/FormField'
 import { useAuth } from '../hooks/useAuth'
 import { useMutation } from '../hooks/useMutation'
@@ -31,30 +33,51 @@ function RegisterPage() {
   })
 
   return (
-    <Flex className="tartar-auth-wrap" align="center" justify="center">
-      <Card className="tartar-auth-card">
-        <Typography.Title level={2} className="tartar-brand tartar-auth-brand">
+    <AuthShell
+      title="Create your account"
+      subtitle="An admin approves new registrations before first sign-in."
+    >
+      <Form
+        layout="vertical"
+        className="tartar-auth-form"
+        onFinish={handleSubmit((v) => void mutate(v))}
+      >
+        <FormField
+          config={{
+            name: 'username',
+            label: 'Username',
+            type: 'text',
+            placeholder: 'letters and numbers only',
+            icon: <UserOutlined />,
+            autoComplete: 'username',
+          }}
+          control={control}
+        />
+        <FormField
+          config={{
+            name: 'password',
+            label: 'Password',
+            type: 'password',
+            placeholder: 'Choose a strong password',
+            icon: <LockOutlined />,
+          }}
+          control={control}
+        />
+
+        <Button
+          type="primary"
+          htmlType="submit"
+          block
+          loading={loading}
+          className="tartar-auth-submit"
+        >
           Create account
-        </Typography.Title>
-        <Typography.Text type="secondary">
-          Your registration will await admin approval.
-        </Typography.Text>
+        </Button>
+      </Form>
 
-        <Form layout="vertical" className="tartar-auth-tabs" onFinish={handleSubmit((v) => void mutate(v))}>
-          <FormField
-            config={{ name: 'username', label: 'Username', type: 'text', placeholder: 'letters and numbers only' }}
-            control={control}
-          />
-          <FormField config={{ name: 'password', label: 'Password', type: 'password' }} control={control} />
-          <Button type="primary" htmlType="submit" block loading={loading}>
-            Register
-          </Button>
-        </Form>
-
-        <Typography.Text type="secondary">
-          Already have an account? <Link to="/login">Sign in</Link>
-        </Typography.Text>
-      </Card>
-    </Flex>
+      <Typography.Text className="tartar-auth-alt">
+        Already have an account? <Link to="/login">Sign in</Link>
+      </Typography.Text>
+    </AuthShell>
   )
 }

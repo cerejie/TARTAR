@@ -1,4 +1,4 @@
-import { globalStyle } from '@vanilla-extract/css'
+import { globalStyle, keyframes } from '@vanilla-extract/css'
 import { vars } from './theme.css'
 import { farmSceneUrl, farmSceneSize } from './farmScene'
 
@@ -15,12 +15,22 @@ globalStyle('body', {
 })
 
 /* Serif headings are the app's signature. antd renders titles as h1–h5, so key
-   the rule on the elements rather than chasing each component's class. */
-globalStyle('h1, h2, h3, h4, h5, .ant-typography h1, .ant-typography h2, .ant-typography h3', {
-  fontFamily: vars.font.heading,
-  fontWeight: 600,
-  letterSpacing: '0.01em',
-})
+   the rule on the elements rather than chasing each component's class. The
+   `body hN.ant-typography` variants exist because antd v6 sets font-family on
+   the heading elements itself (h3.ant-typography, specificity 0-1-1, injected
+   after this sheet) — the extra `body` outweighs it without !important. */
+globalStyle(
+  [
+    'h1, h2, h3, h4, h5',
+    'body h1.ant-typography, body h2.ant-typography, body h3.ant-typography',
+    'body h4.ant-typography, body h5.ant-typography',
+  ].join(', '),
+  {
+    fontFamily: vars.font.heading,
+    fontWeight: 600,
+    letterSpacing: '0.01em',
+  },
+)
 
 globalStyle('#root', {
   display: 'flex',
@@ -175,16 +185,26 @@ globalStyle('.tartar-user-role', {
 })
 
 globalStyle('.tartar-content', {
-  padding: vars.space.lg,
+  padding: vars.space.xl,
+  '@media': {
+    'screen and (max-width: 768px)': { padding: vars.space.md },
+  },
 })
 
-/* --- Page header ---------------------------------------------------------- */
+/* --- Page header ------------------------------------------------------------
+   Rendered as its own card so every page opens on the same surface rhythm:
+   header card, then content cards, all sharing the 24px padding scale. */
 globalStyle('.tartar-page-header', {
+  background: vars.color.surface,
+  border: `1px solid ${vars.color.borderSubtle}`,
+  borderRadius: vars.radius.xl,
+  boxShadow: vars.shadow.card,
+  padding: vars.space.lg,
   marginBottom: vars.space.lg,
 })
 
 globalStyle('.tartar-page-title', {
-  marginBottom: 0,
+  marginBottom: '4px',
   fontSize: '32px',
   lineHeight: 1.2,
   color: vars.color.brandDark,
@@ -271,6 +291,18 @@ globalStyle('.tartar-stat', {
   borderRadius: vars.radius.lg,
   border: `1px solid ${vars.color.borderSubtle}`,
   boxShadow: vars.shadow.card,
+})
+
+/* antd's size="small" body is a cramped 12px; keep tiles on the shared scale.
+   (.ant-card bumps specificity past antd's own `.ant-card-small > .ant-card-body`.) */
+globalStyle('.tartar-stat.ant-card .ant-card-body', {
+  padding: `${vars.space.md} ${vars.space.lg}`,
+})
+
+/* Stat grids sit between the page header and the first section card — give the
+   row the same bottom rhythm every card already has. */
+globalStyle('.tartar-stat-grid', {
+  marginBottom: vars.space.lg,
 })
 
 globalStyle('.tartar-stat .ant-statistic-title', {
@@ -403,37 +435,449 @@ globalStyle('.tartar-sync', {
   marginInlineEnd: 0,
 })
 
-/* --- Auth (login / register) pages ---------------------------------------- */
-globalStyle('.tartar-auth-wrap', {
+/* ==========================================================================
+   Auth (login / register) pages — split-screen composition rendered by
+   components/auth/AuthShell. Left: espresso branding hero (drops out under
+   960px). Right: floating glass card over a cream field with blurred palette
+   blobs. Every colour is one of the five brand browns, shaded only by alpha.
+   ========================================================================== */
+
+/* Entrances + ambient drift. Motion is opt-out via prefers-reduced-motion. */
+const authCardIn = keyframes({
+  from: { opacity: 0, transform: 'translateY(18px) scale(0.98)' },
+  to: { opacity: 1, transform: 'translateY(0) scale(1)' },
+})
+
+const authHeroIn = keyframes({
+  from: { opacity: 0, transform: 'translateY(14px)' },
+  to: { opacity: 1, transform: 'translateY(0)' },
+})
+
+const authBlobDrift = keyframes({
+  from: { transform: 'translate3d(0, 0, 0) scale(1)' },
+  to: { transform: 'translate3d(26px, -20px, 0) scale(1.07)' },
+})
+
+globalStyle('.tartar-auth-page', {
   flex: 1,
+  display: 'flex',
   minHeight: '100vh',
-  padding: vars.space.lg,
+  /* Warm wash over the cream so the field isn't a flat fill. */
+  background: `
+    radial-gradient(1100px 700px at 88% -10%, rgba(255, 224, 178, 0.7), transparent 60%),
+    radial-gradient(900px 650px at -12% 108%, rgba(211, 163, 118, 0.28), transparent 60%),
+    ${vars.color.bg}`,
 })
 
-globalStyle('.tartar-auth-card', {
-  width: '100%',
-  maxWidth: '400px',
-  boxShadow: vars.shadow.raised,
-  borderRadius: vars.radius.xl,
-  border: `1px solid ${vars.color.borderSubtle}`,
-  justifyContent: 'center',
+/* --- Branding hero ---------------------------------------------------------- */
+globalStyle('.tartar-auth-hero', {
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  width: 'clamp(360px, 42vw, 560px)',
+  padding: '48px',
+  overflow: 'hidden',
+  color: vars.color.accent,
+  /* Tan/brown glows over espresso give the panel depth without new hues. */
+  background: `
+    radial-gradient(120% 90% at 110% -10%, rgba(140, 110, 99, 0.5), transparent 55%),
+    radial-gradient(110% 90% at -25% 110%, rgba(211, 163, 118, 0.22), transparent 60%),
+    ${vars.color.brandDark}`,
+  '@media': {
+    'screen and (max-width: 960px)': { display: 'none' },
+  },
 })
 
-globalStyle('.tartar-auth-brand', {
+globalStyle('.tartar-auth-hero-brand', {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
   fontFamily: vars.font.heading,
+  fontWeight: 700,
+  fontSize: '19px',
+  letterSpacing: '0.18em',
+  color: vars.color.bg,
+})
+
+globalStyle('.tartar-auth-hero-body', {
+  position: 'relative',
+  zIndex: 1,
+  margin: 'auto 0',
+  paddingBottom: '96px', // keeps the copy clear of the farm scene below
+  animation: `${authHeroIn} 0.7s 0.1s cubic-bezier(0.21, 0.61, 0.35, 1) both`,
+})
+
+/* antd v6 sets font-family on hN.ant-typography itself, outweighing the
+   element-level serif rule up top — so the auth headings restate it. */
+globalStyle('.tartar-auth-hero h1.ant-typography', {
+  margin: '0 0 12px',
+  fontFamily: vars.font.heading,
+  fontSize: 'clamp(28px, 2.6vw, 36px)',
+  lineHeight: 1.15,
+  color: vars.color.bg,
+})
+
+globalStyle('.tartar-auth-hero .tartar-auth-hero-copy.ant-typography', {
+  margin: 0,
+  maxWidth: '42ch',
+  fontSize: '15px',
+  lineHeight: 1.6,
+  color: 'rgba(255, 242, 223, 0.78)',
+})
+
+globalStyle('.tartar-auth-hero-list', {
+  listStyle: 'none',
+  margin: `${vars.space.xl} 0 0`,
+  padding: 0,
+  display: 'grid',
+  gap: '14px',
+})
+
+globalStyle('.tartar-auth-hero-item', {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  fontSize: '14px',
+  color: 'rgba(255, 242, 223, 0.85)',
+})
+
+globalStyle('.tartar-auth-hero-icon', {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '34px',
+  height: '34px',
+  flexShrink: 0,
+  borderRadius: vars.radius.lg,
+  fontSize: '15px',
+  color: vars.color.brandLight,
+  background: 'rgba(255, 224, 178, 0.12)',
+  border: '1px solid rgba(255, 224, 178, 0.18)',
+})
+
+/* Same etched farm scene as the app sider — tan line-art reads as engraving
+   on espresso. Faded up top so it dissolves into the panel, not pasted on. */
+globalStyle('.tartar-auth-hero-art', {
+  position: 'absolute',
+  insetInline: 0,
+  bottom: 0,
+  height: '46%',
+  backgroundImage: farmSceneUrl,
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'bottom center',
+  backgroundSize: '520px auto',
+  opacity: 0.4,
+  pointerEvents: 'none',
+  maskImage: 'linear-gradient(to bottom, transparent 0%, #000 60%)',
+  WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, #000 60%)',
+})
+
+/* --- Form side --------------------------------------------------------------- */
+globalStyle('.tartar-auth-main', {
+  position: 'relative',
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: `${vars.space.xl} ${vars.space.lg}`,
+  overflow: 'hidden',
+  '@media': {
+    'screen and (max-width: 480px)': {
+      padding: `${vars.space.lg} ${vars.space.md}`,
+    },
+  },
+})
+
+/* Blurred palette blobs — the "abstract background" without an illustration.
+   Oversized blur radii keep them ambient; drift is slow and alternating. */
+globalStyle('.tartar-auth-blob', {
+  position: 'absolute',
+  borderRadius: '50%',
+  filter: 'blur(80px)',
+  pointerEvents: 'none',
+  animation: `${authBlobDrift} 14s ease-in-out infinite alternate`,
+})
+
+globalStyle('.tartar-auth-blob-a', {
+  width: '420px',
+  height: '420px',
+  top: '-120px',
+  right: '-90px',
+  background: 'rgba(255, 224, 178, 0.85)',
+})
+
+globalStyle('.tartar-auth-blob-b', {
+  width: '360px',
+  height: '360px',
+  bottom: '-140px',
+  left: '-110px',
+  background: 'rgba(211, 163, 118, 0.35)',
+  animationDelay: '-7s',
+})
+
+globalStyle('.tartar-auth-blob-c', {
+  width: '260px',
+  height: '260px',
+  top: '55%',
+  right: '6%',
+  background: 'rgba(140, 110, 99, 0.16)',
+  animationDuration: '18s',
+})
+
+/* --- Card -------------------------------------------------------------------- */
+globalStyle('.tartar-auth-card.ant-card', {
+  position: 'relative',
+  zIndex: 1,
+  width: '100%',
+  maxWidth: '440px',
+  /* Subtle glass: near-white over the blobs, blur only where supported. */
+  background: 'rgba(255, 255, 255, 0.88)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+  border: '1px solid rgba(255, 224, 178, 0.9)',
+  borderRadius: '24px',
+  boxShadow: `
+    0 1px 2px rgba(62, 37, 34, 0.05),
+    0 12px 32px rgba(62, 37, 34, 0.10),
+    0 32px 80px rgba(62, 37, 34, 0.12)`,
+  animation: `${authCardIn} 0.55s cubic-bezier(0.21, 0.61, 0.35, 1) both`,
+  '@media': {
+    'screen and (max-width: 480px)': { borderRadius: '20px' },
+  },
+})
+
+globalStyle('.tartar-auth-card.ant-card .ant-card-body', {
+  padding: '44px 40px',
+  '@media': {
+    'screen and (max-width: 480px)': { padding: '32px 24px' },
+  },
+})
+
+/* Compact brand row inside the card — only surfaces when the hero is hidden. */
+globalStyle('.tartar-auth-card-brand', {
+  display: 'none',
+  alignItems: 'center',
+  gap: '10px',
+  marginBottom: vars.space.lg,
+  '@media': {
+    'screen and (max-width: 960px)': { display: 'flex' },
+  },
+})
+
+globalStyle('.tartar-auth-wordmark', {
+  fontFamily: vars.font.heading,
+  fontWeight: 700,
+  fontSize: '17px',
   letterSpacing: '0.18em',
   color: vars.color.brandDark,
-  textAlign: 'center',
-  marginBottom: 0,
+})
+
+/* Logo mark chip, shared by hero and card. */
+globalStyle('.tartar-auth-mark', {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '42px',
+  height: '42px',
+  flexShrink: 0,
+  borderRadius: '14px',
+  fontFamily: vars.font.heading,
+  fontWeight: 700,
+  fontSize: '22px',
+  color: vars.color.brandDark,
+  background: `linear-gradient(135deg, ${vars.color.accent}, ${vars.color.brandLight})`,
+  boxShadow: '0 6px 16px rgba(62, 37, 34, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.45)',
+})
+
+globalStyle('.tartar-auth-card h2.ant-typography', {
+  margin: '0 0 6px',
+  fontFamily: vars.font.heading,
+  fontSize: '26px',
+  color: vars.color.brandDark,
 })
 
 globalStyle('.tartar-auth-subtitle', {
   display: 'block',
-  textAlign: 'center',
+  fontSize: '14px',
+  color: vars.color.textMuted,
 })
 
-globalStyle('.tartar-auth-tabs', {
-  marginTop: vars.space.md,
+/* --- Form ---------------------------------------------------------------------
+   Inputs sit on a faint cream tint, sharpen to white with a tan glow on focus.
+   antd draws prefixed inputs as .ant-input-affix-wrapper > input.ant-input. */
+globalStyle('.tartar-auth-form', {
+  marginTop: '28px',
+})
+
+globalStyle('.tartar-auth-form .ant-form-item', {
+  marginBottom: '18px',
+})
+
+globalStyle('.tartar-auth-form .ant-form-item-label > label', {
+  fontSize: '13px',
+  fontWeight: 600,
+  color: 'rgba(62, 37, 34, 0.85)',
+})
+
+globalStyle('.tartar-auth-form .ant-input-affix-wrapper', {
+  padding: '12px 16px',
+  borderRadius: '14px',
+  background: 'rgba(255, 242, 223, 0.5)',
+  borderColor: 'rgba(211, 163, 118, 0.45)',
+  transition: 'border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
+})
+
+globalStyle('.tartar-auth-form .ant-input-affix-wrapper:hover', {
+  borderColor: vars.color.brandLight,
+  background: 'rgba(255, 242, 223, 0.8)',
+})
+
+globalStyle('.tartar-auth-form .ant-input-affix-wrapper:focus-within', {
+  borderColor: vars.color.brandLight,
+  background: vars.color.surface,
+  boxShadow: '0 0 0 4px rgba(211, 163, 118, 0.22)',
+})
+
+globalStyle('.tartar-auth-form .ant-input-affix-wrapper .ant-input', {
+  background: 'transparent',
+  fontSize: '15px',
+})
+
+globalStyle('.tartar-auth-form .ant-input::placeholder', {
+  color: 'rgba(140, 110, 99, 0.55)',
+})
+
+globalStyle('.tartar-auth-form .ant-input-prefix', {
+  marginInlineEnd: '10px',
+  fontSize: '16px',
+  color: vars.color.textMuted,
+  transition: 'color 0.2s ease',
+})
+
+globalStyle('.tartar-auth-form .ant-input-affix-wrapper:focus-within .ant-input-prefix', {
+  color: vars.color.brandDark,
+})
+
+/* Password visibility toggle. */
+globalStyle('.tartar-auth-form .ant-input-suffix .anticon', {
+  color: vars.color.textMuted,
+  transition: 'color 0.2s ease',
+})
+
+globalStyle('.tartar-auth-form .ant-input-suffix .anticon:hover', {
+  color: vars.color.brandDark,
+})
+
+/* --- Meta row (forgot password) ---------------------------------------------- */
+globalStyle('.tartar-auth-meta', {
+  display: 'flex',
+  justifyContent: 'flex-end',
+  margin: '-6px 0 20px',
+})
+
+globalStyle('.tartar-auth-hint.ant-btn-link', {
+  padding: 0,
+  height: 'auto',
+  fontSize: '13px',
+  fontWeight: 500,
+  color: vars.color.textMuted,
+})
+
+globalStyle('.tartar-auth-hint.ant-btn-link:not(:disabled):hover', {
+  color: vars.color.brandDark,
+  background: 'transparent',
+  textDecoration: 'underline',
+  textUnderlineOffset: '3px',
+})
+
+globalStyle('.tartar-auth-pop', {
+  maxWidth: '260px',
+  fontSize: '13px',
+  lineHeight: 1.55,
+  color: vars.color.text,
+})
+
+/* --- Primary CTA ---------------------------------------------------------------
+   Gradient brown→espresso; hover lifts and slides the gradient, press dips.
+   Selectors carry :not() guards so they outweigh antd's own solid-button rules
+   regardless of style-tag injection order. */
+globalStyle('.tartar-auth-form .tartar-auth-submit.ant-btn-primary', {
+  height: '50px',
+  borderRadius: '14px',
+  fontSize: '15px',
+  fontWeight: 600,
+  border: 'none',
+  background: `linear-gradient(135deg, ${vars.color.brand} 0%, ${vars.color.brandDark} 100%)`,
+  backgroundSize: '160% 160%',
+  backgroundPosition: '0% 0%',
+  boxShadow: '0 12px 28px rgba(62, 37, 34, 0.28)',
+  transition:
+    'transform 0.18s ease, box-shadow 0.25s ease, background-position 0.35s ease',
+})
+
+globalStyle(
+  '.tartar-auth-form .tartar-auth-submit.ant-btn-primary:not(:disabled):not(.ant-btn-disabled):hover',
+  {
+    background: `linear-gradient(135deg, ${vars.color.brand} 0%, ${vars.color.brandDark} 100%)`,
+    backgroundSize: '160% 160%',
+    backgroundPosition: '100% 100%',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 16px 34px rgba(62, 37, 34, 0.34)',
+  },
+)
+
+globalStyle(
+  '.tartar-auth-form .tartar-auth-submit.ant-btn-primary:not(:disabled):not(.ant-btn-disabled):active',
+  {
+    background: `linear-gradient(135deg, ${vars.color.brand} 0%, ${vars.color.brandDark} 100%)`,
+    backgroundSize: '160% 160%',
+    backgroundPosition: '100% 100%',
+    transform: 'translateY(0) scale(0.985)',
+    boxShadow: '0 8px 18px rgba(62, 37, 34, 0.24)',
+  },
+)
+
+globalStyle('.tartar-auth-form .tartar-auth-submit.ant-btn-primary:focus-visible', {
+  outline: '3px solid rgba(211, 163, 118, 0.7)',
+  outlineOffset: '2px',
+})
+
+/* --- Footer link --------------------------------------------------------------- */
+globalStyle('.tartar-auth-alt', {
+  display: 'block',
+  textAlign: 'center',
+  marginTop: '26px',
+  paddingTop: '20px',
+  borderTop: '1px solid rgba(255, 224, 178, 0.8)',
+  fontSize: '14px',
+  color: vars.color.textMuted,
+})
+
+globalStyle('.tartar-auth-alt a', {
+  fontWeight: 600,
+  color: vars.color.brandDark,
+  textDecoration: 'none',
+  borderBottom: '1px solid rgba(211, 163, 118, 0.6)',
+  paddingBottom: '1px',
+  transition: 'border-color 0.2s ease, color 0.2s ease',
+})
+
+globalStyle('.tartar-auth-alt a:hover', {
+  color: vars.color.brand,
+  borderBottomColor: vars.color.brandDark,
+})
+
+globalStyle('.tartar-auth-alt a:focus-visible, .tartar-auth-hint.ant-btn-link:focus-visible', {
+  outline: '2px solid rgba(211, 163, 118, 0.8)',
+  outlineOffset: '2px',
+  borderRadius: vars.radius.sm,
+})
+
+/* --- Motion preferences ---------------------------------------------------------- */
+globalStyle('.tartar-auth-card.ant-card, .tartar-auth-blob, .tartar-auth-hero-body', {
+  '@media': {
+    '(prefers-reduced-motion: reduce)': { animation: 'none' },
+  },
 })
 
 /* --- Filter bar ----------------------------------------------------------- */
