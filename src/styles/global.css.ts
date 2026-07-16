@@ -136,3 +136,59 @@ globalStyle('.tartar-sync', {
   alignItems: 'center',
   marginInlineEnd: 0,
 })
+
+/* --- Auth (login / register) pages ---------------------------------------- */
+globalStyle('.tartar-auth-wrap', {
+  flex: 1,
+  minHeight: '100vh',
+  padding: vars.space.lg,
+})
+
+globalStyle('.tartar-auth-card', {
+  width: '100%',
+  maxWidth: '400px',
+  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+})
+
+globalStyle('.tartar-auth-brand', {
+  marginBottom: 0,
+})
+
+globalStyle('.tartar-auth-tabs', {
+  marginTop: vars.space.md,
+})
+
+/* --- Filter bar ----------------------------------------------------------- */
+globalStyle('.tartar-filterbar', {
+  marginBottom: vars.space.md,
+})
+
+globalStyle('.tartar-filter-branch', {
+  minWidth: '200px',
+})
+
+globalStyle('.tartar-filter-ref', {
+  width: '160px',
+})
+
+globalStyle('.tartar-filter-amount', {
+  width: '110px',
+})
+
+/* --- Cards / charts / reports --------------------------------------------- */
+globalStyle('.tartar-chart-card', {
+  marginTop: vars.space.lg,
+})
+
+globalStyle('.tartar-alerts-hint', {
+  display: 'block',
+  marginTop: vars.space.sm,
+})
+
+globalStyle('.tartar-report-seg', {
+  marginBottom: vars.space.lg,
+})
+
+globalStyle('.tartar-report-stats', {
+  marginBottom: vars.space.lg,
+})

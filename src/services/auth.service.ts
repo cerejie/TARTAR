@@ -48,12 +48,13 @@ export function restoreCustomToken(token: string | null): void {
   setCustomToken(token)
 }
 
-/** Self-registration → creates a PENDING employee awaiting approval. */
+/** Self-registration → creates a PENDING employee awaiting approval. Only a
+ *  username and password are collected; the profile name is filled in later. */
 export async function register(input: RegisterInput): Promise<void> {
   const { error } = await supabase.rpc('register', {
     p_username: input.username,
     p_password: input.password,
-    p_full_name: input.full_name?.trim() || null,
+    p_full_name: null,
   })
   if (error) throw toError(error)
 }

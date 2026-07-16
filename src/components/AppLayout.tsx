@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Avatar, Dropdown, Layout, Menu, Typography, type MenuProps } from 'antd'
 import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons'
 import { useAuth } from '../hooks/useAuth'
@@ -21,6 +22,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ menuItems, selectedKey, onMenuSelect, children }: AppLayoutProps) {
   useNetwork()
+  const navigate = useNavigate()
   const collapsed = useUiStore((s) => s.siderCollapsed)
   const toggleSider = useUiStore((s) => s.toggleSider)
   const { user, role, logout } = useAuth()
@@ -32,7 +34,13 @@ export function AppLayout({ menuItems, selectedKey, onMenuSelect, children }: Ap
   const userMenu: MenuProps = {
     items: [{ key: 'logout', icon: <LogoutOutlined />, label: 'Sign out' }],
     onClick: ({ key }) => {
-      if (key === 'logout') void logout()
+      if (key !== 'logout') return
+      // `logout` clears the session synchronously (before its awaited remote
+      // sign-out), so by the time /login's guard runs the session is already
+      // gone — no bounce back to the app. `replace` drops the authed page from
+      // history so Back can't return to it without re-authenticating.
+      void logout()
+      void navigate({ to: '/login', replace: true })
     },
   }
 

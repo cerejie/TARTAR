@@ -18,6 +18,26 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
       },
+      workbox: {
+        // Read-only offline (build spec §2): precache the whole app shell. The
+        // charts vendor chunk is large, so lift the default 2 MiB cap.
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+      },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Split heavy vendors so the shell isn't one monolithic chunk and the
+        // browser can cache them independently across deploys.
+        manualChunks(id) {
+          // Split only the two heaviest, self-contained vendors so the rest of
+          // the shell stays in one cache-friendly chunk (avoids circular chunks).
+          if (id.includes('@ant-design/charts') || id.includes('@antv')) return 'charts'
+          if (id.includes('/node_modules/antd/')) return 'antd'
+          return undefined
+        },
+      },
+    },
+  },
 })

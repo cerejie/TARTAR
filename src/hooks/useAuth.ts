@@ -46,9 +46,11 @@ export function useAuth() {
   const register = authService.register
 
   const logout = useCallback(async () => {
-    await authService.logout()
+    // Clear local session state first so the redirect is instant and works even
+    // offline; the persist middleware wipes the stored token as `clear` runs.
     clear()
     resetCache() // drop cached data so the next user starts clean
+    await authService.logout() // best-effort remote sign-out (may be slow/offline)
   }, [clear, resetCache])
 
   return {

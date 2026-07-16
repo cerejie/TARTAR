@@ -4,9 +4,6 @@ import { useQueryStore, selectEntry } from '../stores/query.store'
 
 let mutationSeq = 0
 
-/** A write result that may have been deferred to the offline sync queue. */
-type MaybeQueued = { queued?: boolean } | void | undefined
-
 interface MutationOptions<TResult> {
   /** Query keys (or prefixes) to invalidate on success so lists refetch. */
   invalidate?: string[]
@@ -22,7 +19,7 @@ interface MutationOptions<TResult> {
  * message; if the service reports the write was queued offline, it shows the
  * queued notice instead (build spec §2).
  */
-export function useMutation<TArgs extends unknown[], TResult extends MaybeQueued>(
+export function useMutation<TArgs extends unknown[], TResult>(
   mutationFn: (...args: TArgs) => Promise<TResult>,
   options: MutationOptions<TResult> = {},
 ) {
@@ -41,7 +38,7 @@ export function useMutation<TArgs extends unknown[], TResult extends MaybeQueued
         setEntry(key, { loading: false, updatedAt: Date.now() })
         options.invalidate?.forEach(invalidate)
 
-        if (result && typeof result === 'object' && result.queued) {
+        if (result && typeof result === 'object' && 'queued' in result && result.queued) {
           message.info(options.queuedMessage ?? 'Saved offline — will sync when back online')
         } else if (options.successMessage) {
           message.success(options.successMessage)

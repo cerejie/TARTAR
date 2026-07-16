@@ -63,9 +63,13 @@ export const selectIsAuthenticated = (s: AuthState): boolean => s.kind !== null
 export const selectIsManager = (s: AuthState): boolean =>
   s.kind === 'superadmin' || s.user?.role === 'admin'
 
+// Stable reference so the selector's snapshot doesn't change identity every
+// render (a fresh [] would make useSyncExternalStore loop infinitely).
+const NO_BRANCHES: string[] = []
+
 /** null = every branch (superAdmin, Admin, Accountant); otherwise the assigned slugs. */
 export function selectBranchAccess(s: AuthState): string[] | null {
   const role = selectRole(s)
   if (role === 'superadmin' || role === 'admin' || role === 'accountant') return null
-  return s.user?.branch_access ?? []
+  return s.user?.branch_access ?? NO_BRANCHES
 }
