@@ -23,16 +23,21 @@ export async function executeWrite(write: QueuedWrite): Promise<void> {
     switch (write.kind) {
       case 'insert':
         return supabase.from(write.table).insert(write.values as never)
+      // `select()` on the matched writes so we can tell "0 rows changed" apart
+      // from success: PostgREST reports no error when RLS filters every row.
       case 'update':
-        return supabase.from(write.table).update(write.values as never).match(write.match)
+        return supabase.from(write.table).update(write.values as never).match(write.match).select()
       case 'delete':
-        return supabase.from(write.table).delete().match(write.match)
+        return supabase.from(write.table).delete().match(write.match).select()
       case 'rpc':
         return supabase.rpc(write.fn, write.args)
     }
   }
-  const { error } = await run()
+  const { data, error } = await run()
   if (error) throw toError(error)
+  if ((write.kind === 'update' || write.kind === 'delete') && Array.isArray(data) && data.length === 0) {
+    throw new Error(`${write.label} changed nothing — the record is gone or you lack permission for it.`)
+  }
 }
 
 let counter = 0

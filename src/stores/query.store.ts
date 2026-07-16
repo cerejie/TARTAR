@@ -24,10 +24,18 @@ interface QueryState {
 
 const EMPTY: QueryEntry = { data: undefined, loading: false, error: null, updatedAt: 0 }
 
+/**
+ * The last fetcher seen for each key, so `invalidate` can actually re-fetch.
+ * Kept outside the store: functions are not render-relevant state, and putting
+ * them in `entries` would churn every subscriber on each run.
+ */
+const fetchers = new Map<string, () => Promise<unknown>>()
+
 export const useQueryStore = create<QueryState>((set, get) => ({
   entries: {},
 
   run: async (key, fetcher) => {
+    fetchers.set(key, fetcher as () => Promise<unknown>)
     const prev = get().entries[key] ?? EMPTY
     set((s) => ({ entries: { ...s.entries, [key]: { ...prev, loading: true, error: null } } }))
     try {
@@ -51,16 +59,29 @@ export const useQueryStore = create<QueryState>((set, get) => ({
       entries: { ...s.entries, [key]: { ...(s.entries[key] ?? EMPTY), ...partial } },
     })),
 
-  invalidate: (keyPrefix) =>
-    set((s) => {
-      const entries = { ...s.entries }
-      for (const k of Object.keys(entries)) {
-        if (k === keyPrefix || k.startsWith(`${keyPrefix}:`)) delete entries[k]
-      }
-      return { entries }
-    }),
+  invalidate: (keyPrefix) => {
+    const matches = Object.keys(get().entries).filter(
+      (k) => k === keyPrefix || k.startsWith(`${keyPrefix}:`),
+    )
+    for (const k of matches) {
+      const fetcher = fetchers.get(k)
+      // Re-run rather than drop the entry: `useQuery` only fetches when its key
+      // changes, so a deleted entry would leave the view empty until remount.
+      // `run` keeps the previous data visible while the refetch is in flight.
+      if (fetcher) void get().run(k, fetcher)
+      else
+        set((s) => {
+          const entries = { ...s.entries }
+          delete entries[k]
+          return { entries }
+        })
+    }
+  },
 
-  reset: () => set({ entries: {} }),
+  reset: () => {
+    fetchers.clear()
+    set({ entries: {} })
+  },
 }))
 
 export const selectEntry =
