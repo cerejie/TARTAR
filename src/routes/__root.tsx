@@ -1,6 +1,6 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
-import { ConfigProvider } from 'antd'
+import { App as AntdApp, ConfigProvider } from 'antd'
 import { vars } from '../styles/theme.css'
 
 /**
@@ -20,8 +20,11 @@ function RootLayout() {
         },
       }}
     >
-      <Outlet />
-      {import.meta.env.DEV ? <TanStackRouterDevtools position="bottom-right" /> : null}
+      {/* AntdApp provides the message/notification/modal context used by useMutation. */}
+      <AntdApp>
+        <Outlet />
+        {import.meta.env.DEV ? <TanStackRouterDevtools position="bottom-right" /> : null}
+      </AntdApp>
     </ConfigProvider>
   )
 }

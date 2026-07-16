@@ -1,0 +1,12 @@
+/** Barrel for the data-access layer (Supabase + RPC), one module per domain. */
+export { supabase, setCustomToken, toError } from './supabase'
+export * from './filters'
+export * as authService from './auth.service'
+export * as usersService from './users.service'
+export * as referenceService from './reference.service'
+export * as transactionsService from './transactions.service'
+export * as vouchersService from './vouchers.service'
+export * as cashService from './cash.service'
+export * as dashboardService from './dashboard.service'
+export { customersService, suppliersService } from './party.service'
+export { receivablesService, payablesService } from './ledger.service'
