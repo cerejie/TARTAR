@@ -959,6 +959,10 @@ globalStyle('.tartar-filter-ref', {
   width: '160px',
 })
 
+globalStyle('.tartar-filter-status', {
+  minWidth: '140px',
+})
+
 globalStyle('.tartar-filter-amount', {
   width: '110px',
 })

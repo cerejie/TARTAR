@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import { useUiStore } from '../stores/ui.store'
 import { useBranches } from '../hooks/useReferenceData'
 import { useBranchScope } from '../hooks/useBranchScope'
+import { labels, ledgerStatusValues, toOptions } from '../models'
 
 const { RangePicker } = DatePicker
 
@@ -15,9 +16,11 @@ const { RangePicker } = DatePicker
 interface LedgerFilterBarProps {
   /** Hide the branch selector on already branch-scoped views. */
   showBranch?: boolean
+  /** Show the receivable/payable status filter (ledger views only). */
+  showStatus?: boolean
 }
 
-export function LedgerFilterBar({ showBranch = true }: LedgerFilterBarProps) {
+export function LedgerFilterBar({ showBranch = true, showStatus = false }: LedgerFilterBarProps) {
   const filters = useUiStore((s) => s.filters)
   const setFilters = useUiStore((s) => s.setFilters)
   const resetFilters = useUiStore((s) => s.resetFilters)
@@ -55,6 +58,20 @@ export function LedgerFilterBar({ showBranch = true }: LedgerFilterBarProps) {
           })
         }
       />
+
+      {showStatus ? (
+        <Select
+          className="tartar-filter-status"
+          placeholder="Any status"
+          allowClear
+          value={filters.status}
+          onChange={(status) => setFilters({ status })}
+          options={[
+            ...toOptions(ledgerStatusValues, labels.ledgerStatus),
+            { value: 'overdue', label: 'Overdue' },
+          ]}
+        />
+      ) : null}
 
       <Input
         className="tartar-filter-ref"

@@ -19,6 +19,7 @@ import { useBranchScope, scopedFilters } from '../hooks/useBranchScope'
 import { useUiStore, selectModal } from '../stores/ui.store'
 import { useAuthStore } from '../stores/auth.store'
 import * as transactionsService from '../services/transactions.service'
+import * as usersService from '../services/users.service'
 import { customersService, suppliersService } from '../services/party.service'
 import {
   cashAccountValues,
@@ -32,7 +33,7 @@ import {
   type Transaction,
   type TransactionInput,
 } from '../models'
-import { formatDate, formatMoney, todayIso } from '../utils/format'
+import { formatDate, formatMoney, formatTime, todayIso } from '../utils/format'
 
 const MODAL = 'transaction-form'
 
@@ -54,6 +55,10 @@ function TransactionsPage() {
   const { farmSections } = useFarmSections()
   const customers = useQuery('customers', () => customersService.list())
   const suppliers = useQuery('suppliers', () => suppliersService.list())
+  // Who encoded each transaction (build: audit User/Role). Managers only — RLS
+  // only lets managers read other users' rows, so the columns are manager-gated.
+  const users = useQuery('users', () => usersService.listUsers(), { enabled: permissions.isManager })
+  const userById = new Map((users.data ?? []).map((u) => [u.id, u]))
 
   const { branch: scopeBranch } = useBranchScope()
   const effectiveFilters = scopedFilters(filters, scopeBranch)
@@ -135,8 +140,31 @@ function TransactionsPage() {
 
   const columns: ColumnsType<Transaction> = [
     { title: 'Date', dataIndex: 'txn_date', render: formatDate, width: 130 },
+    // Encode time comes from `created_at`; `txn_date` is date-only.
+    { title: 'Time', dataIndex: 'created_at', render: (v: string) => formatTime(v), width: 100 },
     { title: 'Type', dataIndex: 'type', render: (t: Transaction['type']) => <Tag>{labels.transactionType[t]}</Tag> },
     { title: 'Branch', dataIndex: 'branch', render: branchName },
+    ...(permissions.isManager
+      ? [
+          {
+            title: 'User',
+            key: 'user',
+            render: (_: unknown, r: Transaction) => {
+              const u = r.created_by ? userById.get(r.created_by) : undefined
+              return u ? u.full_name || u.username : '—'
+            },
+          },
+          {
+            title: 'Role',
+            key: 'role',
+            width: 130,
+            render: (_: unknown, r: Transaction) => {
+              const u = r.created_by ? userById.get(r.created_by) : undefined
+              return u ? <Tag>{labels.userRole[u.role]}</Tag> : '—'
+            },
+          },
+        ]
+      : []),
     { title: 'Party', key: 'party', render: (_, r) => r.customer?.name ?? r.supplier?.name ?? '—' },
     { title: 'Reference', dataIndex: 'reference_number', render: (v: string | null) => v || '—' },
     { title: 'Amount', dataIndex: 'amount', align: 'right', render: (v: number) => formatMoney(v) },
