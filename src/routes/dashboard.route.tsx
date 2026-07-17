@@ -7,6 +7,7 @@ import { SectionCard } from '../components/SectionCard'
 import { StatCard } from '../components/StatCard'
 import { colors } from '../styles/theme.css'
 import { useQuery } from '../hooks/useQuery'
+import { useBranchScope } from '../hooks/useBranchScope'
 import { useAuthStore } from '../stores/auth.store'
 import * as dashboardService from '../services/dashboard.service'
 import { formatDate, formatMoney } from '../utils/format'
@@ -27,16 +28,23 @@ export const dashboardRoute = createRoute({
 })
 
 function DashboardPage() {
-  const summary = useQuery('dashboard-summary', dashboardService.getDashboardSummary)
-  const daily = useQuery('dashboard-daily', () => dashboardService.getDailySales(30))
-  const alerts = useQuery('dashboard-alerts', () => dashboardService.getDueAlerts(7))
+  // Global branch view (sidebar). Keys carry the scope so each branch's numbers
+  // cache separately and switching back is instant.
+  const { branch, branchName } = useBranchScope()
+  const scope = branch ?? 'all'
+  const summary = useQuery(`dashboard-summary:${scope}`, () => dashboardService.getDashboardSummary(branch))
+  const daily = useQuery(`dashboard-daily:${scope}`, () => dashboardService.getDailySales(30, branch))
+  const alerts = useQuery(`dashboard-alerts:${scope}`, () => dashboardService.getDueAlerts(7, branch))
 
   const s = summary.data
   const series = daily.data ?? []
 
   return (
     <>
-      <PageHeader title="Dashboard" subtitle="Company-wide standing across all branches" />
+      <PageHeader
+        title="Dashboard"
+        subtitle={branchName ? `Standing for ${branchName}` : 'Company-wide standing across all branches'}
+      />
 
       <Row gutter={[16, 16]} className="tartar-stat-grid">
         <StatTile span={6} title="Current Cash" value={s?.currentCash} loading={summary.loading} tone="brand" />

@@ -8,9 +8,12 @@ import type { Voucher, VoucherInput } from '../models'
  * printing are manager-only (enforced by RLS); this service exposes them but the
  * DB is the real gate.
  */
-export async function listVouchers(status?: string): Promise<Voucher[]> {
+export async function listVouchers(
+  filters: { status?: string; branch?: string } = {},
+): Promise<Voucher[]> {
   let query = supabase.from('vouchers').select('*')
-  if (status) query = query.eq('status', status)
+  if (filters.status) query = query.eq('status', filters.status)
+  if (filters.branch) query = query.eq('branch', filters.branch)
   const { data, error } = await query.order('created_at', { ascending: false })
   if (error) throw toError(error)
   return (data ?? []) as Voucher[]

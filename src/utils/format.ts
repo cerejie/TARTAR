@@ -28,5 +28,10 @@ export function formatDateTime(value: string | null | undefined): string {
   return value ? dayjs(value).format('MMM D, YYYY h:mm A') : '—'
 }
 
+/** Time-of-day only (e.g. the encode time alongside a separate date column). */
+export function formatTime(value: string | null | undefined): string {
+  return value ? dayjs(value).format('h:mm A') : '—'
+}
+
 /** Today's date as an ISO date string (form defaults). */
 export const todayIso = (): string => dayjs().format('YYYY-MM-DD')

@@ -61,3 +61,23 @@ export const settlementSchema = z.object({
   amount: amountField,
 })
 export type SettlementInput = z.infer<typeof settlementSchema>
+
+/**
+ * Customer Ledger (receivables by customer). Receivables may reference a saved
+ * customer (`customer_id`) or a free-typed name, so a ledger identity carries
+ * both and matches on id when present, name otherwise.
+ */
+export interface CustomerLedgerKey {
+  customerId: string | null
+  customerName: string
+}
+
+/** Aggregated per-customer receivables view — computed, never stored. */
+export interface CustomerReceivableSummary extends CustomerLedgerKey {
+  /** SUM(amount - paid_amount) across the customer's receivables. */
+  outstanding: number
+  /** Count of receivables not yet fully paid. */
+  unpaidCount: number
+  /** Most recent receivable `created_at`. */
+  lastTransactionAt: string | null
+}

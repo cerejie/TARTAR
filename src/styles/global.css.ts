@@ -111,6 +111,72 @@ globalStyle('.tartar-logo', {
   position: 'relative',
 })
 
+/* --- Branch view switcher (managers) --------------------------------------- */
+/* Sits between the logo and the nav. It is a plain button (antd Dropdown needs
+   a hoverable/clickable child) styled to read as part of the dark sider. */
+globalStyle('.tartar-branch-scope', {
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  width: `calc(100% - ${vars.space.md})`,
+  margin: `0 ${vars.space.sm} ${vars.space.sm}`,
+  padding: '7px 12px',
+  border: '1px solid rgba(255, 224, 178, 0.28)',
+  borderRadius: vars.radius.md,
+  background: 'rgba(255, 255, 255, 0.06)',
+  color: vars.color.accent,
+  fontFamily: vars.font.body,
+  fontSize: '13px',
+  textAlign: 'left',
+  cursor: 'pointer',
+  transition: 'background 0.2s ease, border-color 0.2s ease',
+})
+
+globalStyle('.tartar-branch-scope:hover', {
+  background: 'rgba(255, 255, 255, 0.14)',
+  borderColor: 'rgba(255, 224, 178, 0.55)',
+})
+
+/* A chosen branch reads as "engaged": solid accent border, brighter text. */
+globalStyle('.tartar-branch-scope-active', {
+  borderColor: vars.color.accent,
+  background: 'rgba(255, 224, 178, 0.14)',
+})
+
+globalStyle('.tartar-branch-scope .anticon', {
+  color: vars.color.accent,
+})
+
+globalStyle('.tartar-branch-scope-label', {
+  flex: 1,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
+
+globalStyle('.tartar-branch-scope-caret', {
+  fontSize: '10px',
+  opacity: 0.7,
+})
+
+/* Collapsed sider: keep only the (badged) icon, centred — the Tooltip carries
+   the current selection. */
+globalStyle('.tartar-sider.ant-layout-sider-collapsed .tartar-branch-scope', {
+  justifyContent: 'center',
+  padding: '7px 0',
+})
+
+globalStyle(
+  [
+    '.tartar-sider.ant-layout-sider-collapsed .tartar-branch-scope-label',
+    '.tartar-sider.ant-layout-sider-collapsed .tartar-branch-scope-caret',
+  ].join(', '),
+  {
+    display: 'none',
+  },
+)
+
 /* Nav sits above the illustration. */
 globalStyle('.tartar-menu', {
   position: 'relative',
@@ -891,6 +957,10 @@ globalStyle('.tartar-filter-branch', {
 
 globalStyle('.tartar-filter-ref', {
   width: '160px',
+})
+
+globalStyle('.tartar-filter-status', {
+  minWidth: '140px',
 })
 
 globalStyle('.tartar-filter-amount', {

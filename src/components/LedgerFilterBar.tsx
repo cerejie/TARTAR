@@ -1,8 +1,10 @@
-import { Button, DatePicker, Flex, Input, InputNumber, Select } from 'antd'
+import { Button, DatePicker, Flex, Input, InputNumber, Select, Tooltip } from 'antd'
 import { ClearOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useUiStore } from '../stores/ui.store'
 import { useBranches } from '../hooks/useReferenceData'
+import { useBranchScope } from '../hooks/useBranchScope'
+import { labels, ledgerStatusValues, toOptions } from '../models'
 
 const { RangePicker } = DatePicker
 
@@ -14,25 +16,33 @@ const { RangePicker } = DatePicker
 interface LedgerFilterBarProps {
   /** Hide the branch selector on already branch-scoped views. */
   showBranch?: boolean
+  /** Show the receivable/payable status filter (ledger views only). */
+  showStatus?: boolean
 }
 
-export function LedgerFilterBar({ showBranch = true }: LedgerFilterBarProps) {
+export function LedgerFilterBar({ showBranch = true, showStatus = false }: LedgerFilterBarProps) {
   const filters = useUiStore((s) => s.filters)
   const setFilters = useUiStore((s) => s.setFilters)
   const resetFilters = useUiStore((s) => s.resetFilters)
   const { branches } = useBranches()
+  const { branch: scopeBranch } = useBranchScope()
 
   return (
     <Flex className="tartar-filterbar" gap="small" wrap align="center">
       {showBranch ? (
-        <Select
-          className="tartar-filter-branch"
-          placeholder="All branches"
-          allowClear
-          value={filters.branch}
-          onChange={(branch) => setFilters({ branch })}
-          options={branches.map((b) => ({ value: b.slug, label: b.name }))}
-        />
+        // While the sidebar branch view is active it owns the branch scope, so
+        // the local select just mirrors it and locks (no conflicting filters).
+        <Tooltip title={scopeBranch ? 'Branch is set by the sidebar branch view' : undefined}>
+          <Select
+            className="tartar-filter-branch"
+            placeholder="All branches"
+            allowClear
+            disabled={!!scopeBranch}
+            value={scopeBranch ?? filters.branch}
+            onChange={(branch) => setFilters({ branch })}
+            options={branches.map((b) => ({ value: b.slug, label: b.name }))}
+          />
+        </Tooltip>
       ) : null}
 
       <RangePicker
@@ -48,6 +58,20 @@ export function LedgerFilterBar({ showBranch = true }: LedgerFilterBarProps) {
           })
         }
       />
+
+      {showStatus ? (
+        <Select
+          className="tartar-filter-status"
+          placeholder="Any status"
+          allowClear
+          value={filters.status}
+          onChange={(status) => setFilters({ status })}
+          options={[
+            ...toOptions(ledgerStatusValues, labels.ledgerStatus),
+            { value: 'overdue', label: 'Overdue' },
+          ]}
+        />
+      ) : null}
 
       <Input
         className="tartar-filter-ref"

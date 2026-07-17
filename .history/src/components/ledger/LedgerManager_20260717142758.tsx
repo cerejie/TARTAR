@@ -1,7 +1,6 @@
 import { Button, Popconfirm, Space, Tag, Tooltip } from 'antd'
 import { DeleteOutlined, DollarOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import type { ReactNode } from 'react'
 import type { DefaultValues, FieldValues } from 'react-hook-form'
 import type { ZodType } from 'zod'
 import dayjs from 'dayjs'
@@ -50,11 +49,9 @@ interface LedgerManagerProps<Row extends LedgerRow, Input extends FieldValues> {
   schema: ZodType<Input>
   fields: FieldConfig<Input>[]
   defaults: DefaultValues<Input>
-  /** Extra page-header actions rendered before the "Add" button. */
-  headerActions?: ReactNode
 }
 
-export const STATUS_COLOR: Record<LedgerStatus, string> = { open: 'default', partial: 'gold', paid: 'green' }
+const STATUS_COLOR: Record<LedgerStatus, string> = { open: 'default', partial: 'gold', paid: 'green' }
 
 export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
   props: LedgerManagerProps<Row, Input>,
@@ -164,12 +161,9 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
         title={props.title}
         subtitle={props.subtitle}
         extra={
-          <Space>
-            {props.headerActions}
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal(formKey)}>
-              Add {props.partyLabel.toLowerCase()} record
-            </Button>
-          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal(formKey)}>
+            Add {props.partyLabel.toLowerCase()} record
+          </Button>
         }
       />
 
@@ -186,7 +180,8 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
         />
       </SectionCard>
 
-      <EntityFormModal<Input>
+      <EntityFormModal
+      <Input>
         open={formModal.open}
         title={`Add ${props.title.toLowerCase()} record`}
         fields={props.fields}

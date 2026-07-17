@@ -8,6 +8,7 @@ import { SectionCard } from '../components/SectionCard'
 import { DataTable } from '../components/DataTable'
 import { StatCard } from '../components/StatCard'
 import { useQuery } from '../hooks/useQuery'
+import { useBranchScope } from '../hooks/useBranchScope'
 import { useAuthStore } from '../stores/auth.store'
 import * as transactionsService from '../services/transactions.service'
 import { receivablesService, payablesService } from '../services/ledger.service'
@@ -75,17 +76,25 @@ function ReportsPage() {
   const { from, to } = rangeFor(type)
   const txnBased = ['daily', 'weekly', 'monthly', 'cashflow', 'expenses'].includes(type)
 
+  // Global branch view (sidebar) narrows every report to one branch.
+  const { branch, branchName } = useBranchScope()
+  const scope = branch ?? 'all'
+  const branchFilter = branch ? { branch } : {}
+
   const txns = useQuery(
-    `report-txn:${type}`,
-    () => transactionsService.listTransactions({ dateFrom: from, dateTo: to }),
+    `report-txn:${type}:${scope}`,
+    () => transactionsService.listTransactions({ dateFrom: from, dateTo: to, ...branchFilter }),
     { enabled: txnBased },
   )
-  const rcv = useQuery('report-rcv', () => receivablesService.list({}), { enabled: type === 'receivables' })
-  const pay = useQuery('report-pay', () => payablesService.list({}), { enabled: type === 'payables' })
+  const rcv = useQuery(`report-rcv:${scope}`, () => receivablesService.list(branchFilter), { enabled: type === 'receivables' })
+  const pay = useQuery(`report-pay:${scope}`, () => payablesService.list(branchFilter), { enabled: type === 'payables' })
 
   return (
     <>
-      <PageHeader title="Reports" subtitle="Financial reporting across the business" />
+      <PageHeader
+        title="Reports"
+        subtitle={branchName ? `Financial reporting for ${branchName}` : 'Financial reporting across the business'}
+      />
 
       <Segmented
         className="tartar-report-seg"

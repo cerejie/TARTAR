@@ -1,3 +1,5 @@
+import type { LedgerStatus } from '../models/enums'
+
 /**
  * Shared search/filter shape (build spec §15 — searchable by Customer, Supplier,
  * Reference Number, Date, Amount). Any list service accepts a subset of these
@@ -13,6 +15,11 @@ export interface LedgerFilters {
   referenceNumber?: string
   customerId?: string
   supplierId?: string
+  /**
+   * Receivable/payable lifecycle filter. 'overdue' is derived (not paid + past
+   * due date), so services apply it themselves rather than `applyLedgerFilters`.
+   */
+  status?: LedgerStatus | 'overdue'
 }
 
 /**
