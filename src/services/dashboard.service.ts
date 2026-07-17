@@ -19,19 +19,30 @@ const outstanding = (rows: { amount: number | string; paid_amount: number | stri
   rows.reduce((acc, r) => acc + (Number(r.amount) - Number(r.paid_amount)), 0)
 
 /**
+ * Narrow a query to one branch when the manager's branch view is active
+ * (null/undefined = company-wide). Every table here has a `branch` column.
+ * Casts through a minimal structural type (like `applyLedgerFilters`) because
+ * a recursive generic over the PostgREST builder blows up TS inference.
+ */
+const scopeToBranch = <Q,>(query: Q, branch?: string | null): Q =>
+  branch
+    ? ((query as { eq: (column: string, value: unknown) => unknown }).eq('branch', branch) as Q)
+    : query
+
+/**
  * Admin dashboard aggregates (build spec §11). Managers only — RLS blocks
  * `cash_accounts` for non-managers, so this is called from manager views.
  */
-export async function getDashboardSummary(): Promise<DashboardSummary> {
+export async function getDashboardSummary(branch?: string | null): Promise<DashboardSummary> {
   const [cash, salesToday, expToday, salesMonth, expMonth, receivables, payables] =
     await Promise.all([
-      supabase.from('cash_accounts').select('account, balance'),
-      supabase.from('transactions').select('amount').eq('type', 'sale').eq('txn_date', today()),
-      supabase.from('transactions').select('amount').eq('type', 'expense').eq('txn_date', today()),
-      supabase.from('transactions').select('amount').eq('type', 'sale').gte('txn_date', monthStart()),
-      supabase.from('transactions').select('amount').eq('type', 'expense').gte('txn_date', monthStart()),
-      supabase.from('receivables').select('amount, paid_amount').neq('status', 'paid'),
-      supabase.from('payables').select('amount, paid_amount').neq('status', 'paid'),
+      scopeToBranch(supabase.from('cash_accounts').select('account, balance'), branch),
+      scopeToBranch(supabase.from('transactions').select('amount').eq('type', 'sale').eq('txn_date', today()), branch),
+      scopeToBranch(supabase.from('transactions').select('amount').eq('type', 'expense').eq('txn_date', today()), branch),
+      scopeToBranch(supabase.from('transactions').select('amount').eq('type', 'sale').gte('txn_date', monthStart()), branch),
+      scopeToBranch(supabase.from('transactions').select('amount').eq('type', 'expense').gte('txn_date', monthStart()), branch),
+      scopeToBranch(supabase.from('receivables').select('amount, paid_amount').neq('status', 'paid'), branch),
+      scopeToBranch(supabase.from('payables').select('amount, paid_amount').neq('status', 'paid'), branch),
     ])
 
   const firstError = [cash, salesToday, expToday, salesMonth, expMonth, receivables, payables]
@@ -55,13 +66,12 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
 }
 
 /** Daily sales series for the dashboard chart (@ant-design/charts). */
-export async function getDailySales(days = 30): Promise<DailySalesPoint[]> {
+export async function getDailySales(days = 30, branch?: string | null): Promise<DailySalesPoint[]> {
   const from = dayjs().subtract(days - 1, 'day').format('YYYY-MM-DD')
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('txn_date, amount')
-    .eq('type', 'sale')
-    .gte('txn_date', from)
+  const { data, error } = await scopeToBranch(
+    supabase.from('transactions').select('txn_date, amount').eq('type', 'sale').gte('txn_date', from),
+    branch,
+  )
   if (error) throw toError(error)
 
   // Bucket by date, then fill gaps so the chart has one point per day.
@@ -126,13 +136,13 @@ export interface DueAlerts {
   nearDuePayables: Payable[]
 }
 
-export async function getDueAlerts(nearDays = 7): Promise<DueAlerts> {
+export async function getDueAlerts(nearDays = 7, branch?: string | null): Promise<DueAlerts> {
   const todayStr = today()
   const horizon = dayjs().add(nearDays, 'day').format('YYYY-MM-DD')
 
   const [receivables, payables] = await Promise.all([
-    supabase.from('receivables').select('*').neq('status', 'paid').lte('due_date', horizon),
-    supabase.from('payables').select('*').neq('status', 'paid').lte('due_date', horizon),
+    scopeToBranch(supabase.from('receivables').select('*').neq('status', 'paid').lte('due_date', horizon), branch),
+    scopeToBranch(supabase.from('payables').select('*').neq('status', 'paid').lte('due_date', horizon), branch),
   ])
   if (receivables.error) throw toError(receivables.error)
   if (payables.error) throw toError(payables.error)

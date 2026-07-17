@@ -7,6 +7,7 @@ import { useNetwork } from '../hooks/useNetwork'
 import { useUiStore } from '../stores/ui.store'
 import { labels } from '../models'
 import { SyncIndicator } from './SyncIndicator'
+import { BranchScope } from './BranchScope'
 
 /**
  * The authenticated app shell (sider + header + content). Presentational: the
@@ -48,6 +49,8 @@ export function AppLayout({ menuItems, selectedKey, onMenuSelect, children }: Ap
     <Layout className="tartar-shell">
       <Layout.Sider className="tartar-sider" collapsible collapsed={collapsed} trigger={null} width={224}>
         <div className="tartar-logo">{collapsed ? 'T' : 'TARTAR'}</div>
+        {/* Global branch view for managers — scopes every data screen. */}
+        <BranchScope />
         <Menu
           className="tartar-menu"
           theme="dark"

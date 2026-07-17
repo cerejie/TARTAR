@@ -13,6 +13,7 @@ import { RequirePermission } from '../components/RequirePermission'
 import { useQuery } from '../hooks/useQuery'
 import { useMutation } from '../hooks/useMutation'
 import { useBranches } from '../hooks/useReferenceData'
+import { useBranchScope } from '../hooks/useBranchScope'
 import { useUiStore, selectModal } from '../stores/ui.store'
 import { useAuthStore } from '../stores/auth.store'
 import * as vouchersService from '../services/vouchers.service'
@@ -45,8 +46,11 @@ function VouchersPage() {
   const modal = useUiStore(selectModal(MODAL))
   const currentUserId = useAuthStore((s) => s.user?.id ?? null)
   const { branches } = useBranches()
+  const { branch: scopeBranch } = useBranchScope()
 
-  const list = useQuery('vouchers', () => vouchersService.listVouchers())
+  const list = useQuery(`vouchers:${scopeBranch ?? 'all'}`, () =>
+    vouchersService.listVouchers(scopeBranch ? { branch: scopeBranch } : {}),
+  )
 
   const create = useMutation((input: VoucherInput) => vouchersService.createVoucher(input, currentUserId), {
     successMessage: 'Voucher submitted for approval',

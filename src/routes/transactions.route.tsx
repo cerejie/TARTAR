@@ -15,6 +15,7 @@ import { useQuery } from '../hooks/useQuery'
 import { useMutation } from '../hooks/useMutation'
 import { usePermissions } from '../hooks/usePermissions'
 import { useBranches, useFarmSections } from '../hooks/useReferenceData'
+import { useBranchScope, scopedFilters } from '../hooks/useBranchScope'
 import { useUiStore, selectModal } from '../stores/ui.store'
 import { useAuthStore } from '../stores/auth.store'
 import * as transactionsService from '../services/transactions.service'
@@ -54,8 +55,10 @@ function TransactionsPage() {
   const customers = useQuery('customers', () => customersService.list())
   const suppliers = useQuery('suppliers', () => suppliersService.list())
 
-  const listKey = `transactions:${JSON.stringify(filters)}`
-  const list = useQuery(listKey, () => transactionsService.listTransactions(filters))
+  const { branch: scopeBranch } = useBranchScope()
+  const effectiveFilters = scopedFilters(filters, scopeBranch)
+  const listKey = `transactions:${JSON.stringify(effectiveFilters)}`
+  const list = useQuery(listKey, () => transactionsService.listTransactions(effectiveFilters))
 
   const create = useMutation(
     (values: TransactionInput) => transactionsService.createTransaction(normalize(values), createdBy),

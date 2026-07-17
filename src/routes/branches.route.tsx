@@ -25,6 +25,7 @@ import type { FieldConfig } from '../components/form/FormField'
 import { useQuery } from '../hooks/useQuery'
 import { useMutation } from '../hooks/useMutation'
 import { useBranches } from '../hooks/useReferenceData'
+import { useBranchScope } from '../hooks/useBranchScope'
 import { useUiStore, selectModal } from '../stores/ui.store'
 import { useAuthStore } from '../stores/auth.store'
 import * as referenceService from '../services/reference.service'
@@ -154,12 +155,14 @@ function BranchesPage() {
     },
   ]
 
-  // --- Financial monitoring (unchanged) — scoped to active branches ----------
+  // --- Financial monitoring — active branches, narrowed by the sidebar view --
   const { branches } = useBranches()
+  const { branch: scopeBranch } = useBranchScope()
+  const monitored = scopeBranch ? branches.filter((b) => b.slug === scopeBranch) : branches
   const monitor = useQuery(
-    `branch-monitor:${branches.map((b) => b.slug).join(',')}`,
-    () => dashboardService.getBranchMonitor(branches),
-    { enabled: branches.length > 0 },
+    `branch-monitor:${monitored.map((b) => b.slug).join(',')}`,
+    () => dashboardService.getBranchMonitor(monitored),
+    { enabled: monitored.length > 0 },
   )
   const monitorColumns: ColumnsType<BranchMonitorRow> = [
     {

@@ -15,6 +15,7 @@ import { RequirePermission } from '../RequirePermission'
 import { useQuery } from '../../hooks/useQuery'
 import { useMutation } from '../../hooks/useMutation'
 import { useBranches } from '../../hooks/useReferenceData'
+import { useBranchScope, scopedFilters } from '../../hooks/useBranchScope'
 import { useUiStore, selectModal } from '../../stores/ui.store'
 import { useAuthStore } from '../../stores/auth.store'
 import { settlementSchema, labels, type LedgerStatus, type SettlementInput } from '../../models'
@@ -65,9 +66,11 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
   const settleModal = useUiStore(selectModal(settleKey))
   const createdBy = useAuthStore((s) => s.user?.id ?? null)
   const { branches } = useBranches()
+  const { branch: scopeBranch } = useBranchScope()
 
-  const listKey = `${props.queryKey}:${JSON.stringify(filters)}`
-  const list = useQuery(listKey, () => props.list(filters))
+  const effectiveFilters = scopedFilters(filters, scopeBranch)
+  const listKey = `${props.queryKey}:${JSON.stringify(effectiveFilters)}`
+  const list = useQuery(listKey, () => props.list(effectiveFilters))
   const rows = list.data ?? []
 
   const create = useMutation((input: Input) => props.create(input, createdBy), {

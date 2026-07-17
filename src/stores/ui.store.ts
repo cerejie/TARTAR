@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { LedgerFilters } from '../services/filters'
 
 /**
@@ -29,23 +30,32 @@ interface UiState {
   closeModal: (key: string) => void
 }
 
-export const useUiStore = create<UiState>((set) => ({
-  siderCollapsed: false,
-  toggleSider: () => set((s) => ({ siderCollapsed: !s.siderCollapsed })),
+export const useUiStore = create<UiState>()(
+  persist(
+    (set) => ({
+      siderCollapsed: false,
+      toggleSider: () => set((s) => ({ siderCollapsed: !s.siderCollapsed })),
 
-  branchFilter: null,
-  setBranchFilter: (branch) => set({ branchFilter: branch }),
+      branchFilter: null,
+      setBranchFilter: (branch) => set({ branchFilter: branch }),
 
-  filters: {},
-  setFilters: (patch) => set((s) => ({ filters: { ...s.filters, ...patch } })),
-  resetFilters: () => set({ filters: {} }),
+      filters: {},
+      setFilters: (patch) => set((s) => ({ filters: { ...s.filters, ...patch } })),
+      resetFilters: () => set({ filters: {} }),
 
-  modals: {},
-  openModal: (key, recordId = null) =>
-    set((s) => ({ modals: { ...s.modals, [key]: { open: true, recordId } } })),
-  closeModal: (key) =>
-    set((s) => ({ modals: { ...s.modals, [key]: { open: false, recordId: null } } })),
-}))
+      modals: {},
+      openModal: (key, recordId = null) =>
+        set((s) => ({ modals: { ...s.modals, [key]: { open: true, recordId } } })),
+      closeModal: (key) =>
+        set((s) => ({ modals: { ...s.modals, [key]: { open: false, recordId: null } } })),
+    }),
+    {
+      name: 'tartar-ui',
+      // Only the branch view survives a reload — transient filters/modals don't.
+      partialize: (s) => ({ branchFilter: s.branchFilter }),
+    },
+  ),
+)
 
 // Stable reference for the "no modal open" case. Returning a fresh object
 // literal here would give useSyncExternalStore a new snapshot every render and
