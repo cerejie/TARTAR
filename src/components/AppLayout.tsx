@@ -26,6 +26,9 @@ export function AppLayout({ menuItems, selectedKey, onMenuSelect, children }: Ap
   const navigate = useNavigate()
   const collapsed = useUiStore((s) => s.siderCollapsed)
   const toggleSider = useUiStore((s) => s.toggleSider)
+  const broken = useUiStore((s) => s.siderBroken)
+  const setSiderBroken = useUiStore((s) => s.setSiderBroken)
+  const setSiderCollapsed = useUiStore((s) => s.setSiderCollapsed)
   const { user, role, logout } = useAuth()
 
   const displayName = user?.full_name || user?.username || 'superAdmin (Developer)'
@@ -47,7 +50,24 @@ export function AppLayout({ menuItems, selectedKey, onMenuSelect, children }: Ap
 
   return (
     <Layout className="tartar-shell">
-      <Layout.Sider className="tartar-sider" collapsible collapsed={collapsed} trigger={null} width={224}>
+      {/* Scrim behind the mobile drawer — tap outside the nav to dismiss it.
+          Pointer-only affordance: the header toggle stays keyboard-reachable. */}
+      {broken && !collapsed ? (
+        <div className="tartar-sider-scrim" aria-hidden="true" onClick={() => setSiderCollapsed(true)} />
+      ) : null}
+      <Layout.Sider
+        className="tartar-sider"
+        collapsible
+        collapsed={collapsed}
+        trigger={null}
+        width={224}
+        // Below `lg` the sider leaves the flow (see .tartar-sider media rules)
+        // and collapses to nothing — an 80px rail on a phone still eats a
+        // quarter of the screen. The header button reopens it as a drawer.
+        breakpoint="lg"
+        collapsedWidth={broken ? 0 : 80}
+        onBreakpoint={setSiderBroken}
+      >
         <div className="tartar-logo">{collapsed ? 'T' : 'TARTAR'}</div>
         {/* Global branch view for managers — scopes every data screen. */}
         <BranchScope />
@@ -57,7 +77,11 @@ export function AppLayout({ menuItems, selectedKey, onMenuSelect, children }: Ap
           mode="inline"
           selectedKeys={[selectedKey]}
           items={menuItems}
-          onClick={({ key }) => onMenuSelect(key)}
+          onClick={({ key }) => {
+            onMenuSelect(key)
+            // Navigating from the drawer should reveal the page it opened.
+            if (broken) setSiderCollapsed(true)
+          }}
         />
         {/* Purely decorative farm scene filling the space below the nav. It is
             drawn in CSS (see styles/farmScene.ts) and carries no meaning. */}

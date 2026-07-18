@@ -26,7 +26,13 @@ export const colors = {
   bg: palette.cream,
   surface: '#ffffff',
   text: palette.espresso,
-  textMuted: palette.brown,
+  /**
+   * Deliberately NOT palette.brown: at 12–13px (stat titles, subtitles) brown
+   * on white measures ~4.49:1 — a hair under WCAG AA's 4.5:1. This is the same
+   * hue nudged toward espresso until it clears ~6:1, and the palette's one
+   * sanctioned in-between shade.
+   */
+  textMuted: '#7A5B4F',
   border: palette.tan,
   borderSubtle: palette.sand,
 

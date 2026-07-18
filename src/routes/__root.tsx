@@ -22,6 +22,10 @@ function RootLayout() {
           colorBgContainer: colors.surface,
           colorText: colors.text,
           colorTextSecondary: colors.textMuted,
+          // Typography type="secondary" reads colorTextDescription, not
+          // colorTextSecondary — left alone it derives a low-alpha espresso
+          // (~2.6:1 on white) instead of the palette's muted brown.
+          colorTextDescription: colors.textMuted,
           colorBorder: colors.border,
           colorBorderSecondary: colors.borderSubtle,
           fontFamily: fontBody,

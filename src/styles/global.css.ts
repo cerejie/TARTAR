@@ -98,6 +98,49 @@ globalStyle('.tartar-sider.ant-layout-sider-collapsed .tartar-sider-art', {
   opacity: 0,
 })
 
+/* --- Mobile shell ----------------------------------------------------------
+   Below antd's `lg` breakpoint (992px — mirrored by breakpoint="lg" on the
+   Sider) the sider leaves the flow and overlays the page as a drawer: in flow
+   even its 80px rail would squeeze the content on a phone. Collapsed it is
+   0px wide (see AppLayout's collapsedWidth), so `overflow: hidden` keeps the
+   logo/nav from bleeding out of the zero-width shell mid-animation. */
+globalStyle('.tartar-sider', {
+  '@media': {
+    'screen and (max-width: 991.98px)': {
+      position: 'fixed',
+      insetBlock: 0,
+      insetInlineStart: 0,
+      zIndex: 100,
+      height: '100dvh',
+      overflow: 'hidden',
+    },
+  },
+})
+
+globalStyle('.tartar-sider:not(.ant-layout-sider-collapsed)', {
+  '@media': {
+    'screen and (max-width: 991.98px)': {
+      boxShadow: vars.shadow.raised,
+    },
+  },
+})
+
+/* A long nav must scroll inside the open drawer, not push past the viewport. */
+globalStyle('.tartar-sider .ant-layout-sider-children', {
+  '@media': {
+    'screen and (max-width: 991.98px)': {
+      overflowY: 'auto',
+    },
+  },
+})
+
+globalStyle('.tartar-sider-scrim', {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 99,
+  background: 'rgba(62, 37, 34, 0.4)',
+})
+
 globalStyle('.tartar-logo', {
   height: '64px',
   display: 'flex',
@@ -233,6 +276,21 @@ globalStyle('.tartar-collapse-btn', {
 globalStyle('.tartar-collapse-btn:hover, .tartar-user-btn:hover', {
   background: vars.color.accent,
 })
+
+/* Keyboard focus on the shell's custom buttons — same tan ring the auth pages
+   use, instead of each browser's default ring against the styled surfaces. */
+globalStyle(
+  [
+    '.tartar-collapse-btn:focus-visible',
+    '.tartar-user-btn:focus-visible',
+    '.tartar-icon-btn:focus-visible',
+    '.tartar-branch-scope:focus-visible',
+  ].join(', '),
+  {
+    outline: '3px solid rgba(211, 163, 118, 0.7)',
+    outlineOffset: '2px',
+  },
+)
 
 globalStyle('.tartar-user-btn', {
   paddingInline: vars.space.sm,
@@ -1025,6 +1083,15 @@ globalStyle('.tartar-filter-amount', {
 /* --- Cards / charts / reports --------------------------------------------- */
 globalStyle('.tartar-chart-card', {
   marginTop: vars.space.lg,
+})
+
+/* Placeholder while a chart loads, sized to the chart it will become so the
+   card doesn't jump from spinner-height to 300px when data lands. */
+globalStyle('.tartar-chart-loading', {
+  height: '300px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 })
 
 globalStyle('.tartar-alerts-hint', {
