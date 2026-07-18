@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import dayjs from 'dayjs'
 import { type LedgerStatus } from './enums'
 import { branchSlugSchema } from './branch'
 
@@ -55,6 +56,14 @@ export const payableSchema = z.object({
   reference_number: z.string().trim().max(80).nullable().optional(),
 })
 export type PayableInput = z.infer<typeof payableSchema>
+
+/**
+ * Overdue is DERIVED (unpaid + past due), never stored — always correct with
+ * no scheduled job (client decision 9). One helper so every screen agrees.
+ */
+export function isLedgerOverdue(row: { status: LedgerStatus; due_date: string }): boolean {
+  return row.status !== 'paid' && row.due_date < dayjs().format('YYYY-MM-DD')
+}
 
 /** Recording a payment against a receivable/payable. */
 export const settlementSchema = z.object({

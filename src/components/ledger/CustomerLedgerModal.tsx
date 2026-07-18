@@ -3,6 +3,7 @@ import { SearchOutlined, UserOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { DataTable } from '../DataTable'
 import { NameCell } from '../TableDecor'
+import { CustomerLedgerView } from './CustomerLedgerView'
 import { useQuery } from '../../hooks/useQuery'
 import { useUiStore, selectModal } from '../../stores/ui.store'
 import { receivablesService } from '../../services/ledger.service'
@@ -10,15 +11,17 @@ import type { CustomerReceivableSummary } from '../../models'
 import { formatDate, formatMoney } from '../../utils/format'
 
 /**
- * Customer Ledger picker — lists every customer that has receivable rows so the
- * user can open that customer's full ledger on the Receivables page. Balances
- * are computed by the service (never stored).
+ * Customer Ledger modal — two panes sliding horizontally: the customer list
+ * (everyone with receivable rows) and, once a customer is picked, that
+ * customer's full ledger. "Back to customers" slides back. Balances are
+ * computed by the service (never stored).
  */
 export const CUSTOMER_LEDGER_MODAL = 'receivable-customer-ledger'
 
 export function CustomerLedgerModal() {
   const modal = useUiStore(selectModal(CUSTOMER_LEDGER_MODAL))
   const closeModal = useUiStore((s) => s.closeModal)
+  const detailOpen = useUiStore((s) => s.ledgerDetailOpen)
   const setLedgerCustomer = useUiStore((s) => s.setLedgerCustomer)
   const search = useUiStore((s) => s.searches[CUSTOMER_LEDGER_MODAL] ?? '')
   const setSearch = useUiStore((s) => s.setSearch)
@@ -33,9 +36,14 @@ export function CustomerLedgerModal() {
     c.customerName.toLowerCase().includes(search.trim().toLowerCase()),
   )
 
+  const close = () => {
+    closeModal(CUSTOMER_LEDGER_MODAL)
+    // Reopening always starts on the customer list.
+    setLedgerCustomer(null)
+  }
+
   const open = (customer: CustomerReceivableSummary) => {
     setLedgerCustomer({ customerId: customer.customerId, customerName: customer.customerName })
-    closeModal(CUSTOMER_LEDGER_MODAL)
   }
 
   const columns: ColumnsType<CustomerReceivableSummary> = [
@@ -67,30 +75,33 @@ export function CustomerLedgerModal() {
   ]
 
   return (
-    <Modal
-      title="Customer Ledger"
-      open={modal.open}
-      onCancel={() => closeModal(CUSTOMER_LEDGER_MODAL)}
-      footer={null}
-      width={760}
-    >
-      <Input
-        className="tartar-filterbar"
-        prefix={<SearchOutlined />}
-        placeholder="Search customer"
-        allowClear
-        value={search}
-        onChange={(e) => setSearch(CUSTOMER_LEDGER_MODAL, e.target.value)}
-      />
-      <DataTable<CustomerReceivableSummary>
-        columns={columns}
-        data={customers}
-        loading={list.loading}
-        rowKey={(c) => c.customerId ?? c.customerName}
-        pageSize={8}
-        onRowClick={open}
-        emptyText="No customers with receivables"
-      />
+    <Modal title="Customer Ledger" open={modal.open} onCancel={close} footer={null} width={1040}>
+      <div className="tartar-slide-panes">
+        <div className={`tartar-slide-track${detailOpen ? ' tartar-slide-detail' : ''}`}>
+          <div className="tartar-slide-pane" aria-hidden={detailOpen}>
+            <Input
+              className="tartar-filterbar"
+              prefix={<SearchOutlined />}
+              placeholder="Search customer"
+              allowClear
+              value={search}
+              onChange={(e) => setSearch(CUSTOMER_LEDGER_MODAL, e.target.value)}
+            />
+            <DataTable<CustomerReceivableSummary>
+              columns={columns}
+              data={customers}
+              loading={list.loading}
+              rowKey={(c) => c.customerId ?? c.customerName}
+              pageSize={8}
+              onRowClick={open}
+              emptyText="No customers with receivables"
+            />
+          </div>
+          <div className="tartar-slide-pane" aria-hidden={!detailOpen}>
+            <CustomerLedgerView />
+          </div>
+        </div>
+      </div>
     </Modal>
   )
 }

@@ -1,5 +1,5 @@
 import { createRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { Col, Row, Segmented } from 'antd'
+import { Col, Row, Segmented, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { appLayoutRoute } from './app.route'
@@ -13,8 +13,11 @@ import { useAuthStore } from '../stores/auth.store'
 import * as transactionsService from '../services/transactions.service'
 import { receivablesService, payablesService } from '../services/ledger.service'
 import {
+  isLedgerOverdue,
   labels,
+  tagColors,
   type ExpenseType,
+  type LedgerStatus,
   type Payable,
   type Receivable,
   type Transaction,
@@ -226,6 +229,15 @@ function LedgerReport<Row extends Receivable | Payable>({
   nameOf: (row: Row) => string
   label: string
 }) {
+  const balanceOf = (r: Row) => Number(r.amount) - Number(r.paid_amount)
+  const outstanding = rows.reduce((a, r) => a + balanceOf(r), 0)
+  const overdueRows = rows.filter(isLedgerOverdue)
+  const overdueTotal = overdueRows.reduce((a, r) => a + balanceOf(r), 0)
+
+  // Overdue items float to the top of the report (client decision 9), each
+  // highlighted in red; the rest follow in due-date order (already sorted).
+  const ordered = [...overdueRows, ...rows.filter((r) => !isLedgerOverdue(r))]
+
   const columns: ColumnsType<Row> = [
     { title: 'Due date', dataIndex: 'due_date', render: formatDate },
     { title: label, key: 'name', render: (_, r) => nameOf(r) },
@@ -235,13 +247,46 @@ function LedgerReport<Row extends Receivable | Payable>({
       title: 'Balance',
       key: 'balance',
       align: 'right',
-      render: (_, r) => formatMoney(Number(r.amount) - Number(r.paid_amount)),
+      render: (_, r) => formatMoney(balanceOf(r)),
     },
-    { title: 'Status', dataIndex: 'status', render: (s: string) => labels.ledgerStatus[s as keyof typeof labels.ledgerStatus] },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      render: (s: LedgerStatus, r) =>
+        isLedgerOverdue(r) ? (
+          <Tag color="red">Overdue</Tag>
+        ) : (
+          <Tag color={tagColors.ledgerStatus[s]}>{labels.ledgerStatus[s]}</Tag>
+        ),
+    },
   ]
+
   return (
-    <SectionCard title={`Outstanding ${label}s`} subtitle="Unsettled balances" flush>
-      <DataTable<Row> columns={columns} data={rows} loading={loading} emptyText="Nothing outstanding" />
-    </SectionCard>
+    <>
+      <Row gutter={[16, 16]} className="tartar-report-stats">
+        <Col xs={12} md={8}>
+          <StatCard title="Total outstanding" value={outstanding} loading={loading} tone="brand" />
+        </Col>
+        <Col xs={12} md={8}>
+          <StatCard title="Overdue balance" value={overdueTotal} loading={loading} tone="negative" />
+        </Col>
+        <Col xs={12} md={8}>
+          <StatCard title="Overdue records" value={overdueRows.length} loading={loading} raw />
+        </Col>
+      </Row>
+      <SectionCard
+        title={`Outstanding ${label}s`}
+        subtitle="Overdue items first, highlighted in red"
+        flush
+      >
+        <DataTable<Row>
+          columns={columns}
+          data={ordered}
+          loading={loading}
+          emptyText="Nothing outstanding"
+          rowClassName={(r) => (isLedgerOverdue(r) ? 'tartar-row-overdue' : '')}
+        />
+      </SectionCard>
+    </>
   )
 }

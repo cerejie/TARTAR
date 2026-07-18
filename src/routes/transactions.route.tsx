@@ -23,7 +23,6 @@ import * as usersService from '../services/users.service'
 import { customersService, suppliersService } from '../services/party.service'
 import {
   cashAccountValues,
-  expenseTypeValues,
   incomeSourceValues,
   labels,
   toOptions,
@@ -76,8 +75,12 @@ function TransactionsPage() {
 
   const branchName = (slug: string) => branches.find((b) => b.slug === slug)?.name ?? slug
 
+  // Purchases and Expenses are recorded in their dedicated modules (which
+  // auto-generate the voucher) — offering them here would bypass that flow.
+  const encodableTypes = transactionTypeValues.filter((t) => t !== 'purchase' && t !== 'expense')
+
   const fields: FieldConfig<TransactionInput>[] = [
-    { name: 'type', label: 'Type', type: 'select', options: toOptions(transactionTypeValues, labels.transactionType) },
+    { name: 'type', label: 'Type', type: 'select', options: toOptions(encodableTypes, labels.transactionType) },
     { name: 'branch', label: 'Branch', type: 'select', options: branches.map((b) => ({ value: b.slug, label: b.name })) },
     {
       name: 'farm_section',
@@ -95,13 +98,6 @@ function TransactionsPage() {
       type: 'select',
       options: toOptions(incomeSourceValues, labels.incomeSource),
       hidden: (v) => v.type !== 'sale',
-    },
-    {
-      name: 'expense_type',
-      label: 'Expense type',
-      type: 'select',
-      options: toOptions(expenseTypeValues, labels.expenseType),
-      hidden: (v) => v.type !== 'expense',
     },
     {
       name: 'customer_id',

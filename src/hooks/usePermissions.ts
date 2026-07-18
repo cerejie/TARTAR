@@ -26,6 +26,8 @@ export interface Permissions {
   viewReminders: boolean
   /** Create vouchers — employees + managers. */
   createVouchers: boolean
+  /** Manually create a voucher outside a purchase/expense — managers only. */
+  createManualVouchers: boolean
   /** Approve/reject + release vouchers for printing — managers only. */
   approveVouchers: boolean
   /** Manage users at all (has a Users tab). */
@@ -52,6 +54,7 @@ export function usePermissions(): Permissions {
     encodeTransactions: isManager || isEmployee,
     viewReminders: role !== null,
     createVouchers: isManager || isEmployee,
+    createManualVouchers: isManager,
     approveVouchers: isManager,
     manageUsers: isManager,
     manageAdmins: isSuperAdmin,

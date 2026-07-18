@@ -80,11 +80,15 @@ function BranchesPage() {
   const formFields: FieldConfig<BranchInput>[] = [
     { name: 'name', label: 'Branch name', type: 'text', placeholder: 'e.g. LGC Poultry' },
     { name: 'sort', label: 'Sort order', type: 'number' },
+    // Changing the prefix only affects newly numbered vouchers — history keeps
+    // the prefix it was issued under (client decision, 2026-07).
+    { name: 'voucher_prefix', label: 'Voucher prefix (3 letters)', type: 'text', placeholder: 'e.g. LGC' },
   ]
-  const createDefaults: DefaultValues<BranchInput> = { name: '', sort: nextSort }
+  const createDefaults: DefaultValues<BranchInput> = { name: '', sort: nextSort, voucher_prefix: '' }
   const editDefaults: DefaultValues<BranchInput> = {
     name: editing?.name ?? '',
     sort: editing?.sort ?? nextSort,
+    voucher_prefix: editing?.voucher_prefix ?? '',
   }
 
   const columns: ColumnsType<Branch> = [

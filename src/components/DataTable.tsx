@@ -1,5 +1,5 @@
 import { Table } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import type { ColumnsType, TableProps } from 'antd/es/table'
 
 /**
  * Thin wrapper over antd Table with the app's shared defaults (row key, compact
@@ -15,6 +15,10 @@ interface DataTableProps<T> {
   /** Optional per-row click (e.g. open detail). */
   onRowClick?: (row: T) => void
   emptyText?: string
+  /** Optional checkbox selection (e.g. pick receivables to pay together). */
+  rowSelection?: TableProps<T>['rowSelection']
+  /** Optional per-row class (e.g. red highlight for overdue rows). */
+  rowClassName?: (row: T) => string
 }
 
 export function DataTable<T extends object>({
@@ -25,6 +29,8 @@ export function DataTable<T extends object>({
   pageSize = 15,
   onRowClick,
   emptyText,
+  rowSelection,
+  rowClassName,
 }: DataTableProps<T>) {
   return (
     <Table<T>
@@ -34,6 +40,8 @@ export function DataTable<T extends object>({
       loading={loading}
       size="middle"
       rowKey={typeof rowKey === 'function' ? rowKey : (row) => String(row[rowKey])}
+      rowSelection={rowSelection}
+      rowClassName={rowClassName}
       scroll={{ x: 'max-content' }}
       locale={emptyText ? { emptyText } : undefined}
       pagination={{ pageSize, showSizeChanger: false, hideOnSinglePage: true }}
