@@ -27,24 +27,30 @@ export type AppPath =
   | '/reports'
   | '/users'
 
+/** Sidebar sections, in display order. Labels are uppercased by CSS. */
+export const NAV_GROUPS = ['Main', 'Operations', 'Accounting', 'Monitoring', 'System'] as const
+export type NavGroup = (typeof NAV_GROUPS)[number]
+
 interface NavItem {
   key: AppPath
   label: string
   icon: ReactNode
   /** Which permission flag must be true for the item to appear (build spec §5). */
   can: keyof Permissions
+  /** Which sidebar section the item renders under. */
+  group: NavGroup
 }
 
-/** Sidebar navigation, filtered per role at render time. */
+/** Sidebar navigation, filtered per role at render time and grouped by section. */
 export const NAV_ITEMS: NavItem[] = [
-  { key: '/', label: 'Dashboard', icon: createElement(DashboardOutlined), can: 'viewDashboard' },
-  { key: '/transactions', label: 'Transactions', icon: createElement(SwapOutlined), can: 'viewReminders' },
-  { key: '/purchases', label: 'Purchases', icon: createElement(ShoppingCartOutlined), can: 'viewReminders' },
-  { key: '/expenses', label: 'Expenses', icon: createElement(WalletOutlined), can: 'viewReminders' },
-  { key: '/receivables', label: 'Receivables', icon: createElement(SolutionOutlined), can: 'viewReminders' },
-  { key: '/payables', label: 'Payables', icon: createElement(AuditOutlined), can: 'viewReminders' },
-  { key: '/vouchers', label: 'Vouchers', icon: createElement(FileTextOutlined), can: 'createVouchers' },
-  { key: '/branches', label: 'Branch Monitoring', icon: createElement(AppstoreOutlined), can: 'viewBranchMonitoring' },
-  { key: '/reports', label: 'Reports', icon: createElement(BankOutlined), can: 'viewIncomeExpenses' },
-  { key: '/users', label: 'Users', icon: createElement(TeamOutlined), can: 'manageUsers' },
+  { key: '/', label: 'Dashboard', icon: createElement(DashboardOutlined), can: 'viewDashboard', group: 'Main' },
+  { key: '/transactions', label: 'Transactions', icon: createElement(SwapOutlined), can: 'viewReminders', group: 'Operations' },
+  { key: '/purchases', label: 'Purchases', icon: createElement(ShoppingCartOutlined), can: 'viewReminders', group: 'Operations' },
+  { key: '/expenses', label: 'Expenses', icon: createElement(WalletOutlined), can: 'viewReminders', group: 'Operations' },
+  { key: '/vouchers', label: 'Vouchers', icon: createElement(FileTextOutlined), can: 'createVouchers', group: 'Operations' },
+  { key: '/receivables', label: 'Receivables', icon: createElement(SolutionOutlined), can: 'viewReminders', group: 'Accounting' },
+  { key: '/payables', label: 'Payables', icon: createElement(AuditOutlined), can: 'viewReminders', group: 'Accounting' },
+  { key: '/reports', label: 'Reports', icon: createElement(BankOutlined), can: 'viewIncomeExpenses', group: 'Monitoring' },
+  { key: '/branches', label: 'Branch Monitoring', icon: createElement(AppstoreOutlined), can: 'viewBranchMonitoring', group: 'Monitoring' },
+  { key: '/users', label: 'Users', icon: createElement(TeamOutlined), can: 'manageUsers', group: 'System' },
 ]

@@ -66,6 +66,31 @@ globalStyle('.tartar-shell', {
 })
 
 /* --- Sider ---------------------------------------------------------------- */
+/* Same radial-glow treatment as the auth hero: tan/brown washes over espresso
+   give the panel depth without introducing hues, and tie the app shell to the
+   login screen it follows. (Two classes so this outweighs antd's token bg.) */
+globalStyle('.tartar-sider.ant-layout-sider', {
+  background: `
+    radial-gradient(130% 70% at 110% -5%, rgba(140, 110, 99, 0.42), transparent 55%),
+    radial-gradient(110% 60% at -25% 105%, rgba(211, 163, 118, 0.16), transparent 60%),
+    ${vars.color.brandDark}`,
+})
+
+/* Desktop: pin the sider to the viewport instead of letting it stretch with
+   the page. In flow it grows as tall as the content, which pushes the account
+   card below the fold on any page longer than one screen; sticky at 100dvh the
+   card stays visible and the nav scrolls internally (`.tartar-menu` overflow).
+   Below `lg` the fixed drawer rules further down take over. */
+globalStyle('.tartar-sider', {
+  '@media': {
+    'screen and (min-width: 992px)': {
+      position: 'sticky',
+      top: 0,
+      height: '100dvh',
+    },
+  },
+})
+
 /* Column layout so the farm scene can claim the leftover space under the nav.
    It is deliberately NOT absolutely positioned: on a short viewport, or with a
    long nav, an absolute scene would sit on top of the menu items. As a flex
@@ -75,6 +100,7 @@ globalStyle('.tartar-sider .ant-layout-sider-children', {
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
+  height: '100%',
 })
 
 globalStyle('.tartar-sider-art', {
@@ -145,26 +171,98 @@ globalStyle('.tartar-logo', {
   height: '64px',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
+  gap: '10px',
+  padding: `0 ${vars.space.md}`,
   fontFamily: vars.font.heading,
-  color: vars.color.accent,
   fontWeight: 700,
-  letterSpacing: '0.18em',
-  fontSize: '20px',
   position: 'relative',
 })
 
+/* Only the mark fits the 80px rail — centre it. */
+globalStyle('.tartar-sider.ant-layout-sider-collapsed .tartar-logo', {
+  justifyContent: 'center',
+  padding: 0,
+})
+
+/* Same gradient mark chip as the auth pages (.tartar-auth-mark), sized for the
+   64px sider rail — one logo lockup across login and app. */
+globalStyle('.tartar-logo-mark', {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '34px',
+  height: '34px',
+  flexShrink: 0,
+  borderRadius: '12px',
+  fontSize: '18px',
+  color: vars.color.brandDark,
+  background: `linear-gradient(135deg, ${vars.color.accent}, ${vars.color.brandLight})`,
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.45)',
+})
+
+/* Two-line lockup: serif wordmark over a quiet product descriptor. */
+globalStyle('.tartar-logo-lockup', {
+  display: 'flex',
+  flexDirection: 'column',
+  lineHeight: 1.2,
+  minWidth: 0,
+})
+
+globalStyle('.tartar-logo-word', {
+  fontSize: '15px',
+  letterSpacing: '0.1em',
+  color: vars.color.bg,
+  whiteSpace: 'nowrap',
+})
+
+globalStyle('.tartar-logo-sub', {
+  fontFamily: vars.font.body,
+  fontSize: '10px',
+  fontWeight: 500,
+  letterSpacing: '0.06em',
+  color: 'rgba(255, 224, 178, 0.65)',
+  whiteSpace: 'nowrap',
+})
+
 /* --- Branch view switcher (managers) --------------------------------------- */
-/* Sits between the logo and the nav. It is a plain button (antd Dropdown needs
-   a hoverable/clickable child) styled to read as part of the dark sider. */
+/* Fieldset composition: the wrapper positions a floating caption over the
+   button's top border, so the control reads as a labelled field. */
+globalStyle('.tartar-branch-field', {
+  position: 'relative',
+  margin: `${vars.space.xs} ${vars.space.sm} 10px`,
+})
+
+globalStyle('.tartar-branch-field-label', {
+  position: 'absolute',
+  top: '-7px',
+  insetInlineStart: '12px',
+  zIndex: 1,
+  padding: '0 6px',
+  fontSize: '10px',
+  fontWeight: 600,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  lineHeight: '14px',
+  color: 'rgba(255, 224, 178, 0.75)',
+  // Solid espresso so the caption masks the border it sits on; the sider's
+  // gradient glow is imperceptible this close to the panel's top edge.
+  background: vars.color.brandDark,
+  borderRadius: vars.radius.sm,
+})
+
+globalStyle('.tartar-sider.ant-layout-sider-collapsed .tartar-branch-field-label', {
+  display: 'none',
+})
+
+/* The switcher itself: a plain button (antd Dropdown needs a hoverable/
+   clickable child) styled to read as part of the dark sider. */
 globalStyle('.tartar-branch-scope', {
   position: 'relative',
   display: 'flex',
   alignItems: 'center',
   gap: vars.space.sm,
-  width: `calc(100% - ${vars.space.md})`,
-  margin: `0 ${vars.space.sm} ${vars.space.sm}`,
-  padding: '7px 12px',
+  width: '100%',
+  padding: '9px 12px',
   border: '1px solid rgba(255, 224, 178, 0.28)',
   borderRadius: vars.radius.md,
   background: 'rgba(255, 255, 255, 0.06)',
@@ -220,25 +318,67 @@ globalStyle(
   },
 )
 
-/* Nav sits above the illustration. */
+/* Nav sits above the illustration. Grouped headings make it tall, so on short
+   viewports it scrolls within the column instead of clipping (the farm art
+   gives up its space first — it's the flex-1 child). */
 globalStyle('.tartar-menu', {
   position: 'relative',
   borderInlineEnd: 'none',
   background: 'transparent',
   paddingInline: vars.space.sm,
+  minHeight: 0,
+  overflowY: 'auto',
+  overflowX: 'hidden',
 })
 
 globalStyle('.tartar-menu .ant-menu-item', {
+  position: 'relative',
   borderRadius: vars.radius.md,
+  marginBlock: '3px',
+})
+
+/* Section headings: small caps in muted tan, set apart from the items. */
+globalStyle('.tartar-menu .ant-menu-item-group-title', {
+  padding: '18px 12px 6px',
+  fontFamily: vars.font.body,
+  fontSize: '11px',
+  fontWeight: 700,
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: 'rgba(211, 163, 118, 0.8)',
+})
+
+/* Collapsed rail: the heading text can't fit, so each becomes a short hairline
+   — the grouping stays legible as rhythm even without words. */
+globalStyle('.tartar-sider.ant-layout-sider-collapsed .tartar-menu .ant-menu-item-group-title', {
+  height: 0,
+  padding: 0,
+  margin: '10px auto',
+  width: '28px',
+  overflow: 'hidden',
+  borderTop: '1px solid rgba(255, 224, 178, 0.22)',
+})
+
+/* The light selected pill (tokens invert it to cream-on-dark) lifts slightly so
+   it reads as sitting on top of the sider rather than punched into it. */
+globalStyle('.tartar-menu .ant-menu-item-selected', {
+  fontWeight: 600,
+  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.28)',
 })
 
 globalStyle('.tartar-header', {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  // Cream, not white: the header is part of the page field, and only cards lift
-  // off it. A white bar here would read as a second, competing surface.
-  background: vars.color.bg,
+  // Sticky so the toggle/sync/user controls survive long tables. Cream (not
+  // white) because the header is part of the page field and only cards lift off
+  // it — translucent with blur so content ghosts through as it passes under.
+  position: 'sticky',
+  top: 0,
+  zIndex: 50, // above page content, below the mobile drawer (100) and scrim (99)
+  background: 'rgba(255, 242, 223, 0.85)',
+  backdropFilter: 'saturate(150%) blur(12px)',
+  WebkitBackdropFilter: 'saturate(150%) blur(12px)',
   paddingInline: vars.space.lg,
   height: '64px',
   borderBottom: `1px solid ${vars.color.borderSubtle}`,
@@ -250,30 +390,23 @@ globalStyle('.tartar-header-right', {
   gap: vars.space.md,
 })
 
-globalStyle('.tartar-collapse-btn, .tartar-user-btn', {
-  background: 'transparent',
-  border: 'none',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  gap: vars.space.sm,
-  padding: vars.space.xs,
-  fontSize: '16px',
-  color: vars.color.text,
-  borderRadius: vars.radius.md,
-})
-
 /* The collapse control reads as its own white chip against the cream header. */
 globalStyle('.tartar-collapse-btn', {
   background: vars.color.surface,
   border: `1px solid ${vars.color.borderSubtle}`,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   width: '36px',
   height: '36px',
-  justifyContent: 'center',
   padding: 0,
+  fontSize: '16px',
+  color: vars.color.text,
+  borderRadius: vars.radius.pill,
 })
 
-globalStyle('.tartar-collapse-btn:hover, .tartar-user-btn:hover', {
+globalStyle('.tartar-collapse-btn:hover', {
   background: vars.color.accent,
 })
 
@@ -282,7 +415,7 @@ globalStyle('.tartar-collapse-btn:hover, .tartar-user-btn:hover', {
 globalStyle(
   [
     '.tartar-collapse-btn:focus-visible',
-    '.tartar-user-btn:focus-visible',
+    '.tartar-sider-user:focus-visible',
     '.tartar-icon-btn:focus-visible',
     '.tartar-branch-scope:focus-visible',
   ].join(', '),
@@ -292,21 +425,106 @@ globalStyle(
   },
 )
 
-globalStyle('.tartar-user-btn', {
-  paddingInline: vars.space.sm,
-  paddingBlock: vars.space.xs,
+/* --- Sider account card ----------------------------------------------------
+   Pinned to the sider foot, below the farm scene. Reads as a raised chip on
+   the dark panel; the whole card is the dropdown trigger (sign out). */
+globalStyle('.tartar-sider-user', {
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  width: `calc(100% - ${vars.space.md})`,
+  margin: `10px ${vars.space.sm} 14px`,
+  padding: '7px 12px 7px 7px',
+  border: '1px solid rgba(255, 224, 178, 0.22)',
+  borderRadius: vars.radius.pill,
+  background: 'rgba(255, 255, 255, 0.07)',
+  fontFamily: vars.font.body,
+  textAlign: 'left',
+  cursor: 'pointer',
+  transition: 'background 0.2s ease, border-color 0.2s ease',
 })
 
-globalStyle('.tartar-user-meta', {
+globalStyle('.tartar-sider-user:hover', {
+  background: 'rgba(255, 255, 255, 0.13)',
+  borderColor: 'rgba(255, 224, 178, 0.5)',
+})
+
+globalStyle('.tartar-sider-user .ant-avatar', {
+  background: 'rgba(255, 224, 178, 0.16)',
+  color: vars.color.accent,
+})
+
+globalStyle('.tartar-sider-user-avatar', {
+  position: 'relative',
+  display: 'inline-flex',
+  flexShrink: 0,
+})
+
+/* Connectivity dot on the avatar's shoulder. The espresso ring separates it
+   from the avatar so it reads as a badge, not a blemish. */
+globalStyle('.tartar-status-dot', {
+  position: 'absolute',
+  right: '-1px',
+  bottom: '-1px',
+  width: '11px',
+  height: '11px',
+  borderRadius: '50%',
+  border: `2px solid ${vars.color.brandDark}`,
+  background: vars.color.danger,
+})
+
+globalStyle('.tartar-status-dot-online', {
+  // The palette's positive green, lifted a step: #237804 sinks into espresso.
+  background: '#49aa19',
+})
+
+globalStyle('.tartar-sider-user-meta', {
+  flex: 1,
+  minWidth: 0,
   display: 'flex',
   flexDirection: 'column',
-  lineHeight: 1.2,
-  textAlign: 'left',
+  lineHeight: 1.25,
 })
 
-globalStyle('.tartar-user-role', {
-  fontSize: '12px',
+globalStyle('.tartar-sider-user-name', {
+  fontSize: '13px',
+  fontWeight: 600,
+  color: vars.color.bg,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 })
+
+globalStyle('.tartar-sider-user-role', {
+  fontSize: '11px',
+  color: 'rgba(255, 224, 178, 0.65)',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
+
+globalStyle('.tartar-sider-user-caret', {
+  fontSize: '10px',
+  color: 'rgba(255, 224, 178, 0.55)',
+  flexShrink: 0,
+})
+
+/* Collapsed rail: avatar only, centred. */
+globalStyle('.tartar-sider.ant-layout-sider-collapsed .tartar-sider-user', {
+  justifyContent: 'center',
+  padding: '7px 0',
+})
+
+globalStyle(
+  [
+    '.tartar-sider.ant-layout-sider-collapsed .tartar-sider-user-meta',
+    '.tartar-sider.ant-layout-sider-collapsed .tartar-sider-user-caret',
+  ].join(', '),
+  {
+    display: 'none',
+  },
+)
 
 globalStyle('.tartar-content', {
   padding: vars.space.xl,

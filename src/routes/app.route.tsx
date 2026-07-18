@@ -3,7 +3,7 @@ import { rootRoute } from './__root'
 import { AppLayout } from '../components/AppLayout'
 import { usePermissions } from '../hooks/usePermissions'
 import { useAuthStore } from '../stores/auth.store'
-import { NAV_ITEMS, type AppPath } from './nav'
+import { NAV_GROUPS, NAV_ITEMS, type AppPath } from './nav'
 
 /**
  * Pathless layout route wrapping every authenticated page. `beforeLoad` is the
@@ -31,11 +31,15 @@ function AppShell() {
   // Render nothing in that window so protected UI never flashes without a session.
   if (!kind) return null
 
-  const menuItems = NAV_ITEMS.filter((item) => permissions[item.can]).map((item) => ({
-    key: item.key,
-    label: item.label,
-    icon: item.icon,
-  }))
+  // Sectioned nav: items the role can see, under their group heading. Groups
+  // whose every item is filtered out disappear rather than render an empty label.
+  const visible = NAV_ITEMS.filter((item) => permissions[item.can])
+  const menuItems = NAV_GROUPS.flatMap((group) => {
+    const children = visible
+      .filter((item) => item.group === group)
+      .map((item) => ({ key: item.key, label: item.label, icon: item.icon }))
+    return children.length ? [{ type: 'group' as const, key: group, label: group, children }] : []
+  })
 
   return (
     <AppLayout
