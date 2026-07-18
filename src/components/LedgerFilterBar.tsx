@@ -18,12 +18,22 @@ interface LedgerFilterBarProps {
   showBranch?: boolean
   /** Show the receivable/payable status filter (ledger views only). */
   showStatus?: boolean
+  /**
+   * Which filter slice to read/write. The customer-ledger pane lives in a modal
+   * over a filtered page, so it gets its own slice to avoid cross-talk.
+   */
+  scope?: 'page' | 'customer-ledger'
 }
 
-export function LedgerFilterBar({ showBranch = true, showStatus = false }: LedgerFilterBarProps) {
-  const filters = useUiStore((s) => s.filters)
-  const setFilters = useUiStore((s) => s.setFilters)
-  const resetFilters = useUiStore((s) => s.resetFilters)
+export function LedgerFilterBar({
+  showBranch = true,
+  showStatus = false,
+  scope = 'page',
+}: LedgerFilterBarProps) {
+  const scoped = scope === 'customer-ledger'
+  const filters = useUiStore((s) => (scoped ? s.customerLedgerFilters : s.filters))
+  const setFilters = useUiStore((s) => (scoped ? s.setCustomerLedgerFilters : s.setFilters))
+  const resetFilters = useUiStore((s) => (scoped ? s.resetCustomerLedgerFilters : s.resetFilters))
   const { branches } = useBranches()
   const { branch: scopeBranch } = useBranchScope()
 

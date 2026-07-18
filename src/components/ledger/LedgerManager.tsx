@@ -4,12 +4,12 @@ import type { ColumnsType } from 'antd/es/table'
 import type { ReactNode } from 'react'
 import type { DefaultValues, FieldValues } from 'react-hook-form'
 import type { ZodType } from 'zod'
-import dayjs from 'dayjs'
 import { PageHeader } from '../PageHeader'
 import { SectionCard } from '../SectionCard'
 import { NameCell } from '../TableDecor'
 import { DataTable } from '../DataTable'
 import { LedgerFilterBar } from '../LedgerFilterBar'
+import { PaymentsPanel } from '../payments/PaymentsPanel'
 import { EntityFormModal } from '../form/EntityFormModal'
 import type { FieldConfig } from '../form/FormField'
 import { RequirePermission } from '../RequirePermission'
@@ -19,7 +19,14 @@ import { useBranches } from '../../hooks/useReferenceData'
 import { useBranchScope, scopedFilters } from '../../hooks/useBranchScope'
 import { useUiStore, selectModal } from '../../stores/ui.store'
 import { useAuthStore } from '../../stores/auth.store'
-import { settlementSchema, labels, type LedgerStatus, type SettlementInput } from '../../models'
+import {
+  isLedgerOverdue,
+  labels,
+  settlementSchema,
+  tagColors,
+  type LedgerStatus,
+  type SettlementInput,
+} from '../../models'
 import { formatDate, formatMoney } from '../../utils/format'
 
 /**
@@ -45,7 +52,8 @@ interface LedgerManagerProps<Row extends LedgerRow, Input extends FieldValues> {
   nameOf: (row: Row) => string
   list: (filters: object) => Promise<Row[]>
   create: (input: Input, createdBy: string | null) => Promise<{ queued: boolean }>
-  settle: (row: Row, amount: number) => Promise<{ queued: boolean }>
+  /** Records a verifiable payment (payments.service) — not a raw balance write. */
+  settle: (row: Row, amount: number, createdBy: string | null) => Promise<{ queued: boolean }>
   remove: (id: string) => Promise<{ queued: boolean }>
   schema: ZodType<Input>
   fields: FieldConfig<Input>[]
@@ -54,7 +62,7 @@ interface LedgerManagerProps<Row extends LedgerRow, Input extends FieldValues> {
   headerActions?: ReactNode
 }
 
-export const STATUS_COLOR: Record<LedgerStatus, string> = { open: 'default', partial: 'gold', paid: 'green' }
+const STATUS_COLOR: Record<LedgerStatus, string> = tagColors.ledgerStatus
 
 export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
   props: LedgerManagerProps<Row, Input>,
@@ -82,8 +90,12 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
     onSuccess: () => closeModal(formKey),
   })
   const settle = useMutation(
-    (payload: { row: Row; amount: number }) => props.settle(payload.row, payload.amount),
-    { successMessage: 'Payment recorded', invalidate: [props.queryKey], onSuccess: () => closeModal(settleKey) },
+    (payload: { row: Row; amount: number }) => props.settle(payload.row, payload.amount, createdBy),
+    {
+      successMessage: 'Payment recorded',
+      invalidate: [props.queryKey, 'payments'],
+      onSuccess: () => closeModal(settleKey),
+    },
   )
   const remove = useMutation((id: string) => props.remove(id), {
     successMessage: `${props.title} deleted`,
@@ -92,7 +104,7 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
 
   const settleRow = rows.find((r) => r.id === settleModal.recordId)
   const branchName = (slug: string) => branches.find((b) => b.slug === slug)?.name ?? slug
-  const isOverdue = (r: Row) => r.status !== 'paid' && r.due_date < dayjs().format('YYYY-MM-DD')
+  const isOverdue = (r: Row) => isLedgerOverdue(r)
 
   const columns: ColumnsType<Row> = [
     {
@@ -183,8 +195,12 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
           data={rows}
           loading={list.loading}
           emptyText="No records match the filters"
+          rowClassName={(r) => (isOverdue(r) ? 'tartar-row-overdue' : '')}
         />
       </SectionCard>
+
+      {/* Payment history + the manager verification/approval queue. */}
+      <PaymentsPanel kind={props.queryKey === 'receivables' ? 'receivable' : 'payable'} />
 
       <EntityFormModal<Input>
         open={formModal.open}

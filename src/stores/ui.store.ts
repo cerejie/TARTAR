@@ -21,9 +21,28 @@ interface UiState {
   setFilters: (patch: Partial<LedgerFilters>) => void
   resetFilters: () => void
 
-  /** Receivables: customer whose ledger is open (null = normal list view). */
+  /** Receivables: customer whose ledger pane is open inside the picker modal. */
   ledgerCustomer: CustomerLedgerKey | null
   setLedgerCustomer: (customer: CustomerLedgerKey | null) => void
+  /**
+   * Whether the modal shows the detail pane. Kept apart from `ledgerCustomer`
+   * so "back" can slide away with the content still rendered (no blank pane
+   * mid-animation); the customer itself is cleared when the modal closes.
+   */
+  ledgerDetailOpen: boolean
+  closeLedgerDetail: () => void
+
+  /**
+   * Filters scoped to the customer-ledger pane. Kept separate from `filters`
+   * so filtering inside the modal never re-filters the page behind it.
+   */
+  customerLedgerFilters: LedgerFilters
+  setCustomerLedgerFilters: (patch: Partial<LedgerFilters>) => void
+  resetCustomerLedgerFilters: () => void
+
+  /** Receivable ids ticked in the ledger pane for a combined payment. */
+  ledgerSelection: string[]
+  setLedgerSelection: (ids: string[]) => void
 
   /** Generic keyed search text (e.g. the customer picker modal), no useState. */
   searches: Record<string, string>
@@ -53,13 +72,24 @@ export const useUiStore = create<UiState>()(
       resetFilters: () => set({ filters: {} }),
 
       ledgerCustomer: null,
-      // The status filter only exists on the ledger view, so drop it on the way
-      // out — otherwise it would silently keep filtering the plain list.
+      // Each ledger visit starts with clean pane-scoped filters and selection.
       setLedgerCustomer: (customer) =>
-        set((s) => ({
+        set({
           ledgerCustomer: customer,
-          filters: customer ? s.filters : { ...s.filters, status: undefined },
-        })),
+          ledgerDetailOpen: !!customer,
+          customerLedgerFilters: {},
+          ledgerSelection: [],
+        }),
+      ledgerDetailOpen: false,
+      closeLedgerDetail: () => set({ ledgerDetailOpen: false }),
+
+      customerLedgerFilters: {},
+      setCustomerLedgerFilters: (patch) =>
+        set((s) => ({ customerLedgerFilters: { ...s.customerLedgerFilters, ...patch } })),
+      resetCustomerLedgerFilters: () => set({ customerLedgerFilters: {} }),
+
+      ledgerSelection: [],
+      setLedgerSelection: (ids) => set({ ledgerSelection: ids }),
 
       searches: {},
       setSearch: (key, value) => set((s) => ({ searches: { ...s.searches, [key]: value } })),

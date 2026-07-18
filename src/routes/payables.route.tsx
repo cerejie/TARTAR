@@ -5,6 +5,7 @@ import { LedgerManager } from '../components/ledger/LedgerManager'
 import type { FieldConfig } from '../components/form/FormField'
 import { useBranches } from '../hooks/useReferenceData'
 import { payablesService } from '../services/ledger.service'
+import * as paymentsService from '../services/payments.service'
 import { payableSchema, type BranchSlug, type Payable, type PayableInput } from '../models'
 import { todayIso } from '../utils/format'
 
@@ -43,7 +44,19 @@ function PayablesPage() {
       nameOf={(p) => p.supplier_name}
       list={payablesService.list}
       create={payablesService.create}
-      settle={payablesService.settle}
+      settle={(row, amount, createdBy) =>
+        paymentsService.recordPayment(
+          'payable',
+          {
+            partyId: row.supplier_id,
+            partyName: row.supplier_name,
+            paidAt: todayIso(),
+            referenceNumber: null,
+            allocations: [{ ledgerId: row.id, amount }],
+          },
+          createdBy,
+        )
+      }
       remove={payablesService.remove}
       schema={payableSchema}
       fields={fields}

@@ -5,6 +5,8 @@ import { registerRoute } from './register.route'
 import { appLayoutRoute } from './app.route'
 import { dashboardRoute } from './dashboard.route'
 import { transactionsRoute } from './transactions.route'
+import { purchasesRoute } from './purchases.route'
+import { expensesRoute } from './expenses.route'
 import { receivablesRoute } from './receivables.route'
 import { payablesRoute } from './payables.route'
 import { vouchersRoute } from './vouchers.route'
@@ -23,6 +25,8 @@ const routeTree = rootRoute.addChildren([
   appLayoutRoute.addChildren([
     dashboardRoute,
     transactionsRoute,
+    purchasesRoute,
+    expensesRoute,
     receivablesRoute,
     payablesRoute,
     vouchersRoute,

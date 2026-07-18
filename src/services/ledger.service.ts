@@ -15,13 +15,10 @@ import type {
 /**
  * Receivables (customers pay later) and Payables (bought on credit) — build
  * spec §9. Same lifecycle, so a factory keyed on the counterparty column serves
- * both. `paid_amount` + `amount` derive the open/partial/paid status.
+ * both. Settling now lives in payments.service (recordPayment) so every payment
+ * is a verifiable record — there is deliberately no direct paid_amount write
+ * here any more.
  */
-function deriveStatus(amount: number, paid: number): LedgerStatus {
-  if (paid <= 0) return 'open'
-  if (paid >= amount) return 'paid'
-  return 'partial'
-}
 
 /**
  * Status filter — 'overdue' is derived (unpaid + past due), so it can't go
@@ -77,18 +74,6 @@ function makeLedgerService<
           status: 'open' as LedgerStatus,
           created_by: createdBy,
         },
-      })
-    },
-
-    /** Record a payment against a row, updating paid_amount + derived status. */
-    settle: async (row: Row, payment: number) => {
-      const paid = Number(row.paid_amount) + payment
-      return runWrite({
-        label: `Payment ${payment} on ${config.table.slice(0, -1)}`,
-        kind: 'update',
-        table: config.table,
-        values: { paid_amount: paid, status: deriveStatus(Number(row.amount), paid) },
-        match: { id: row.id },
       })
     },
 

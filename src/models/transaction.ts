@@ -4,12 +4,14 @@ import {
   expenseTypeSchema,
   incomeSourceSchema,
   transactionTypeSchema,
+  voucherTypeSchema,
   type CashAccount,
   type ExpenseType,
   type IncomeSource,
   type TransactionType,
 } from './enums'
 import { FARM_BRANCH, branchSlugSchema, farmSectionSlugSchema } from './branch'
+import type { Voucher } from './voucher'
 
 /**
  * Transactions ledger — everything employees encode (build spec §7). Joined
@@ -76,3 +78,65 @@ export const transactionSchema = z
     message: 'Select an expense type',
   })
 export type TransactionInput = z.infer<typeof transactionSchema>
+
+/**
+ * Purchases & Expenses ("disbursements") — recorded through their dedicated
+ * modules and always paired with an auto-generated pending voucher. The payee
+ * is a supplier or a free-typed name; the voucher type follows the payment
+ * account, and is chosen manually for on-credit records (no account).
+ */
+const disbursementBase = z.object({
+  branch: branchSlugSchema,
+  farm_section: farmSectionSlugSchema.nullable().optional(),
+  txn_date: isoDateField,
+  amount: amountField,
+  cash_account: cashAccountSchema.nullable().optional(),
+  voucher_type: voucherTypeSchema.nullable().optional(),
+  supplier_id: z.string().uuid().nullable().optional(),
+  payee: z.string().trim().max(160).nullable().optional(),
+  reference_number: z.string().trim().max(80).nullable().optional(),
+  description: z.string().trim().max(500).nullable().optional(),
+})
+
+/** Shared cross-field rules for both disbursement schemas. */
+function withDisbursementRules<T extends typeof disbursementBase>(schema: T) {
+  return schema
+    .refine((v) => !v.farm_section || v.branch === FARM_BRANCH, {
+      path: ['farm_section'],
+      message: 'Farm section only applies to the Farm branch',
+    })
+    .refine((v) => !!v.supplier_id || !!v.payee?.trim(), {
+      path: ['payee'],
+      message: 'Select a supplier or enter a payee for the voucher',
+    })
+    .refine((v) => !!v.cash_account || !!v.voucher_type, {
+      path: ['voucher_type'],
+      message: 'Select check or cash (no payment account chosen)',
+    })
+}
+
+export const purchaseSchema = withDisbursementRules(disbursementBase)
+export const expenseSchema = withDisbursementRules(
+  disbursementBase.extend({
+    expense_type: expenseTypeSchema,
+  }) as unknown as typeof disbursementBase,
+)
+
+/** One form-value shape serves both modules (expense_type unused on purchases). */
+export type DisbursementInput = z.infer<typeof disbursementBase> & {
+  expense_type?: ExpenseType | null
+}
+
+/** A purchase/expense row joined with its auto-generated voucher. */
+export interface Disbursement extends Transaction {
+  voucher: Voucher | null
+}
+
+/** One audit entry: who edited a transaction, when, and what changed. */
+export interface TransactionAudit {
+  id: string
+  transaction_id: string
+  edited_by: string | null
+  edited_at: string
+  changes: Record<string, { old: unknown; new: unknown }>
+}

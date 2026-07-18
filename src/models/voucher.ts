@@ -21,6 +21,11 @@ export interface Voucher {
   approved_by: string | null
   approved_at: string | null
   created_at: string
+  /** Source purchase/expense when auto-generated (null = manual voucher). */
+  transaction_id: string | null
+  supplier_id: string | null
+  /** Numbering category code (PUR, ELC, …, GEN for manual). Set server-side. */
+  category: string
 }
 
 const amountField = z.coerce

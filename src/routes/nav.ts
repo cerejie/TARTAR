@@ -5,9 +5,11 @@ import {
   BankOutlined,
   DashboardOutlined,
   FileTextOutlined,
+  ShoppingCartOutlined,
   SolutionOutlined,
   SwapOutlined,
   TeamOutlined,
+  WalletOutlined,
 } from '@ant-design/icons'
 import { createElement } from 'react'
 import type { Permissions } from '../hooks/usePermissions'
@@ -16,6 +18,8 @@ import type { Permissions } from '../hooks/usePermissions'
 export type AppPath =
   | '/'
   | '/transactions'
+  | '/purchases'
+  | '/expenses'
   | '/receivables'
   | '/payables'
   | '/vouchers'
@@ -35,6 +39,8 @@ interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { key: '/', label: 'Dashboard', icon: createElement(DashboardOutlined), can: 'viewDashboard' },
   { key: '/transactions', label: 'Transactions', icon: createElement(SwapOutlined), can: 'viewReminders' },
+  { key: '/purchases', label: 'Purchases', icon: createElement(ShoppingCartOutlined), can: 'viewReminders' },
+  { key: '/expenses', label: 'Expenses', icon: createElement(WalletOutlined), can: 'viewReminders' },
   { key: '/receivables', label: 'Receivables', icon: createElement(SolutionOutlined), can: 'viewReminders' },
   { key: '/payables', label: 'Payables', icon: createElement(AuditOutlined), can: 'viewReminders' },
   { key: '/vouchers', label: 'Vouchers', icon: createElement(FileTextOutlined), can: 'createVouchers' },

@@ -5,11 +5,11 @@ import type { DefaultValues } from 'react-hook-form'
 import { appLayoutRoute } from './app.route'
 import { LedgerManager } from '../components/ledger/LedgerManager'
 import { CustomerLedgerModal, CUSTOMER_LEDGER_MODAL } from '../components/ledger/CustomerLedgerModal'
-import { CustomerLedgerView } from '../components/ledger/CustomerLedgerView'
 import type { FieldConfig } from '../components/form/FormField'
 import { useBranches } from '../hooks/useReferenceData'
 import { useUiStore } from '../stores/ui.store'
 import { receivablesService } from '../services/ledger.service'
+import * as paymentsService from '../services/payments.service'
 import { receivableSchema, type BranchSlug, type Receivable, type ReceivableInput } from '../models'
 import { todayIso } from '../utils/format'
 
@@ -22,7 +22,6 @@ export const receivablesRoute = createRoute({
 
 function ReceivablesPage() {
   const { branches } = useBranches()
-  const ledgerCustomer = useUiStore((s) => s.ledgerCustomer)
   const openModal = useUiStore((s) => s.openModal)
 
   const fields: FieldConfig<ReceivableInput>[] = [
@@ -41,10 +40,6 @@ function ReceivablesPage() {
     reference_number: '',
   }
 
-  // A selected customer swaps the list for that customer's ledger (build spec —
-  // Customer Ledger). "Back to Receivables" clears it.
-  if (ledgerCustomer) return <CustomerLedgerView />
-
   return (
     <>
       <LedgerManager<Receivable, ReceivableInput>
@@ -55,7 +50,19 @@ function ReceivablesPage() {
         nameOf={(r) => r.customer_name}
         list={receivablesService.list}
         create={receivablesService.create}
-        settle={receivablesService.settle}
+        settle={(row, amount, createdBy) =>
+          paymentsService.recordPayment(
+            'receivable',
+            {
+              partyId: row.customer_id,
+              partyName: row.customer_name,
+              paidAt: todayIso(),
+              referenceNumber: null,
+              allocations: [{ ledgerId: row.id, amount }],
+            },
+            createdBy,
+          )
+        }
         remove={receivablesService.remove}
         schema={receivableSchema}
         fields={fields}

@@ -1,33 +1,44 @@
-import { Button, Col, Row, Tag } from 'antd'
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { Button, Col, Flex, Row, Tag, Tooltip, Typography } from 'antd'
+import { ArrowLeftOutlined, DollarOutlined, PrinterOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
-import { PageHeader } from '../PageHeader'
-import { SectionCard } from '../SectionCard'
 import { StatCard } from '../StatCard'
 import { DataTable } from '../DataTable'
 import { LedgerFilterBar } from '../LedgerFilterBar'
-import { STATUS_COLOR } from './LedgerManager'
+import { RequirePermission } from '../RequirePermission'
+import { PaymentsPanel } from '../payments/PaymentsPanel'
+import { PaymentAllocationModal } from './PaymentAllocationModal'
 import { useQuery } from '../../hooks/useQuery'
+import { useMutation } from '../../hooks/useMutation'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useBranches } from '../../hooks/useReferenceData'
 import { useBranchScope, scopedFilters } from '../../hooks/useBranchScope'
-import { useUiStore } from '../../stores/ui.store'
+import { useUiStore, selectModal } from '../../stores/ui.store'
+import { useAuthStore } from '../../stores/auth.store'
 import { receivablesService } from '../../services/ledger.service'
+import * as paymentsService from '../../services/payments.service'
 import * as usersService from '../../services/users.service'
-import { labels, type Receivable } from '../../models'
+import { isLedgerOverdue, labels, tagColors, type Receivable } from '../../models'
 import { formatDate, formatMoney } from '../../utils/format'
+import { printStatement } from '../../utils/print'
 
 /**
- * Customer Ledger — every receivable of one customer on the Receivables page
- * (opened via the picker modal, closed with "Back to Receivables"). Summary
- * figures are computed from the receivable rows, never stored (build spec §9
- * lifecycle unchanged; this is a read-only view over the same data).
+ * Customer Ledger — the detail pane inside the Customer Ledger modal. Shows the
+ * selected customer's summary + every receivable, with pane-scoped filters.
+ * Employees tick receivables and record one payment across them (pending
+ * manager verification); the statement button prints the full ledger.
  */
+const PAY_MODAL = 'receivable-ledger-payment'
+
 export function CustomerLedgerView() {
   const customer = useUiStore((s) => s.ledgerCustomer)
-  const setLedgerCustomer = useUiStore((s) => s.setLedgerCustomer)
-  const filters = useUiStore((s) => s.filters)
+  const closeLedgerDetail = useUiStore((s) => s.closeLedgerDetail)
+  const filters = useUiStore((s) => s.customerLedgerFilters)
+  const selection = useUiStore((s) => s.ledgerSelection)
+  const setSelection = useUiStore((s) => s.setLedgerSelection)
+  const openModal = useUiStore((s) => s.openModal)
+  const closeModal = useUiStore((s) => s.closeModal)
+  const payModal = useUiStore(selectModal(PAY_MODAL))
+  const createdBy = useAuthStore((s) => s.user?.id ?? null)
   const permissions = usePermissions()
   const { branches } = useBranches()
   const { branch: scopeBranch } = useBranchScope()
@@ -53,20 +64,51 @@ export function CustomerLedgerView() {
     { enabled: !!customer?.customerId },
   )
 
+  // Same key as the payments panel below, so the statement prints from cache.
+  const paymentsKey = `payments:receivable:${ledgerId}`
+  const payments = useQuery(
+    paymentsKey,
+    () =>
+      paymentsService.listPayments(
+        'receivable',
+        customer?.customerId
+          ? { partyId: customer.customerId }
+          : { partyName: customer?.customerName ?? '' },
+      ),
+    { enabled: !!customer },
+  )
+
   // Who encoded each row — manager-gated, same as the Transactions page (RLS
   // only lets managers read other users' rows).
   const users = useQuery('users', () => usersService.listUsers(), { enabled: permissions.isManager })
   const userById = new Map((users.data ?? []).map((u) => [u.id, u]))
 
+  const rows = list.data ?? []
+  const selectedRows = rows.filter((r) => selection.includes(r.id) && r.status !== 'paid')
+
+  const recordPayment = useMutation(
+    (input: paymentsService.RecordPaymentInput) =>
+      paymentsService.recordPayment('receivable', input, createdBy),
+    {
+      successMessage: permissions.isManager
+        ? 'Payment recorded'
+        : 'Payment recorded — pending verification',
+      invalidate: ['receivables', 'payments'],
+      onSuccess: () => {
+        closeModal(PAY_MODAL)
+        setSelection([])
+      },
+    },
+  )
+
   if (!customer) return null
 
-  const rows = list.data ?? []
   const branchName = (slug: string) => branches.find((b) => b.slug === slug)?.name ?? slug
-  const isOverdue = (r: Receivable) => r.status !== 'paid' && r.due_date < dayjs().format('YYYY-MM-DD')
+  const isOverdue = isLedgerOverdue
 
   const columns: ColumnsType<Receivable> = [
-    { title: 'Date', dataIndex: 'created_at', width: 130, render: (v: string) => formatDate(v) },
-    { title: 'Due date', dataIndex: 'due_date', width: 130, render: (v: string) => formatDate(v) },
+    { title: 'Date', dataIndex: 'created_at', width: 120, render: (v: string) => formatDate(v) },
+    { title: 'Due date', dataIndex: 'due_date', width: 120, render: (v: string) => formatDate(v) },
     { title: 'Branch', dataIndex: 'branch', render: branchName },
     { title: 'Reference', dataIndex: 'reference_number', render: (v: string | null) => v || '—' },
     { title: 'Amount', dataIndex: 'amount', align: 'right', render: (v: number) => formatMoney(v) },
@@ -84,7 +126,7 @@ export function CustomerLedgerView() {
         isOverdue(r) ? (
           <Tag color="red">Overdue</Tag>
         ) : (
-          <Tag color={STATUS_COLOR[s]}>{labels.ledgerStatus[s]}</Tag>
+          <Tag color={tagColors.ledgerStatus[s]}>{labels.ledgerStatus[s]}</Tag>
         ),
     },
     ...(permissions.isManager
@@ -103,15 +145,40 @@ export function CustomerLedgerView() {
 
   return (
     <>
-      <PageHeader
-        title={customer.customerName}
-        subtitle="Customer ledger — all receivable transactions"
-        extra={
-          <Button icon={<ArrowLeftOutlined />} onClick={() => setLedgerCustomer(null)}>
-            Back to Receivables
+      <Flex className="tartar-ledger-head" align="center" gap="middle" wrap justify="space-between">
+        <Flex align="center" gap="middle">
+          <Button icon={<ArrowLeftOutlined />} onClick={closeLedgerDetail}>
+            Back to customers
           </Button>
-        }
-      />
+          <Typography.Title level={4} className="tartar-card-title">
+            {customer.customerName}
+          </Typography.Title>
+        </Flex>
+        <Flex align="center" gap="small">
+          <Button
+            icon={<PrinterOutlined />}
+            onClick={() =>
+              printStatement(customer, summary, rows, payments.data ?? [], branchName)
+            }
+          >
+            Print statement
+          </Button>
+          <RequirePermission can="encodeTransactions" fallback={null}>
+            <Tooltip title={selectedRows.length ? undefined : 'Tick the receivables being paid first'}>
+              <span>
+                <Button
+                  type="primary"
+                  icon={<DollarOutlined />}
+                  disabled={selectedRows.length === 0}
+                  onClick={() => openModal(PAY_MODAL)}
+                >
+                  Record payment
+                </Button>
+              </span>
+            </Tooltip>
+          </RequirePermission>
+        </Flex>
+      </Flex>
 
       <Row gutter={[16, 16]} className="tartar-stat-grid">
         <Col xs={12} md={6}>
@@ -148,16 +215,39 @@ export function CustomerLedgerView() {
         </Col>
       </Row>
 
-      <LedgerFilterBar showStatus />
+      <LedgerFilterBar scope="customer-ledger" showBranch={false} showStatus />
 
-      <SectionCard title="Ledger" subtitle="Matching the current filters" flush>
-        <DataTable<Receivable>
-          columns={columns}
-          data={rows}
-          loading={list.loading}
-          emptyText="No receivables match the filters"
-        />
-      </SectionCard>
+      <DataTable<Receivable>
+        columns={columns}
+        data={rows}
+        loading={list.loading}
+        pageSize={10}
+        emptyText="No receivables match the filters"
+        rowClassName={(r) => (isOverdue(r) ? 'tartar-row-overdue' : '')}
+        rowSelection={{
+          selectedRowKeys: selection,
+          onChange: (keys) => setSelection(keys as string[]),
+          getCheckboxProps: (r) => ({ disabled: r.status === 'paid' }),
+        }}
+      />
+
+      <Typography.Title level={5} className="tartar-ledger-section">
+        Payments
+      </Typography.Title>
+      <PaymentsPanel
+        kind="receivable"
+        party={{ partyId: customer.customerId, partyName: customer.customerName }}
+        compact
+      />
+
+      <PaymentAllocationModal
+        open={payModal.open}
+        customer={customer}
+        rows={selectedRows}
+        submitting={recordPayment.loading}
+        onSubmit={(input) => void recordPayment.mutate(input)}
+        onClose={() => closeModal(PAY_MODAL)}
+      />
     </>
   )
 }

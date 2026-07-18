@@ -963,6 +963,61 @@ globalStyle('.tartar-filter-status', {
   minWidth: '140px',
 })
 
+/* --- Customer Ledger modal: two panes sliding horizontally ----------------- */
+globalStyle('.tartar-slide-panes', {
+  overflow: 'hidden',
+})
+
+globalStyle('.tartar-slide-track', {
+  display: 'flex',
+  width: '200%',
+  alignItems: 'flex-start',
+  transition: 'transform 0.3s ease',
+  '@media': {
+    '(prefers-reduced-motion: reduce)': { transition: 'none' },
+  },
+})
+
+globalStyle('.tartar-slide-track.tartar-slide-detail', {
+  transform: 'translateX(-50%)',
+})
+
+globalStyle('.tartar-slide-pane', {
+  width: '50%',
+  flexShrink: 0,
+  minWidth: 0,
+})
+
+globalStyle('.tartar-ledger-head', {
+  marginBottom: vars.space.md,
+})
+
+/* --- Transaction edit-history modal ---------------------------------------- */
+globalStyle('.tartar-audit-entry', {
+  marginBottom: vars.space.md,
+})
+
+globalStyle('.tartar-audit-changes', {
+  margin: `${vars.space.xs} 0 0`,
+  paddingLeft: vars.space.lg,
+})
+
+globalStyle('.tartar-payment-total', {
+  marginTop: vars.space.md,
+  textAlign: 'right',
+})
+
+/* Section heading inside the customer-ledger pane (payments history). */
+globalStyle('.tartar-ledger-section', {
+  marginTop: vars.space.lg,
+  marginBottom: vars.space.sm,
+})
+
+/* Overdue rows glow red across every ledger table (client decision 9). */
+globalStyle('.tartar-table .tartar-row-overdue > td', {
+  background: 'rgba(255, 77, 79, 0.07)',
+})
+
 globalStyle('.tartar-filter-amount', {
   width: '110px',
 })

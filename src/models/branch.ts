@@ -24,6 +24,9 @@ export interface Branch {
   sort: number
   /** false = archived: hidden from selectors but kept for historical rows. */
   active: boolean
+  /** 3-letter voucher numbering prefix (e.g. LGC). Changing it only affects
+   *  newly generated voucher numbers — history keeps its original prefix. */
+  voucher_prefix: string
 }
 
 /** Create/edit form for a branch. The slug is derived from the name and is
@@ -31,6 +34,11 @@ export interface Branch {
 export const branchSchema = z.object({
   name: z.string().trim().min(2, 'Enter a branch name').max(80),
   sort: z.number({ error: 'Enter a number' }).int('Whole number only').min(0).max(999),
+  voucher_prefix: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z]{3}$/, '3 letters, e.g. LGC'),
 })
 export type BranchInput = z.infer<typeof branchSchema>
 

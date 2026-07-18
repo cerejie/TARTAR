@@ -67,6 +67,15 @@ export const ledgerStatusValues = ['open', 'partial', 'paid'] as const
 export const ledgerStatusSchema = z.enum(ledgerStatusValues)
 export type LedgerStatus = z.infer<typeof ledgerStatusSchema>
 
+// --- Ledger payments (verification workflow) ---------------------------------
+export const paymentKindValues = ['receivable', 'payable'] as const
+export const paymentKindSchema = z.enum(paymentKindValues)
+export type PaymentKind = z.infer<typeof paymentKindSchema>
+
+export const paymentStatusValues = ['pending', 'verified', 'rejected'] as const
+export const paymentStatusSchema = z.enum(paymentStatusValues)
+export type PaymentStatus = z.infer<typeof paymentStatusSchema>
+
 /**
  * Human-friendly labels for enum values. One map per enum keeps every UI label
  * consistent (tables, selects, tags) without scattering switch statements.
@@ -123,6 +132,45 @@ export const labels = {
     partial: 'Partial',
     paid: 'Paid',
   } satisfies Record<LedgerStatus, string>,
+  // Client terminology (2026-07): customer payments are VERIFIED, supplier
+  // payments are APPROVED — same workflow, different label per side.
+  receivablePaymentStatus: {
+    pending: 'Pending verification',
+    verified: 'Verified',
+    rejected: 'Rejected',
+  } satisfies Record<PaymentStatus, string>,
+  payablePaymentStatus: {
+    pending: 'Pending approval',
+    verified: 'Approved',
+    rejected: 'Rejected',
+  } satisfies Record<PaymentStatus, string>,
+} as const
+
+/** Status labels for a payment, honoring the per-side terminology. */
+export function paymentStatusLabels(kind: PaymentKind): Record<PaymentStatus, string> {
+  return kind === 'receivable' ? labels.receivablePaymentStatus : labels.payablePaymentStatus
+}
+
+/**
+ * Shared antd Tag colors per enum, mirroring `labels` — one source so every
+ * page renders a given status identically.
+ */
+export const tagColors = {
+  ledgerStatus: {
+    open: 'default',
+    partial: 'gold',
+    paid: 'green',
+  } satisfies Record<LedgerStatus, string>,
+  voucherStatus: {
+    pending: 'gold',
+    approved: 'green',
+    rejected: 'red',
+  } satisfies Record<VoucherStatus, string>,
+  paymentStatus: {
+    pending: 'gold',
+    verified: 'green',
+    rejected: 'red',
+  } satisfies Record<PaymentStatus, string>,
 } as const
 
 /** Build antd <Select> options ([{value,label}]) from a values array + label map. */
