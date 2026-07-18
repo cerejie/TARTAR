@@ -62,6 +62,24 @@ export const voucherStatusValues = ['pending', 'approved', 'rejected'] as const
 export const voucherStatusSchema = z.enum(voucherStatusValues)
 export type VoucherStatus = z.infer<typeof voucherStatusSchema>
 
+/**
+ * What a MANUAL voucher is for (client decision 2026-07-19). Replaces the old
+ * free-text purpose: the creator picks expense or purchase, and an approved
+ * purchase voucher becomes a payable (DB trigger, see the voucher_payables
+ * migration). Auto-generated vouchers derive the same thing from their source
+ * transaction, so this lives in the shared `category` code rather than a new
+ * column.
+ */
+export const voucherKindValues = ['expense', 'purchase'] as const
+export const voucherKindSchema = z.enum(voucherKindValues)
+export type VoucherKind = z.infer<typeof voucherKindSchema>
+
+/** Manual-voucher kind → numbering category code (see app.voucher_category). */
+export const voucherKindCategory = {
+  expense: 'EXP',
+  purchase: 'PUR',
+} as const satisfies Record<VoucherKind, string>
+
 // --- Receivable / payable lifecycle -----------------------------------------
 export const ledgerStatusValues = ['open', 'partial', 'paid'] as const
 export const ledgerStatusSchema = z.enum(ledgerStatusValues)
@@ -127,6 +145,10 @@ export const labels = {
     approved: 'Approved',
     rejected: 'Rejected',
   } satisfies Record<VoucherStatus, string>,
+  voucherKind: {
+    expense: 'Expense',
+    purchase: 'Purchase',
+  } satisfies Record<VoucherKind, string>,
   ledgerStatus: {
     open: 'Open',
     partial: 'Partial',

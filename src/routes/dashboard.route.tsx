@@ -46,6 +46,10 @@ function DashboardPage() {
         subtitle={branchName ? `Standing for ${branchName}` : 'Company-wide standing across all branches'}
       />
 
+      {/* Alerts lead the page (client decision, 2026-07-19): anything overdue or
+          near-due needs attention before the standing figures are read. */}
+      <DueAlerts data={alerts.data} loading={alerts.loading} />
+
       <Row gutter={[16, 16]} className="tartar-stat-grid">
         <StatTile span={6} title="Current Cash" value={s?.currentCash} loading={summary.loading} tone="brand" />
         <StatTile span={6} title="Bank Balance" value={s?.bankBalance} loading={summary.loading} />
@@ -76,8 +80,6 @@ function DashboardPage() {
           <Empty description="No sales recorded yet" />
         )}
       </SectionCard>
-
-      <DueAlerts data={alerts.data} loading={alerts.loading} />
     </>
   )
 }
