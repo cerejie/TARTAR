@@ -11,6 +11,15 @@ import type { CustomerLedgerKey } from '../models'
 interface UiState {
   siderCollapsed: boolean
   toggleSider: () => void
+  setSiderCollapsed: (collapsed: boolean) => void
+
+  /**
+   * True below the sider's responsive breakpoint (antd `lg`, 992px). While
+   * broken the sider overlays the page as a drawer instead of sitting in flow,
+   * so crossing the breakpoint also snaps it closed.
+   */
+  siderBroken: boolean
+  setSiderBroken: (broken: boolean) => void
 
   /** Global branch filter (null = all branches the user may see). */
   branchFilter: string | null
@@ -63,6 +72,10 @@ export const useUiStore = create<UiState>()(
     (set) => ({
       siderCollapsed: false,
       toggleSider: () => set((s) => ({ siderCollapsed: !s.siderCollapsed })),
+      setSiderCollapsed: (collapsed) => set({ siderCollapsed: collapsed }),
+
+      siderBroken: false,
+      setSiderBroken: (broken) => set({ siderBroken: broken, siderCollapsed: broken }),
 
       branchFilter: null,
       setBranchFilter: (branch) => set({ branchFilter: branch }),

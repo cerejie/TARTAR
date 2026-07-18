@@ -22,6 +22,10 @@ function RootLayout() {
           colorBgContainer: colors.surface,
           colorText: colors.text,
           colorTextSecondary: colors.textMuted,
+          // Typography type="secondary" reads colorTextDescription, not
+          // colorTextSecondary — left alone it derives a low-alpha espresso
+          // (~2.6:1 on white) instead of the palette's muted brown.
+          colorTextDescription: colors.textMuted,
           colorBorder: colors.border,
           colorBorderSecondary: colors.borderSubtle,
           fontFamily: fontBody,
@@ -38,13 +42,17 @@ function RootLayout() {
           Button: { controlHeight: 40, paddingInline: 18, fontWeight: 500 },
           Card: { borderRadiusLG: 16 },
           Menu: {
-            darkItemBg: colors.brandDark,
-            darkSubMenuItemBg: colors.brandDark,
+            darkItemBg: 'transparent',
+            darkSubMenuItemBg: 'transparent',
             darkItemColor: colors.accent,
-            darkItemHoverBg: colors.brand,
-            darkItemHoverColor: colors.surface,
-            darkItemSelectedBg: colors.brand,
-            darkItemSelectedColor: colors.surface,
+            // Hover is a translucent wash, NOT the selected brown — when the two
+            // states share a colour the nav gives no feedback about where you are.
+            darkItemHoverBg: 'rgba(255, 242, 223, 0.09)',
+            darkItemHoverColor: colors.bg,
+            // Inverted selection: a light cream pill with espresso text pops
+            // against the dark sider far more than another shade of brown.
+            darkItemSelectedBg: colors.bg,
+            darkItemSelectedColor: colors.brandDark,
           },
         },
       }}

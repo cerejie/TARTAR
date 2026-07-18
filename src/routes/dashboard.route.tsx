@@ -1,4 +1,5 @@
-import { createRoute, redirect } from '@tanstack/react-router'
+import { Fragment } from 'react'
+import { createRoute, Link, redirect } from '@tanstack/react-router'
 import { Alert, Col, Empty, Row, Space, Spin, Typography } from 'antd'
 import { Column } from '@ant-design/charts'
 import { appLayoutRoute } from './app.route'
@@ -63,7 +64,10 @@ function DashboardPage() {
 
       <SectionCard title="Daily Sales" subtitle="Last 30 days">
         {daily.loading ? (
-          <Spin />
+          // Same height as the chart it becomes, so the card doesn't jump.
+          <div className="tartar-chart-loading">
+            <Spin />
+          </div>
         ) : series.length ? (
           <Column
             data={series}
@@ -71,9 +75,21 @@ function DashboardPage() {
             yField="total"
             height={300}
             // Charts sit outside antd's token system, so the brand colour has to
-            // be handed to them explicitly or they fall back to antd blue.
+            // be handed to them explicitly or they fall back to antd blue — and
+            // the axes likewise, or their labels/grid stay the library's grey.
             style={{ fill: colors.brand, radiusTopLeft: 4, radiusTopRight: 4 }}
-            axis={{ x: { labelFormatter: (v: string) => v.slice(5) } }}
+            axis={{
+              x: {
+                labelFormatter: (v: string) => v.slice(5),
+                labelFill: colors.textMuted,
+                line: false,
+              },
+              y: {
+                labelFill: colors.textMuted,
+                gridStroke: colors.border,
+                gridStrokeOpacity: 0.35,
+              },
+            }}
             tooltip={{ items: [{ channel: 'y', valueFormatter: (v: number) => formatMoney(v) }] }}
           />
         ) : (
@@ -98,54 +114,90 @@ function StatTile(props: {
   )
 }
 
+/**
+ * At most this many alerts render per category — beyond that a "view all" link
+ * hands off to the ledger page. Without the cap a bad month turns the dashboard
+ * into a wall of red before any standing figure is visible.
+ */
+const ALERT_CAP = 3
+
+interface AlertGroup {
+  key: string
+  severity: 'error' | 'warning'
+  to: '/receivables' | '/payables'
+  items: { id: string; message: string; description: string }[]
+}
+
 function DueAlerts({ data, loading }: { data?: dashboardService.DueAlerts; loading: boolean }) {
   if (loading || !data) return null
-  const { overdueReceivables, overduePayables, nearDueReceivables, nearDuePayables } = data
-  const nothing =
-    !overdueReceivables.length &&
-    !overduePayables.length &&
-    !nearDueReceivables.length &&
-    !nearDuePayables.length
-  if (nothing) return null
+
+  const groups: AlertGroup[] = [
+    {
+      key: 'overdue-receivables',
+      severity: 'error',
+      to: '/receivables',
+      items: data.overdueReceivables.map((r) => ({
+        id: r.id,
+        message: `Overdue receivable — ${r.customer_name}`,
+        description: `${formatMoney(r.amount - r.paid_amount)} was due ${formatDate(r.due_date)}`,
+      })),
+    },
+    {
+      key: 'overdue-payables',
+      severity: 'error',
+      to: '/payables',
+      items: data.overduePayables.map((p) => ({
+        id: p.id,
+        message: `Overdue payable — ${p.supplier_name}`,
+        description: `${formatMoney(p.amount - p.paid_amount)} was due ${formatDate(p.due_date)}`,
+      })),
+    },
+    {
+      key: 'near-due-receivables',
+      severity: 'warning',
+      to: '/receivables',
+      items: data.nearDueReceivables.map((r) => ({
+        id: r.id,
+        message: `Receivable due soon — ${r.customer_name}`,
+        description: `${formatMoney(r.amount - r.paid_amount)} due ${formatDate(r.due_date)}`,
+      })),
+    },
+    {
+      key: 'near-due-payables',
+      severity: 'warning',
+      to: '/payables',
+      items: data.nearDuePayables.map((p) => ({
+        id: p.id,
+        message: `Payable due soon — ${p.supplier_name}`,
+        description: `${formatMoney(p.amount - p.paid_amount)} due ${formatDate(p.due_date)}`,
+      })),
+    },
+  ]
+  if (groups.every((g) => !g.items.length)) return null
 
   return (
     <SectionCard title="Notifications & Alerts" subtitle="Overdue and near-due items needing attention">
       <Space direction="vertical" className="tartar-block" size="small">
-        {overdueReceivables.map((r) => (
-          <Alert
-            key={r.id}
-            type="error"
-            showIcon
-            message={`Overdue receivable — ${r.customer_name}`}
-            description={`${formatMoney(r.amount - r.paid_amount)} was due ${formatDate(r.due_date)}`}
-          />
-        ))}
-        {overduePayables.map((p) => (
-          <Alert
-            key={p.id}
-            type="error"
-            showIcon
-            message={`Overdue payable — ${p.supplier_name}`}
-            description={`${formatMoney(p.amount - p.paid_amount)} was due ${formatDate(p.due_date)}`}
-          />
-        ))}
-        {nearDueReceivables.map((r) => (
-          <Alert
-            key={r.id}
-            type="warning"
-            showIcon
-            message={`Receivable due soon — ${r.customer_name}`}
-            description={`${formatMoney(r.amount - r.paid_amount)} due ${formatDate(r.due_date)}`}
-          />
-        ))}
-        {nearDuePayables.map((p) => (
-          <Alert
-            key={p.id}
-            type="warning"
-            showIcon
-            message={`Payable due soon — ${p.supplier_name}`}
-            description={`${formatMoney(p.amount - p.paid_amount)} due ${formatDate(p.due_date)}`}
-          />
+        {groups.map((g) => (
+          <Fragment key={g.key}>
+            {g.items.slice(0, ALERT_CAP).map((item) => (
+              <Alert
+                key={item.id}
+                type={g.severity}
+                showIcon
+                message={item.message}
+                description={item.description}
+              />
+            ))}
+            {g.items.length > ALERT_CAP ? (
+              <Typography.Text type="secondary">
+                <Link to={g.to}>
+                  +{g.items.length - ALERT_CAP} more — view all in{' '}
+                  {g.to === '/receivables' ? 'Receivables' : 'Payables'}
+                </Link>
+              </Typography.Text>
+            ) : null}
+          </Fragment>
         ))}
       </Space>
       <Typography.Text type="secondary" className="tartar-alerts-hint">

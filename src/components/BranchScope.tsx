@@ -26,23 +26,30 @@ export function BranchScope() {
   }
 
   return (
-    <Dropdown menu={menu} trigger={['click']} placement="bottomLeft">
-      <Tooltip
-        placement="right"
-        title={branch ? `Branch view: ${branchName}` : 'Branch view: all branches'}
-      >
-        <button
-          type="button"
-          className={branch ? 'tartar-branch-scope tartar-branch-scope-active' : 'tartar-branch-scope'}
-          aria-label="Choose which branch to view"
+    // Fieldset-style: the "Current Branch" caption floats on the box's border.
+    // Decorative — the button's aria-label already names the control's purpose.
+    <div className="tartar-branch-field">
+      <span className="tartar-branch-field-label" aria-hidden="true">
+        Current Branch
+      </span>
+      <Dropdown menu={menu} trigger={['click']} placement="bottomLeft">
+        <Tooltip
+          placement="right"
+          title={branch ? `Branch view: ${branchName}` : 'Branch view: all branches'}
         >
-          <Badge dot={!!branch} color="gold" offset={[2, 2]}>
-            <ShopOutlined className="tartar-branch-scope-icon" />
-          </Badge>
-          <span className="tartar-branch-scope-label">{branchName ?? 'All branches'}</span>
-          <CaretDownOutlined className="tartar-branch-scope-caret" />
-        </button>
-      </Tooltip>
-    </Dropdown>
+          <button
+            type="button"
+            className={branch ? 'tartar-branch-scope tartar-branch-scope-active' : 'tartar-branch-scope'}
+            aria-label="Choose which branch to view"
+          >
+            <Badge dot={!!branch} color="gold" offset={[2, 2]}>
+              <ShopOutlined className="tartar-branch-scope-icon" />
+            </Badge>
+            <span className="tartar-branch-scope-label">{branchName ?? 'All branches'}</span>
+            <CaretDownOutlined className="tartar-branch-scope-caret" />
+          </button>
+        </Tooltip>
+      </Dropdown>
+    </div>
   )
 }
