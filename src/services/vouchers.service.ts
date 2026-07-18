@@ -1,6 +1,6 @@
 import { supabase, toError } from './supabase'
 import { runWrite } from '../stores/sync.store'
-import type { Voucher, VoucherInput } from '../models'
+import { voucherKindCategory, type Voucher, type VoucherInput } from '../models'
 
 /**
  * Voucher approval workflow (build spec §16): Employee creates a `pending`
@@ -19,7 +19,13 @@ export async function listVouchers(
   return (data ?? []) as Voucher[]
 }
 
+/**
+ * Manual voucher. The chosen kind becomes the numbering category; a purchase
+ * also carries supplier + due date, which the DB turns into a payable when a
+ * manager approves it (client decision 2026-07-19).
+ */
 export async function createVoucher(input: VoucherInput, createdBy: string | null) {
+  const isPurchase = input.kind === 'purchase'
   return runWrite({
     label: `Voucher for ${input.payee} · ${input.amount}`,
     kind: 'insert',
@@ -29,7 +35,11 @@ export async function createVoucher(input: VoucherInput, createdBy: string | nul
       branch: input.branch,
       payee: input.payee,
       amount: input.amount,
-      purpose: input.purpose ?? null,
+      // Manual vouchers no longer take a free-text purpose — `category` is it.
+      purpose: null,
+      category: voucherKindCategory[input.kind],
+      supplier_id: isPurchase ? (input.supplier_id ?? null) : null,
+      due_date: isPurchase ? (input.due_date ?? null) : null,
       status: 'pending',
       printed: false,
       created_by: createdBy,

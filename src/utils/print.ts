@@ -5,7 +5,7 @@ import type {
   Receivable,
   Voucher,
 } from '../models'
-import { labels, paymentStatusLabels } from '../models'
+import { labels, paymentStatusLabels, voucherPurpose } from '../models'
 import { formatDate, formatMoney, formatDateTime } from './format'
 import { colors, fontBody } from '../styles/theme.css'
 
@@ -24,7 +24,7 @@ export function printVoucher(v: Voucher, branchName: string): void {
     ['Branch', branchName],
     ['Payee', v.payee],
     ['Amount', formatMoney(v.amount)],
-    ['Purpose', v.purpose ?? '—'],
+    ['Purpose', voucherPurpose(v)],
     ['Status', labels.voucherStatus[v.status]],
     ['Approved at', formatDateTime(v.approved_at)],
   ]
