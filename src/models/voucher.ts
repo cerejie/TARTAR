@@ -37,6 +37,10 @@ export interface Voucher {
   due_date: string | null
   /** Payable created by approval (null until an admin approves a purchase). */
   payable_id: string | null
+  /** The check itself (check vouchers only) — issuing bank, number, due date. */
+  check_bank: string | null
+  check_number: string | null
+  check_due_date: string | null
 }
 
 const amountField = z.coerce
@@ -50,7 +54,8 @@ const isoDateField = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a valid date')
  * Manual-voucher create form. Status/printed/voucher_no are server-side.
  * The old free-text purpose is gone (client decision 2026-07-19): the creator
  * picks expense or purchase, and a purchase also needs a due date because
- * approving it opens a payable.
+ * approving it opens a payable. A check voucher additionally describes the
+ * check being issued (client decision 2026-07-22).
  */
 export const voucherSchema = z
   .object({
@@ -61,6 +66,9 @@ export const voucherSchema = z
     amount: amountField,
     supplier_id: z.string().uuid().nullable().optional(),
     due_date: isoDateField.nullable().optional(),
+    check_bank: z.string().trim().max(120).nullable().optional(),
+    check_number: z.string().trim().max(60).nullable().optional(),
+    check_due_date: isoDateField.nullable().optional(),
   })
   .superRefine((v, ctx) => {
     if (v.kind === 'purchase' && !v.due_date) {
@@ -69,6 +77,17 @@ export const voucherSchema = z
         path: ['due_date'],
         message: 'A purchase needs a due date — approval creates a payable',
       })
+    }
+    if (v.type !== 'check') return
+    // The check details identify the instrument being handed over, so a check
+    // voucher is incomplete without them.
+    const required = [
+      ['check_bank', v.check_bank, 'Enter the issuing bank'],
+      ['check_number', v.check_number, 'Enter the check number'],
+      ['check_due_date', v.check_due_date, 'Enter the check due date'],
+    ] as const
+    for (const [path, value, message] of required) {
+      if (!value) ctx.addIssue({ code: 'custom', path: [path], message })
     }
   })
 export type VoucherInput = z.infer<typeof voucherSchema>

@@ -26,6 +26,9 @@ export async function listVouchers(
  */
 export async function createVoucher(input: VoucherInput, createdBy: string | null) {
   const isPurchase = input.kind === 'purchase'
+  // Check details describe the instrument, so a cash voucher must not keep the
+  // values a user typed before switching the type (the DB rejects them too).
+  const isCheck = input.type === 'check'
   return runWrite({
     label: `Voucher for ${input.payee} · ${input.amount}`,
     kind: 'insert',
@@ -40,6 +43,9 @@ export async function createVoucher(input: VoucherInput, createdBy: string | nul
       category: voucherKindCategory[input.kind],
       supplier_id: isPurchase ? (input.supplier_id ?? null) : null,
       due_date: isPurchase ? (input.due_date ?? null) : null,
+      check_bank: isCheck ? (input.check_bank ?? null) : null,
+      check_number: isCheck ? (input.check_number ?? null) : null,
+      check_due_date: isCheck ? (input.check_due_date ?? null) : null,
       status: 'pending',
       printed: false,
       created_by: createdBy,

@@ -66,8 +66,8 @@ export async function logout(): Promise<void> {
 }
 
 /**
- * Create an already-approved user (public.admin_create_user). superAdmin may
- * assign any role; Admin only non-admin roles — enforced server-side.
+ * Create an already-approved user (public.admin_create_user). Either manager
+ * may assign any role, admins included — enforced server-side.
  */
 export async function createUser(input: CreateUserInput): Promise<string> {
   const { data, error } = await supabase.rpc('admin_create_user', {

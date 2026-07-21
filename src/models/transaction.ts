@@ -31,6 +31,8 @@ export interface Transaction {
   income_source: IncomeSource | null
   /** Slug of an `expense_categories` row (master data) — for expenses. */
   expense_type: string | null
+  /** Credit term of a purchase (post-dated check / on account); null = settled. */
+  due_date: string | null
   created_by: string | null
   created_at: string
   // Optional joined labels (from `customers(name)` / `suppliers(name)` selects).
@@ -83,13 +85,16 @@ export type TransactionInput = z.infer<typeof transactionSchema>
  * Purchases & Expenses ("disbursements") — recorded through their dedicated
  * modules and always paired with an auto-generated pending voucher. The payee
  * is a supplier or a free-typed name; the voucher type follows the payment
- * account, and is chosen manually for on-credit records (no account).
+ * account, and is chosen manually for on-credit records (no account). A
+ * purchase may also carry a due date (60-day check, on account): approving its
+ * voucher then opens the payable so the debt carries over.
  */
 const disbursementBase = z.object({
   branch: branchSlugSchema,
   farm_section: farmSectionSlugSchema.nullable().optional(),
   txn_date: isoDateField,
   amount: amountField,
+  due_date: isoDateField.nullable().optional(),
   cash_account: cashAccountSchema.nullable().optional(),
   voucher_type: voucherTypeSchema.nullable().optional(),
   supplier_id: z.string().uuid().nullable().optional(),

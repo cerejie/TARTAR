@@ -178,9 +178,13 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
         extra={
           <Space>
             {props.headerActions}
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal(formKey)}>
-              Add {props.partyLabel.toLowerCase()} record
-            </Button>
+            {/* Accountants read these ledgers for BIR purposes but never encode
+                them (client decision 2026-07-22). */}
+            <RequirePermission can="encodeTransactions" fallback={null}>
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal(formKey)}>
+                Add {props.partyLabel.toLowerCase()} record
+              </Button>
+            </RequirePermission>
           </Space>
         }
       />

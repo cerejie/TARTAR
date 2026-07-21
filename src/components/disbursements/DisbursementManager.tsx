@@ -126,6 +126,18 @@ export function DisbursementManager({ kind, title, subtitle }: DisbursementManag
     },
     { name: 'txn_date', label: 'Date', type: 'date' },
     { name: 'amount', label: 'Amount', type: 'number', prefix: '₱' },
+    // Credit terms — a post-dated check or an on-account purchase. Approving
+    // the voucher then opens the payable, so the balance carries over; leaving
+    // it empty means the purchase was settled on the spot.
+    ...(kind === 'purchase'
+      ? [
+          {
+            name: 'due_date',
+            label: 'Due date (leave empty if paid in full now)',
+            type: 'date',
+          } satisfies FieldConfig<DisbursementInput>,
+        ]
+      : []),
     ...(kind === 'expense'
       ? [
           {
@@ -165,7 +177,11 @@ export function DisbursementManager({ kind, title, subtitle }: DisbursementManag
       options: toOptions(voucherTypeValues, labels.voucherType),
       hidden: (v) => !!v.cash_account,
     },
-    { name: 'reference_number', label: 'Reference no.', type: 'text' },
+    // Expenses dropped their reference number (client decision 2026-07-22) —
+    // the voucher number already identifies the record.
+    ...(kind === 'purchase'
+      ? [{ name: 'reference_number', label: 'Reference no.', type: 'text' } satisfies FieldConfig<DisbursementInput>]
+      : []),
     { name: 'description', label: 'Description', type: 'textarea' },
   ]
 
@@ -173,6 +189,9 @@ export function DisbursementManager({ kind, title, subtitle }: DisbursementManag
     branch: (branches[0]?.slug ?? 'hardware') as BranchSlug,
     farm_section: null,
     txn_date: todayIso(),
+    // Blank by default: most purchases are settled on the spot, and a stray
+    // due date would open a payable nobody asked for.
+    due_date: null,
     cash_account: 'cash_drawer',
     voucher_type: null,
     supplier_id: null,
@@ -188,6 +207,7 @@ export function DisbursementManager({ kind, title, subtitle }: DisbursementManag
         farm_section: editRow.farm_section as DisbursementInput['farm_section'],
         txn_date: editRow.txn_date,
         amount: editRow.amount,
+        due_date: editRow.due_date,
         cash_account: editRow.cash_account,
         voucher_type: editRow.voucher?.type ?? null,
         supplier_id: editRow.supplier_id,
@@ -218,7 +238,22 @@ export function DisbursementManager({ kind, title, subtitle }: DisbursementManag
         ]
       : []),
     { title: 'Amount', dataIndex: 'amount', align: 'right', render: (v: number) => formatMoney(v) },
-    { title: 'Reference', dataIndex: 'reference_number', render: (v: string | null) => v || '—' },
+    ...(kind === 'purchase'
+      ? [
+          {
+            title: 'Due date',
+            dataIndex: 'due_date',
+            width: 130,
+            // No due date = settled on the spot, so there is nothing to carry over.
+            render: (v: string | null) => (v ? formatDate(v) : 'Paid'),
+          },
+          {
+            title: 'Reference',
+            dataIndex: 'reference_number',
+            render: (v: string | null) => v || '—',
+          },
+        ]
+      : []),
     {
       title: 'Voucher no.',
       key: 'voucher_no',

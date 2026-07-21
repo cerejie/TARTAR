@@ -62,12 +62,14 @@ function UsersPage() {
   const editModal = useUiStore(selectModal(EDIT))
   const resetModal = useUiStore(selectModal(RESET))
   const { branches } = useBranches()
+  const currentUserId = useAuthStore((s) => s.user?.id ?? null)
 
   const list = useQuery('users', () => usersService.listUsers())
   const users = list.data ?? []
   const editing = users.find((u) => u.id === editModal.recordId)
 
-  // superAdmin may assign any role; Admin only non-admin roles (build spec §4).
+  // Managers assign any role, admins included (client decision 2026-07-22); the
+  // filter stays so a role that may not manage admins can never offer it.
   const assignableRoles: UserRole[] = permissions.manageAdmins
     ? [...userRoleValues]
     : userRoleValues.filter((r) => r !== 'admin')
@@ -179,16 +181,27 @@ function UsersPage() {
               onClick={() => openModal(RESET, u.id)}
             />
           </Tooltip>
-          <Popconfirm title="Delete this user?" onConfirm={() => void remove.mutate(u.id)}>
-            <Tooltip title="Delete user">
-              <Button
-                className="tartar-icon-btn"
-                danger
-                icon={<DeleteOutlined />}
-                aria-label={`Delete ${u.username}`}
-              />
+          {/* Deleting your own account would end the session on the very screen
+              you are using, and only the superAdmin could restore it — the DB
+              policy refuses it too. */}
+          {u.id === currentUserId ? (
+            <Tooltip title="You cannot delete your own account">
+              <span>
+                <Button className="tartar-icon-btn" danger disabled icon={<DeleteOutlined />} />
+              </span>
             </Tooltip>
-          </Popconfirm>
+          ) : (
+            <Popconfirm title="Delete this user?" onConfirm={() => void remove.mutate(u.id)}>
+              <Tooltip title="Delete user">
+                <Button
+                  className="tartar-icon-btn"
+                  danger
+                  icon={<DeleteOutlined />}
+                  aria-label={`Delete ${u.username}`}
+                />
+              </Tooltip>
+            </Popconfirm>
+          )}
         </span>
       ),
     },
@@ -198,11 +211,7 @@ function UsersPage() {
     <>
       <PageHeader
         title="Users"
-        subtitle={
-          permissions.manageAdmins
-            ? 'Manage all users and assign any role'
-            : 'Manage accountants and employees'
-        }
+        subtitle="Manage all users and assign any role"
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal(CREATE)}>
             Add user

@@ -18,6 +18,17 @@ export function printVoucher(v: Voucher, branchName: string): void {
   const win = window.open('', '_blank', 'width=720,height=900')
   if (!win) return
 
+  // Check details only exist on check vouchers, so they are spliced in rather
+  // than printed as a row of dashes on every cash voucher.
+  const checkRows: [string, string][] =
+    v.type === 'check'
+      ? [
+          ['Bank issuing', v.check_bank ?? '—'],
+          ['Check No.', v.check_number ?? '—'],
+          ['Check due date', v.check_due_date ? formatDate(v.check_due_date) : '—'],
+        ]
+      : []
+
   const rows: [string, string][] = [
     ['Voucher No.', v.voucher_no ?? '—'],
     ['Type', labels.voucherType[v.type]],
@@ -25,7 +36,9 @@ export function printVoucher(v: Voucher, branchName: string): void {
     ['Payee', v.payee],
     ['Amount', formatMoney(v.amount)],
     ['Purpose', voucherPurpose(v)],
+    ...checkRows,
     ['Status', labels.voucherStatus[v.status]],
+    ['Created', formatDateTime(v.created_at)],
     ['Approved at', formatDateTime(v.approved_at)],
   ]
 

@@ -1,5 +1,10 @@
 import { Button, Col, Flex, Row, Tag, Tooltip, Typography } from 'antd'
-import { ArrowLeftOutlined, DollarOutlined, PrinterOutlined } from '@ant-design/icons'
+import {
+  ArrowLeftOutlined,
+  DollarOutlined,
+  InfoCircleOutlined,
+  PrinterOutlined,
+} from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { StatCard } from '../StatCard'
 import { DataTable } from '../DataTable'
@@ -7,6 +12,7 @@ import { LedgerFilterBar } from '../LedgerFilterBar'
 import { RequirePermission } from '../RequirePermission'
 import { PaymentsPanel } from '../payments/PaymentsPanel'
 import { PaymentAllocationModal } from './PaymentAllocationModal'
+import { CUSTOMER_DETAILS_FORM, CUSTOMER_INFO_MODAL, CustomerInfoModal } from './CustomerDetails'
 import { useQuery } from '../../hooks/useQuery'
 import { useMutation } from '../../hooks/useMutation'
 import { usePermissions } from '../../hooks/usePermissions'
@@ -38,6 +44,7 @@ export function CustomerLedgerView() {
   const openModal = useUiStore((s) => s.openModal)
   const closeModal = useUiStore((s) => s.closeModal)
   const payModal = useUiStore(selectModal(PAY_MODAL))
+  const infoModal = useUiStore(selectModal(CUSTOMER_INFO_MODAL))
   const createdBy = useAuthStore((s) => s.user?.id ?? null)
   const permissions = usePermissions()
   const { branches } = useBranches()
@@ -155,6 +162,13 @@ export function CustomerLedgerView() {
           </Typography.Title>
         </Flex>
         <Flex align="center" gap="small">
+          <Tooltip title="Customer information">
+            <Button
+              icon={<InfoCircleOutlined />}
+              aria-label={`Information for ${customer.customerName}`}
+              onClick={() => openModal(CUSTOMER_INFO_MODAL)}
+            />
+          </Tooltip>
           <Button
             icon={<PrinterOutlined />}
             onClick={() =>
@@ -238,6 +252,22 @@ export function CustomerLedgerView() {
         kind="receivable"
         party={{ partyId: customer.customerId, partyName: customer.customerName }}
         compact
+      />
+
+      {/* The details form itself lives in CustomerLedgerModal, keyed on the
+          ledger identity, so the list pane and this pane share one instance. */}
+      <CustomerInfoModal
+        open={infoModal.open}
+        customer={customer}
+        onClose={() => closeModal(CUSTOMER_INFO_MODAL)}
+        onEdit={
+          permissions.encodeTransactions
+            ? () => {
+                closeModal(CUSTOMER_INFO_MODAL)
+                openModal(CUSTOMER_DETAILS_FORM, ledgerId)
+              }
+            : undefined
+        }
       />
 
       <PaymentAllocationModal

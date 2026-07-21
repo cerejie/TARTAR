@@ -11,7 +11,7 @@ import { useQuery } from '../../hooks/useQuery'
 import { useMutation } from '../../hooks/useMutation'
 import { useUiStore, selectModal } from '../../stores/ui.store'
 import { suppliersService } from '../../services/party.service'
-import { supplierSchema, type Supplier, type SupplierInput } from '../../models'
+import { partySchema, type PartyInput, type Supplier } from '../../models'
 
 const CREATE = 'supplier-create'
 const EDIT = 'supplier-edit'
@@ -19,14 +19,14 @@ const EDIT = 'supplier-edit'
 /** Every screen that offers a supplier selector reads the same `suppliers` key. */
 const INVALIDATE = ['suppliers']
 
-const FIELDS: FieldConfig<SupplierInput>[] = [
+const FIELDS: FieldConfig<PartyInput>[] = [
   { name: 'name', label: 'Supplier name', type: 'text', placeholder: 'e.g. Cebu Steel Trading' },
   { name: 'contact_person', label: 'Contact person', type: 'text', placeholder: 'Who to ask for' },
   { name: 'contact', label: 'Contact number', type: 'text', placeholder: 'e.g. 0917 123 4567' },
   { name: 'address', label: 'Address', type: 'textarea' },
 ]
 
-const EMPTY: DefaultValues<SupplierInput> = {
+const EMPTY: DefaultValues<PartyInput> = {
   name: '',
   contact_person: '',
   contact: '',
@@ -47,13 +47,13 @@ export function SuppliersPanel() {
   const suppliers = list.data ?? []
   const editing = suppliers.find((s) => s.id === editModal.recordId)
 
-  const create = useMutation((input: SupplierInput) => suppliersService.create(input), {
+  const create = useMutation((input: PartyInput) => suppliersService.create(input), {
     successMessage: 'Supplier added',
     invalidate: INVALIDATE,
     onSuccess: () => closeModal(CREATE),
   })
   const update = useMutation(
-    (p: { id: string; patch: SupplierInput }) => suppliersService.update(p.id, p.patch),
+    (p: { id: string; patch: PartyInput }) => suppliersService.update(p.id, p.patch),
     { successMessage: 'Supplier updated', invalidate: INVALIDATE, onSuccess: () => closeModal(EDIT) },
   )
   // Deleting is blocked by the FK once a transaction, payable or voucher points
@@ -63,7 +63,7 @@ export function SuppliersPanel() {
     invalidate: INVALIDATE,
   })
 
-  const editDefaults: DefaultValues<SupplierInput> = editing
+  const editDefaults: DefaultValues<PartyInput> = editing
     ? {
         name: editing.name,
         contact_person: editing.contact_person ?? '',
@@ -135,11 +135,11 @@ export function SuppliersPanel() {
         />
       </SectionCard>
 
-      <EntityFormModal<SupplierInput>
+      <EntityFormModal<PartyInput>
         open={createModal.open}
         title="Add supplier"
         fields={FIELDS}
-        schema={supplierSchema}
+        schema={partySchema}
         defaultValues={EMPTY}
         submitting={create.loading}
         submitText="Add supplier"
@@ -147,11 +147,11 @@ export function SuppliersPanel() {
         onClose={() => closeModal(CREATE)}
       />
 
-      <EntityFormModal<SupplierInput>
+      <EntityFormModal<PartyInput>
         open={editModal.open}
         title={`Edit ${editing?.name ?? 'supplier'}`}
         fields={FIELDS}
-        schema={supplierSchema}
+        schema={partySchema}
         defaultValues={editDefaults}
         submitting={update.loading}
         onSubmit={(v) => {

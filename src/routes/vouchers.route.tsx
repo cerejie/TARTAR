@@ -1,5 +1,5 @@
 import { createRoute } from '@tanstack/react-router'
-import { Button, Space, Tag } from 'antd'
+import { Button, Space, Tag, Typography } from 'antd'
 import { CheckOutlined, CloseOutlined, PlusOutlined, PrinterOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { DefaultValues } from 'react-hook-form'
@@ -31,7 +31,7 @@ import {
   type VoucherInput,
   type VoucherStatus,
 } from '../models'
-import { formatMoney, todayIso } from '../utils/format'
+import { formatDate, formatDateTime, formatMoney, todayIso } from '../utils/format'
 import { printVoucher } from '../utils/print'
 
 const MODAL = 'voucher-form'
@@ -101,6 +101,17 @@ function VouchersPage() {
       type: 'date',
       hidden: (v) => v.kind !== 'purchase',
     },
+    // The check being issued (client decision 2026-07-22). Cash vouchers have
+    // no instrument to describe, so these disappear for them.
+    {
+      name: 'check_bank',
+      label: 'Bank issuing',
+      type: 'text',
+      placeholder: 'e.g. BDO — Tacloban',
+      hidden: (v) => v.type !== 'check',
+    },
+    { name: 'check_number', label: 'Check number', type: 'text', hidden: (v) => v.type !== 'check' },
+    { name: 'check_due_date', label: 'Check due date', type: 'date', hidden: (v) => v.type !== 'check' },
   ]
 
   const defaults: DefaultValues<VoucherInput> = {
@@ -110,6 +121,9 @@ function VouchersPage() {
     payee: '',
     supplier_id: null,
     due_date: todayIso(),
+    check_bank: '',
+    check_number: '',
+    check_due_date: todayIso(),
   }
 
   const columns: ColumnsType<Voucher> = [
@@ -120,6 +134,26 @@ function VouchersPage() {
     { title: 'Branch', dataIndex: 'branch', render: branchName },
     { title: 'Payee', dataIndex: 'payee' },
     { title: 'Amount', dataIndex: 'amount', align: 'right', render: (v: number) => formatMoney(v) },
+    {
+      title: 'Check',
+      key: 'check',
+      width: 180,
+      render: (_, v) =>
+        v.type === 'check' && v.check_number ? (
+          <Space direction="vertical" size={0}>
+            <span>{v.check_number}</span>
+            <Typography.Text type="secondary">
+              {[v.check_bank, v.check_due_date ? `due ${formatDate(v.check_due_date)}` : null]
+                .filter(Boolean)
+                .join(' · ')}
+            </Typography.Text>
+          </Space>
+        ) : (
+          '—'
+        ),
+    },
+    // Encoding timestamp — vouchers are date-and-time stamped on creation.
+    { title: 'Created', dataIndex: 'created_at', width: 180, render: (v: string) => formatDateTime(v) },
     {
       title: 'Status',
       dataIndex: 'status',

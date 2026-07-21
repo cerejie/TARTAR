@@ -4,9 +4,10 @@ import type { ApprovalStatus, UpdateUserInput, User } from '../models'
 
 /**
  * Users management (build spec §4). The Admin's Users tab and the superAdmin's
- * user admin both read/write here; RLS decides who may see/modify whom (Admin =
- * non-admin users only; superAdmin = everyone). Creating users and resetting
- * passwords go through RPCs in auth.service (server-side hashing).
+ * user admin both read/write here; RLS decides who may see/modify whom — since
+ * 2026-07-22 an Admin manages every account in this table, admins included (the
+ * superAdmin is not a row here), except their own deletion. Creating users and
+ * resetting passwords go through RPCs in auth.service (server-side hashing).
  */
 export async function listUsers(status?: ApprovalStatus): Promise<User[]> {
   let query = supabase

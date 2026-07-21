@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { App } from 'antd'
 import { useQueryStore, selectEntry } from '../stores/query.store'
 
@@ -30,8 +30,19 @@ export function useMutation<TArgs extends unknown[], TResult>(
   const invalidate = useQueryStore((s) => s.invalidate)
   const entry = useQueryStore(selectEntry<never>(key))
 
+  // `mutate` is memoized on `key` alone so callers can pass it straight to an
+  // effect or a memo. The mutation function and options therefore CANNOT be read
+  // from its closure — that would freeze the values of the first render — so the
+  // latest ones are kept on a ref. `mutate` only ever runs from an event handler,
+  // by which time the effect below has committed the current render's values.
+  const latest = useRef({ mutationFn, options })
+  useEffect(() => {
+    latest.current = { mutationFn, options }
+  })
+
   const mutate = useCallback(
     async (...args: TArgs): Promise<TResult | undefined> => {
+      const { mutationFn, options } = latest.current
       setEntry(key, { loading: true, error: null })
       try {
         const result = await mutationFn(...args)
@@ -52,7 +63,6 @@ export function useMutation<TArgs extends unknown[], TResult>(
         return undefined
       }
     },
-    // Stable across renders; options/mutationFn are read fresh via closure each call.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [key],
   )

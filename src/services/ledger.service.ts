@@ -88,7 +88,9 @@ export const receivablesService = {
     table: 'receivables',
     nameColumn: 'customer_name',
     idColumn: 'customer_id',
-    getName: (i) => i.customer_name,
+    // Like Payables, the form resolves a picked customer to its name before
+    // calling create (see receivables.route.tsx).
+    getName: (i) => i.customer_name ?? '',
     getPartyId: (i) => i.customer_id,
   }),
 
