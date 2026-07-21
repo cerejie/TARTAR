@@ -161,7 +161,6 @@ function TransactionsPage() {
           },
         ]
       : []),
-    { title: 'Party', key: 'party', render: (_, r) => r.customer?.name ?? r.supplier?.name ?? '—' },
     { title: 'Reference', dataIndex: 'reference_number', render: (v: string | null) => v || '—' },
     { title: 'Amount', dataIndex: 'amount', align: 'right', render: (v: number) => formatMoney(v) },
     ...(permissions.isManager

@@ -13,7 +13,7 @@ import {
 
 const SELECT = `
   id, type, branch, farm_section, txn_date, amount, reference_number, description,
-  customer_id, supplier_id, cash_account, income_source, expense_type,
+  customer_id, supplier_id, cash_account, income_source, expense_type, due_date,
   created_by, created_at,
   customer:customers(name), supplier:suppliers(name)
 `
@@ -101,7 +101,7 @@ export async function createDisbursement(
       p_txn_date: input.txn_date,
       p_amount: input.amount,
       p_farm_section: input.farm_section ?? null,
-      p_reference_number: input.reference_number ?? null,
+      p_reference_number: referenceOf(type, input),
       p_description: input.description ?? null,
       p_supplier_id: input.supplier_id ?? null,
       p_cash_account: input.cash_account ?? null,
@@ -109,8 +109,19 @@ export async function createDisbursement(
       p_payee: input.payee ?? null,
       p_voucher_type: input.cash_account ? null : (input.voucher_type ?? null),
       p_created_by: createdBy,
+      // Purchases only: a due date makes the approved voucher open a payable.
+      p_due_date: type === 'purchase' ? (input.due_date ?? null) : null,
     },
   })
+}
+
+/**
+ * Expenses dropped their reference number (client decision 2026-07-22) — the
+ * voucher number identifies them — so the field is purchases-only, and blanks
+ * are stored as null rather than an empty string.
+ */
+function referenceOf(type: 'purchase' | 'expense', input: DisbursementInput): string | null {
+  return type === 'purchase' ? (input.reference_number?.trim() || null) : null
 }
 
 /**
@@ -128,11 +139,13 @@ export async function updateDisbursement(id: string, type: 'purchase' | 'expense
       farm_section: input.farm_section ?? null,
       txn_date: input.txn_date,
       amount: input.amount,
-      reference_number: input.reference_number ?? null,
+      reference_number: referenceOf(type, input),
       description: input.description ?? null,
       supplier_id: input.supplier_id ?? null,
       cash_account: input.cash_account ?? null,
       expense_type: type === 'expense' ? (input.expense_type ?? null) : null,
+      // The pending voucher picks this up through the sync trigger.
+      due_date: type === 'purchase' ? (input.due_date ?? null) : null,
     },
     match: { id },
   })

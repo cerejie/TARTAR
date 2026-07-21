@@ -1,16 +1,15 @@
 import { z } from 'zod'
 import {
   cashAccountSchema,
-  expenseTypeSchema,
   incomeSourceSchema,
   transactionTypeSchema,
   voucherTypeSchema,
   type CashAccount,
-  type ExpenseType,
   type IncomeSource,
   type TransactionType,
 } from './enums'
 import { FARM_BRANCH, branchSlugSchema, farmSectionSlugSchema } from './branch'
+import { expenseCategorySlugSchema } from './expenseCategory'
 import type { Voucher } from './voucher'
 
 /**
@@ -30,7 +29,10 @@ export interface Transaction {
   supplier_id: string | null
   cash_account: CashAccount | null
   income_source: IncomeSource | null
-  expense_type: ExpenseType | null
+  /** Slug of an `expense_categories` row (master data) — for expenses. */
+  expense_type: string | null
+  /** Credit term of a purchase (post-dated check / on account); null = settled. */
+  due_date: string | null
   created_by: string | null
   created_at: string
   // Optional joined labels (from `customers(name)` / `suppliers(name)` selects).
@@ -61,7 +63,7 @@ export const transactionSchema = z
     supplier_id: z.string().uuid().nullable().optional(),
     cash_account: cashAccountSchema.nullable().optional(),
     income_source: incomeSourceSchema.nullable().optional(),
-    expense_type: expenseTypeSchema.nullable().optional(),
+    expense_type: expenseCategorySlugSchema.nullable().optional(),
   })
   // A farm section is only meaningful on the Farm branch (mirrors the DB check).
   .refine((v) => !v.farm_section || v.branch === FARM_BRANCH, {
@@ -83,13 +85,16 @@ export type TransactionInput = z.infer<typeof transactionSchema>
  * Purchases & Expenses ("disbursements") — recorded through their dedicated
  * modules and always paired with an auto-generated pending voucher. The payee
  * is a supplier or a free-typed name; the voucher type follows the payment
- * account, and is chosen manually for on-credit records (no account).
+ * account, and is chosen manually for on-credit records (no account). A
+ * purchase may also carry a due date (60-day check, on account): approving its
+ * voucher then opens the payable so the debt carries over.
  */
 const disbursementBase = z.object({
   branch: branchSlugSchema,
   farm_section: farmSectionSlugSchema.nullable().optional(),
   txn_date: isoDateField,
   amount: amountField,
+  due_date: isoDateField.nullable().optional(),
   cash_account: cashAccountSchema.nullable().optional(),
   voucher_type: voucherTypeSchema.nullable().optional(),
   supplier_id: z.string().uuid().nullable().optional(),
@@ -118,13 +123,13 @@ function withDisbursementRules<T extends typeof disbursementBase>(schema: T) {
 export const purchaseSchema = withDisbursementRules(disbursementBase)
 export const expenseSchema = withDisbursementRules(
   disbursementBase.extend({
-    expense_type: expenseTypeSchema,
+    expense_type: expenseCategorySlugSchema,
   }) as unknown as typeof disbursementBase,
 )
 
 /** One form-value shape serves both modules (expense_type unused on purchases). */
 export type DisbursementInput = z.infer<typeof disbursementBase> & {
-  expense_type?: ExpenseType | null
+  expense_type?: string | null
 }
 
 /** A purchase/expense row joined with its auto-generated voucher. */

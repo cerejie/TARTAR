@@ -1,6 +1,8 @@
 /** Barrel for all domain models (types + zod schemas). */
 export * from './enums'
+export * from './slug'
 export * from './branch'
+export * from './expenseCategory'
 export * from './user'
 export * from './party'
 export * from './transaction'

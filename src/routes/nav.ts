@@ -4,6 +4,7 @@ import {
   AuditOutlined,
   BankOutlined,
   DashboardOutlined,
+  DatabaseOutlined,
   FileTextOutlined,
   ShoppingCartOutlined,
   SolutionOutlined,
@@ -25,6 +26,7 @@ export type AppPath =
   | '/vouchers'
   | '/branches'
   | '/reports'
+  | '/master-data'
   | '/users'
 
 /** Sidebar sections, in display order. Labels are uppercased by CSS. */
@@ -52,5 +54,6 @@ export const NAV_ITEMS: NavItem[] = [
   { key: '/payables', label: 'Payables', icon: createElement(AuditOutlined), can: 'viewReminders', group: 'Accounting' },
   { key: '/reports', label: 'Reports', icon: createElement(BankOutlined), can: 'viewIncomeExpenses', group: 'Monitoring' },
   { key: '/branches', label: 'Branch Monitoring', icon: createElement(AppstoreOutlined), can: 'viewBranchMonitoring', group: 'Monitoring' },
+  { key: '/master-data', label: 'Master Data', icon: createElement(DatabaseOutlined), can: 'manageMasterData', group: 'System' },
   { key: '/users', label: 'Users', icon: createElement(TeamOutlined), can: 'manageUsers', group: 'System' },
 ]

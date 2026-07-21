@@ -13,6 +13,7 @@ import { vouchersRoute } from './vouchers.route'
 import { usersRoute } from './users.route'
 import { reportsRoute } from './reports.route'
 import { branchesRoute } from './branches.route'
+import { masterDataRoute } from './masterData.route'
 
 /**
  * Code-based route tree (the locked stack has no file-based codegen plugin).
@@ -33,6 +34,7 @@ const routeTree = rootRoute.addChildren([
     usersRoute,
     reportsRoute,
     branchesRoute,
+    masterDataRoute,
   ]),
 ])
 

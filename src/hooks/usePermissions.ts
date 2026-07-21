@@ -5,8 +5,8 @@ import type { EffectiveRole } from '../models'
  * Capability flags derived from the effective role (build spec §5). Deriving in
  * one place keeps role logic out of components and out of route guards.
  *
- *   superAdmin → everything (incl. managing admins)
- *   Admin      → full business control; manage NON-admin users
+ *   superAdmin → everything
+ *   Admin      → full business control; manage every user, admins included
  *   Accountant → view Expenses & Income (BIR); NOT financial standing
  *   Employee   → encode transactions, view reminders; NOT financial standing
  */
@@ -32,7 +32,13 @@ export interface Permissions {
   approveVouchers: boolean
   /** Manage users at all (has a Users tab). */
   manageUsers: boolean
-  /** Assign/modify the admin role or other admins — superAdmin only. */
+  /** Reference records (suppliers, expense categories) — managers only. */
+  manageMasterData: boolean
+  /**
+   * Assign the admin role and manage other admin accounts. Both managers, since
+   * the client asked for admins to run this themselves (2026-07-22); the
+   * superAdmin isn't a `users` row, so it stays out of reach either way.
+   */
   manageAdmins: boolean
 }
 
@@ -57,6 +63,7 @@ export function usePermissions(): Permissions {
     createManualVouchers: isManager,
     approveVouchers: isManager,
     manageUsers: isManager,
-    manageAdmins: isSuperAdmin,
+    manageMasterData: isManager,
+    manageAdmins: isManager,
   }
 }

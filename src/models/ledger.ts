@@ -37,24 +37,46 @@ const amountField = z.coerce
 
 const isoDateField = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a valid date')
 
-export const receivableSchema = z.object({
-  branch: branchSlugSchema,
-  customer_id: z.string().uuid().nullable().optional(),
-  customer_name: z.string().trim().min(1, 'Customer name is required').max(160),
-  amount: amountField,
-  due_date: isoDateField,
-  reference_number: z.string().trim().max(80).nullable().optional(),
-})
+/**
+ * A receivable names a saved customer (`customer_id`) or, for a walk-in, a
+ * free-typed name (client decision 2026-07-22) — the same pattern as a payable
+ * below. The route resolves the stored `customer_name` from the master record
+ * whenever an id is chosen.
+ */
+export const receivableSchema = z
+  .object({
+    branch: branchSlugSchema,
+    customer_id: z.string().uuid().nullable().optional(),
+    customer_name: z.string().trim().max(160).nullable().optional(),
+    amount: amountField,
+    due_date: isoDateField,
+    reference_number: z.string().trim().max(80).nullable().optional(),
+  })
+  .refine((v) => !!v.customer_id || !!v.customer_name?.trim(), {
+    path: ['customer_name'],
+    message: 'Select a customer or enter a name',
+  })
 export type ReceivableInput = z.infer<typeof receivableSchema>
 
-export const payableSchema = z.object({
-  branch: branchSlugSchema,
-  supplier_id: z.string().uuid().nullable().optional(),
-  supplier_name: z.string().trim().min(1, 'Supplier name is required').max(160),
-  amount: amountField,
-  due_date: isoDateField,
-  reference_number: z.string().trim().max(80).nullable().optional(),
-})
+/**
+ * A payable names a supplier from the master list (`supplier_id`) or, for a
+ * one-off, a free-typed name — mirroring how a disbursement names its payee
+ * (client decision 2026-07-21). The service resolves the stored
+ * `supplier_name` from the master record whenever an id is chosen.
+ */
+export const payableSchema = z
+  .object({
+    branch: branchSlugSchema,
+    supplier_id: z.string().uuid().nullable().optional(),
+    supplier_name: z.string().trim().max(160).nullable().optional(),
+    amount: amountField,
+    due_date: isoDateField,
+    reference_number: z.string().trim().max(80).nullable().optional(),
+  })
+  .refine((v) => !!v.supplier_id || !!v.supplier_name?.trim(), {
+    path: ['supplier_name'],
+    message: 'Select a supplier or enter a name',
+  })
 export type PayableInput = z.infer<typeof payableSchema>
 
 /**

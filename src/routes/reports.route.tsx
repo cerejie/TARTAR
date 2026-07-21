@@ -9,6 +9,7 @@ import { DataTable } from '../components/DataTable'
 import { StatCard } from '../components/StatCard'
 import { useQuery } from '../hooks/useQuery'
 import { useBranchScope } from '../hooks/useBranchScope'
+import { useExpenseCategories } from '../hooks/useReferenceData'
 import { useAuthStore } from '../stores/auth.store'
 import * as transactionsService from '../services/transactions.service'
 import { receivablesService, payablesService } from '../services/ledger.service'
@@ -16,7 +17,6 @@ import {
   isLedgerOverdue,
   labels,
   tagColors,
-  type ExpenseType,
   type LedgerStatus,
   type Payable,
   type Receivable,
@@ -199,12 +199,21 @@ function CashFlowReport({ txns, loading }: { txns: Transaction[]; loading: boole
 }
 
 function ExpensesReport({ txns, loading }: { txns: Transaction[]; loading: boolean }) {
+  // Categories are master data, so the breakdown is driven by the loaded rows —
+  // archived categories still appear while they carry expenses in the period.
+  const { expenseCategories } = useExpenseCategories()
   const expenses = txns.filter((t) => t.type === 'expense')
-  const byType = (Object.keys(labels.expenseType) as ExpenseType[]).map((et) => ({
-    key: et,
-    label: labels.expenseType[et],
-    total: expenses.filter((t) => t.expense_type === et).reduce((a, t) => a + Number(t.amount), 0),
-  }))
+  const byType = expenseCategories
+    .map((c) => ({
+      key: c.slug,
+      label: c.name,
+      active: c.active,
+      total: expenses
+        .filter((t) => t.expense_type === c.slug)
+        .reduce((a, t) => a + Number(t.amount), 0),
+    }))
+    // Archived categories only earn a row when they actually carry spend.
+    .filter((row) => row.active || row.total > 0)
 
   const columns: ColumnsType<(typeof byType)[number]> = [
     { title: 'Expense type', dataIndex: 'label' },
