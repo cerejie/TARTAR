@@ -382,6 +382,9 @@ globalStyle('.tartar-header', {
   paddingInline: vars.space.lg,
   height: '64px',
   borderBottom: `1px solid ${vars.color.borderSubtle}`,
+  '@media': {
+    'screen and (max-width: 480px)': { paddingInline: vars.space.sm },
+  },
 })
 
 globalStyle('.tartar-header-right', {
@@ -581,6 +584,15 @@ globalStyle('.tartar-card-subtitle', {
   fontSize: '13px',
 })
 
+/* A wide `extra` (the dashboard's period Segmented, Reports' print button)
+   must never force the card wider than its column — `.tartar-card` clips
+   overflow, so without this the control would just get cropped on a narrow
+   phone or a heavily zoomed-in viewport. Scrolls internally instead. */
+globalStyle('.tartar-card-extra', {
+  maxWidth: '100%',
+  overflowX: 'auto',
+})
+
 globalStyle('.tartar-card-body', {
   padding: vars.space.lg,
 })
@@ -639,6 +651,9 @@ globalStyle('.tartar-stat', {
    (.ant-card bumps specificity past antd's own `.ant-card-small > .ant-card-body`.) */
 globalStyle('.tartar-stat.ant-card .ant-card-body', {
   padding: `${vars.space.md} ${vars.space.lg}`,
+  '@media': {
+    'screen and (max-width: 420px)': { padding: `${vars.space.sm} ${vars.space.md}` },
+  },
 })
 
 /* Stat grids sit between the page header and the first section card — give the
@@ -657,6 +672,10 @@ globalStyle('.tartar-stat .ant-statistic-content', {
   fontFamily: vars.font.heading,
   color: vars.color.brandDark,
   fontSize: '24px',
+  // Belt-and-braces: the tile grid already gives each card room to breathe at
+  // every breakpoint, but a peso figure must never be clipped by its card —
+  // wrapping mid-digit beats losing digits off the edge.
+  overflowWrap: 'anywhere',
 })
 
 globalStyle('.tartar-tone-positive .ant-statistic-content', {
@@ -1487,6 +1506,7 @@ globalStyle('.tartar-notif-group:last-child .tartar-notif-item:last-child', {
 globalStyle('.tartar-notif-item-main', {
   display: 'flex',
   alignItems: 'flex-start',
+  flex: 1,
   gap: '10px',
   minWidth: 0,
 })
@@ -1510,6 +1530,7 @@ globalStyle('.tartar-notif-dot.tartar-tone-warning', {
 globalStyle('.tartar-notif-text', {
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
   minWidth: 0,
 })
 

@@ -265,7 +265,10 @@ function StatTile(props: {
   caption?: ReactNode
 }) {
   return (
-    <Col xs={12} md={props.span}>
+    // Full width on phones (a squeezed 2-up row is where a peso figure and an
+    // icon badge first start fighting for space), 2-up from `sm`, 4-up from
+    // `md` once there's room for the whole row.
+    <Col xs={24} sm={12} md={props.span}>
       <StatCard
         title={props.title}
         value={props.value}
