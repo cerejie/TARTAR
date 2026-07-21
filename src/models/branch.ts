@@ -29,8 +29,9 @@ export interface Branch {
   voucher_prefix: string
 }
 
-/** Create/edit form for a branch. The slug is derived from the name and is
- *  immutable once created, so the form only collects a display name + order. */
+/** Create/edit form for a branch. The slug is derived from the name (see
+ *  `slugify`) and is immutable once created, so the form only collects a
+ *  display name + order. */
 export const branchSchema = z.object({
   name: z.string().trim().min(2, 'Enter a branch name').max(80),
   sort: z.number({ error: 'Enter a number' }).int('Whole number only').min(0).max(999),
@@ -41,17 +42,6 @@ export const branchSchema = z.object({
     .regex(/^[A-Z]{3}$/, '3 letters, e.g. LGC'),
 })
 export type BranchInput = z.infer<typeof branchSchema>
-
-/** Derive a DB-safe slug from a branch name — matches `branches_slug_format_chk`
- *  (`^[a-z0-9_]+$`). Returns '' when the name has no usable characters. */
-export function slugifyBranch(name: string): string {
-  return name
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '') // strip accents
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-}
 
 export interface FarmSection {
   slug: FarmSectionSlug

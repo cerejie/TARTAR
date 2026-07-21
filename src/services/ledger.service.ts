@@ -162,6 +162,9 @@ export const payablesService = makeLedgerService<Payable, PayableInput>({
   table: 'payables',
   nameColumn: 'supplier_name',
   idColumn: 'supplier_id',
-  getName: (i) => i.supplier_name,
+  // The Payables form resolves the display name from the chosen master record
+  // before calling create, so a picked supplier and a free-typed one both
+  // arrive here as a plain name (see payables.route.tsx).
+  getName: (i) => i.supplier_name ?? '',
   getPartyId: (i) => i.supplier_id,
 })

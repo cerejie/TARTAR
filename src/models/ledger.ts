@@ -47,14 +47,25 @@ export const receivableSchema = z.object({
 })
 export type ReceivableInput = z.infer<typeof receivableSchema>
 
-export const payableSchema = z.object({
-  branch: branchSlugSchema,
-  supplier_id: z.string().uuid().nullable().optional(),
-  supplier_name: z.string().trim().min(1, 'Supplier name is required').max(160),
-  amount: amountField,
-  due_date: isoDateField,
-  reference_number: z.string().trim().max(80).nullable().optional(),
-})
+/**
+ * A payable names a supplier from the master list (`supplier_id`) or, for a
+ * one-off, a free-typed name — mirroring how a disbursement names its payee
+ * (client decision 2026-07-21). The service resolves the stored
+ * `supplier_name` from the master record whenever an id is chosen.
+ */
+export const payableSchema = z
+  .object({
+    branch: branchSlugSchema,
+    supplier_id: z.string().uuid().nullable().optional(),
+    supplier_name: z.string().trim().max(160).nullable().optional(),
+    amount: amountField,
+    due_date: isoDateField,
+    reference_number: z.string().trim().max(80).nullable().optional(),
+  })
+  .refine((v) => !!v.supplier_id || !!v.supplier_name?.trim(), {
+    path: ['supplier_name'],
+    message: 'Select a supplier or enter a name',
+  })
 export type PayableInput = z.infer<typeof payableSchema>
 
 /**

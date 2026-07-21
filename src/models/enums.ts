@@ -37,17 +37,10 @@ export const incomeSourceValues = ['product_sales', 'rental_income'] as const
 export const incomeSourceSchema = z.enum(incomeSourceValues)
 export type IncomeSource = z.infer<typeof incomeSourceSchema>
 
-export const expenseTypeValues = [
-  'electricity',
-  'water',
-  'internet',
-  'salaries',
-  'office_supplies',
-  'repairs_maintenance',
-  'taxes',
-] as const
-export const expenseTypeSchema = z.enum(expenseTypeValues)
-export type ExpenseType = z.infer<typeof expenseTypeSchema>
+// NOTE: expense types are NOT an enum — they are master data managed at
+// runtime (see models/expenseCategory.ts and the Master Data screen), so their
+// labels come from the loaded `expense_categories` rows rather than from
+// `labels` below.
 
 export const cashAccountValues = ['cash_drawer', 'bank_account'] as const
 export const cashAccountSchema = z.enum(cashAccountValues)
@@ -123,15 +116,6 @@ export const labels = {
     product_sales: 'Product Sales',
     rental_income: 'Rental Income',
   } satisfies Record<IncomeSource, string>,
-  expenseType: {
-    electricity: 'Electricity',
-    water: 'Water',
-    internet: 'Internet',
-    salaries: 'Salaries',
-    office_supplies: 'Office Supplies',
-    repairs_maintenance: 'Repairs & Maintenance',
-    taxes: 'Taxes',
-  } satisfies Record<ExpenseType, string>,
   cashAccount: {
     cash_drawer: 'Cash Drawer',
     bank_account: 'Bank Account',

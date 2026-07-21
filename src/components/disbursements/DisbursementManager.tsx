@@ -12,7 +12,7 @@ import { RequirePermission } from '../RequirePermission'
 import { useQuery } from '../../hooks/useQuery'
 import { useMutation } from '../../hooks/useMutation'
 import { usePermissions } from '../../hooks/usePermissions'
-import { useBranches, useFarmSections } from '../../hooks/useReferenceData'
+import { useBranches, useExpenseCategories, useFarmSections } from '../../hooks/useReferenceData'
 import { useBranchScope, scopedFilters } from '../../hooks/useBranchScope'
 import { useUiStore, selectModal } from '../../stores/ui.store'
 import { useAuthStore } from '../../stores/auth.store'
@@ -22,7 +22,6 @@ import { suppliersService } from '../../services/party.service'
 import {
   cashAccountValues,
   expenseSchema,
-  expenseTypeValues,
   labels,
   purchaseSchema,
   tagColors,
@@ -68,6 +67,7 @@ export function DisbursementManager({ kind, title, subtitle }: DisbursementManag
 
   const { branches } = useBranches()
   const { farmSections } = useFarmSections()
+  const expenseCategories = useExpenseCategories()
   const suppliers = useQuery('suppliers', () => suppliersService.list())
   const users = useQuery('users', () => usersService.listUsers(), { enabled: permissions.isManager })
   const userById = new Map((users.data ?? []).map((u) => [u.id, u]))
@@ -107,6 +107,13 @@ export function DisbursementManager({ kind, title, subtitle }: DisbursementManag
 
   const branchName = (slug: string) => branches.find((b) => b.slug === slug)?.name ?? slug
 
+  // Only active categories are offered — except the one the edited row already
+  // carries, so re-saving an expense filed under a since-archived category
+  // doesn't silently blank the field.
+  const expenseTypeOptions = expenseCategories.expenseCategories
+    .filter((c) => c.active || c.slug === editRow?.expense_type)
+    .map((c) => ({ value: c.slug, label: c.name }))
+
   const fields: FieldConfig<DisbursementInput>[] = [
     { name: 'branch', label: 'Branch', type: 'select', options: branches.map((b) => ({ value: b.slug, label: b.name })) },
     {
@@ -125,7 +132,7 @@ export function DisbursementManager({ kind, title, subtitle }: DisbursementManag
             name: 'expense_type',
             label: 'Expense type',
             type: 'select',
-            options: toOptions(expenseTypeValues, labels.expenseType),
+            options: expenseTypeOptions,
           } satisfies FieldConfig<DisbursementInput>,
         ]
       : []),
@@ -206,7 +213,7 @@ export function DisbursementManager({ kind, title, subtitle }: DisbursementManag
           {
             title: 'Expense type',
             dataIndex: 'expense_type',
-            render: (t: Disbursement['expense_type']) => (t ? labels.expenseType[t] : '—'),
+            render: (t: Disbursement['expense_type']) => expenseCategories.labelOf(t),
           },
         ]
       : []),

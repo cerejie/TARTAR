@@ -32,6 +32,8 @@ export interface Permissions {
   approveVouchers: boolean
   /** Manage users at all (has a Users tab). */
   manageUsers: boolean
+  /** Reference records (suppliers, expense categories) — managers only. */
+  manageMasterData: boolean
   /** Assign/modify the admin role or other admins — superAdmin only. */
   manageAdmins: boolean
 }
@@ -57,6 +59,7 @@ export function usePermissions(): Permissions {
     createManualVouchers: isManager,
     approveVouchers: isManager,
     manageUsers: isManager,
+    manageMasterData: isManager,
     manageAdmins: isSuperAdmin,
   }
 }

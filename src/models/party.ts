@@ -1,8 +1,10 @@
 import { z } from 'zod'
 
 /**
- * "Parties" = customers and suppliers. Identical shape, so one model with a
- * shared schema keeps the two services and forms DRY (build spec §3).
+ * "Parties" = customers and suppliers. They share the same core shape, so one
+ * base model keeps the two services and forms DRY (build spec §3). Suppliers
+ * additionally carry the master-record details managed on the Master Data
+ * screen (client decision 2026-07-21).
  */
 export interface Party {
   id: string
@@ -12,10 +14,30 @@ export interface Party {
 }
 
 export type Customer = Party
-export type Supplier = Party
+
+export interface Supplier extends Party {
+  contact_person: string | null
+  address: string | null
+}
+
+/** Optional free-text detail: '' from an untouched input means "not set". */
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .nullable()
+    .optional()
+    .transform((v) => v || null)
 
 export const partySchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(160),
-  contact: z.string().trim().max(120).nullable().optional(),
+  contact: optionalText(120),
 })
 export type PartyInput = z.infer<typeof partySchema>
+
+export const supplierSchema = partySchema.extend({
+  contact_person: optionalText(160),
+  address: optionalText(400),
+})
+export type SupplierInput = z.infer<typeof supplierSchema>

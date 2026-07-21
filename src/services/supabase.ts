@@ -46,11 +46,24 @@ export const supabase = createClient(url, anonKey, {
   global: { fetch: customFetch },
 })
 
+/**
+ * Postgres constraint violations whose raw message ("insert or update on table
+ * … violates foreign key constraint …") is meaningless to a user. Callers that
+ * can say something more specific check `error.code` themselves first.
+ */
+const CONSTRAINT_MESSAGES: Record<string, string> = {
+  '23503': 'This record is still used by other records, so it cannot be deleted.',
+  '23505': 'A record with these details already exists.',
+}
+
 /** Normalise a Supabase/PostgREST error into a plain Error with a clean message. */
 export function toError(error: unknown): Error {
   if (error instanceof Error) return error
   if (error && typeof error === 'object' && 'message' in error) {
-    return new Error(String((error as { message: unknown }).message))
+    const code = 'code' in error ? String((error as { code: unknown }).code) : ''
+    return new Error(
+      CONSTRAINT_MESSAGES[code] ?? String((error as { message: unknown }).message),
+    )
   }
   return new Error('Unexpected error')
 }

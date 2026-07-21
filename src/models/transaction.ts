@@ -1,16 +1,15 @@
 import { z } from 'zod'
 import {
   cashAccountSchema,
-  expenseTypeSchema,
   incomeSourceSchema,
   transactionTypeSchema,
   voucherTypeSchema,
   type CashAccount,
-  type ExpenseType,
   type IncomeSource,
   type TransactionType,
 } from './enums'
 import { FARM_BRANCH, branchSlugSchema, farmSectionSlugSchema } from './branch'
+import { expenseCategorySlugSchema } from './expenseCategory'
 import type { Voucher } from './voucher'
 
 /**
@@ -30,7 +29,8 @@ export interface Transaction {
   supplier_id: string | null
   cash_account: CashAccount | null
   income_source: IncomeSource | null
-  expense_type: ExpenseType | null
+  /** Slug of an `expense_categories` row (master data) — for expenses. */
+  expense_type: string | null
   created_by: string | null
   created_at: string
   // Optional joined labels (from `customers(name)` / `suppliers(name)` selects).
@@ -61,7 +61,7 @@ export const transactionSchema = z
     supplier_id: z.string().uuid().nullable().optional(),
     cash_account: cashAccountSchema.nullable().optional(),
     income_source: incomeSourceSchema.nullable().optional(),
-    expense_type: expenseTypeSchema.nullable().optional(),
+    expense_type: expenseCategorySlugSchema.nullable().optional(),
   })
   // A farm section is only meaningful on the Farm branch (mirrors the DB check).
   .refine((v) => !v.farm_section || v.branch === FARM_BRANCH, {
@@ -118,13 +118,13 @@ function withDisbursementRules<T extends typeof disbursementBase>(schema: T) {
 export const purchaseSchema = withDisbursementRules(disbursementBase)
 export const expenseSchema = withDisbursementRules(
   disbursementBase.extend({
-    expense_type: expenseTypeSchema,
+    expense_type: expenseCategorySlugSchema,
   }) as unknown as typeof disbursementBase,
 )
 
 /** One form-value shape serves both modules (expense_type unused on purchases). */
 export type DisbursementInput = z.infer<typeof disbursementBase> & {
-  expense_type?: ExpenseType | null
+  expense_type?: string | null
 }
 
 /** A purchase/expense row joined with its auto-generated voucher. */
