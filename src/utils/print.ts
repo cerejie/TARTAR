@@ -10,6 +10,19 @@ import { formatDate, formatMoney, formatDateTime } from './format'
 import { colors, fontBody } from '../styles/theme.css'
 
 /**
+ * Values printed into these documents come from user-entered data (payee,
+ * customer name, reference numbers), so they are escaped rather than trusted:
+ * a name containing `<` would otherwise break the document structure.
+ */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+/**
  * Opens a print-ready window for an approved voucher (build spec §16). This is
  * a standalone generated document (not part of the antd app UI), so it carries
  * its own <style> — the "no inline styles" rule governs the app, not print docs.
@@ -161,6 +174,126 @@ export function printStatement(
     <tr><th>Date</th><th>Reference</th><th class="num">Amount</th><th>Status</th></tr>
     ${paymentRows || '<tr><td colspan="4">No payments recorded</td></tr>'}
   </table>
+  <script>window.onload = function () { window.print(); };</script>
+</body>
+</html>`)
+  win.document.close()
+}
+
+/** A headline figure shown above the tables of a printed report. */
+export interface PrintStat {
+  label: string
+  value: string
+}
+
+export interface PrintColumn {
+  title: string
+  /** Money/count columns print right-aligned, like their on-screen counterparts. */
+  numeric?: boolean
+}
+
+export interface PrintTable {
+  title: string
+  subtitle?: string
+  columns: readonly PrintColumn[]
+  /** Pre-formatted cells, in the same order as `columns`. */
+  rows: readonly (readonly string[])[]
+  emptyText?: string
+  /** Rows to emphasise (overdue ledger entries), by index into `rows`. */
+  highlightRows?: readonly number[]
+}
+
+export interface PrintReportDoc {
+  title: string
+  /** Human-readable period, e.g. "Jul 21, 2026" or "Jul 1 – Jul 21, 2026". */
+  period: string
+  /** Branch name, or "All branches" when the report is company-wide. */
+  scope: string
+  stats?: readonly PrintStat[]
+  tables: readonly PrintTable[]
+}
+
+/**
+ * Printable version of any Reports page view (build spec §12). Callers pass
+ * already-formatted cells so the document stays presentation-only and matches
+ * exactly what is on screen.
+ */
+export function printReport(doc: PrintReportDoc): void {
+  const win = window.open('', '_blank', 'width=960,height=1000')
+  if (!win) return
+
+  const renderTable = (t: PrintTable): string => {
+    const head = t.columns
+      .map((c) => `<th class="${c.numeric ? 'num' : ''}">${escapeHtml(c.title)}</th>`)
+      .join('')
+    const highlight = new Set(t.highlightRows ?? [])
+    const body = t.rows
+      .map(
+        (row, i) =>
+          `<tr class="${highlight.has(i) ? 'flag' : ''}">${row
+            .map(
+              (cell, c) =>
+                `<td class="${t.columns[c]?.numeric ? 'num' : ''}">${escapeHtml(cell)}</td>`,
+            )
+            .join('')}</tr>`,
+      )
+      .join('')
+
+    return `<section>
+    <h2>${escapeHtml(t.title)}</h2>
+    ${t.subtitle ? `<div class="sub small">${escapeHtml(t.subtitle)}</div>` : ''}
+    <table>
+      <thead><tr>${head}</tr></thead>
+      <tbody>
+        ${
+          body ||
+          `<tr><td colspan="${t.columns.length}">${escapeHtml(t.emptyText ?? 'No records')}</td></tr>`
+        }
+      </tbody>
+    </table>
+  </section>`
+  }
+
+  const stats = (doc.stats ?? [])
+    .map(
+      (s) =>
+        `<div class="stat"><div class="stat-label">${escapeHtml(s.label)}</div>
+         <div class="stat-value">${escapeHtml(s.value)}</div></div>`,
+    )
+    .join('')
+
+  win.document.write(`<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(doc.title)} — TARTAR</title>
+  <style>
+    @page { margin: 14mm; }
+    body { font-family: ${fontBody}; color: ${colors.text}; padding: 32px; }
+    h1 { color: ${colors.brandDark}; letter-spacing: .08em; margin: 0 0 4px; }
+    h2 { margin: 26px 0 8px; font-size: 15px; }
+    .sub { color: ${colors.textMuted}; }
+    .small { font-size: 12px; }
+    .stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 4px; }
+    .stat { border: 1px solid ${colors.border}; border-radius: 6px; padding: 10px 16px; min-width: 150px; }
+    .stat-label { color: ${colors.textMuted}; font-size: 12px; }
+    .stat-value { color: ${colors.brandDark}; font-size: 18px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; color: ${colors.textMuted}; font-weight: 600; }
+    th, td { padding: 7px 8px; border-bottom: 1px solid ${colors.border}; }
+    td.num, th.num { text-align: right; }
+    tr.flag td { color: ${colors.danger}; font-weight: 600; }
+    thead { display: table-header-group; }
+    tr { break-inside: avoid; }
+    .foot { margin-top: 28px; color: ${colors.textMuted}; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <h1>TARTAR</h1>
+  <div class="sub">${escapeHtml(doc.title)} · ${escapeHtml(doc.period)} · ${escapeHtml(doc.scope)}</div>
+  ${stats ? `<div class="stats">${stats}</div>` : ''}
+  ${doc.tables.map(renderTable).join('')}
+  <div class="foot">Generated ${formatDateTime(new Date().toISOString())}</div>
   <script>window.onload = function () { window.print(); };</script>
 </body>
 </html>`)
