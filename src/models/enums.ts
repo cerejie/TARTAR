@@ -33,6 +33,24 @@ export const transactionTypeValues = [
 export const transactionTypeSchema = z.enum(transactionTypeValues)
 export type TransactionType = z.infer<typeof transactionTypeSchema>
 
+/**
+ * Which transaction types move cash in vs. out (Reports § Cash Flow, and the
+ * dashboard's Cash Flow (MTD) tile). One source so the two pages can never
+ * disagree on what counts as an inflow.
+ */
+export const CASH_INFLOW_TYPES: TransactionType[] = [
+  'sale',
+  'customer_payment',
+  'collection',
+  'cash_deposit',
+]
+export const CASH_OUTFLOW_TYPES: TransactionType[] = [
+  'expense',
+  'supplier_payment',
+  'purchase',
+  'petty_cash',
+]
+
 export const incomeSourceValues = ['product_sales', 'rental_income'] as const
 export const incomeSourceSchema = z.enum(incomeSourceValues)
 export type IncomeSource = z.infer<typeof incomeSourceSchema>

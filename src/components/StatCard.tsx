@@ -16,20 +16,39 @@ interface StatCardProps {
   prefix?: ReactNode
   /** Accent tone for the value text (maps to a globalStyle class). */
   tone?: 'default' | 'positive' | 'negative' | 'brand'
+  /** Icon badge docked top-right of the tile (dashboard stat grid only). */
+  icon?: ReactNode
+  /** Small line under the value — a plain caption or a computed delta. */
+  caption?: ReactNode
 }
 
-export function StatCard({ title, value, loading, raw, prefix, tone = 'default' }: StatCardProps) {
+export function StatCard({
+  title,
+  value,
+  loading,
+  raw,
+  prefix,
+  tone = 'default',
+  icon,
+  caption,
+}: StatCardProps) {
   return (
     <Card className="tartar-stat" size="small">
       {loading ? (
         <Skeleton active paragraph={false} title={{ width: '80%' }} />
       ) : (
-        <Statistic
-          className={`tartar-stat-value tartar-tone-${tone}`}
-          title={title}
-          prefix={prefix}
-          value={raw ? (value ?? '—') : formatMoney(value)}
-        />
+        <div className="tartar-stat-body">
+          <div className="tartar-stat-head">
+            <Statistic
+              className={`tartar-stat-value tartar-tone-${tone}`}
+              title={title}
+              prefix={prefix}
+              value={raw ? (value ?? '—') : formatMoney(value)}
+            />
+            {icon ? <span className={`tartar-stat-icon tartar-tone-${tone}`}>{icon}</span> : null}
+          </div>
+          {caption ? <div className="tartar-stat-caption">{caption}</div> : null}
+        </div>
       )}
     </Card>
   )

@@ -671,6 +671,76 @@ globalStyle('.tartar-tone-brand .ant-statistic-content', {
   color: vars.color.brand,
 })
 
+/* Icon badge + caption/delta line, used by the dashboard's stat grid only —
+   plain StatCard usages elsewhere (Reports, ledger summaries) never pass
+   `icon`/`caption`, so those tiles render exactly as before. */
+globalStyle('.tartar-stat-head', {
+  display: 'flex',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
+  gap: vars.space.sm,
+})
+
+globalStyle('.tartar-stat-head .tartar-stat-value', {
+  flex: 1,
+  minWidth: 0,
+})
+
+globalStyle('.tartar-stat-icon', {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '40px',
+  height: '40px',
+  flexShrink: 0,
+  borderRadius: vars.radius.pill,
+  fontSize: '18px',
+})
+
+globalStyle('.tartar-stat-icon.tartar-tone-default', {
+  background: vars.color.accent,
+  color: vars.color.brand,
+})
+
+globalStyle('.tartar-stat-icon.tartar-tone-brand', {
+  background: vars.color.brand,
+  color: vars.color.surface,
+})
+
+globalStyle('.tartar-stat-icon.tartar-tone-positive', {
+  background: 'rgba(35, 120, 4, 0.12)',
+  color: vars.color.positive,
+})
+
+globalStyle('.tartar-stat-icon.tartar-tone-negative', {
+  background: vars.color.dangerBg,
+  color: vars.color.danger,
+})
+
+globalStyle('.tartar-stat-caption', {
+  marginTop: '6px',
+  fontSize: '12px',
+  color: vars.color.textMuted,
+})
+
+/* A caption that's a computed delta (StatDelta in dashboard.route.tsx) rather
+   than plain text — colored by whether the change is good or bad news, which
+   isn't always "up is green" (e.g. expenses falling is good). */
+globalStyle('.tartar-stat-delta', {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '3px',
+  fontWeight: 600,
+})
+
+globalStyle('.tartar-stat-delta.tartar-tone-positive', {
+  color: vars.color.positive,
+})
+
+globalStyle('.tartar-stat-delta.tartar-tone-negative', {
+  color: vars.color.danger,
+})
+
 globalStyle('.tartar-row-clickable', {
   cursor: 'pointer',
 })
@@ -1323,4 +1393,242 @@ globalStyle('.tartar-report-seg', {
 
 globalStyle('.tartar-report-stats', {
   marginBottom: vars.space.lg,
+})
+
+/* --- Dashboard: notifications sidebar -------------------------------------
+   Wraps the SectionCard so it can stretch to match the main column's height
+   (the Row above uses align="stretch") without SectionCard itself needing a
+   className prop. */
+globalStyle('.tartar-notif-col', {
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+})
+
+globalStyle('.tartar-notif-col .tartar-card', {
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+})
+
+globalStyle('.tartar-notif-col .tartar-card-body', {
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  overflowY: 'auto',
+})
+
+globalStyle('.tartar-notif-group', {
+  marginBottom: vars.space.md,
+})
+
+globalStyle('.tartar-notif-group:last-child', {
+  marginBottom: 0,
+})
+
+globalStyle('.tartar-notif-group-head', {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  marginBottom: '2px',
+  fontSize: '11px',
+  fontWeight: 700,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+})
+
+globalStyle('.tartar-notif-group-head.tartar-tone-negative', {
+  color: vars.color.danger,
+})
+
+/* Due-today/tomorrow read as "pending attention" rather than "wrong" — amber,
+   the same signal antd's own Tag color="gold" already carries elsewhere in
+   the app (ledgerStatus.partial, voucherStatus.pending). */
+globalStyle('.tartar-notif-group-head.tartar-tone-warning', {
+  color: '#ad6800',
+})
+
+globalStyle('.tartar-notif-count', {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: '16px',
+  height: '16px',
+  padding: '0 5px',
+  borderRadius: vars.radius.pill,
+  fontSize: '10px',
+  fontWeight: 700,
+  color: vars.color.surface,
+})
+
+globalStyle('.tartar-notif-count.tartar-tone-negative', {
+  background: vars.color.danger,
+})
+
+globalStyle('.tartar-notif-count.tartar-tone-warning', {
+  background: '#ad6800',
+})
+
+globalStyle('.tartar-notif-item', {
+  display: 'flex',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
+  gap: vars.space.sm,
+  padding: '9px 0',
+  borderBottom: `1px solid ${vars.color.borderSubtle}`,
+})
+
+globalStyle('.tartar-notif-group:last-child .tartar-notif-item:last-child', {
+  borderBottom: 'none',
+})
+
+globalStyle('.tartar-notif-item-main', {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '10px',
+  minWidth: 0,
+})
+
+globalStyle('.tartar-notif-dot', {
+  marginTop: '6px',
+  width: '8px',
+  height: '8px',
+  flexShrink: 0,
+  borderRadius: '50%',
+})
+
+globalStyle('.tartar-notif-dot.tartar-tone-negative', {
+  background: vars.color.danger,
+})
+
+globalStyle('.tartar-notif-dot.tartar-tone-warning', {
+  background: '#ad6800',
+})
+
+globalStyle('.tartar-notif-text', {
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+})
+
+globalStyle('.tartar-notif-name', {
+  fontSize: '13px',
+  fontWeight: 600,
+  color: vars.color.text,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
+
+globalStyle('.tartar-notif-sub', {
+  fontSize: '12px',
+  color: vars.color.textMuted,
+})
+
+globalStyle('.tartar-notif-figures', {
+  flexShrink: 0,
+  textAlign: 'right',
+})
+
+globalStyle('.tartar-notif-amount', {
+  fontSize: '13px',
+  fontWeight: 700,
+  whiteSpace: 'nowrap',
+})
+
+globalStyle('.tartar-notif-amount.tartar-tone-negative', {
+  color: vars.color.danger,
+})
+
+globalStyle('.tartar-notif-amount.tartar-tone-warning', {
+  color: vars.color.brandDark,
+})
+
+globalStyle('.tartar-notif-date', {
+  fontSize: '11px',
+  color: vars.color.textMuted,
+  whiteSpace: 'nowrap',
+})
+
+globalStyle('.tartar-notif-more', {
+  display: 'block',
+  marginTop: '4px',
+  fontSize: '12px',
+})
+
+globalStyle('.tartar-notif-empty', {
+  padding: `${vars.space.lg} 0`,
+  textAlign: 'center',
+})
+
+globalStyle('.tartar-notif-footer', {
+  marginTop: vars.space.md,
+  paddingTop: vars.space.sm,
+  borderTop: `1px solid ${vars.color.borderSubtle}`,
+  textAlign: 'center',
+})
+
+/* --- Dashboard: Cash Flow (MTD) donut --------------------------------------- */
+globalStyle('.tartar-donut-wrap', {
+  position: 'relative',
+})
+
+globalStyle('.tartar-donut-center', {
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  textAlign: 'center',
+  pointerEvents: 'none',
+})
+
+globalStyle('.tartar-donut-center-value', {
+  fontFamily: vars.font.heading,
+  fontSize: '19px',
+  fontWeight: 700,
+  color: vars.color.brandDark,
+  lineHeight: 1.2,
+})
+
+globalStyle('.tartar-donut-center-label', {
+  fontSize: '12px',
+  color: vars.color.textMuted,
+})
+
+globalStyle('.tartar-donut-legend', {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  marginTop: vars.space.md,
+})
+
+globalStyle('.tartar-donut-legend-row', {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  fontSize: '13px',
+})
+
+globalStyle('.tartar-donut-legend-key', {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  color: vars.color.text,
+})
+
+globalStyle('.tartar-donut-legend-dot', {
+  width: '10px',
+  height: '10px',
+  flexShrink: 0,
+  borderRadius: '50%',
+})
+
+globalStyle('.tartar-donut-legend-value', {
+  fontFamily: vars.font.heading,
+  fontWeight: 700,
+  color: vars.color.brandDark,
 })

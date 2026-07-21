@@ -15,6 +15,8 @@ import { useAuthStore } from '../stores/auth.store'
 import * as transactionsService from '../services/transactions.service'
 import { receivablesService, payablesService } from '../services/ledger.service'
 import {
+  CASH_INFLOW_TYPES,
+  CASH_OUTFLOW_TYPES,
   isLedgerOverdue,
   labels,
   tagColors,
@@ -49,8 +51,8 @@ const REPORT_LABEL: Record<ReportType, string> = {
   expenses: 'Expenses',
 }
 
-const INFLOW: TransactionType[] = ['sale', 'customer_payment', 'collection', 'cash_deposit']
-const OUTFLOW: TransactionType[] = ['expense', 'supplier_payment', 'purchase', 'petty_cash']
+const INFLOW = CASH_INFLOW_TYPES
+const OUTFLOW = CASH_OUTFLOW_TYPES
 
 /** Reports (build spec §12). Managers + accountants (BIR income/expense). */
 export const reportsRoute = createRoute({
