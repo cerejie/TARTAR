@@ -1,88 +1,129 @@
-import type { ReactNode } from 'react'
-import { Card, Typography } from 'antd'
-import { CloudSyncOutlined, FileProtectOutlined, ShopOutlined } from '@ant-design/icons'
+import {
+  CloudSyncOutlined,
+  FileProtectOutlined,
+  ShopOutlined,
+} from "@ant-design/icons";
+import { Card, Flex, Typography } from "antd";
+import type { ReactNode } from "react";
+import {
+  authBlob,
+  authBlobA,
+  authBlobB,
+  authBlobC,
+  authCard,
+  authCardBrand,
+  authHero,
+  authHeroArt,
+  authHeroBody,
+  authHeroBrand,
+  authHeroCopy,
+  authHeroIcon,
+  authHeroItem,
+  authHeroList,
+  authHeroTitle,
+  authMain,
+  authMark,
+  authPage,
+  authSubtitle,
+  authTitle,
+  authWordmark,
+} from "../../styles/layout/public.layout.css";
 
-/**
- * Shared chrome for the public auth pages (login / register): a split-screen
- * composition with an espresso branding panel on the left and the floating
- * form card over a soft cream field on the right. The panel collapses away on
- * narrow viewports, where the card grows its own compact brand row instead.
- *
- * Purely presentational — pages pass their heading and form as children. All
- * styling lives in globalStyle rules keyed on `tartar-auth-*` (hard rule).
- */
+const { Title, Paragraph, Text } = Typography;
 
-const FEATURES = [
-  { icon: <ShopOutlined />, text: 'Every branch on one ledger' },
-  { icon: <FileProtectOutlined />, text: 'Vouchers with an approval trail' },
-  { icon: <CloudSyncOutlined />, text: 'Works offline, syncs when you return' },
-]
+const features = [
+  { icon: <ShopOutlined />, text: "Every branch on one ledger" },
+  { icon: <FileProtectOutlined />, text: "Vouchers with an approval trail" },
+  { icon: <CloudSyncOutlined />, text: "Works offline, syncs when you return" },
+];
 
-interface AuthShellProps {
-  /** Card heading, e.g. "Welcome back". */
-  title: string
-  /** One-line supporting copy under the heading. */
-  subtitle: string
-  children: ReactNode
-}
+type IProps = {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+};
 
-export function AuthShell({ title, subtitle, children }: AuthShellProps) {
+const AuthShell = ({ title, subtitle, children }: IProps) => {
   return (
-    <div className="tartar-auth-page">
-      <aside className="tartar-auth-hero">
-        <div className="tartar-auth-hero-brand">
-          <span className="tartar-auth-mark" aria-hidden="true">
+    <Flex className={`${authPage}`}>
+      <Flex vertical component="aside" className={`${authHero}`}>
+        <Flex className={`${authHeroBrand}`} align="center" gap={12}>
+          <Flex
+            component="span"
+            className={`${authMark}`}
+            align="center"
+            justify="center"
+            aria-hidden="true"
+          >
             T
-          </span>
+          </Flex>
           TARTAR
-        </div>
+        </Flex>
 
-        <div className="tartar-auth-hero-body">
-          <Typography.Title level={1} className="tartar-auth-hero-title">
+        <Flex vertical className={`${authHeroBody}`}>
+          <Title level={1} className={`${authHeroTitle}`}>
             The calm ledger behind a busy tartar.
-          </Typography.Title>
-          <Typography.Paragraph className="tartar-auth-hero-copy">
+          </Title>
+          <Paragraph className={`${authHeroCopy}`}>
             Cash, receivables, payables and vouchers for every branch — kept in
             one quiet, careful place.
-          </Typography.Paragraph>
-          <ul className="tartar-auth-hero-list">
-            {FEATURES.map((f) => (
-              <li key={f.text} className="tartar-auth-hero-item">
-                <span className="tartar-auth-hero-icon" aria-hidden="true">
-                  {f.icon}
-                </span>
-                {f.text}
-              </li>
+          </Paragraph>
+          <Flex vertical component="ul" className={`${authHeroList}`}>
+            {features.map((feature) => (
+              <Flex
+                key={feature.text}
+                component="li"
+                className={`${authHeroItem}`}
+                align="center"
+                gap={12}
+              >
+                <Flex
+                  component="span"
+                  className={`${authHeroIcon}`}
+                  align="center"
+                  justify="center"
+                  aria-hidden="true"
+                >
+                  {feature.icon}
+                </Flex>
+                {feature.text}
+              </Flex>
             ))}
-          </ul>
-        </div>
+          </Flex>
+        </Flex>
 
-        {/* Etched farm scene, shared with the app sider — brand continuity. */}
-        <div className="tartar-auth-hero-art" aria-hidden="true" />
-      </aside>
+        <div className={`${authHeroArt}`} aria-hidden="true" />
+      </Flex>
 
-      <main className="tartar-auth-main">
-        <span className="tartar-auth-blob tartar-auth-blob-a" aria-hidden="true" />
-        <span className="tartar-auth-blob tartar-auth-blob-b" aria-hidden="true" />
-        <span className="tartar-auth-blob tartar-auth-blob-c" aria-hidden="true" />
+      <Flex component="main" className={`${authMain}`}>
+        <span className={`${authBlob} ${authBlobA}`} aria-hidden="true" />
+        <span className={`${authBlob} ${authBlobB}`} aria-hidden="true" />
+        <span className={`${authBlob} ${authBlobC}`} aria-hidden="true" />
 
-        <Card className="tartar-auth-card">
-          {/* Compact brand row — only rendered visible when the hero is gone. */}
-          <div className="tartar-auth-card-brand">
-            <span className="tartar-auth-mark" aria-hidden="true">
+        <Card className={`${authCard}`} variant="borderless">
+          <Flex className={`${authCardBrand}`} align="center" gap={10}>
+            <Flex
+              component="span"
+              className={`${authMark}`}
+              align="center"
+              justify="center"
+              aria-hidden="true"
+            >
               T
-            </span>
-            <span className="tartar-auth-wordmark">TARTAR</span>
-          </div>
+            </Flex>
+            <span className={`${authWordmark}`}>TARTAR</span>
+          </Flex>
 
-          <Typography.Title level={2} className="tartar-auth-title">
+          <Title level={2} className={`${authTitle}`}>
             {title}
-          </Typography.Title>
-          <Typography.Text className="tartar-auth-subtitle">{subtitle}</Typography.Text>
+          </Title>
+          <Text className={`${authSubtitle}`}>{subtitle}</Text>
 
           {children}
         </Card>
-      </main>
-    </div>
-  )
-}
+      </Flex>
+    </Flex>
+  );
+};
+
+export default AuthShell;

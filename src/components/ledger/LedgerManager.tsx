@@ -1,174 +1,161 @@
-import { Button, Popconfirm, Space, Tag, Tooltip } from 'antd'
-import { DeleteOutlined, DollarOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import type { ReactNode } from 'react'
-import type { DefaultValues, FieldValues } from 'react-hook-form'
-import type { ZodType } from 'zod'
-import { PageHeader } from '../PageHeader'
-import { SectionCard } from '../SectionCard'
-import { NameCell } from '../TableDecor'
-import { DataTable } from '../DataTable'
-import { LedgerFilterBar } from '../LedgerFilterBar'
-import { PaymentsPanel } from '../payments/PaymentsPanel'
-import { EntityFormModal } from '../form/EntityFormModal'
-import type { FieldConfig } from '../form/FormField'
-import { RequirePermission } from '../RequirePermission'
-import { useQuery } from '../../hooks/useQuery'
-import { useMutation } from '../../hooks/useMutation'
-import { useBranches } from '../../hooks/useReferenceData'
-import { useBranchScope, scopedFilters } from '../../hooks/useBranchScope'
-import { useUiStore, selectModal } from '../../stores/ui.store'
-import { useAuthStore } from '../../stores/auth.store'
+import {
+  DeleteOutlined,
+  DollarOutlined,
+  PlusOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { Button, Popconfirm, Space, Tag, Tooltip } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import type { ReactNode } from "react";
+import type { DefaultValues, FieldValues } from "react-hook-form";
+import type { ZodType } from "zod";
+import {
+  ledgerStatusColors,
+  ledgerStatusLabels,
+  type LedgerStatus,
+} from "../../enums/ledger.enum";
+import {
+  useLedgerManagerHook,
+  type ILedgerManagerConfig,
+} from "../../hook/data/ledger/ledger.manage.hook";
+import type { IFieldConfig } from "../../models/common/field.model";
 import {
   isLedgerOverdue,
-  labels,
+  ledgerBalance,
+  type ILedgerRow,
+} from "../../models/data/ledger/ledger.response";
+import {
   settlementSchema,
-  tagColors,
-  type LedgerStatus,
-  type SettlementInput,
-} from '../../models'
-import { formatDate, formatMoney } from '../../utils/format'
+  type ISettlementInput,
+} from "../../models/data/ledger/ledger.request";
+import { iconButton, rowOverdue } from "../../styles/table/table.css";
+import { formatDate, formatMoney } from "../../utils/format.utils";
+import SectionCard from "../common/card/SectionCard";
+import LedgerFilterBar from "../common/filter/LedgerFilterBar";
+import EntityFormModal from "../common/form/EntityFormModal";
+import RequirePermission from "../common/guard/RequirePermission";
+import DataTable from "../common/table/DataTable";
+import { NameCell, RowActions } from "../common/table/TableDecor";
+import PageHeader from "../common/view/PageHeader";
+import PaymentsPanel from "../payment/PaymentsPanel";
 
-/**
- * One component that runs both the Receivables and Payables screens (build spec
- * §9 — identical lifecycle). Handles create, "record payment" (settle), delete,
- * filtering, and overdue/near-due tagging (§14). The two routes just pass config.
- */
-export interface LedgerRow {
-  id: string
-  branch: string
-  amount: number
-  paid_amount: number
-  due_date: string
-  reference_number: string | null
-  status: LedgerStatus
-}
+type IProps<Row extends ILedgerRow, Input extends FieldValues> =
+  ILedgerManagerConfig<Row, Input> & {
+    subtitle: string;
+    partyLabel: string;
+    nameOf: (row: Row) => string;
+    schema: ZodType<Input>;
+    fields: IFieldConfig<Input>[];
+    defaults: DefaultValues<Input>;
+    headerActions?: ReactNode;
+  };
 
-interface LedgerManagerProps<Row extends LedgerRow, Input extends FieldValues> {
-  queryKey: 'receivables' | 'payables'
-  title: string
-  subtitle: string
-  partyLabel: string
-  nameOf: (row: Row) => string
-  list: (filters: object) => Promise<Row[]>
-  create: (input: Input, createdBy: string | null) => Promise<{ queued: boolean }>
-  /** Records a verifiable payment (payments.service) — not a raw balance write. */
-  settle: (row: Row, amount: number, createdBy: string | null) => Promise<{ queued: boolean }>
-  remove: (id: string) => Promise<{ queued: boolean }>
-  schema: ZodType<Input>
-  fields: FieldConfig<Input>[]
-  defaults: DefaultValues<Input>
-  /** Extra page-header actions rendered before the "Add" button. */
-  headerActions?: ReactNode
-}
-
-const STATUS_COLOR: Record<LedgerStatus, string> = tagColors.ledgerStatus
-
-export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
-  props: LedgerManagerProps<Row, Input>,
-) {
-  const formKey = `${props.queryKey}-form`
-  const settleKey = `${props.queryKey}-settle`
-
-  const filters = useUiStore((s) => s.filters)
-  const openModal = useUiStore((s) => s.openModal)
-  const closeModal = useUiStore((s) => s.closeModal)
-  const formModal = useUiStore(selectModal(formKey))
-  const settleModal = useUiStore(selectModal(settleKey))
-  const createdBy = useAuthStore((s) => s.user?.id ?? null)
-  const { branches } = useBranches()
-  const { branch: scopeBranch } = useBranchScope()
-
-  const effectiveFilters = scopedFilters(filters, scopeBranch)
-  const listKey = `${props.queryKey}:${JSON.stringify(effectiveFilters)}`
-  const list = useQuery(listKey, () => props.list(effectiveFilters))
-  const rows = list.data ?? []
-
-  const create = useMutation((input: Input) => props.create(input, createdBy), {
-    successMessage: `${props.title} added`,
-    invalidate: [props.queryKey],
-    onSuccess: () => closeModal(formKey),
-  })
-  const settle = useMutation(
-    (payload: { row: Row; amount: number }) => props.settle(payload.row, payload.amount, createdBy),
-    {
-      successMessage: 'Payment recorded',
-      invalidate: [props.queryKey, 'payments'],
-      onSuccess: () => closeModal(settleKey),
-    },
-  )
-  const remove = useMutation((id: string) => props.remove(id), {
-    successMessage: `${props.title} deleted`,
-    invalidate: [props.queryKey],
-  })
-
-  const settleRow = rows.find((r) => r.id === settleModal.recordId)
-  const branchName = (slug: string) => branches.find((b) => b.slug === slug)?.name ?? slug
-  const isOverdue = (r: Row) => isLedgerOverdue(r)
+const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
+  props: IProps<Row, Input>
+) => {
+  const {
+    rows,
+    loading,
+    branchName,
+    formModal,
+    settleModal,
+    settleRow,
+    createMutation,
+    settleMutation,
+    removeMutation,
+  } = useLedgerManagerHook<Row, Input>(props);
 
   const columns: ColumnsType<Row> = [
     {
-      title: 'Due date',
-      dataIndex: 'due_date',
+      title: "Due date",
+      dataIndex: "due_date",
       width: 190,
-      render: (v: string, r) => (
+      render: (value: string, row) => (
         <Space>
-          {formatDate(v)}
-          {isOverdue(r) ? <Tag color="red">Overdue</Tag> : null}
+          {formatDate(value)}
+          {isLedgerOverdue(row) ? <Tag color="red">Overdue</Tag> : null}
         </Space>
       ),
     },
     {
       title: props.partyLabel,
-      key: 'name',
-      render: (_, r) => <NameCell icon={<UserOutlined />}>{props.nameOf(r)}</NameCell>,
+      key: "name",
+      render: (_, row) => (
+        <NameCell icon={<UserOutlined />}>{props.nameOf(row)}</NameCell>
+      ),
     },
-    { title: 'Branch', dataIndex: 'branch', render: branchName },
-    { title: 'Amount', dataIndex: 'amount', align: 'right', render: (v: number) => formatMoney(v) },
-    { title: 'Paid', dataIndex: 'paid_amount', align: 'right', render: (v: number) => formatMoney(v) },
+    { title: "Branch", dataIndex: "branch", render: branchName },
     {
-      title: 'Balance',
-      key: 'balance',
-      align: 'right',
-      render: (_, r) => formatMoney(Number(r.amount) - Number(r.paid_amount)),
+      title: "Amount",
+      dataIndex: "amount",
+      align: "right",
+      render: (value: number) => formatMoney(value),
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      render: (s: LedgerStatus) => <Tag color={STATUS_COLOR[s]}>{labels.ledgerStatus[s]}</Tag>,
+      title: "Paid",
+      dataIndex: "paid_amount",
+      align: "right",
+      render: (value: number) => formatMoney(value),
     },
-    { title: 'Reference', dataIndex: 'reference_number', render: (v: string | null) => v || '—' },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Balance",
+      key: "balance",
+      align: "right",
+      render: (_, row) => formatMoney(ledgerBalance(row)),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (status: LedgerStatus) => (
+        <Tag color={ledgerStatusColors[status]}>
+          {ledgerStatusLabels[status]}
+        </Tag>
+      ),
+    },
+    {
+      title: "Reference",
+      dataIndex: "reference_number",
+      render: (value: string | null) => value || "—",
+    },
+    {
+      title: "Actions",
+      key: "actions",
       width: 120,
-      align: 'center',
-      render: (_, r) => (
-        <span className="tartar-row-actions">
-          <Tooltip title={r.status === 'paid' ? 'Fully paid' : 'Record payment'}>
-            {/* Tooltip needs a live child to hover, so the span keeps the
-                disabled button's title reachable. */}
+      align: "center",
+      render: (_, row) => (
+        <RowActions>
+          <Tooltip
+            title={row.status === "paid" ? "Fully paid" : "Record payment"}
+          >
             <span>
               <Button
-                className="tartar-icon-btn"
+                className={`${iconButton}`}
                 icon={<DollarOutlined />}
                 aria-label="Record payment"
-                disabled={r.status === 'paid'}
-                onClick={() => openModal(settleKey, r.id)}
+                disabled={row.status === "paid"}
+                onClick={() => settleModal.openModal(row.id)}
               />
             </span>
           </Tooltip>
           <RequirePermission can="isManager" fallback={null}>
-            <Popconfirm title="Delete this record?" onConfirm={() => void remove.mutate(r.id)}>
+            <Popconfirm
+              title="Delete this record?"
+              onConfirm={() => void removeMutation.mutate(row.id)}
+            >
               <Tooltip title="Delete record">
-                <Button className="tartar-icon-btn" danger icon={<DeleteOutlined />} aria-label="Delete record" />
+                <Button
+                  className={`${iconButton}`}
+                  danger
+                  icon={<DeleteOutlined />}
+                  aria-label="Delete record"
+                />
               </Tooltip>
             </Popconfirm>
           </RequirePermission>
-        </span>
+        </RowActions>
       ),
     },
-  ]
+  ];
 
   return (
     <>
@@ -178,10 +165,12 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
         extra={
           <Space>
             {props.headerActions}
-            {/* Accountants read these ledgers for BIR purposes but never encode
-                them (client decision 2026-07-22). */}
             <RequirePermission can="encodeTransactions" fallback={null}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal(formKey)}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => formModal.openModal()}
+              >
                 Add {props.partyLabel.toLowerCase()} record
               </Button>
             </RequirePermission>
@@ -191,45 +180,53 @@ export function LedgerManager<Row extends LedgerRow, Input extends FieldValues>(
 
       <LedgerFilterBar />
 
-      {/* The page header already carries `props.title`/`props.subtitle`, so the
-          card names the *contents* instead of repeating them. */}
-      <SectionCard title={`All ${props.title}`} subtitle="Matching the current filters" flush>
+      <SectionCard
+        title={`All ${props.title}`}
+        subtitle="Matching the current filters"
+        flush
+      >
         <DataTable<Row>
           columns={columns}
           data={rows}
-          loading={list.loading}
+          loading={loading}
           emptyText="No records match the filters"
-          rowClassName={(r) => (isOverdue(r) ? 'tartar-row-overdue' : '')}
+          rowClassName={(row) => (isLedgerOverdue(row) ? `${rowOverdue}` : "")}
         />
       </SectionCard>
 
-      {/* Payment history + the manager verification/approval queue. */}
-      <PaymentsPanel kind={props.queryKey === 'receivables' ? 'receivable' : 'payable'} />
+      <PaymentsPanel
+        kind={props.scope === "receivables" ? "receivable" : "payable"}
+      />
 
       <EntityFormModal<Input>
-        open={formModal.open}
+        open={formModal.modal.open}
         title={`Add ${props.title.toLowerCase()} record`}
         fields={props.fields}
         schema={props.schema}
         defaultValues={props.defaults}
-        submitting={create.loading}
-        onSubmit={(v) => void create.mutate(v)}
-        onClose={() => closeModal(formKey)}
+        submitting={createMutation.loading}
+        onSubmit={(values) => void createMutation.mutate(values)}
+        onClose={formModal.closeModal}
       />
 
-      <EntityFormModal<SettlementInput>
-        open={settleModal.open}
+      <EntityFormModal<ISettlementInput>
+        open={settleModal.modal.open}
         title="Record payment"
-        fields={[{ name: 'amount', label: 'Payment amount', type: 'number', prefix: '₱' }]}
+        fields={[
+          { name: "amount", label: "Payment amount", type: "number", prefix: "₱" },
+        ]}
         schema={settlementSchema}
         defaultValues={{ amount: undefined as unknown as number }}
-        submitting={settle.loading}
+        submitting={settleMutation.loading}
         submitText="Record payment"
-        onSubmit={(v) => {
-          if (settleRow) void settle.mutate({ row: settleRow, amount: v.amount })
+        onSubmit={(values) => {
+          if (settleRow)
+            void settleMutation.mutate({ row: settleRow, amount: values.amount });
         }}
-        onClose={() => closeModal(settleKey)}
+        onClose={settleModal.closeModal}
       />
     </>
-  )
-}
+  );
+};
+
+export default LedgerManager;

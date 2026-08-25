@@ -1,0 +1,226 @@
+import {
+  CheckOutlined,
+  CloseOutlined,
+  PlusOutlined,
+  PrinterOutlined,
+} from "@ant-design/icons";
+import { Button, Space, Tag, Typography } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import SectionCard from "../../components/common/card/SectionCard";
+import EntityFormModal from "../../components/common/form/EntityFormModal";
+import RequirePermission from "../../components/common/guard/RequirePermission";
+import DataTable from "../../components/common/table/DataTable";
+import PageHeader from "../../components/common/view/PageHeader";
+import {
+  voucherStatusColors,
+  voucherStatusLabels,
+  voucherTypeLabels,
+  type VoucherStatus,
+} from "../../enums/voucher.enum";
+import { useVoucherListHook } from "../../hook/data/voucher/voucher.list.hook";
+import {
+  voucherSchema,
+  type IVoucherInput,
+} from "../../models/data/voucher/voucher.request";
+import {
+  voucherPurpose,
+  type IVoucher,
+} from "../../models/data/voucher/voucher.response";
+import {
+  formatDate,
+  formatDateTime,
+  formatMoney,
+} from "../../utils/format.utils";
+
+const { Text } = Typography;
+
+const VouchersView = () => {
+  const {
+    vouchers,
+    loading,
+    branchName,
+    formModal,
+    fields,
+    defaults,
+    createMutation,
+    decideMutation,
+    print,
+  } = useVoucherListHook();
+
+  const columns: ColumnsType<IVoucher> = [
+    {
+      title: "Voucher no.",
+      dataIndex: "voucher_no",
+      width: 190,
+      render: (value: string | null) => value || "—",
+    },
+    {
+      title: "Type",
+      dataIndex: "type",
+      render: (type: IVoucher["type"]) => voucherTypeLabels[type],
+    },
+    {
+      title: "Category",
+      dataIndex: "category",
+      width: 100,
+      render: (value: string) => <Tag>{value}</Tag>,
+    },
+    {
+      title: "Purpose",
+      key: "purpose",
+      render: (_, voucher) => voucherPurpose(voucher),
+    },
+    { title: "Branch", dataIndex: "branch", render: branchName },
+    { title: "Payee", dataIndex: "payee" },
+    {
+      title: "Amount",
+      dataIndex: "amount",
+      align: "right",
+      render: (value: number) => formatMoney(value),
+    },
+    {
+      title: "Check",
+      key: "check",
+      width: 180,
+      render: (_, voucher) =>
+        voucher.type === "check" && voucher.check_number ? (
+          <Space direction="vertical" size={0}>
+            <span>{voucher.check_number}</span>
+            <Text type="secondary">
+              {[
+                voucher.check_bank,
+                voucher.check_due_date
+                  ? `due ${formatDate(voucher.check_due_date)}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </Text>
+          </Space>
+        ) : (
+          "—"
+        ),
+    },
+    {
+      title: "Created",
+      dataIndex: "created_at",
+      width: 180,
+      render: (value: string) => formatDateTime(value),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (status: VoucherStatus, voucher) => (
+        <Space>
+          <Tag color={voucherStatusColors[status]}>
+            {voucherStatusLabels[status]}
+          </Tag>
+          {voucher.printed ? <Tag>Printed</Tag> : null}
+        </Space>
+      ),
+    },
+    {
+      title: "",
+      key: "actions",
+      width: 240,
+      render: (_, voucher) => (
+        <Space>
+          <RequirePermission can="approveVouchers" fallback={null}>
+            {voucher.status === "pending" ? (
+              <>
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<CheckOutlined />}
+                  onClick={() =>
+                    void decideMutation.mutate({
+                      id: voucher.id,
+                      approve: true,
+                    })
+                  }
+                >
+                  Approve
+                </Button>
+                <Button
+                  type="link"
+                  danger
+                  size="small"
+                  icon={<CloseOutlined />}
+                  onClick={() =>
+                    void decideMutation.mutate({
+                      id: voucher.id,
+                      approve: false,
+                    })
+                  }
+                >
+                  Reject
+                </Button>
+              </>
+            ) : null}
+          </RequirePermission>
+          <Button
+            type="link"
+            size="small"
+            icon={<PrinterOutlined />}
+            disabled={voucher.status !== "approved"}
+            title={
+              voucher.status !== "approved"
+                ? "Only approved vouchers can be printed"
+                : undefined
+            }
+            onClick={() => print(voucher)}
+          >
+            Print
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <PageHeader
+        title="Vouchers"
+        subtitle="Auto-generated by Purchases & Expenses → manager approves → approved vouchers can be printed"
+        extra={
+          <RequirePermission can="createManualVouchers" fallback={null}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => formModal.openModal()}
+            >
+              Manual voucher
+            </Button>
+          </RequirePermission>
+        }
+      />
+
+      <SectionCard
+        title="All Vouchers"
+        subtitle="Draft, pending approval, approved and printed"
+        flush
+      >
+        <DataTable<IVoucher>
+          columns={columns}
+          data={vouchers}
+          loading={loading}
+          emptyText="No vouchers yet"
+        />
+      </SectionCard>
+
+      <EntityFormModal<IVoucherInput>
+        open={formModal.modal.open}
+        title="Manual voucher"
+        fields={fields}
+        schema={voucherSchema}
+        defaultValues={defaults}
+        submitting={createMutation.loading}
+        submitText="Submit"
+        onSubmit={(values) => void createMutation.mutate(values)}
+        onClose={formModal.closeModal}
+      />
+    </>
+  );
+};
+
+export default VouchersView;
