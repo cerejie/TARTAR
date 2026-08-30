@@ -33,21 +33,42 @@ Derive the paths; do not search for them. This map resolves most tasks with zero
 
 | Need | Path |
 |---|---|
+| **A screen's UI — columns, buttons, toolbar, modals** | `src/components/<x>/tables/<X>Table.tsx` |
+| **A screen's data, fields, defaults, mutations** | `src/hook/data/<x>/<x>.list.hook.ts` |
+| What a page contains (rarely more than one line) | `src/pages/<X>/<X>View.tsx` |
 | Database / API calls for `x` | `src/services/data/x.services.ts` |
-| Screen logic for `x` | `src/hook/data/x/x.manage.hook.ts` |
-| Read-only fetch for `x` | `src/hook/data/x/x.list.hook.ts` |
+| Panel-shaped screen instead of a table | `src/hook/data/x/x.manage.hook.ts` |
 | Form validation for `x` | `src/models/data/x/x.request.ts` |
 | Row shape for `x` | `src/models/data/x/x.response.ts` |
 | Status values, labels, colours | `src/enums/x.enum.ts` |
-| The screen | `src/pages/X/XView.tsx` |
-| Cache / modal / storage keys | `src/keys/*.keys.ts` |
+| Cache / modal / storage / pagination keys | `src/keys/*.keys.ts` |
 | Route, nav entry, permission gate | `src/routes/protected.view.routes.ts` |
 | Client state for `x` | `src/store/data/x/x.store.ts` |
-| Query, mutation, modal, sync, network mechanics | `src/hook/common/`, `src/store/common/` |
+| Query, mutation, modal, confirm, filter, pagination, sync mechanics | `src/hook/common/`, `src/store/common/` |
+| Shared primitives (`ContentView`, `DataTable`, `SectionCard`, `EntityFormModal`) | `src/components/common/<kind>/` |
 | Formatting, schema fragments, data client | `src/utils/*.utils.ts` |
-| Design tokens | `src/styles/common/vars.css.ts` |
+| **Look of a thing** | `src/styles/<area>/<area>.css.ts` — see the style map below |
+| Colours, spacing, radii, shadows, fonts | `src/styles/common/vars.css.ts` |
+
+**Style areas** — the `<area>` folder is the visual concern, not the domain:
+
+| Looking at | File |
+|---|---|
+| Sider, header, nav, app shell | `styles/layout/protected.layout.css.ts` |
+| Content shell, bento, page body | `styles/view/content/content.view.css.ts` |
+| Cards and panels | `styles/card/card.css.ts` |
+| Forms and fields | `styles/form/form.css.ts` |
+| Filter bar | `styles/filter/filter.css.ts` |
+| Tables | `styles/table/table.css.ts` |
+| Modals | `styles/modal/modal.css.ts` |
+| Stat tiles | `styles/stat/stat.css.ts` |
+| Status pills and tags | `styles/status/status.css.ts` |
+| Semantic tones (money, danger, focus) | `styles/common/tone.css.ts` |
 
 Multi-word domain: dots in the filename, kebab-case in the folder — `hook/data/expense-category/expense.category.manage.hook.ts`.
+
+Almost every change to an existing screen is its feature component plus its list hook. Open
+those two and stop. The full request router is in `references/pathfind.md`.
 
 Budget: **≤6 file reads for a feature, ≤3 for a fix.** Confirm a derived path with one `ls`, never a recursive `find`. If the map does not resolve it, read `references/pathfind.md` for symbol search and narrow-grep technique.
 
@@ -70,7 +91,11 @@ Read `references/plan.md`. Produce a plan of at most 15 lines — exact paths, `
 
 ## Step 5 — Implement
 
-Read `references/conventions.md` unless the change is confined to a file you have already read in this session. It is the authority on folder law, file naming, naming inside files, globalization, the layer contract, and the standard code shapes.
+Read `references/conventions.md` unless the change is confined to a file you have already
+read in this session, **or** it is a pure restyle of an existing element — editing a
+`styles/<area>/*.css.ts` with no new file and no markup change needs only the token rule,
+which `CLAUDE.md` already carries. It is otherwise the authority on folder law, file naming,
+naming inside files, globalization, the layer contract, and the standard code shapes.
 
 Also read, only when it applies:
 
