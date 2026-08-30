@@ -1,4 +1,4 @@
-import { globalStyle, style } from "@vanilla-extract/css";
+import { globalStyle, style, styleVariants } from "@vanilla-extract/css";
 import { vars } from "../common/vars.css";
 
 export const appModal = style({});
@@ -57,4 +57,36 @@ export const modalEmpty = style({
 globalStyle(`.${appModal} .ant-descriptions-bordered .ant-descriptions-view`, {
   borderRadius: vars.radius.lg,
   overflow: "hidden",
+});
+
+export const confirmBody = style({
+  paddingBlock: vars.space.sm,
+});
+
+export const confirmIcon = style({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 40,
+  height: 40,
+  flexShrink: 0,
+  borderRadius: vars.radius.pill,
+  fontSize: 18,
+});
+
+export const confirmIconTone = styleVariants({
+  confirm: {
+    background: vars.color.accentSoft,
+    color: vars.color.ink,
+  },
+  delete: {
+    background: vars.color.dangerBg,
+    color: vars.color.danger,
+  },
+});
+
+export const confirmMessage = style({
+  fontSize: 14,
+  lineHeight: 1.5,
+  color: vars.color.text,
 });

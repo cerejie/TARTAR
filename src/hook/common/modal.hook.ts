@@ -1,23 +1,35 @@
-import {
-  selectModal,
-  useModalStore,
-} from "../../store/common/modal.store";
+import { useMemo } from "react";
+import type { IModalRequest } from "../../models/common/modal.model";
+import { selectModal, useModalStore } from "../../store/common/modal.store";
 
-export const useModal = (key: string) => {
-  const modal = useModalStore(selectModal(key));
-  const open = useModalStore((state) => state.openModal);
-  const close = useModalStore((state) => state.closeModal);
+export const useModal = <T = unknown>(key: string) => {
+  const modal = useModalStore(selectModal(key)) as IModalRequest<T>;
+  const setModalAt = useModalStore((state) => state.setModal);
+  const resetModalAt = useModalStore((state) => state.resetModal);
+  const removeModalAt = useModalStore((state) => state.removeModal);
 
-  return {
-    modal,
-    openModal: (recordId?: string | null) => open(key, recordId),
-    closeModal: () => close(key),
-  };
+  return useMemo(
+    () => ({
+      modal,
+      setModal: (value: IModalRequest<T>) => setModalAt<T>(key, value),
+      openModal: (data?: T) => setModalAt<T>(key, { visible: true, data }),
+      closeModal: () => setModalAt<T>(key, { visible: false }),
+      resetModal: () => resetModalAt(key),
+      removeModal: () => removeModalAt(key),
+    }),
+    [modal, key, setModalAt, resetModalAt, removeModalAt]
+  );
 };
 
 export const useModalActions = () => {
-  const openModal = useModalStore((state) => state.openModal);
-  const closeModal = useModalStore((state) => state.closeModal);
+  const setModal = useModalStore((state) => state.setModal);
 
-  return { openModal, closeModal };
+  return useMemo(
+    () => ({
+      openModal: <T>(key: string, data?: T) =>
+        setModal<T>(key, { visible: true, data }),
+      closeModal: (key: string) => setModal(key, { visible: false }),
+    }),
+    [setModal]
+  );
 };

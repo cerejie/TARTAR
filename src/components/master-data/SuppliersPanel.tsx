@@ -4,7 +4,8 @@ import {
   PlusOutlined,
   ShopOutlined,
 } from "@ant-design/icons";
-import { Button, Popconfirm, Tooltip } from "antd";
+import { Button, Tooltip } from "antd";
+import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import { useSupplierManageHook } from "../../hook/data/party/supplier.manage.hook";
 import type { IFieldConfig } from "../../models/common/field.model";
@@ -55,6 +56,8 @@ const SuppliersPanel = () => {
     removeMutation,
   } = useSupplierManageHook();
 
+  const openConfirm = useConfirm();
+
   const columns: ColumnsType<ISupplier> = [
     {
       title: "Supplier",
@@ -90,23 +93,25 @@ const SuppliersPanel = () => {
               className={`${iconButton}`}
               icon={<EditOutlined />}
               aria-label={`Edit ${supplier.name}`}
-              onClick={() => editModal.openModal(supplier.id)}
+              onClick={() => editModal.openModal(supplier)}
             />
           </Tooltip>
-          <Popconfirm
-            title="Delete this supplier?"
-            description="Only possible while no record references it."
-            onConfirm={() => void removeMutation.mutate(supplier.id)}
-          >
-            <Tooltip title="Delete supplier">
-              <Button
-                className={`${iconButton}`}
-                danger
-                icon={<DeleteOutlined />}
-                aria-label={`Delete ${supplier.name}`}
-              />
-            </Tooltip>
-          </Popconfirm>
+          <Tooltip title="Delete supplier">
+            <Button
+              className={`${iconButton}`}
+              danger
+              icon={<DeleteOutlined />}
+              aria-label={`Delete ${supplier.name}`}
+              onClick={() =>
+                openConfirm({
+                  kind: "delete",
+                  title: `Delete ${supplier.name}?`,
+                  message: "Only possible while no record references it.",
+                  onConfirm: () => removeMutation.mutate(supplier.id),
+                })
+              }
+            />
+          </Tooltip>
         </RowActions>
       ),
     },
@@ -137,7 +142,7 @@ const SuppliersPanel = () => {
       </SectionCard>
 
       <EntityFormModal<IPartyInput>
-        open={createModal.modal.open}
+        open={createModal.modal.visible}
         title="Add supplier"
         fields={fields}
         schema={partySchema}
@@ -149,7 +154,7 @@ const SuppliersPanel = () => {
       />
 
       <EntityFormModal<IPartyInput>
-        open={editModal.modal.open}
+        open={editModal.modal.visible}
         title={`Edit ${editing?.name ?? "supplier"}`}
         fields={fields}
         schema={partySchema}

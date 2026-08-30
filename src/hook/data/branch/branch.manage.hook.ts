@@ -41,7 +41,7 @@ export const branchFormFields: IFieldConfig<IBranchInput>[] = [
 
 export const useBranchManageHook = () => {
   const createModal = useModal(branchCreateModalKey);
-  const editModal = useModal(branchEditModalKey);
+  const editModal = useModal<IBranch>(branchEditModalKey);
 
   const listQuery = useQuery<IBranch[]>(
     branchAdminListKey,
@@ -49,9 +49,7 @@ export const useBranchManageHook = () => {
   );
 
   const allBranches = listQuery.data ?? [];
-  const editing = allBranches.find(
-    (branch) => branch.slug === editModal.modal.recordId
-  );
+  const editing = editModal.modal.data;
   const nextSort =
     allBranches.reduce((max, branch) => Math.max(max, branch.sort), 0) + 1;
 

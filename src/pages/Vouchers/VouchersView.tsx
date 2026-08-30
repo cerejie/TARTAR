@@ -207,7 +207,7 @@ const VouchersView = () => {
       </SectionCard>
 
       <EntityFormModal<IVoucherInput>
-        open={formModal.modal.open}
+        open={formModal.modal.visible}
         title="Manual voucher"
         fields={fields}
         schema={voucherSchema}

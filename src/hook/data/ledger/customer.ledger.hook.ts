@@ -5,7 +5,6 @@ import {
 } from "../../../keys/modal.keys";
 import { receivableListKey, scopedKey } from "../../../keys/query.keys";
 import type { ICustomerReceivableSummary } from "../../../models/data/ledger/ledger.response";
-import { ledgerKeyOf } from "../../../models/data/ledger/ledger.response";
 import { receivableServices } from "../../../services/data/ledger.services";
 import { useLedgerStore } from "../../../store/data/ledger/ledger.store";
 import { useModal, useModalActions } from "../../common/modal.hook";
@@ -17,7 +16,7 @@ export const customerSummaryKey = scopedKey(receivableListKey, "customers");
 
 export const useCustomerLedgerHook = () => {
   const ledgerModal = useModal(customerLedgerModalKey);
-  const detailsModal = useModal(customerDetailsModalKey);
+  const detailsModal = useModal<ICustomerReceivableSummary>(customerDetailsModalKey);
   const { closeModal } = useModalActions();
   const { search, setSearch } = useSearch(customerLedgerModalKey);
 
@@ -27,7 +26,7 @@ export const useCustomerLedgerHook = () => {
   const query = useQuery<ICustomerReceivableSummary[]>(
     customerSummaryKey,
     receivableServices.getCustomerSummaries,
-    { enabled: ledgerModal.modal.open }
+    { enabled: ledgerModal.modal.visible }
   );
 
   const summaries = query.data ?? [];
@@ -36,13 +35,10 @@ export const useCustomerLedgerHook = () => {
   );
 
   const { recordFor } = useCustomerRecordHook(null, {
-    enabled: ledgerModal.modal.open,
+    enabled: ledgerModal.modal.visible,
   });
 
-  const detailsTarget =
-    summaries.find(
-      (customer) => ledgerKeyOf(customer) === detailsModal.modal.recordId
-    ) ?? null;
+  const detailsTarget = detailsModal.modal.data ?? null;
 
   const close = () => {
     closeModal(customerLedgerModalKey);

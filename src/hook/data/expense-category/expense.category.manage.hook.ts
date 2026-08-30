@@ -5,6 +5,7 @@ import {
 } from "../../../keys/modal.keys";
 import { expenseCategoryListKey } from "../../../keys/query.keys";
 import type { IExpenseCategoryInput } from "../../../models/data/expense-category/expense.category.request";
+import type { IExpenseCategory } from "../../../models/data/expense-category/expense.category.response";
 import referenceServices from "../../../services/data/reference.services";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
@@ -12,13 +13,11 @@ import { useExpenseCategoryListHook } from "./expense.category.list.hook";
 
 export const useExpenseCategoryManageHook = () => {
   const createModal = useModal(expenseCategoryCreateModalKey);
-  const editModal = useModal(expenseCategoryEditModalKey);
+  const editModal = useModal<IExpenseCategory>(expenseCategoryEditModalKey);
   const { expenseCategories, loading } = useExpenseCategoryListHook();
 
   const invalidate = [expenseCategoryListKey];
-  const editing = expenseCategories.find(
-    (category) => category.slug === editModal.modal.recordId
-  );
+  const editing = editModal.modal.data;
   const nextSort =
     expenseCategories.reduce((max, category) => Math.max(max, category.sort), 0) +
     1;

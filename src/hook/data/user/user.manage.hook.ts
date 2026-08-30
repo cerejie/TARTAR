@@ -19,6 +19,7 @@ import type {
   ICreateUserInput,
   IUpdateUserInput,
 } from "../../../models/data/account/account.request";
+import type { IUser } from "../../../models/data/account/account.response";
 import accountServices from "../../../services/data/account.services";
 import userServices from "../../../services/data/user.services";
 import {
@@ -34,8 +35,8 @@ import { useUserListHook } from "./user.list.hook";
 
 export const useUserManageHook = () => {
   const createModal = useModal(userCreateModalKey);
-  const editModal = useModal(userEditModalKey);
-  const resetModal = useModal(userResetModalKey);
+  const editModal = useModal<IUser>(userEditModalKey);
+  const resetModal = useModal<IUser>(userResetModalKey);
 
   const permissions = usePermissions();
   const currentUserId = useAccountStore(selectUserId);
@@ -43,7 +44,7 @@ export const useUserManageHook = () => {
   const { users, loading } = useUserListHook();
 
   const invalidate = [userListKey];
-  const editing = users.find((user) => user.id === editModal.modal.recordId);
+  const editing = editModal.modal.data;
 
   const assignableRoles: UserRole[] = permissions.manageAdmins
     ? [...userRoleValues]

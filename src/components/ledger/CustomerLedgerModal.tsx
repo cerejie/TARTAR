@@ -93,7 +93,7 @@ const CustomerLedgerModal = () => {
               aria-label={`Customer details for ${customer.customerName}`}
               onClick={(event) => {
                 event.stopPropagation();
-                detailsModal.openModal(ledgerKeyOf(customer));
+                detailsModal.openModal(customer);
               }}
             />
           </Tooltip>
@@ -106,7 +106,7 @@ const CustomerLedgerModal = () => {
     <AppModal
       title="Customer Ledger"
       subtitle="Outstanding receivables by customer"
-      open={ledgerModal.modal.open}
+      open={ledgerModal.modal.visible}
       size="xl"
       onClose={close}
     >
@@ -146,7 +146,7 @@ const CustomerLedgerModal = () => {
       </Flex>
 
       <CustomerDetailsModal
-        open={detailsModal.modal.open}
+        open={detailsModal.modal.visible}
         customer={detailsTarget}
         onClose={detailsModal.closeModal}
       />

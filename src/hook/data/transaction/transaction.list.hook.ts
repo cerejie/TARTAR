@@ -8,8 +8,10 @@ import {
   transactionTypeValues,
 } from "../../../enums/transaction.enum";
 import { transactionFormModalKey } from "../../../keys/modal.keys";
+import { transactionPaginationKey } from "../../../keys/table.keys";
 import { scopedKey, transactionListKey } from "../../../keys/query.keys";
 import type { IFieldConfig } from "../../../models/common/field.model";
+import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { ITransactionInput } from "../../../models/data/transaction/transaction.request";
 import type { ITransaction } from "../../../models/data/transaction/transaction.response";
@@ -24,6 +26,7 @@ import { toOptions } from "../../../utils/option.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
 import { useModal } from "../../common/modal.hook";
+import { usePagination } from "../../common/pagination.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { useQuery } from "../../common/query.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
@@ -47,6 +50,9 @@ const normalize = (values: ITransactionInput): ITransactionInput => ({
 
 export const useTransactionListHook = () => {
   const formModal = useModal(transactionFormModalKey);
+  const { pagination, setPagination, goToPage } = usePagination(
+    transactionPaginationKey
+  );
   const permissions = usePermissions();
   const createdBy = useAccountStore(selectUserId);
 
@@ -59,9 +65,14 @@ export const useTransactionListHook = () => {
   const { branch: scopeBranch } = useBranchScopeHook();
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
-  const listQuery = useQuery<ITransaction[]>(
-    scopedKey(transactionListKey, JSON.stringify(effectiveFilters)),
-    () => transactionServices.getList(effectiveFilters)
+  const listQuery = useQuery<IPaginationResponse<ITransaction>>(
+    scopedKey(
+      transactionListKey,
+      JSON.stringify(effectiveFilters),
+      pagination.pageNumber,
+      pagination.pageSize
+    ),
+    () => transactionServices.getList(effectiveFilters, pagination)
   );
 
   const createMutation = useMutation(
@@ -70,7 +81,10 @@ export const useTransactionListHook = () => {
     {
       successMessage: "Transaction recorded",
       invalidate: [transactionListKey],
-      onSuccess: formModal.closeModal,
+      onSuccess: () => {
+        formModal.closeModal();
+        setPagination({ pageNumber: 1 });
+      },
     }
   );
 
@@ -151,7 +165,10 @@ export const useTransactionListHook = () => {
 
   return {
     permissions,
-    transactions: listQuery.data ?? [],
+    transactions: listQuery.data?.data ?? [],
+    totalCount: listQuery.data?.totalCount ?? 0,
+    pagination,
+    goToPage,
     loading: listQuery.loading,
     branchName,
     userById,

@@ -45,7 +45,7 @@ export const useReportHook = () => {
   const transactionQuery = useQuery<ITransaction[]>(
     scopedKey(reportTransactionKey, type, branch),
     () =>
-      transactionServices.getList({
+      transactionServices.getAll({
         dateFrom: from,
         dateTo: to,
         ...branchFilter,

@@ -16,7 +16,6 @@ import { useCustomerDetailHook } from "../../hook/data/ledger/customer.detail.ho
 import {
   isLedgerOverdue,
   ledgerBalance,
-  ledgerKeyOf,
   type IReceivable,
 } from "../../models/data/ledger/ledger.response";
 import { cardTitle } from "../../styles/card/card.css";
@@ -247,21 +246,21 @@ const CustomerLedgerView = () => {
       />
 
       <CustomerInfoModal
-        open={infoModal.modal.open}
+        open={infoModal.modal.visible}
         customer={customer}
         onClose={infoModal.closeModal}
         onEdit={
           permissions.encodeTransactions
             ? () => {
                 infoModal.closeModal();
-                openModal(customerDetailsModalKey, ledgerKeyOf(customer));
+                openModal(customerDetailsModalKey, customer);
               }
             : undefined
         }
       />
 
       <PaymentAllocationModal
-        open={paymentModal.modal.open}
+        open={paymentModal.modal.visible}
         customer={customer}
         rows={selectedRows}
         submitting={recordPaymentMutation.loading}

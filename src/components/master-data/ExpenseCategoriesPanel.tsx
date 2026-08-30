@@ -6,7 +6,8 @@ import {
   UndoOutlined,
   WalletOutlined,
 } from "@ant-design/icons";
-import { Badge, Button, Popconfirm, Tag, Tooltip } from "antd";
+import { Badge, Button, Tag, Tooltip } from "antd";
+import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import { useExpenseCategoryManageHook } from "../../hook/data/expense-category/expense.category.manage.hook";
 import type { IFieldConfig } from "../../models/common/field.model";
@@ -52,6 +53,8 @@ const ExpenseCategoriesPanel = () => {
     removeMutation,
   } = useExpenseCategoryManageHook();
 
+  const openConfirm = useConfirm();
+
   const columns: ColumnsType<IExpenseCategory> = [
     {
       title: "Category",
@@ -91,28 +94,29 @@ const ExpenseCategoriesPanel = () => {
               className={`${iconButton}`}
               icon={<EditOutlined />}
               aria-label={`Edit ${category.name}`}
-              onClick={() => editModal.openModal(category.slug)}
+              onClick={() => editModal.openModal(category)}
             />
           </Tooltip>
           {category.active ? (
-            <Popconfirm
-              title="Archive this category?"
-              description="It stops appearing on the expense form but past expenses keep it."
-              onConfirm={() =>
-                void setActiveMutation.mutate({
-                  slug: category.slug,
-                  active: false,
-                })
-              }
-            >
-              <Tooltip title="Archive category">
-                <Button
-                  className={`${iconButton}`}
-                  icon={<InboxOutlined />}
-                  aria-label={`Archive ${category.name}`}
-                />
-              </Tooltip>
-            </Popconfirm>
+            <Tooltip title="Archive category">
+              <Button
+                className={`${iconButton}`}
+                icon={<InboxOutlined />}
+                aria-label={`Archive ${category.name}`}
+                onClick={() =>
+                  openConfirm({
+                    title: `Archive ${category.name}?`,
+                    message:
+                      "It stops appearing on the expense form but past expenses keep it.",
+                    onConfirm: () =>
+                      setActiveMutation.mutate({
+                        slug: category.slug,
+                        active: false,
+                      }),
+                  })
+                }
+              />
+            </Tooltip>
           ) : (
             <Tooltip title="Restore category">
               <Button
@@ -128,20 +132,23 @@ const ExpenseCategoriesPanel = () => {
               />
             </Tooltip>
           )}
-          <Popconfirm
-            title="Delete this category?"
-            description="Only possible while no expense uses it — otherwise archive it."
-            onConfirm={() => void removeMutation.mutate(category.slug)}
-          >
-            <Tooltip title="Delete category">
-              <Button
-                className={`${iconButton}`}
-                danger
-                icon={<DeleteOutlined />}
-                aria-label={`Delete ${category.name}`}
-              />
-            </Tooltip>
-          </Popconfirm>
+          <Tooltip title="Delete category">
+            <Button
+              className={`${iconButton}`}
+              danger
+              icon={<DeleteOutlined />}
+              aria-label={`Delete ${category.name}`}
+              onClick={() =>
+                openConfirm({
+                  kind: "delete",
+                  title: `Delete ${category.name}?`,
+                  message:
+                    "Only possible while no expense uses it — otherwise archive it.",
+                  onConfirm: () => removeMutation.mutate(category.slug),
+                })
+              }
+            />
+          </Tooltip>
         </RowActions>
       ),
     },
@@ -173,7 +180,7 @@ const ExpenseCategoriesPanel = () => {
       </SectionCard>
 
       <EntityFormModal<IExpenseCategoryInput>
-        open={createModal.modal.open}
+        open={createModal.modal.visible}
         title="Add expense category"
         fields={fields}
         schema={expenseCategorySchema}
@@ -185,7 +192,7 @@ const ExpenseCategoriesPanel = () => {
       />
 
       <EntityFormModal<IExpenseCategoryInput>
-        open={editModal.modal.open}
+        open={editModal.modal.visible}
         title={`Edit ${editing?.name ?? "category"}`}
         fields={fields}
         schema={expenseCategorySchema}

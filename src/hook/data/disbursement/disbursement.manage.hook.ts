@@ -54,8 +54,10 @@ export const useDisbursementManagerHook = (
   const scope = kind === "purchase" ? purchaseListKey : expenseListKey;
 
   const formModal = useModal(disbursementFormModalKey(scope));
-  const editModal = useModal(disbursementEditModalKey(scope));
-  const historyModal = useModal(disbursementHistoryModalKey(scope));
+  const editModal = useModal<IDisbursement>(disbursementEditModalKey(scope));
+  const historyModal = useModal<IDisbursement>(
+    disbursementHistoryModalKey(scope)
+  );
 
   const permissions = usePermissions();
   const createdBy = useAccountStore(selectUserId);
@@ -75,13 +77,13 @@ export const useDisbursementManagerHook = (
   );
 
   const rows = listQuery.data ?? [];
-  const editRow = rows.find((row) => row.id === editModal.modal.recordId);
-  const historyRow = rows.find((row) => row.id === historyModal.modal.recordId);
+  const editRow = editModal.modal.data;
+  const historyRow = historyModal.modal.data;
 
   const auditQuery = useQuery<ITransactionAudit[]>(
-    scopedKey(scope, "audit", historyModal.modal.recordId),
-    () => transactionServices.getAudit(historyModal.modal.recordId as string),
-    { enabled: historyModal.modal.open && !!historyModal.modal.recordId }
+    scopedKey(scope, "audit", historyRow?.id),
+    () => transactionServices.getAudit(historyRow?.id as string),
+    { enabled: historyModal.modal.visible && !!historyRow }
   );
 
   const invalidate = [scope, voucherListKey];

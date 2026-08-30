@@ -4,7 +4,8 @@ import {
   HistoryOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Button, Flex, Popconfirm, Space, Tag, Tooltip, Typography } from "antd";
+import { Button, Flex, Space, Tag, Tooltip, Typography } from "antd";
+import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import type { DisbursementKind } from "../../enums/transaction.enum";
 import { transactionTypeLabels } from "../../enums/transaction.enum";
@@ -68,6 +69,8 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
     updateMutation,
     removeMutation,
   } = useDisbursementManagerHook(kind, title);
+
+  const openConfirm = useConfirm();
 
   const singular = title.toLowerCase().replace(/s$/, "");
 
@@ -168,7 +171,7 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
                   icon={<EditOutlined />}
                   aria-label="Edit record"
                   disabled={isDisbursementLocked(row)}
-                  onClick={() => editModal.openModal(row.id)}
+                  onClick={() => editModal.openModal(row)}
                 />
               </span>
             </Tooltip>
@@ -178,24 +181,28 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
               className={`${iconButton}`}
               icon={<HistoryOutlined />}
               aria-label="Edit history"
-              onClick={() => historyModal.openModal(row.id)}
+              onClick={() => historyModal.openModal(row)}
             />
           </Tooltip>
           <RequirePermission can="isManager" fallback={null}>
             {isDisbursementLocked(row) ? null : (
-              <Popconfirm
-                title="Delete this record and its voucher?"
-                onConfirm={() => void removeMutation.mutate(row.id)}
-              >
-                <Tooltip title="Delete record">
-                  <Button
-                    className={`${iconButton}`}
-                    danger
-                    icon={<DeleteOutlined />}
-                    aria-label="Delete record"
-                  />
-                </Tooltip>
-              </Popconfirm>
+              <Tooltip title="Delete record">
+                <Button
+                  className={`${iconButton}`}
+                  danger
+                  icon={<DeleteOutlined />}
+                  aria-label="Delete record"
+                  onClick={() =>
+                    openConfirm({
+                      kind: "delete",
+                      title: `Delete ${title.toLowerCase()}?`,
+                      message:
+                        "This deletes the record and its voucher, and cannot be undone.",
+                      onConfirm: () => removeMutation.mutate(row.id),
+                    })
+                  }
+                />
+              </Tooltip>
             )}
           </RequirePermission>
         </RowActions>
@@ -235,7 +242,7 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
       </SectionCard>
 
       <EntityFormModal<IDisbursementInput>
-        open={formModal.modal.open}
+        open={formModal.modal.visible}
         title={`Record ${singular}`}
         fields={fields}
         schema={schema}
@@ -248,7 +255,7 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
 
       {editDefaults ? (
         <EntityFormModal<IDisbursementInput>
-          open={editModal.modal.open}
+          open={editModal.modal.visible}
           title={`Edit ${singular}`}
           fields={fields}
           schema={schema}
@@ -271,7 +278,7 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
               )} · ${formatDate(historyRow.txn_date)}`
             : undefined
         }
-        open={historyModal.modal.open}
+        open={historyModal.modal.visible}
         size="lg"
         onClose={historyModal.closeModal}
       >

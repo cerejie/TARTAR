@@ -3,6 +3,11 @@ import {
   type DisbursementKind,
 } from "../../enums/transaction.enum";
 import type { ILedgerFilters } from "../../models/common/filter.model";
+import {
+  pageRange,
+  type IPaginationRequest,
+  type IPaginationResponse,
+} from "../../models/common/pagination.model";
 import type {
   IDisbursementInput,
   ITransactionInput,
@@ -30,6 +35,8 @@ const columns = `
 
 const transactionColumns = { date: "txn_date", amount: "amount" };
 
+const reportLimit = 5000;
+
 const referenceOf = (
   kind: DisbursementKind,
   values: IDisbursementInput
@@ -37,13 +44,34 @@ const referenceOf = (
   kind === "purchase" ? values.reference_number?.trim() || null : null;
 
 const transactionServices = {
-  getList: async (filters: ILedgerFilters = {}): Promise<ITransaction[]> => {
+  getList: async (
+    filters: ILedgerFilters = {},
+    pagination: IPaginationRequest
+  ): Promise<IPaginationResponse<ITransaction>> => {
+    const base = supabase.from(table).select(columns, { count: "exact" });
+    const query = applyLedgerFilters(base, filters, transactionColumns);
+    const { from, to } = pageRange(pagination);
+
+    const { data, error, count } = await query
+      .order("txn_date", { ascending: false })
+      .range(from, to);
+    if (error) throw toError(error);
+
+    return {
+      data: (data ?? []) as unknown as ITransaction[],
+      currentPage: pagination.pageNumber,
+      pageSize: pagination.pageSize,
+      totalCount: count ?? 0,
+    };
+  },
+
+  getAll: async (filters: ILedgerFilters = {}): Promise<ITransaction[]> => {
     const base = supabase.from(table).select(columns);
     const query = applyLedgerFilters(base, filters, transactionColumns);
 
     const { data, error } = await query
       .order("txn_date", { ascending: false })
-      .limit(500);
+      .limit(reportLimit);
     if (error) throw toError(error);
 
     return (data ?? []) as unknown as ITransaction[];

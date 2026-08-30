@@ -1,5 +1,6 @@
 import { CheckOutlined, CloseOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Tag, Tooltip } from "antd";
+import { Button, Space, Tag, Tooltip } from "antd";
+import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import {
   paymentStatusColors,
@@ -30,6 +31,8 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
     verifyMutation,
     rejectMutation,
   } = usePaymentListHook(kind, party);
+
+  const openConfirm = useConfirm();
 
   const columns: ColumnsType<ILedgerPayment> = [
     {
@@ -109,14 +112,25 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
               </Button>
             ) : null}
             {payment.status !== "rejected" ? (
-              <Popconfirm
-                title="Reject this payment and restore the balances?"
-                onConfirm={() => void rejectMutation.mutate(payment.id)}
+              <Button
+                type="link"
+                danger
+                size="small"
+                icon={<CloseOutlined />}
+                onClick={() =>
+                  openConfirm({
+                    kind: "delete",
+                    title: "Reject payment?",
+                    message:
+                      "Rejecting this payment restores the balances it settled.",
+                    okText: "Reject",
+                    cancelText: "Cancel",
+                    onConfirm: () => rejectMutation.mutate(payment.id),
+                  })
+                }
               >
-                <Button type="link" danger size="small" icon={<CloseOutlined />}>
-                  Reject
-                </Button>
-              </Popconfirm>
+                Reject
+              </Button>
             ) : null}
           </Space>
         </RequirePermission>

@@ -6,7 +6,6 @@ import type { ICustomer } from "../../models/data/party/party.response";
 import DetailModal from "../common/modal/DetailModal";
 import CustomerInfoTag from "./CustomerInfoTag";
 
-/** A ledger customer may have no party record yet, so the name falls back to the ledger key. */
 type ICustomerInfo = {
   name: string;
   party: ICustomer | undefined;

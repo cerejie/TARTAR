@@ -416,7 +416,6 @@ export const branchScopeCaret = style({
   },
 });
 
-/** The only scroll container in the shell — the chrome around it stays fixed to the viewport. */
 export const content = style({
   flex: 1,
   minWidth: 0,

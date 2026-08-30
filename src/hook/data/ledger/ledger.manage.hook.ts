@@ -42,7 +42,7 @@ export const useLedgerManagerHook = <
   config: ILedgerManagerConfig<Row, Input>
 ) => {
   const formModal = useModal(ledgerFormModalKey(config.scope));
-  const settleModal = useModal(ledgerSettleModalKey(config.scope));
+  const settleModal = useModal<Row>(ledgerSettleModalKey(config.scope));
   const createdBy = useAccountStore(selectUserId);
 
   const { filters } = useLedgerFilters("page");
@@ -56,7 +56,7 @@ export const useLedgerManagerHook = <
   );
 
   const rows = query.data ?? [];
-  const settleRow = rows.find((row) => row.id === settleModal.modal.recordId);
+  const settleRow = settleModal.modal.data;
 
   const createMutation = useMutation(
     (values: Input) => config.create(values, createdBy),

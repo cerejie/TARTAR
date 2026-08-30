@@ -9,9 +9,9 @@ type States = {
 };
 
 type Actions = {
-  openModal: (key: string, recordId?: string | null) => void;
-  closeModal: (key: string) => void;
+  setModal: <T>(key: string, value: IModalRequest<T>) => void;
   resetModal: (key: string) => void;
+  removeModal: (key: string) => void;
 };
 
 const initialValues: States = {
@@ -22,15 +22,15 @@ const closedModal = new IModalFormValue();
 
 export const useModalStore = create<States & Actions>()((set) => ({
   ...initialValues,
-  openModal: (key, recordId = null) =>
+  setModal: (key, value) =>
     set((state) => ({
-      modals: { ...state.modals, [key]: { open: true, recordId } },
-    })),
-  closeModal: (key) =>
-    set((state) => ({
-      modals: { ...state.modals, [key]: { open: false, recordId: null } },
+      modals: { ...state.modals, [key]: value as IModalRequest },
     })),
   resetModal: (key) =>
+    set((state) => ({
+      modals: { ...state.modals, [key]: closedModal },
+    })),
+  removeModal: (key) =>
     set((state) => {
       const modals = { ...state.modals };
       delete modals[key];

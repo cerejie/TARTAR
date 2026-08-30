@@ -6,7 +6,6 @@ export const filterBar = style({
   marginBottom: vars.space.md,
 });
 
-/** Inside a card the card owns the outer spacing, so the bar drops its own. */
 globalStyle(`.${cardBody} > .${filterBar}`, {
   marginBottom: 0,
 });

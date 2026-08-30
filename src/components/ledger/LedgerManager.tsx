@@ -4,7 +4,8 @@ import {
   PlusOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Tag, Tooltip } from "antd";
+import { Button, Space, Tag, Tooltip } from "antd";
+import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import type { ReactNode } from "react";
 import type { DefaultValues, FieldValues } from "react-hook-form";
@@ -64,6 +65,8 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
     settleMutation,
     removeMutation,
   } = useLedgerManagerHook<Row, Input>(props);
+
+  const openConfirm = useConfirm();
 
   const columns: ColumnsType<Row> = [
     {
@@ -133,24 +136,26 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
                 icon={<DollarOutlined />}
                 aria-label="Record payment"
                 disabled={row.status === "paid"}
-                onClick={() => settleModal.openModal(row.id)}
+                onClick={() => settleModal.openModal(row)}
               />
             </span>
           </Tooltip>
           <RequirePermission can="isManager" fallback={null}>
-            <Popconfirm
-              title="Delete this record?"
-              onConfirm={() => void removeMutation.mutate(row.id)}
-            >
-              <Tooltip title="Delete record">
-                <Button
-                  className={`${iconButton}`}
-                  danger
-                  icon={<DeleteOutlined />}
-                  aria-label="Delete record"
-                />
-              </Tooltip>
-            </Popconfirm>
+            <Tooltip title="Delete record">
+              <Button
+                className={`${iconButton}`}
+                danger
+                icon={<DeleteOutlined />}
+                aria-label="Delete record"
+                onClick={() =>
+                  openConfirm({
+                    kind: "delete",
+                    title: "Delete record?",
+                    onConfirm: () => removeMutation.mutate(row.id),
+                  })
+                }
+              />
+            </Tooltip>
           </RequirePermission>
         </RowActions>
       ),
@@ -197,7 +202,7 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
       />
 
       <EntityFormModal<Input>
-        open={formModal.modal.open}
+        open={formModal.modal.visible}
         title={`Add ${props.title.toLowerCase()} record`}
         fields={props.fields}
         schema={props.schema}
@@ -208,7 +213,7 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
       />
 
       <EntityFormModal<ISettlementInput>
-        open={settleModal.modal.open}
+        open={settleModal.modal.visible}
         title="Record payment"
         fields={[
           { name: "amount", label: "Payment amount", type: "number", prefix: "₱" },

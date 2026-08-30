@@ -2,7 +2,6 @@ import { globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { vars } from "../common/vars.css";
 import { farmSceneUrl } from "../scene/farm.scene";
 
-/** rgba forms of the flux palette — vanilla-extract cannot derive alpha from a hex token. */
 const tint = {
   lime: (alpha: number) => `rgba(214, 242, 91, ${alpha})`,
   lilac: (alpha: number) => `rgba(185, 165, 245, ${alpha})`,

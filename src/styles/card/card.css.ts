@@ -136,7 +136,6 @@ export const cardBody = style({
 
 export const cardDense = style({});
 
-/** Minimum padding — the card is chrome around a control row, not a content panel. */
 globalStyle(`.${cardDense} .${cardBody}`, {
   padding: vars.space.sm,
 });

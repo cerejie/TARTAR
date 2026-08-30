@@ -11,7 +11,8 @@ import {
   UndoOutlined,
   WalletOutlined,
 } from "@ant-design/icons";
-import { Badge, Button, Popconfirm, Tag, Tooltip } from "antd";
+import { Badge, Button, Tag, Tooltip } from "antd";
+import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import SectionCard from "../../components/common/card/SectionCard";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
@@ -50,6 +51,8 @@ const BranchesView = () => {
     monitorRows,
     monitorLoading,
   } = useBranchManageHook();
+
+  const openConfirm = useConfirm();
 
   const columns: ColumnsType<IBranch> = [
     {
@@ -90,29 +93,30 @@ const BranchesView = () => {
               className={`${iconButton}`}
               icon={<EditOutlined />}
               aria-label={`Edit ${branch.name}`}
-              onClick={() => editModal.openModal(branch.slug)}
+              onClick={() => editModal.openModal(branch)}
             />
           </Tooltip>
           {branch.active ? (
-            <Popconfirm
-              title="Archive this branch?"
-              description="It is hidden from selectors but its history is kept."
-              onConfirm={() =>
-                void setActiveMutation.mutate({
-                  slug: branch.slug,
-                  active: false,
-                })
-              }
-            >
-              <Tooltip title="Archive branch">
-                <Button
-                  className={`${iconButton}`}
-                  danger
-                  icon={<DeleteOutlined />}
-                  aria-label={`Archive ${branch.name}`}
-                />
-              </Tooltip>
-            </Popconfirm>
+            <Tooltip title="Archive branch">
+              <Button
+                className={`${iconButton}`}
+                danger
+                icon={<DeleteOutlined />}
+                aria-label={`Archive ${branch.name}`}
+                onClick={() =>
+                  openConfirm({
+                    title: `Archive ${branch.name}?`,
+                    message:
+                      "It is hidden from selectors but its history is kept.",
+                    onConfirm: () =>
+                      setActiveMutation.mutate({
+                        slug: branch.slug,
+                        active: false,
+                      }),
+                  })
+                }
+              />
+            </Tooltip>
           ) : (
             <Tooltip title="Restore branch">
               <Button
@@ -216,7 +220,7 @@ const BranchesView = () => {
       </SectionCard>
 
       <EntityFormModal<IBranchInput>
-        open={createModal.modal.open}
+        open={createModal.modal.visible}
         title="Add branch"
         fields={branchFormFields}
         schema={branchSchema}
@@ -228,7 +232,7 @@ const BranchesView = () => {
       />
 
       <EntityFormModal<IBranchInput>
-        open={editModal.modal.open}
+        open={editModal.modal.visible}
         title={`Edit ${editing?.name ?? "branch"}`}
         fields={branchFormFields}
         schema={branchSchema}

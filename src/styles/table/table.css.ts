@@ -3,7 +3,6 @@ import { vars } from "../common/vars.css";
 
 export const tableContainer = style({});
 
-/** Rows read as detached cards: `separate` collapse is what allows the gap and the per-row radii. */
 const rowGap = "8px";
 const rowRadius = vars.radius.lg;
 const rowBorder = `1px solid ${vars.color.borderSubtle}`;
@@ -65,7 +64,6 @@ globalStyle(`.${tableContainer} .ant-table-tbody > tr.ant-table-row:hover > td`,
   borderColor: vars.color.border,
 });
 
-/** rc-table injects a zero-height row to measure columns — keep it out of the card treatment. */
 globalStyle(`.${tableContainer} .ant-table-measure-row > td`, {
   background: "transparent",
   border: "none",

@@ -1,5 +1,5 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Popconfirm, Tag } from "antd";
+import { Button, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import SectionCard from "../../components/common/card/SectionCard";
 import LedgerFilterBar from "../../components/common/filter/LedgerFilterBar";
@@ -9,6 +9,7 @@ import DataTable from "../../components/common/table/DataTable";
 import ContentView from "../../components/common/view/ContentView";
 import { userRoleLabels } from "../../enums/role.enum";
 import { transactionTypeLabels } from "../../enums/transaction.enum";
+import { useConfirm } from "../../hook/common/confirmation.hook";
 import { useTransactionListHook } from "../../hook/data/transaction/transaction.list.hook";
 import {
   transactionSchema,
@@ -25,6 +26,9 @@ const TransactionsView = () => {
   const {
     permissions,
     transactions,
+    totalCount,
+    pagination,
+    goToPage,
     loading,
     branchName,
     userById,
@@ -34,6 +38,8 @@ const TransactionsView = () => {
     createMutation,
     removeMutation,
   } = useTransactionListHook();
+
+  const openConfirm = useConfirm();
 
   const columns: ColumnsType<ITransaction> = [
     {
@@ -99,14 +105,25 @@ const TransactionsView = () => {
             key: "actions",
             width: 90,
             render: (_: unknown, row: ITransaction) => (
-              <Popconfirm
-                title="Delete this transaction?"
-                onConfirm={() => void removeMutation.mutate(row.id)}
+              <Button
+                type="link"
+                danger
+                size="small"
+                onClick={() =>
+                  openConfirm({
+                    kind: "delete",
+                    title: "Delete transaction?",
+                    message: `Deleting this ${transactionTypeLabels[
+                      row.type
+                    ].toLowerCase()} of ${formatMoney(
+                      row.amount
+                    )} cannot be undone.`,
+                    onConfirm: () => removeMutation.mutate(row.id),
+                  })
+                }
               >
-                <Button type="link" danger size="small">
-                  Delete
-                </Button>
-              </Popconfirm>
+                Delete
+              </Button>
             ),
           },
         ]
@@ -117,7 +134,7 @@ const TransactionsView = () => {
     <ContentView
       title="Transactions"
       subtitle="Sales, expenses, payments, purchases and collections"
-      meta={`${transactions.length} ${transactions.length === 1 ? "record" : "records"}`}
+      meta={`${totalCount} ${totalCount === 1 ? "record" : "records"}`}
       actions={
         <RequirePermission can="encodeTransactions" fallback={null}>
           <Button
@@ -138,11 +155,14 @@ const TransactionsView = () => {
         columns={columns}
         data={transactions}
         loading={loading}
+        pagination={pagination}
+        totalCount={totalCount}
+        onPageChange={goToPage}
         emptyText="No transactions match the current filters"
       />
 
       <EntityFormModal<ITransactionInput>
-        open={formModal.modal.open}
+        open={formModal.modal.visible}
         title="Record transaction"
         fields={fields}
         schema={transactionSchema}

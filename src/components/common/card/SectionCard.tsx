@@ -58,7 +58,6 @@ const SectionCard = ({
       </Flex>
     ) : undefined;
 
-  /** No title and no subtitle means no head at all — one less nested box. */
   const heading =
     title || subtitle ? (
       <Flex vertical>

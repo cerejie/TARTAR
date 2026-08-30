@@ -5,7 +5,8 @@ import {
   PlusOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Tag, Tooltip } from "antd";
+import { Button, Space, Tag, Tooltip } from "antd";
+import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import SectionCard from "../../components/common/card/SectionCard";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
@@ -51,6 +52,8 @@ const UsersView = () => {
     removeMutation,
     resetPasswordMutation,
   } = useUserManageHook();
+
+  const openConfirm = useConfirm();
 
   const columns: ColumnsType<IUser> = [
     {
@@ -130,7 +133,7 @@ const UsersView = () => {
               className={`${iconButton}`}
               icon={<EditOutlined />}
               aria-label={`Edit ${user.username}`}
-              onClick={() => editModal.openModal(user.id)}
+              onClick={() => editModal.openModal(user)}
             />
           </Tooltip>
           <Tooltip title="Reset password">
@@ -138,7 +141,7 @@ const UsersView = () => {
               className={`${iconButton}`}
               icon={<KeyOutlined />}
               aria-label={`Reset password for ${user.username}`}
-              onClick={() => resetModal.openModal(user.id)}
+              onClick={() => resetModal.openModal(user)}
             />
           </Tooltip>
           {user.id === currentUserId ? (
@@ -153,19 +156,21 @@ const UsersView = () => {
               </span>
             </Tooltip>
           ) : (
-            <Popconfirm
-              title="Delete this user?"
-              onConfirm={() => void removeMutation.mutate(user.id)}
-            >
-              <Tooltip title="Delete user">
-                <Button
-                  className={`${iconButton}`}
-                  danger
-                  icon={<DeleteOutlined />}
-                  aria-label={`Delete ${user.username}`}
-                />
-              </Tooltip>
-            </Popconfirm>
+            <Tooltip title="Delete user">
+              <Button
+                className={`${iconButton}`}
+                danger
+                icon={<DeleteOutlined />}
+                aria-label={`Delete ${user.username}`}
+                onClick={() =>
+                  openConfirm({
+                    kind: "delete",
+                    title: `Delete ${user.username}?`,
+                    onConfirm: () => removeMutation.mutate(user.id),
+                  })
+                }
+              />
+            </Tooltip>
           )}
         </RowActions>
       ),
@@ -200,7 +205,7 @@ const UsersView = () => {
       </SectionCard>
 
       <EntityFormModal<ICreateUserInput>
-        open={createModal.modal.open}
+        open={createModal.modal.visible}
         title="Add user"
         fields={createFields}
         schema={createUserSchema}
@@ -212,7 +217,7 @@ const UsersView = () => {
       />
 
       <EntityFormModal<IUpdateUserInput>
-        open={editModal.modal.open}
+        open={editModal.modal.visible}
         title={`Edit ${editing?.username ?? "user"}`}
         fields={editFields}
         schema={updateUserSchema}
@@ -225,7 +230,7 @@ const UsersView = () => {
       />
 
       <EntityFormModal<IResetPasswordInput>
-        open={resetModal.modal.open}
+        open={resetModal.modal.visible}
         title="Reset password"
         fields={[
           { name: "password", label: "New password", type: "password" },
@@ -235,9 +240,9 @@ const UsersView = () => {
         submitting={resetPasswordMutation.loading}
         submitText="Reset password"
         onSubmit={(values) => {
-          if (resetModal.modal.recordId)
+          if (resetModal.modal.data)
             void resetPasswordMutation.mutate({
-              id: resetModal.modal.recordId,
+              id: resetModal.modal.data.id,
               password: values.password,
             });
         }}
