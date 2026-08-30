@@ -21,10 +21,21 @@ Reference stack: React 19, react-router-dom 7, antd 6, `@ant-design/icons`, `@an
 
 ## antd 6
 
-- Use the project's wrappers first: `DataTable`, `SectionCard`, `PageHeader`, `EntityFormModal`, `FormField`, `RowActions`, `NameCell`, `ColumnLabel`. Reach for a raw antd component only when no wrapper fits.
+- Use the project's wrappers first: `ContentView`, `DataTable`, `SectionCard`, `StatCard`,
+  `BentoGrid` / `BentoCell`, `EntityFormModal`, `FormField`, `AppModal`, `DetailModal`,
+  `FilterToolbar`, `RequirePermission`. Reach for a raw antd component only when no wrapper
+  fits. `PageHeader` no longer exists — `ContentView` owns the title block.
+- Never hand-roll a table, form, modal, drawer, date picker, select or notification that antd
+  already provides. Before writing a custom element, read how the nearest existing screen
+  composes antd and copy that composition.
 - Feedback comes from `App.useApp()` (`message`, `modal`, `notification`) so it inherits theme and context. Never import the static `message` singleton.
+- Confirmations come from `useConfirm` and the confirm store, never `Popconfirm` or
+  `Modal.confirm`. See `conventions.md` §9.
 - Theme is configured once through `ConfigProvider` in `App.tsx`. Do not add a second provider.
-- Table columns are typed `ColumnsType<T>`; give every column an explicit `width` or `align` when it holds a number or an action.
+- Table columns are typed `ColumnsType<T>`, declared in the **feature component** rather than
+  the page, and given an explicit `width` or `align` when they hold a number or an action.
+  Columns that depend on a permission are spread in conditionally, not hidden.
+- `colorPrimary` is ink, never lime. The theme object lives in `store/common/theme.store.ts`.
 
 ## vanilla-extract
 

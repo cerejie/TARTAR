@@ -33,7 +33,20 @@ The manage hook is a composition root, not a dumping ground: it composes the lis
 
 ## Modals
 
-Modal open state lives in the modal store, keyed by a constant from `keys/modal.keys.ts`, not in component `useState`. A modal that needs a target record passes `recordId` through `openModal(id)`, and the manage hook resolves the record from the already-loaded list. Do not fetch a record just to edit it when the list already holds it.
+Modal open state lives in the modal store, keyed by a constant from `keys/modal.keys.ts`,
+never in component state. `useModal<T>(key)` is generic over the record the modal carries and
+is selector-scoped per key, so opening one modal never re-renders consumers of another:
+
+```ts
+const { modal, openModal, closeModal } = useModal<ITransaction>(transactionFormModalKey);
+```
+
+`modal.visible` drives `open`. **`modal.data` carries the whole record, not an id** — that is
+what lets a modal be opened detached from the list that owns it. Do not fetch a record just
+to edit it when the caller already holds it.
+
+Feature modals compose `AppModal`, `DetailModal<T>` or `EntityFormModal`; they never reach
+for antd `Modal` directly, and width comes from `ModalSize`.
 
 ## Offline / queued writes
 
