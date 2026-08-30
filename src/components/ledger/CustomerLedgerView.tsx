@@ -217,7 +217,7 @@ const CustomerLedgerView = () => {
         </Col>
       </Row>
 
-      <LedgerFilterBar scope="customer-ledger" showBranch={false} showStatus />
+      <LedgerFilterBar scope="customer-ledger" showStatus />
 
       <DataTable<IReceivable>
         columns={columns}

@@ -210,9 +210,10 @@ one deliberate divergence from DCWD, and it is intentional.
   title renders no head — use that for chrome-only panels.
 - Never nest a card in a card. The content shell is already a surface; one card layer
   on top of it is the maximum.
-- Filters are a bar inside a minimum-padding card (`SectionCard` with `dense`),
-  sitting above the table. Filter state lives in `store/common/filter.store.ts` via
-  `useLedgerFilters(scope)` — never in component state.
+- Filters are a bare row sitting directly on the content surface above the table, laid out
+  by `FilterToolbar` with the primary action on the trailing edge — no card. Branch is not a
+  filter field; the sider branch scope is the only branch control. Filter state lives in
+  `store/common/filter.store.ts` via `useLedgerFilters(scope)` — never in component state.
 - Tables are `DataTable<T>` only. Columns are declared in the feature component; cell
   renderers are extracted to `components/<domain>/table/cells/` when reused.
 - Transactional tables are **server-paged**: the feature hook calls

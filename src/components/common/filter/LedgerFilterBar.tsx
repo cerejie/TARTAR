@@ -1,26 +1,16 @@
 import { ClearOutlined } from "@ant-design/icons";
-import {
-  Button,
-  DatePicker,
-  Flex,
-  Input,
-  InputNumber,
-  Select,
-  Tooltip,
-} from "antd";
+import { Button, DatePicker, Flex, Input, InputNumber, Select } from "antd";
 import dayjs from "dayjs";
 import {
   ledgerStatusLabels,
   ledgerStatusValues,
 } from "../../../enums/ledger.enum";
-import { useBranchListHook } from "../../../hook/data/branch/branch.list.hook";
-import { useBranchScopeHook } from "../../../hook/data/branch/branch.scope.hook";
 import { useLedgerFilters } from "../../../hook/common/filter.hook";
 import type { ILedgerFilterScope } from "../../../models/common/filter.model";
 import {
   filterAmount,
   filterBar,
-  filterBranch,
+  filterClear,
   filterReference,
   filterStatus,
 } from "../../../styles/filter/filter.css";
@@ -29,42 +19,15 @@ import { toOptions } from "../../../utils/option.utils";
 const { RangePicker } = DatePicker;
 
 type IProps = {
-  showBranch?: boolean;
   showStatus?: boolean;
   scope?: ILedgerFilterScope;
 };
 
-const LedgerFilterBar = ({
-  showBranch = true,
-  showStatus = false,
-  scope = "page",
-}: IProps) => {
+const LedgerFilterBar = ({ showStatus = false, scope = "page" }: IProps) => {
   const { filters, setFilters, resetFilters } = useLedgerFilters(scope);
-  const { branchOptions } = useBranchListHook();
-  const { branch: scopeBranch } = useBranchScopeHook();
 
   return (
     <Flex className={`${filterBar}`} gap="small" wrap align="center">
-      {showBranch ? (
-        <Tooltip
-          title={
-            scopeBranch
-              ? "Branch is set by the sidebar branch view"
-              : undefined
-          }
-        >
-          <Select
-            className={`${filterBranch}`}
-            placeholder="All branches"
-            allowClear
-            disabled={!!scopeBranch}
-            value={scopeBranch ?? filters.branch}
-            onChange={(branch) => setFilters({ branch })}
-            options={branchOptions}
-          />
-        </Tooltip>
-      ) : null}
-
       <RangePicker
         value={
           filters.dateFrom && filters.dateTo
@@ -118,7 +81,11 @@ const LedgerFilterBar = ({
         onChange={(amountMax) => setFilters({ amountMax: amountMax ?? undefined })}
       />
 
-      <Button icon={<ClearOutlined />} onClick={resetFilters}>
+      <Button
+        className={`${filterClear}`}
+        icon={<ClearOutlined />}
+        onClick={resetFilters}
+      >
         Clear
       </Button>
     </Flex>

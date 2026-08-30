@@ -6,6 +6,7 @@ import {
   branchScopeActive,
   branchScopeCaret,
   branchScopeLabel,
+  siderScope,
 } from "../../../styles/layout/protected.layout.css";
 
 const ProtectedBranchScope = () => {
@@ -26,26 +27,28 @@ const ProtectedBranchScope = () => {
   };
 
   return (
-    <Dropdown menu={menu} trigger={["click"]} placement="bottomRight">
-      <Tooltip
-        placement="bottom"
-        title={
-          branch ? `Branch view: ${branchName}` : "Branch view: all branches"
-        }
-      >
-        <Button
-          type="text"
-          className={`${branchScope} ${branch ? branchScopeActive : ""}`}
-          aria-label="Choose which branch to view"
+    <div className={`${siderScope}`}>
+      <Dropdown menu={menu} trigger={["click"]} placement="bottomLeft">
+        <Tooltip
+          placement="right"
+          title={
+            branch ? `Branch view: ${branchName}` : "Branch view: all branches"
+          }
         >
-          <ShopOutlined />
-          <span className={`${branchScopeLabel}`}>
-            {branchName ?? "All branches"}
-          </span>
-          <DownOutlined className={`${branchScopeCaret}`} />
-        </Button>
-      </Tooltip>
-    </Dropdown>
+          <Button
+            type="text"
+            className={`${branchScope} ${branch ? branchScopeActive : ""}`}
+            aria-label="Choose which branch to view"
+          >
+            <ShopOutlined />
+            <span className={`${branchScopeLabel}`}>
+              {branchName ?? "All branches"}
+            </span>
+            <DownOutlined className={`${branchScopeCaret}`} />
+          </Button>
+        </Tooltip>
+      </Dropdown>
+    </div>
   );
 };
 

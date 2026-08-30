@@ -1,11 +1,7 @@
-import {
-  CloudOutlined,
-  CloudSyncOutlined,
-  DisconnectOutlined,
-} from "@ant-design/icons";
+import { CloudSyncOutlined, DisconnectOutlined } from "@ant-design/icons";
 import { Badge, Tag, Tooltip } from "antd";
 import { useSyncStatus } from "../../../hook/common/network.hook";
-import { syncIndicator } from "../../../styles/status/status.css";
+import { syncIndicator, syncOnline } from "../../../styles/status/status.css";
 
 const SyncIndicator = () => {
   const { online, pending, flushing } = useSyncStatus();
@@ -52,13 +48,9 @@ const SyncIndicator = () => {
 
   return (
     <Tooltip title="Online — all changes saved">
-      <Tag
-        className={`${syncIndicator}`}
-        color="success"
-        icon={<CloudOutlined />}
-      >
+      <span className={`${syncOnline}`}>
         <Badge status="success" text="Online" />
-      </Tag>
+      </span>
     </Tooltip>
   );
 };

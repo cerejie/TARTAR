@@ -7,7 +7,6 @@ import {
   headerTitle,
 } from "../../../styles/layout/protected.layout.css";
 import SyncIndicator from "../status/SyncIndicator";
-import ProtectedBranchScope from "./ProtectedBranchScope";
 
 const { Header } = Layout;
 
@@ -20,7 +19,6 @@ const ProtectedHeader = () => {
         <span className={`${headerTitle}`}>{title}</span>
       </Flex>
       <Flex className={`${headerRight}`} align="center">
-        <ProtectedBranchScope />
         <SyncIndicator />
       </Flex>
     </Header>

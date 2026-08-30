@@ -1,21 +1,12 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { cardBody } from "../card/card.css";
 import { vars } from "../common/vars.css";
 
 export const filterBar = style({
   marginBottom: vars.space.md,
 });
 
-globalStyle(`.${cardBody} > .${filterBar}`, {
-  marginBottom: 0,
-});
-
-export const filterBranch = style({
-  minWidth: 200,
-});
-
 export const filterReference = style({
-  width: 160,
+  width: 180,
 });
 
 export const filterStatus = style({
@@ -23,7 +14,22 @@ export const filterStatus = style({
 });
 
 export const filterAmount = style({
-  width: 110,
+  width: 120,
+});
+
+export const filterClear = style({});
+
+globalStyle(`.${filterClear}.ant-btn`, {
+  border: "none",
+  boxShadow: "none",
+  background: "transparent",
+  color: vars.color.textMuted,
+  paddingInline: vars.space.sm,
+});
+
+globalStyle(`.${filterClear}.ant-btn:not(:disabled):hover`, {
+  background: "transparent",
+  color: vars.color.text,
 });
 
 export const filterToolbar = style({
@@ -33,12 +39,12 @@ export const filterToolbar = style({
   marginBottom: vars.space.md,
 });
 
-export const filterToolbarCard = style({
+export const filterToolbarStart = style({
   flex: 1,
   minWidth: 0,
 });
 
-globalStyle(`.${filterToolbarCard} > .ant-card`, {
+globalStyle(`.${filterToolbarStart} > .${filterBar}`, {
   marginBottom: 0,
 });
 

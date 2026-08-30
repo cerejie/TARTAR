@@ -12,6 +12,16 @@ export const syncIndicator = style({
   fontSize: 12,
 });
 
+export const syncOnline = style({
+  display: "inline-flex",
+  alignItems: "center",
+});
+
+globalStyle(`.${syncOnline} .ant-badge-status-text`, {
+  fontSize: 13,
+  color: vars.color.textMuted,
+});
+
 export const statDelta = style({
   display: "inline-flex",
   alignItems: "center",

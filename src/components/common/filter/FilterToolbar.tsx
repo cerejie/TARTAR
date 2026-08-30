@@ -3,9 +3,8 @@ import type { ReactNode } from "react";
 import {
   filterToolbar,
   filterToolbarActions,
-  filterToolbarCard,
+  filterToolbarStart,
 } from "../../../styles/filter/filter.css";
-import SectionCard from "../card/SectionCard";
 
 type IProps = {
   actions?: ReactNode;
@@ -15,9 +14,9 @@ type IProps = {
 const FilterToolbar = ({ actions, children }: IProps) => {
   return (
     <Flex className={`${filterToolbar}`} align="center" gap="small" wrap>
-      <div className={`${filterToolbarCard}`}>
-        <SectionCard dense>{children}</SectionCard>
-      </div>
+      <Flex className={`${filterToolbarStart}`} align="center" gap="small" wrap>
+        {children}
+      </Flex>
 
       {actions ? (
         <Flex className={`${filterToolbarActions}`} align="center" gap="small">

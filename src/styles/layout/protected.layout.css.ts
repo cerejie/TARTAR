@@ -4,13 +4,7 @@ import { vars } from "../common/vars.css";
 export const protectedLayout = style({
   height: "100dvh",
   overflow: "hidden",
-  background: vars.color.bg,
-  "@media": {
-    "screen and (min-width: 992px)": {
-      padding: vars.space.md,
-      gap: vars.space.md,
-    },
-  },
+  background: vars.color.surfaceSubtle,
 });
 
 export const shellMain = style({
@@ -25,11 +19,6 @@ export const siderWrapper = style({
   height: "100%",
   overflow: "hidden",
   flexShrink: 0,
-  "@media": {
-    "screen and (min-width: 992px)": {
-      borderRadius: vars.radius.shell,
-    },
-  },
   selectors: {
     "&.ant-layout-sider": {
       background: vars.color.brandDark,
@@ -94,6 +83,12 @@ export const siderLogoSub = style({
   whiteSpace: "nowrap",
 });
 
+export const siderScope = style({
+  flexShrink: 0,
+  padding: `0 ${vars.space.lg}`,
+  marginBottom: vars.space.sm,
+});
+
 export const menuWrapper = style({
   position: "relative",
   borderInlineEnd: "none",
@@ -133,7 +128,6 @@ globalStyle(`.${menuWrapper}.${menuWrapper} .ant-menu-item`, {
 });
 
 globalStyle(`.${menuWrapper}.${menuWrapper} .ant-menu-item-group-title`, {
-  position: "relative",
   marginTop: vars.space.sm,
   padding: `${vars.space.lg} ${vars.space.md} ${vars.space.sm}`,
   fontFamily: vars.font.body,
@@ -145,33 +139,20 @@ globalStyle(`.${menuWrapper}.${menuWrapper} .ant-menu-item-group-title`, {
   color: vars.color.onInkMuted,
 });
 
-globalStyle(
-  `.${menuWrapper}.${menuWrapper} .ant-menu-item-group-title::before`,
-  {
-    content: "",
-    position: "absolute",
-    top: 0,
-    insetInline: vars.space.sm,
-    height: 1,
-    background: vars.color.inkBorder,
-  }
-);
-
 globalStyle(`.${menuWrapper}.${menuWrapper} .ant-menu-item-selected`, {
   fontWeight: 600,
-  color: vars.color.ink,
-  background: `linear-gradient(90deg, ${vars.color.accentStrong}, ${vars.color.accent})`,
+  color: vars.color.onInk,
+  background: vars.color.inkOverlay,
 });
 
 globalStyle(`.${menuWrapper}.${menuWrapper} .ant-menu-item-selected::before`, {
   content: "",
   position: "absolute",
-  insetBlock: 0,
+  insetBlock: vars.space.xs,
   insetInlineStart: 0,
-  width: 4,
-  borderStartStartRadius: vars.radius.lg,
-  borderEndStartRadius: vars.radius.lg,
-  background: vars.color.accentStrong,
+  width: 3,
+  borderRadius: vars.radius.pill,
+  background: vars.color.accent,
 });
 
 export const siderFooter = style({
@@ -259,18 +240,14 @@ export const header = style({
   justifyContent: "space-between",
   gap: vars.space.md,
   flexShrink: 0,
-  height: 64,
-  paddingInline: vars.space.md,
-  background: vars.color.surface,
-  border: `1px solid ${vars.color.borderSubtle}`,
-  borderRadius: vars.radius.pill,
-  marginBottom: vars.space.md,
+  height: 88,
+  paddingInline: vars.space.xxl,
+  background: "transparent",
+  borderBottom: `1px solid ${vars.color.borderSubtle}`,
   "@media": {
     "screen and (max-width: 991.98px)": {
-      borderRadius: 0,
-      border: "none",
-      borderBottom: `1px solid ${vars.color.borderSubtle}`,
-      marginBottom: 0,
+      height: 72,
+      paddingInline: vars.space.md,
     },
     "screen and (max-width: 480px)": { paddingInline: vars.space.sm },
   },
@@ -292,14 +269,18 @@ export const headerRight = style({
 
 export const headerTitle = style({
   fontFamily: vars.font.heading,
-  fontSize: 18,
+  fontSize: 26,
   fontWeight: 700,
-  letterSpacing: "-0.01em",
+  lineHeight: 1.2,
+  letterSpacing: "-0.02em",
   color: vars.color.text,
   minWidth: 0,
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
+  "@media": {
+    "screen and (max-width: 575.98px)": { fontSize: 20 },
+  },
 });
 
 export const branchScope = style({});
@@ -308,29 +289,29 @@ globalStyle(`.${branchScope}.ant-btn`, {
   display: "flex",
   alignItems: "center",
   gap: vars.space.sm,
-  height: 36,
-  padding: "0 14px",
-  border: `1px solid ${vars.color.borderSubtle}`,
-  borderRadius: vars.radius.pill,
-  background: vars.color.surfaceSubtle,
-  color: vars.color.text,
+  width: "100%",
+  height: 44,
+  padding: `0 ${vars.space.md}`,
+  border: `1px solid ${vars.color.inkBorder}`,
+  borderRadius: vars.radius.lg,
+  background: vars.color.inkOverlay,
+  color: vars.color.onInk,
   fontFamily: vars.font.body,
   fontSize: 13,
   fontWeight: 500,
-  maxWidth: 220,
 });
 
 globalStyle(`.${branchScope}.ant-btn:not(:disabled):hover`, {
-  background: vars.color.accentSoft,
-  borderColor: vars.color.accent,
-  color: vars.color.text,
+  background: vars.color.inkOverlayStrong,
+  borderColor: vars.color.inkOverlayStrong,
+  color: vars.color.onInk,
 });
 
 export const branchScopeActive = style({});
 
 globalStyle(`.${branchScope}.${branchScopeActive}.ant-btn`, {
-  borderColor: vars.color.ink,
-  background: vars.color.ink,
+  borderColor: vars.color.accent,
+  background: vars.color.inkOverlayStrong,
   color: vars.color.onInk,
 });
 
@@ -340,40 +321,30 @@ globalStyle(`.${branchScope}.${branchScopeActive} .anticon`, {
 
 export const branchScopeLabel = style({
   flex: 1,
+  textAlign: "left",
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
-  "@media": {
-    "screen and (max-width: 767.98px)": { display: "none" },
-  },
 });
 
 export const branchScopeCaret = style({
   fontSize: 10,
   opacity: 0.7,
-  "@media": {
-    "screen and (max-width: 767.98px)": { display: "none" },
-  },
+  flexShrink: 0,
 });
 
 export const content = style({
   flex: 1,
   minWidth: 0,
   minHeight: 0,
-  padding: 0,
+  background: "transparent",
+  padding: `${vars.space.lg} ${vars.space.xxl}`,
   overflowY: "auto",
   overflowX: "hidden",
   scrollbarWidth: "thin",
   scrollbarGutter: "stable",
   scrollbarColor: `${vars.color.border} transparent`,
   "@media": {
-    "screen and (min-width: 992px)": {
-      padding: vars.space.lg,
-      background: vars.color.surfaceSubtle,
-      border: `1px solid ${vars.color.borderSubtle}`,
-      borderRadius: vars.radius.shell,
-      boxShadow: vars.shadow.card,
-    },
     "screen and (max-width: 991.98px)": { padding: vars.space.md },
     "screen and (max-width: 480px)": { padding: vars.space.sm },
   },
@@ -407,10 +378,16 @@ export const footer = style({
   justifyContent: "space-between",
   flexWrap: "wrap",
   gap: vars.space.sm,
-  padding: `${vars.space.md} ${vars.space.lg}`,
+  marginInline: vars.space.xxl,
+  padding: `${vars.space.md} 0`,
   background: "transparent",
+  borderTop: `1px solid ${vars.color.borderSubtle}`,
   color: vars.color.textMuted,
   fontSize: 12,
+  "@media": {
+    "screen and (max-width: 991.98px)": { marginInline: vars.space.md },
+    "screen and (max-width: 480px)": { marginInline: vars.space.sm },
+  },
 });
 
 export const footerNote = style({
