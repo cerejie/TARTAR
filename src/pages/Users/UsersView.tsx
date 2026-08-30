@@ -179,8 +179,6 @@ const UsersView = () => {
 
   return (
     <ContentView
-      title="Users"
-      subtitle="Manage all users and assign any role"
       actions={
         <Button
           type="primary"

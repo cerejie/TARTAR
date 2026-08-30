@@ -58,7 +58,6 @@ const PayablesView = () => {
     <LedgerManager<IPayable, IPayableInput>
       scope="payables"
       title="Payables"
-      subtitle="Amounts the business owes suppliers"
       partyLabel="Supplier"
       nameOf={(row) => row.supplier_name}
       getList={payableServices.getList}

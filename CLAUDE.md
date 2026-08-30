@@ -26,6 +26,19 @@ yarn lint               # oxlint
 Gate every change on `yarn build` and `yarn lint` both clean. This repo has no
 pre-existing type errors and must not acquire any.
 
+## Before writing code — always
+
+Any prompt that asks for implementation work in this repo runs the `build` skill's
+pipeline, whether or not the user typed `/build`. A design revision, a spacing tweak or a
+one-line style change counts: those are exactly the changes that look too small to warrant
+it. Load `.claude/skills/build/references/` as the step calls for it — `conventions.md`
+for folder and naming law, `stack.md` before touching antd or vanilla-extract,
+`verification.md` before claiming a change is done.
+
+Never report a visual change as working on the strength of `yarn build` alone. A build
+proves the CSS compiled; it cannot prove the selector matches an element. Say it is
+compiled and let the user confirm it renders.
+
 ## Structure (src/)
 
 Layering is strict and one-directional:
@@ -218,6 +231,11 @@ one deliberate divergence from DCWD, and it is intentional.
 - All styling is vanilla-extract `*.css.ts`, centralized under `src/styles/<area>/`,
   never colocated with the component, never a `.css` file, never inline styles, never
   Tailwind or styled-components.
+- `vite.config.ts` sets `vanillaExtractPlugin({ identifiers: 'short' })`. That option is
+  load-bearing, not cosmetic: without it, dev class names are prefixed with the source
+  filename and the dot in `protected.layout.css.ts` produces a selector that matches no
+  element, silently killing every rule in the file while every build still passes. Do not
+  remove it. Detail: `.claude/skills/build/references/stack.md`.
 - All colours, spacing, radii, shadows and fonts come from the token contract in
   `src/styles/common/vars.css.ts` (`vars.color.*`, `vars.space.*`, `vars.radius.*`,
   `vars.shadow.*`, `vars.font.*`). Hardcoding any of them is a defect. The `palette`

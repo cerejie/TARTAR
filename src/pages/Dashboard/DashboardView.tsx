@@ -39,7 +39,6 @@ const formatAxisLabel = (iso: string, period: SalesPeriod): string => {
 
 const DashboardView = () => {
   const {
-    branchName,
     salesPeriod,
     setSalesPeriod,
     summary,
@@ -59,12 +58,6 @@ const DashboardView = () => {
 
   return (
     <ContentView
-      title="Dashboard"
-      subtitle={
-        branchName
-          ? `Standing for ${branchName}`
-          : "Company-wide standing across all branches"
-      }
       meta={formatDate(todayIso())}
       layout="bento"
     >

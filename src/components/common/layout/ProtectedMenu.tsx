@@ -10,6 +10,7 @@ const ProtectedMenu = () => {
       className={`${menuWrapper}`}
       theme="dark"
       mode="inline"
+      inlineIndent={20}
       selectedKeys={[selectedKey]}
       items={items}
       onClick={({ key }) => onSelect(key)}

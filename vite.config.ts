@@ -7,7 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     react(),
-    vanillaExtractPlugin(),
+    vanillaExtractPlugin({ identifiers: 'short' }),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {

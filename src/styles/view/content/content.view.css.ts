@@ -10,11 +10,25 @@ export const contentView = style({
 export const viewToolbar = style({
   display: "flex",
   alignItems: "center",
-  flexWrap: "wrap",
   gap: vars.space.sm,
-  marginBottom: vars.space.lg,
+  marginBottom: vars.space.md,
   maxWidth: "100%",
-  overflowX: "auto",
+});
+
+export const viewToolbarStart = style({
+  flex: 1,
+  minWidth: 0,
+});
+
+export const viewToolbarActions = style({
+  marginInlineStart: "auto",
+  flexShrink: 0,
+});
+
+export const viewMeta = style({
+  fontSize: 12,
+  color: vars.color.textMuted,
+  whiteSpace: "nowrap",
 });
 
 export const viewBody = style({

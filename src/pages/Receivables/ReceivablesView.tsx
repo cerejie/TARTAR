@@ -65,7 +65,6 @@ const ReceivablesView = () => {
       <LedgerManager<IReceivable, IReceivableInput>
         scope="receivables"
         title="Receivables"
-        subtitle="Amounts customers owe the business"
         partyLabel="Customer"
         nameOf={(row) => row.customer_name}
         getList={receivableServices.getList}

@@ -17,7 +17,6 @@ const ReportsView = () => {
   const {
     type,
     setType,
-    branchName,
     transactions,
     receivables,
     payables,
@@ -55,12 +54,6 @@ const ReportsView = () => {
 
   return (
     <ContentView
-      title="Reports"
-      subtitle={
-        branchName
-          ? `Financial reporting for ${branchName}`
-          : "Financial reporting across the business"
-      }
       actions={
         <Button icon={<PrinterOutlined />} onClick={print} disabled={loading}>
           Print report

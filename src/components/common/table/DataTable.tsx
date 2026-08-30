@@ -39,6 +39,8 @@ const DataTable = <T extends object>({
         total: totalCount,
         showSizeChanger: true,
         showLessItems: true,
+        showTotal: (total: number) =>
+          `${total} ${total === 1 ? "record" : "records"}`,
       }
     : { pageSize, showSizeChanger: false, hideOnSinglePage: true };
 

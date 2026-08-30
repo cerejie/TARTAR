@@ -25,3 +25,23 @@ export const filterStatus = style({
 export const filterAmount = style({
   width: 110,
 });
+
+export const filterToolbar = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  marginBottom: vars.space.md,
+});
+
+export const filterToolbarCard = style({
+  flex: 1,
+  minWidth: 0,
+});
+
+globalStyle(`.${filterToolbarCard} > .ant-card`, {
+  marginBottom: 0,
+});
+
+export const filterToolbarActions = style({
+  flexShrink: 0,
+});

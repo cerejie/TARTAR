@@ -179,8 +179,6 @@ const BranchesView = () => {
 
   return (
     <ContentView
-      title="Branch Monitoring"
-      subtitle="Monitor cash, sales, expenses, receivables and payables per branch"
       actions={
         <Button
           type="primary"

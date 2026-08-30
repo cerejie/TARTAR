@@ -1,6 +1,6 @@
 ---
 name: build
-description: "The single entry point for implementation work in this codebase — new module, feature, bug fix, refactor, UI or schema change. The user invokes it explicitly by typing /build; do not auto-invoke it on ordinary prompts. It runs the whole pipeline itself (locate, decide, plan, implement, verify, report) and loads whatever references it needs — pathfinding, planning, conventions, stack rules, verification — without the user naming them."
+description: "The single entry point for implementation work in this codebase — new module, feature, bug fix, refactor, UI or schema change. Load this automatically whenever a prompt asks for implementation work in this codebase, whether or not the user types /build — a styling or design revision counts, however small it looks. It runs the whole pipeline itself (locate, decide, plan, implement, verify, report) and loads whatever references it needs — pathfinding, planning, conventions, stack rules, verification — without the user naming them."
 ---
 
 # /build
@@ -84,7 +84,8 @@ Never read more than two references in one task.
 
 **One** command, the cheapest that covers the change:
 
-- Copy, labels, styles, or a single file with no new types → **nothing**.
+- Copy, labels, styles, or a single file with no new types → **nothing**. A build never
+  proves a style change is *visible*; report it as compiled, not as confirmed.
 - New or changed types, models, services, or more than one file → `npx tsc -b`.
 - Build config, vite, PWA, or a dependency change → `yarn build`.
 

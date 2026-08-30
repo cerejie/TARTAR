@@ -2,11 +2,7 @@ import DisbursementManager from "../../components/disbursement/DisbursementManag
 
 const PurchasesView = () => {
   return (
-    <DisbursementManager
-      kind="purchase"
-      title="Purchases"
-      subtitle="Goods bought — each record generates a voucher for approval"
-    />
+    <DisbursementManager kind="purchase" title="Purchases" />
   );
 };
 

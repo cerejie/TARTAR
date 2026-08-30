@@ -32,6 +32,7 @@ import {
 import { iconButton, rowOverdue } from "../../styles/table/table.css";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import SectionCard from "../common/card/SectionCard";
+import FilterToolbar from "../common/filter/FilterToolbar";
 import LedgerFilterBar from "../common/filter/LedgerFilterBar";
 import EntityFormModal from "../common/form/EntityFormModal";
 import RequirePermission from "../common/guard/RequirePermission";
@@ -42,7 +43,6 @@ import PaymentsPanel from "../payment/PaymentsPanel";
 
 type IProps<Row extends ILedgerRow, Input extends FieldValues> =
   ILedgerManagerConfig<Row, Input> & {
-    subtitle: string;
     partyLabel: string;
     nameOf: (row: Row) => string;
     schema: ZodType<Input>;
@@ -163,25 +163,25 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
   ];
 
   return (
-    <ContentView
-      title={props.title}
-      subtitle={props.subtitle}
-      actions={
-        <Space>
-          {props.headerActions}
-          <RequirePermission can="encodeTransactions" fallback={null}>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => formModal.openModal()}
-            >
-              Add {props.partyLabel.toLowerCase()} record
-            </Button>
-          </RequirePermission>
-        </Space>
-      }
-    >
-      <LedgerFilterBar />
+    <ContentView>
+      <FilterToolbar
+        actions={
+          <>
+            {props.headerActions}
+            <RequirePermission can="encodeTransactions" fallback={null}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => formModal.openModal()}
+              >
+                Add {props.partyLabel.toLowerCase()} record
+              </Button>
+            </RequirePermission>
+          </>
+        }
+      >
+        <LedgerFilterBar />
+      </FilterToolbar>
 
       <SectionCard
         title={`All ${props.title}`}

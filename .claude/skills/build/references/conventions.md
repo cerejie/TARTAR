@@ -147,7 +147,9 @@ export const xStatusColors: Record<XStatus, string> = { ... };
 
 ## 8. Style layer
 
-- vanilla-extract only. One `*.css.ts` per visual group under `styles/`.
+- vanilla-extract only. One `*.css.ts` per visual group under `styles/`. Dotted base names
+  (`content.view.css.ts`) are fine only because `vite.config.ts` sets
+  `identifiers: 'short'` — see the dotted-filename trap in `stack.md` before changing that.
 - Every value comes from `vars`: `vars.color.brand`, `vars.space.md`, `vars.radius.xl`, `vars.shadow.card`, `vars.font.heading`.
 - Component-library internals are reached through a scoped `globalStyle` that starts from your own class, never by styling a library class globally on its own.
 - Classes are applied through a template string on `className`, matching the existing components.

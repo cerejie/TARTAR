@@ -1,17 +1,18 @@
+import { Flex } from "antd";
 import type { ReactNode } from "react";
 import type { ViewLayout } from "../../../models/common/view.model";
 import {
   contentView,
   viewBody,
   viewFooter,
+  viewMeta,
   viewToolbar,
+  viewToolbarActions,
+  viewToolbarStart,
 } from "../../../styles/view/content/content.view.css";
 import BentoGrid from "./BentoGrid";
-import PageHeader from "./PageHeader";
 
 type IProps = {
-  title: string;
-  subtitle?: string;
   meta?: ReactNode;
   actions?: ReactNode;
   toolbar?: ReactNode;
@@ -21,8 +22,6 @@ type IProps = {
 };
 
 const ContentView = ({
-  title,
-  subtitle,
   meta,
   actions,
   toolbar,
@@ -32,14 +31,31 @@ const ContentView = ({
 }: IProps) => {
   return (
     <div className={`${contentView}`}>
-      <PageHeader
-        title={title}
-        subtitle={subtitle}
-        meta={meta}
-        actions={actions}
-      />
+      {toolbar || meta || actions ? (
+        <Flex className={`${viewToolbar}`} align="center" gap="small" wrap>
+          {toolbar ? (
+            <Flex
+              className={`${viewToolbarStart}`}
+              align="center"
+              gap="small"
+              wrap
+            >
+              {toolbar}
+            </Flex>
+          ) : null}
 
-      {toolbar ? <div className={`${viewToolbar}`}>{toolbar}</div> : null}
+          {meta || actions ? (
+            <Flex
+              className={`${viewToolbarActions}`}
+              align="center"
+              gap="small"
+            >
+              {meta ? <span className={`${viewMeta}`}>{meta}</span> : null}
+              {actions}
+            </Flex>
+          ) : null}
+        </Flex>
+      ) : null}
 
       {layout === "bento" ? (
         <BentoGrid>{children}</BentoGrid>

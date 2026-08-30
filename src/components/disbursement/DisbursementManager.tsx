@@ -30,6 +30,7 @@ import {
   formatMoney,
 } from "../../utils/format.utils";
 import SectionCard from "../common/card/SectionCard";
+import FilterToolbar from "../common/filter/FilterToolbar";
 import LedgerFilterBar from "../common/filter/LedgerFilterBar";
 import EntityFormModal from "../common/form/EntityFormModal";
 import RequirePermission from "../common/guard/RequirePermission";
@@ -43,10 +44,9 @@ const { Text } = Typography;
 type IProps = {
   kind: DisbursementKind;
   title: string;
-  subtitle: string;
 };
 
-const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
+const DisbursementManager = ({ kind, title }: IProps) => {
   const {
     permissions,
     rows,
@@ -211,22 +211,22 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
   ];
 
   return (
-    <ContentView
-      title={title}
-      subtitle={subtitle}
-      actions={
-        <RequirePermission can="encodeTransactions" fallback={null}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => formModal.openModal()}
-          >
-            Record {singular}
-          </Button>
-        </RequirePermission>
-      }
-    >
-      <LedgerFilterBar />
+    <ContentView>
+      <FilterToolbar
+        actions={
+          <RequirePermission can="encodeTransactions" fallback={null}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => formModal.openModal()}
+            >
+              Record {singular}
+            </Button>
+          </RequirePermission>
+        }
+      >
+        <LedgerFilterBar />
+      </FilterToolbar>
 
       <SectionCard
         title={`All ${title}`}

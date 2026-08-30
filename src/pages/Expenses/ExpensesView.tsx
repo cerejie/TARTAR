@@ -2,11 +2,7 @@ import DisbursementManager from "../../components/disbursement/DisbursementManag
 
 const ExpensesView = () => {
   return (
-    <DisbursementManager
-      kind="expense"
-      title="Expenses"
-      subtitle="Operating costs — each record generates a voucher for approval"
-    />
+    <DisbursementManager kind="expense" title="Expenses" />
   );
 };
 

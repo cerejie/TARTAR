@@ -4,15 +4,10 @@ import { colors, fontFamilyBase } from "../../styles/common/vars.css";
 
 type States = {
   theme: ThemeConfig;
-  siderCollapsed: boolean;
-  siderBroken: boolean;
 };
 
 type Actions = {
   setTheme: (theme: ThemeConfig) => void;
-  toggleSider: () => void;
-  setSiderCollapsed: (siderCollapsed: boolean) => void;
-  setSiderBroken: (siderBroken: boolean) => void;
 };
 
 const initialValues: States = {
@@ -79,29 +74,25 @@ const initialValues: States = {
       Menu: {
         darkItemBg: "transparent",
         darkSubMenuItemBg: "transparent",
-        darkItemColor: colors.onInkMuted,
+        darkItemColor: colors.onInk,
         darkItemHoverBg: colors.inkOverlay,
         darkItemHoverColor: colors.onInk,
-        darkItemSelectedBg: colors.surface,
+        darkItemSelectedBg: colors.accent,
         darkItemSelectedColor: colors.ink,
         itemBorderRadius: 999,
+        itemHeight: 34,
+        itemMarginBlock: 2,
+        itemMarginInline: 0,
+        itemPaddingInline: 12,
       },
       Tag: { borderRadiusSM: 999 },
       Input: { paddingBlock: 8 },
       Select: { borderRadius: 12 },
     },
   },
-  siderCollapsed: false,
-  siderBroken: false,
 };
 
 export const useThemeStore = create<States & Actions>((set) => ({
   ...initialValues,
   setTheme: (theme: ThemeConfig) => set(() => ({ theme })),
-  toggleSider: () =>
-    set((state) => ({ siderCollapsed: !state.siderCollapsed })),
-  setSiderCollapsed: (siderCollapsed: boolean) =>
-    set(() => ({ siderCollapsed })),
-  setSiderBroken: (siderBroken: boolean) =>
-    set(() => ({ siderBroken, siderCollapsed: siderBroken })),
 }));

@@ -6,7 +6,6 @@ export const statCard = style({
   height: "100%",
   borderRadius: vars.radius.xxl,
   border: `1px solid ${vars.color.borderSubtle}`,
-  boxShadow: vars.shadow.card,
 });
 
 globalStyle(`.${statCard}.ant-card .ant-card-body`, {

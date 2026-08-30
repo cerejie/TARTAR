@@ -12,11 +12,6 @@ const sectionLabels: Record<Section, string> = {
   "expense-categories": "Expense Categories",
 };
 
-const sectionSubtitles: Record<Section, string> = {
-  suppliers: "Supplier records used by payables, purchases and vouchers",
-  "expense-categories": "Categories offered when recording an expense",
-};
-
 const MasterDataView = () => {
   const { value: section, setValue: setSection } = useSearchParam<Section>(
     "section",
@@ -26,8 +21,6 @@ const MasterDataView = () => {
 
   return (
     <ContentView
-      title="Master Data"
-      subtitle={sectionSubtitles[section]}
       toolbar={
         <Segmented
           value={section}

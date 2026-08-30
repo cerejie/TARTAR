@@ -33,6 +33,32 @@ Reference stack: React 19, react-router-dom 7, antd 6, `@ant-design/icons`, `@an
 - Library internals are targeted with `globalStyle` scoped through your own generated class.
 - Dynamic values that cannot be a token go through inline style or a `createVar`, not a new class per value.
 
+### Generated class names — the dotted-filename trap
+
+`vite.config.ts` passes `vanillaExtractPlugin({ identifiers: 'short' })`. **Do not remove
+that option.** Without it, dev builds prefix every generated class with the source
+filename, and vanilla-extract sanitizes only whitespace in that prefix — never dots.
+
+A file named `protected.layout.css.ts` then produces:
+
+```
+element:  class="protected.layout_menuWrapper__1yh2jv38"   one class token containing "."
+selector: .protected.layout_menuWrapper__1yh2jv38          parsed as .protected AND .layout_menuWrapper__…
+```
+
+The selector cannot match the element — the dot needed escaping and never gets it, so
+**every rule in that file is silently dead in the dev server**. Production is unaffected,
+because release builds emit hash-only identifiers. The failure is invisible to `tsc`,
+`oxlint` and `yarn build` alike.
+
+Seven of this project's stylesheets have a dotted base name and were affected:
+`protected.layout`, `public.layout`, `common.view`, `content.view`, `dashboard.view`,
+`ledger.view`, `report.view`. `identifiers: 'short'` fixes all of them at once and keeps
+the `<area>.<kind>.css.ts` naming convention intact.
+
+If a style edit provably reaches the compiled CSS but does not appear in the browser,
+check this first: fetch the served class name and confirm it contains no dot.
+
 ## zustand 5
 
 - `type States` + `type Actions` + `initialValues`, as in `conventions.md`.
