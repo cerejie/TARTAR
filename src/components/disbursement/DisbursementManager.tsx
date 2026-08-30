@@ -4,7 +4,7 @@ import {
   HistoryOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Button, Flex, Modal, Popconfirm, Space, Tag, Tooltip, Typography } from "antd";
+import { Button, Flex, Popconfirm, Space, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { DisbursementKind } from "../../enums/transaction.enum";
 import { transactionTypeLabels } from "../../enums/transaction.enum";
@@ -32,11 +32,12 @@ import SectionCard from "../common/card/SectionCard";
 import LedgerFilterBar from "../common/filter/LedgerFilterBar";
 import EntityFormModal from "../common/form/EntityFormModal";
 import RequirePermission from "../common/guard/RequirePermission";
+import AppModal from "../common/modal/AppModal";
 import DataTable from "../common/table/DataTable";
 import { RowActions } from "../common/table/TableDecor";
-import PageHeader from "../common/view/PageHeader";
+import ContentView from "../common/view/ContentView";
 
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 type IProps = {
   kind: DisbursementKind;
@@ -203,23 +204,21 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
   ];
 
   return (
-    <>
-      <PageHeader
-        title={title}
-        subtitle={subtitle}
-        extra={
-          <RequirePermission can="encodeTransactions" fallback={null}>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => formModal.openModal()}
-            >
-              Record {singular}
-            </Button>
-          </RequirePermission>
-        }
-      />
-
+    <ContentView
+      title={title}
+      subtitle={subtitle}
+      actions={
+        <RequirePermission can="encodeTransactions" fallback={null}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => formModal.openModal()}
+          >
+            Record {singular}
+          </Button>
+        </RequirePermission>
+      }
+    >
       <LedgerFilterBar />
 
       <SectionCard
@@ -263,20 +262,19 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
         />
       ) : null}
 
-      <Modal
+      <AppModal
         title="Edit history"
+        subtitle={
+          historyRow
+            ? `${transactionTypeLabels[historyRow.type]} · ${formatMoney(
+                historyRow.amount
+              )} · ${formatDate(historyRow.txn_date)}`
+            : undefined
+        }
         open={historyModal.modal.open}
-        onCancel={historyModal.closeModal}
-        footer={null}
-        width={640}
+        size="lg"
+        onClose={historyModal.closeModal}
       >
-        {historyRow ? (
-          <Paragraph type="secondary">
-            {transactionTypeLabels[historyRow.type]} ·{" "}
-            {formatMoney(historyRow.amount)} · {formatDate(historyRow.txn_date)}
-          </Paragraph>
-        ) : null}
-
         {audit.length === 0 && !auditLoading ? (
           <Text type="secondary">No edits recorded.</Text>
         ) : null}
@@ -297,8 +295,8 @@ const DisbursementManager = ({ kind, title, subtitle }: IProps) => {
             </ul>
           </Flex>
         ))}
-      </Modal>
-    </>
+      </AppModal>
+    </ContentView>
   );
 };
 

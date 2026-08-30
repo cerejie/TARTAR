@@ -14,6 +14,14 @@ import {
 import { usePermissions } from "../account/account.permission.hook";
 import { useAccountLogoutHook } from "../account/account.logout.hook";
 import { useNetwork } from "../common/network.hook";
+import { useBranchScopeHook } from "../data/branch/branch.scope.hook";
+
+type ICallout = {
+  title: string;
+  description: string;
+  actionLabel: string;
+  onAction: () => void;
+};
 
 export const useProtectedLayoutHook = () => {
   useNetwork();
@@ -68,7 +76,7 @@ export const useProtectedMenuHook = () => {
   return { items, selectedKey: location.pathname, onSelect };
 };
 
-export const useProtectedSiderUserHook = () => {
+export const useProtectedHeaderUserHook = () => {
   const user = useAccountStore((state) => state.user);
   const permissions = usePermissions();
   const online = useNetworkStore((state) => state.online);
@@ -85,4 +93,38 @@ export const useProtectedSiderUserHook = () => {
         : "";
 
   return { displayName, roleLabel, online, logoutMutation };
+};
+
+export const useProtectedCalloutHook = (): ICallout | null => {
+  const navigate = useNavigate();
+  const permissions = usePermissions();
+
+  if (permissions.approveVouchers)
+    return {
+      title: "Voucher approvals",
+      description: "Review the vouchers waiting on your sign-off.",
+      actionLabel: "Open vouchers",
+      onAction: () => navigate("/vouchers"),
+    };
+
+  if (permissions.viewIncomeExpenses)
+    return {
+      title: "Period reporting",
+      description: "Cash flow, ledger and expense summaries in one place.",
+      actionLabel: "Open reports",
+      onAction: () => navigate("/reports"),
+    };
+
+  return null;
+};
+
+export const useProtectedFooterHook = () => {
+  const online = useNetworkStore((state) => state.online);
+  const { branchName } = useBranchScopeHook();
+
+  return {
+    year: new Date().getFullYear(),
+    branchLabel: branchName ? `Branch: ${branchName}` : "All branches",
+    online,
+  };
 };

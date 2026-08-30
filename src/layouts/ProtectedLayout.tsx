@@ -1,11 +1,13 @@
 import { Layout } from "antd";
 import { Outlet } from "react-router-dom";
+import ProtectedFooter from "../components/common/layout/ProtectedFooter";
 import ProtectedHeader from "../components/common/layout/ProtectedHeader";
 import ProtectedSider from "../components/common/layout/ProtectedSider";
 import { useProtectedLayoutHook } from "../hook/layout/protected.hook";
 import {
   content,
   protectedLayout,
+  shellMain,
   siderScrim,
   siderWrapper,
 } from "../styles/layout/protected.layout.css";
@@ -36,7 +38,7 @@ const ProtectedLayout = () => {
         collapsible
         collapsed={siderCollapsed}
         trigger={null}
-        width={224}
+        width={236}
         breakpoint="lg"
         collapsedWidth={siderBroken ? 0 : 80}
         onBreakpoint={setSiderBroken}
@@ -44,7 +46,7 @@ const ProtectedLayout = () => {
         <ProtectedSider siderCollapsed={siderCollapsed} />
       </Sider>
 
-      <Layout>
+      <Layout className={`${shellMain}`}>
         <ProtectedHeader
           siderCollapsed={siderCollapsed}
           onToggleSider={toggleSider}
@@ -52,6 +54,7 @@ const ProtectedLayout = () => {
         <Content className={`${content}`}>
           <Outlet />
         </Content>
+        <ProtectedFooter />
       </Layout>
     </Layout>
   );

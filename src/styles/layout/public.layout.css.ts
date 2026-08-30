@@ -2,6 +2,13 @@ import { globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { vars } from "../common/vars.css";
 import { farmSceneUrl } from "../scene/farm.scene";
 
+/** rgba forms of the flux palette — vanilla-extract cannot derive alpha from a hex token. */
+const tint = {
+  lime: (alpha: number) => `rgba(214, 242, 91, ${alpha})`,
+  lilac: (alpha: number) => `rgba(185, 165, 245, ${alpha})`,
+  ink: (alpha: number) => `rgba(22, 22, 26, ${alpha})`,
+} as const;
+
 const cardIn = keyframes({
   from: { opacity: 0, transform: "translateY(18px) scale(0.98)" },
   to: { opacity: 1, transform: "translateY(0) scale(1)" },
@@ -28,8 +35,8 @@ export const authPage = style({
   display: "flex",
   minHeight: "100vh",
   background: `
-    radial-gradient(1100px 700px at 88% -10%, rgba(255, 224, 178, 0.7), transparent 60%),
-    radial-gradient(900px 650px at -12% 108%, rgba(211, 163, 118, 0.28), transparent 60%),
+    radial-gradient(1100px 700px at 88% -10%, ${tint.lime(0.32)}, transparent 60%),
+    radial-gradient(900px 650px at -12% 108%, ${tint.lilac(0.3)}, transparent 60%),
     ${vars.color.bg}`,
 });
 
@@ -40,10 +47,10 @@ export const authHero = style({
   width: "clamp(360px, 42vw, 560px)",
   padding: 48,
   overflow: "hidden",
-  color: vars.color.accent,
+  color: vars.color.onInk,
   background: `
-    radial-gradient(120% 90% at 110% -10%, rgba(140, 110, 99, 0.5), transparent 55%),
-    radial-gradient(110% 90% at -25% 110%, rgba(211, 163, 118, 0.22), transparent 60%),
+    radial-gradient(120% 90% at 110% -10%, ${tint.lime(0.14)}, transparent 55%),
+    radial-gradient(110% 90% at -25% 110%, ${tint.lilac(0.18)}, transparent 60%),
     ${vars.color.brandDark}`,
 });
 
@@ -61,7 +68,7 @@ export const authHeroBrand = style({
   fontWeight: 700,
   fontSize: 19,
   letterSpacing: "0.18em",
-  color: vars.color.bg,
+  color: vars.color.onInk,
 });
 
 export const authHeroBody = style([
@@ -82,7 +89,8 @@ globalStyle(`.${authHero} h1.${authHeroTitle}.ant-typography`, {
   fontFamily: vars.font.heading,
   fontSize: "clamp(28px, 2.6vw, 36px)",
   lineHeight: 1.15,
-  color: vars.color.bg,
+  letterSpacing: "-0.02em",
+  color: vars.color.onInk,
 });
 
 export const authHeroCopy = style({});
@@ -92,7 +100,7 @@ globalStyle(`.${authHero} .${authHeroCopy}.ant-typography`, {
   maxWidth: "42ch",
   fontSize: 15,
   lineHeight: 1.6,
-  color: "rgba(255, 242, 223, 0.78)",
+  color: vars.color.onInkMuted,
 });
 
 export const authHeroList = style({
@@ -107,7 +115,7 @@ export const authHeroItem = style({
   alignItems: "center",
   gap: 12,
   fontSize: 14,
-  color: "rgba(255, 242, 223, 0.85)",
+  color: vars.color.onInk,
 });
 
 export const authHeroIcon = style({
@@ -119,9 +127,9 @@ export const authHeroIcon = style({
   flexShrink: 0,
   borderRadius: vars.radius.lg,
   fontSize: 15,
-  color: vars.color.brandLight,
-  background: "rgba(255, 224, 178, 0.12)",
-  border: "1px solid rgba(255, 224, 178, 0.18)",
+  color: vars.color.accent,
+  background: vars.color.inkOverlay,
+  border: `1px solid ${vars.color.inkBorder}`,
 });
 
 export const authHeroArt = style({
@@ -133,7 +141,7 @@ export const authHeroArt = style({
   backgroundRepeat: "no-repeat",
   backgroundPosition: "bottom center",
   backgroundSize: "520px auto",
-  opacity: 0.4,
+  opacity: 0.3,
   pointerEvents: "none",
   maskImage: "linear-gradient(to bottom, transparent 0%, #000 60%)",
   WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 60%)",
@@ -170,7 +178,7 @@ export const authBlobA = style({
   height: 420,
   top: -120,
   right: -90,
-  background: "rgba(255, 224, 178, 0.85)",
+  background: tint.lime(0.5),
 });
 
 export const authBlobB = style({
@@ -178,7 +186,7 @@ export const authBlobB = style({
   height: 360,
   bottom: -140,
   left: -110,
-  background: "rgba(211, 163, 118, 0.35)",
+  background: tint.lilac(0.42),
   animationDelay: "-7s",
 });
 
@@ -187,7 +195,7 @@ export const authBlobC = style({
   height: 260,
   top: "55%",
   right: "6%",
-  background: "rgba(140, 110, 99, 0.16)",
+  background: tint.ink(0.1),
   animationDuration: "18s",
 });
 
@@ -198,18 +206,18 @@ globalStyle(`.${authCard}.ant-card`, {
   zIndex: 1,
   width: "100%",
   maxWidth: 440,
-  background: "rgba(255, 255, 255, 0.88)",
+  background: "rgba(255, 255, 255, 0.9)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
-  border: "1px solid rgba(255, 224, 178, 0.9)",
-  borderRadius: 24,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.xxl,
   boxShadow: `
-    0 1px 2px rgba(62, 37, 34, 0.05),
-    0 12px 32px rgba(62, 37, 34, 0.10),
-    0 32px 80px rgba(62, 37, 34, 0.12)`,
+    0 1px 2px ${tint.ink(0.04)},
+    0 12px 32px ${tint.ink(0.08)},
+    0 32px 80px ${tint.ink(0.1)}`,
   animation: `${cardIn} 0.55s cubic-bezier(0.21, 0.61, 0.35, 1) both`,
   "@media": {
-    "screen and (max-width: 480px)": { borderRadius: 20 },
+    "screen and (max-width: 480px)": { borderRadius: vars.radius.xl },
     "(prefers-reduced-motion: reduce)": { animation: "none" },
   },
 });
@@ -249,14 +257,12 @@ export const authMark = style({
   width: 42,
   height: 42,
   flexShrink: 0,
-  borderRadius: 14,
+  borderRadius: vars.radius.lg,
   fontFamily: vars.font.heading,
   fontWeight: 700,
   fontSize: 22,
-  color: vars.color.brandDark,
-  background: `linear-gradient(135deg, ${vars.color.accent}, ${vars.color.brandLight})`,
-  boxShadow:
-    "0 6px 16px rgba(62, 37, 34, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.45)",
+  color: vars.color.ink,
+  background: vars.color.accent,
 });
 
 export const authTitle = style({});
@@ -265,6 +271,7 @@ globalStyle(`.${authCard} h2.${authTitle}.ant-typography`, {
   margin: "0 0 6px",
   fontFamily: vars.font.heading,
   fontSize: 26,
+  letterSpacing: "-0.02em",
   color: vars.color.brandDark,
 });
 
@@ -285,27 +292,27 @@ globalStyle(`.${authForm} .ant-form-item`, {
 globalStyle(`.${authForm} .ant-form-item-label > label`, {
   fontSize: 13,
   fontWeight: 600,
-  color: "rgba(62, 37, 34, 0.85)",
+  color: vars.color.text,
 });
 
 globalStyle(`.${authForm} .ant-input-affix-wrapper`, {
   padding: "12px 16px",
-  borderRadius: 14,
-  background: "rgba(255, 242, 223, 0.5)",
-  borderColor: "rgba(211, 163, 118, 0.45)",
+  borderRadius: vars.radius.lg,
+  background: vars.color.surfaceSubtle,
+  borderColor: vars.color.border,
   transition:
     "border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease",
 });
 
 globalStyle(`.${authForm} .ant-input-affix-wrapper:hover`, {
-  borderColor: vars.color.brandLight,
-  background: "rgba(255, 242, 223, 0.8)",
+  borderColor: vars.color.ink,
+  background: vars.color.surface,
 });
 
 globalStyle(`.${authForm} .ant-input-affix-wrapper:focus-within`, {
-  borderColor: vars.color.brandLight,
+  borderColor: vars.color.ink,
   background: vars.color.surface,
-  boxShadow: "0 0 0 4px rgba(211, 163, 118, 0.22)",
+  boxShadow: `0 0 0 4px ${tint.lilac(0.4)}`,
 });
 
 globalStyle(`.${authForm} .ant-input-affix-wrapper .ant-input`, {
@@ -314,7 +321,7 @@ globalStyle(`.${authForm} .ant-input-affix-wrapper .ant-input`, {
 });
 
 globalStyle(`.${authForm} .ant-input::placeholder`, {
-  color: "rgba(140, 110, 99, 0.55)",
+  color: vars.color.textMuted,
 });
 
 globalStyle(`.${authForm} .ant-input-prefix`, {
@@ -324,9 +331,10 @@ globalStyle(`.${authForm} .ant-input-prefix`, {
   transition: "color 0.2s ease",
 });
 
-globalStyle(`.${authForm} .ant-input-affix-wrapper:focus-within .ant-input-prefix`, {
-  color: vars.color.brandDark,
-});
+globalStyle(
+  `.${authForm} .ant-input-affix-wrapper:focus-within .ant-input-prefix`,
+  { color: vars.color.ink }
+);
 
 globalStyle(`.${authForm} .ant-input-suffix .anticon`, {
   color: vars.color.textMuted,
@@ -334,7 +342,7 @@ globalStyle(`.${authForm} .ant-input-suffix .anticon`, {
 });
 
 globalStyle(`.${authForm} .ant-input-suffix .anticon:hover`, {
-  color: vars.color.brandDark,
+  color: vars.color.ink,
 });
 
 export const authMeta = style({
@@ -373,14 +381,14 @@ const submitGradient = `linear-gradient(135deg, ${vars.color.brand} 0%, ${vars.c
 
 globalStyle(`.${authForm} .${authSubmit}.ant-btn-primary`, {
   height: 50,
-  borderRadius: 14,
+  borderRadius: vars.radius.lg,
   fontSize: 15,
   fontWeight: 600,
   border: "none",
   background: submitGradient,
   backgroundSize: "160% 160%",
   backgroundPosition: "0% 0%",
-  boxShadow: "0 12px 28px rgba(62, 37, 34, 0.28)",
+  boxShadow: `0 12px 28px ${tint.ink(0.24)}`,
   transition:
     "transform 0.18s ease, box-shadow 0.25s ease, background-position 0.35s ease",
 });
@@ -392,7 +400,7 @@ globalStyle(
     backgroundSize: "160% 160%",
     backgroundPosition: "100% 100%",
     transform: "translateY(-2px)",
-    boxShadow: "0 16px 34px rgba(62, 37, 34, 0.34)",
+    boxShadow: `0 16px 34px ${tint.ink(0.3)}`,
   }
 );
 
@@ -403,12 +411,12 @@ globalStyle(
     backgroundSize: "160% 160%",
     backgroundPosition: "100% 100%",
     transform: "translateY(0) scale(0.985)",
-    boxShadow: "0 8px 18px rgba(62, 37, 34, 0.24)",
+    boxShadow: `0 8px 18px ${tint.ink(0.2)}`,
   }
 );
 
 globalStyle(`.${authForm} .${authSubmit}.ant-btn-primary:focus-visible`, {
-  outline: "3px solid rgba(211, 163, 118, 0.7)",
+  outline: `3px solid ${vars.color.accentAlt}`,
   outlineOffset: 2,
 });
 
@@ -417,7 +425,7 @@ export const authAlt = style({
   textAlign: "center",
   marginTop: 26,
   paddingTop: 20,
-  borderTop: "1px solid rgba(255, 224, 178, 0.8)",
+  borderTop: `1px solid ${vars.color.borderSubtle}`,
   fontSize: 14,
   color: vars.color.textMuted,
 });
@@ -426,23 +434,44 @@ globalStyle(`.${authAlt} a`, {
   fontWeight: 600,
   color: vars.color.brandDark,
   textDecoration: "none",
-  borderBottom: "1px solid rgba(211, 163, 118, 0.6)",
+  borderBottom: `1px solid ${vars.color.border}`,
   paddingBottom: 1,
   transition: "border-color 0.2s ease, color 0.2s ease",
 });
 
 globalStyle(`.${authAlt} a:hover`, {
   color: vars.color.brand,
-  borderBottomColor: vars.color.brandDark,
+  borderBottomColor: vars.color.ink,
 });
 
 globalStyle(
-  [`.${authAlt} a:focus-visible`, `.${authHint}.ant-btn-link:focus-visible`].join(
-    ", "
-  ),
+  [
+    `.${authAlt} a:focus-visible`,
+    `.${authHint}.ant-btn-link:focus-visible`,
+  ].join(", "),
   {
-    outline: "2px solid rgba(211, 163, 118, 0.8)",
+    outline: `3px solid ${vars.color.accentAlt}`,
     outlineOffset: 2,
     borderRadius: vars.radius.sm,
   }
 );
+
+export const errorPage = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: "100vh",
+  padding: vars.space.lg,
+  background: `
+    radial-gradient(900px 600px at 50% -20%, ${tint.lime(0.28)}, transparent 60%),
+    ${vars.color.bg}`,
+});
+
+export const errorCard = style({
+  width: "100%",
+  maxWidth: 560,
+  background: vars.color.surface,
+  border: `1px solid ${vars.color.borderSubtle}`,
+  borderRadius: vars.radius.xxl,
+  boxShadow: vars.shadow.card,
+});

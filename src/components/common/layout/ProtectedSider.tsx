@@ -1,21 +1,22 @@
 import { Flex } from "antd";
+import { useProtectedCalloutHook } from "../../../hook/layout/protected.hook";
 import {
-  siderArt,
   siderLogo,
   siderLogoLockup,
   siderLogoMark,
   siderLogoSub,
   siderLogoWord,
 } from "../../../styles/layout/protected.layout.css";
-import ProtectedBranchScope from "./ProtectedBranchScope";
 import ProtectedMenu from "./ProtectedMenu";
-import ProtectedSiderUser from "./ProtectedSiderUser";
+import SiderCallout from "./SiderCallout";
 
 type IProps = {
   siderCollapsed: boolean;
 };
 
 const ProtectedSider = ({ siderCollapsed }: IProps) => {
+  const callout = useProtectedCalloutHook();
+
   return (
     <>
       <Flex className={`${siderLogo}`} align="center" gap={10}>
@@ -36,12 +37,16 @@ const ProtectedSider = ({ siderCollapsed }: IProps) => {
         )}
       </Flex>
 
-      <ProtectedBranchScope />
       <ProtectedMenu />
 
-      <div className={`${siderArt}`} aria-hidden="true" />
-
-      <ProtectedSiderUser />
+      {callout ? (
+        <SiderCallout
+          title={callout.title}
+          description={callout.description}
+          actionLabel={callout.actionLabel}
+          onAction={callout.onAction}
+        />
+      ) : null}
     </>
   );
 };

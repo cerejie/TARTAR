@@ -21,7 +21,7 @@ import {
   NameCell,
   RowActions,
 } from "../../components/common/table/TableDecor";
-import PageHeader from "../../components/common/view/PageHeader";
+import ContentView from "../../components/common/view/ContentView";
 import {
   branchFormFields,
   useBranchManageHook,
@@ -174,21 +174,19 @@ const BranchesView = () => {
   ];
 
   return (
-    <>
-      <PageHeader
-        title="Branch Monitoring"
-        subtitle="Monitor cash, sales, expenses, receivables and payables per branch"
-        extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => createModal.openModal()}
-          >
-            Add Branch
-          </Button>
-        }
-      />
-
+    <ContentView
+      title="Branch Monitoring"
+      subtitle="Monitor cash, sales, expenses, receivables and payables per branch"
+      actions={
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => createModal.openModal()}
+        >
+          Add Branch
+        </Button>
+      }
+    >
       <SectionCard
         title="Branches"
         subtitle="Add, rename, re-order and archive business units"
@@ -242,7 +240,7 @@ const BranchesView = () => {
         }}
         onClose={editModal.closeModal}
       />
-    </>
+    </ContentView>
   );
 };
 

@@ -11,7 +11,7 @@ import SectionCard from "../../components/common/card/SectionCard";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
 import DataTable from "../../components/common/table/DataTable";
 import { NameCell, RowActions } from "../../components/common/table/TableDecor";
-import PageHeader from "../../components/common/view/PageHeader";
+import ContentView from "../../components/common/view/ContentView";
 import {
   approvalStatusColors,
   approvalStatusLabels,
@@ -173,21 +173,19 @@ const UsersView = () => {
   ];
 
   return (
-    <>
-      <PageHeader
-        title="Users"
-        subtitle="Manage all users and assign any role"
-        extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => createModal.openModal()}
-          >
-            Add user
-          </Button>
-        }
-      />
-
+    <ContentView
+      title="Users"
+      subtitle="Manage all users and assign any role"
+      actions={
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => createModal.openModal()}
+        >
+          Add user
+        </Button>
+      }
+    >
       <SectionCard
         title="All Users"
         subtitle="Accounts, roles and branch access"
@@ -245,7 +243,7 @@ const UsersView = () => {
         }}
         onClose={resetModal.closeModal}
       />
-    </>
+    </ContentView>
   );
 };
 

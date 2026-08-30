@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, Modal } from "antd";
+import { Button, Flex, Form } from "antd";
 import { useEffect } from "react";
 import {
   useForm,
@@ -9,12 +9,16 @@ import {
 } from "react-hook-form";
 import type { ZodType } from "zod";
 import type { IFieldConfig } from "../../../models/common/field.model";
+import type { ModalSize } from "../../../models/common/view.model";
 import { entityForm } from "../../../styles/form/form.css";
+import AppModal from "../modal/AppModal";
 import FormField from "./FormField";
 
 type IProps<TValues extends FieldValues> = {
   open: boolean;
   title: string;
+  subtitle?: string;
+  size?: ModalSize;
   fields: IFieldConfig<TValues>[];
   schema: ZodType<TValues>;
   defaultValues: DefaultValues<TValues>;
@@ -27,6 +31,8 @@ type IProps<TValues extends FieldValues> = {
 const EntityFormModal = <TValues extends FieldValues>({
   open,
   title,
+  subtitle,
+  size = "md",
   fields,
   schema,
   defaultValues,
@@ -48,15 +54,24 @@ const EntityFormModal = <TValues extends FieldValues>({
   const values = watch();
 
   return (
-    <Modal
+    <AppModal
       open={open}
       title={title}
-      onCancel={onClose}
-      onOk={handleSubmit(onSubmit)}
-      okText={submitText}
-      confirmLoading={submitting}
-      destroyOnHidden
-      maskClosable={false}
+      subtitle={subtitle}
+      size={size}
+      onClose={onClose}
+      footer={
+        <Flex justify="flex-end" gap={8}>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
+            type="primary"
+            loading={submitting}
+            onClick={handleSubmit(onSubmit)}
+          >
+            {submitText}
+          </Button>
+        </Flex>
+      }
     >
       <Form layout="vertical" className={`${entityForm}`}>
         {fields
@@ -69,7 +84,7 @@ const EntityFormModal = <TValues extends FieldValues>({
             />
           ))}
       </Form>
-    </Modal>
+    </AppModal>
   );
 };
 

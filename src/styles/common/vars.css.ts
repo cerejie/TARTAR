@@ -1,37 +1,64 @@
 import { createGlobalTheme } from "@vanilla-extract/css";
 
 export const palette = {
-  cream: "#FFF2DF",
-  sand: "#FFE0B2",
-  tan: "#D3A376",
-  brown: "#8C6E63",
-  espresso: "#3E2522",
+  ink: "#16161A",
+  inkDeep: "#0B0B0E",
+  inkSoft: "#232329",
+  inkLift: "#2E2E36",
+  lime: "#D6F25B",
+  limeSoft: "#EAF7A9",
+  lilac: "#B9A5F5",
+  lilacSoft: "#E7E0FC",
+  cloud: "#F2F3EE",
+  mist: "#FAFAF7",
+  white: "#ffffff",
 } as const;
 
 export const colors = {
-  brand: palette.brown,
-  brandDark: palette.espresso,
-  brandLight: palette.tan,
-  accent: palette.sand,
-  bg: palette.cream,
-  surface: "#ffffff",
-  text: palette.espresso,
-  textMuted: "#7A5B4F",
-  border: palette.tan,
-  borderSubtle: palette.sand,
-  danger: "#a8071a",
-  dangerBg: "#fff1f0",
-  dangerBorder: "#ffccc7",
-  positive: "#237804",
-  positiveBright: "#49aa19",
-  warning: "#ad6800",
+  brand: palette.ink,
+  brandDark: palette.inkDeep,
+  brandLight: palette.inkSoft,
+  accent: palette.lime,
+  bg: palette.cloud,
+  surface: palette.white,
+  surfaceSubtle: palette.mist,
+  text: palette.ink,
+  textMuted: "#6B6B72",
+  border: "#E3E4DE",
+  borderSubtle: "#EDEEE8",
+  danger: "#C2372B",
+  dangerBg: "#FDF2F0",
+  dangerBorder: "#F3D3CE",
+  positive: "#3E9B26",
+  positiveBright: "#4FB831",
+  warning: "#B7791F",
+  ink: palette.ink,
+  inkSoft: palette.inkSoft,
+  inkLift: palette.inkLift,
+  onInk: "#F4F5EF",
+  onInkMuted: "#9A9AA2",
+  inkOverlay: "rgba(244, 245, 239, 0.08)",
+  inkOverlayStrong: "rgba(244, 245, 239, 0.16)",
+  inkBorder: "rgba(244, 245, 239, 0.14)",
+  accentSoft: palette.limeSoft,
+  accentAlt: palette.lilac,
+  accentAltSoft: palette.lilacSoft,
 } as const;
 
+export const chartSeries = [
+  colors.ink,
+  colors.accentAlt,
+  colors.accent,
+  colors.positive,
+  colors.warning,
+  colors.danger,
+] as const;
+
 export const fontFamilyBase =
-  "'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif";
+  "'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 export const fontFamilyHeading =
-  "Georgia, 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Times New Roman', serif";
+  "'Segoe UI Variable Display', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif";
 
 export const vars = createGlobalTheme(":root", {
   color: colors,
@@ -41,17 +68,21 @@ export const vars = createGlobalTheme(":root", {
     md: "16px",
     lg: "24px",
     xl: "32px",
+    xxl: "40px",
   },
   radius: {
     sm: "4px",
     md: "8px",
     lg: "12px",
     xl: "16px",
+    xxl: "24px",
+    shell: "32px",
     pill: "999px",
   },
   shadow: {
-    card: "0 1px 2px rgba(62, 37, 34, 0.04), 0 8px 24px rgba(62, 37, 34, 0.06)",
-    raised: "0 8px 30px rgba(62, 37, 34, 0.12)",
+    card: "0 1px 2px rgba(22, 22, 26, 0.04), 0 10px 30px rgba(22, 22, 26, 0.05)",
+    raised: "0 8px 30px rgba(22, 22, 26, 0.12)",
+    pop: "0 12px 40px rgba(22, 22, 26, 0.16)",
   },
   font: {
     body: fontFamilyBase,

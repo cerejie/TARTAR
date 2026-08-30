@@ -1,9 +1,7 @@
-import { CaretDownOutlined, ShopOutlined } from "@ant-design/icons";
-import { Badge, Button, Dropdown, Flex, Tooltip, type MenuProps } from "antd";
+import { DownOutlined, ShopOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Tooltip, type MenuProps } from "antd";
 import { useBranchScopeHook } from "../../../hook/data/branch/branch.scope.hook";
 import {
-  branchField,
-  branchFieldLabel,
   branchScope,
   branchScopeActive,
   branchScopeCaret,
@@ -28,35 +26,26 @@ const ProtectedBranchScope = () => {
   };
 
   return (
-    <Flex className={`${branchField}`}>
-      <span className={`${branchFieldLabel}`} aria-hidden="true">
-        Current Branch
-      </span>
-      <Dropdown menu={menu} trigger={["click"]} placement="bottomLeft">
-        <Tooltip
-          placement="right"
-          title={
-            branch
-              ? `Branch view: ${branchName}`
-              : "Branch view: all branches"
-          }
+    <Dropdown menu={menu} trigger={["click"]} placement="bottomRight">
+      <Tooltip
+        placement="bottom"
+        title={
+          branch ? `Branch view: ${branchName}` : "Branch view: all branches"
+        }
+      >
+        <Button
+          type="text"
+          className={`${branchScope} ${branch ? branchScopeActive : ""}`}
+          aria-label="Choose which branch to view"
         >
-          <Button
-            type="text"
-            className={`${branchScope} ${branch ? branchScopeActive : ""}`}
-            aria-label="Choose which branch to view"
-          >
-            <Badge dot={!!branch} color="gold" offset={[2, 2]}>
-              <ShopOutlined />
-            </Badge>
-            <span className={`${branchScopeLabel}`}>
-              {branchName ?? "All branches"}
-            </span>
-            <CaretDownOutlined className={`${branchScopeCaret}`} />
-          </Button>
-        </Tooltip>
-      </Dropdown>
-    </Flex>
+          <ShopOutlined />
+          <span className={`${branchScopeLabel}`}>
+            {branchName ?? "All branches"}
+          </span>
+          <DownOutlined className={`${branchScopeCaret}`} />
+        </Button>
+      </Tooltip>
+    </Dropdown>
   );
 };
 

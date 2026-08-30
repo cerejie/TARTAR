@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, InputNumber, Modal, Typography } from "antd";
+import { Button, Flex, Form, InputNumber, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -16,6 +16,7 @@ import { entityForm } from "../../styles/form/form.css";
 import { paymentTotal } from "../../styles/view/ledger/ledger.view.css";
 import { formatDate, formatMoney, todayIso } from "../../utils/format.utils";
 import FormField from "../common/form/FormField";
+import AppModal from "../common/modal/AppModal";
 import DataTable from "../common/table/DataTable";
 
 const { Paragraph, Text } = Typography;
@@ -126,17 +127,25 @@ const PaymentAllocationModal = ({
   ];
 
   return (
-    <Modal
-      title={`Record payment — ${customer.customerName}`}
+    <AppModal
+      title="Record payment"
+      subtitle={customer.customerName}
       open={open}
-      onCancel={onClose}
-      onOk={handleSubmit(submit)}
-      okText="Record payment"
-      okButtonProps={{ disabled: total <= 0 }}
-      confirmLoading={submitting}
-      width={640}
-      destroyOnHidden
-      maskClosable={false}
+      size="lg"
+      onClose={onClose}
+      footer={
+        <Flex justify="flex-end" gap={8}>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
+            type="primary"
+            disabled={total <= 0}
+            loading={submitting}
+            onClick={handleSubmit(submit)}
+          >
+            Record payment
+          </Button>
+        </Flex>
+      }
     >
       <Form layout="vertical" className={`${entityForm}`}>
         {detailFields.map((field) => (
@@ -154,7 +163,7 @@ const PaymentAllocationModal = ({
       <Paragraph className={`${paymentTotal}`}>
         Total payment: <Text strong>{formatMoney(total)}</Text>
       </Paragraph>
-    </Modal>
+    </AppModal>
   );
 };
 

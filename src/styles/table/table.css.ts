@@ -3,15 +3,39 @@ import { vars } from "../common/vars.css";
 
 export const tableContainer = style({});
 
+/** Rows read as detached cards: `separate` collapse is what allows the gap and the per-row radii. */
+const rowGap = "8px";
+const rowRadius = vars.radius.lg;
+const rowBorder = `1px solid ${vars.color.borderSubtle}`;
+
 globalStyle(`.${tableContainer} .ant-table`, {
   background: "transparent",
 });
 
+globalStyle(`.${tableContainer} .ant-table table`, {
+  borderCollapse: "separate",
+  borderSpacing: `0 ${rowGap}`,
+});
+
 globalStyle(`.${tableContainer} .ant-table-thead > tr > th`, {
-  background: "transparent",
-  color: vars.color.brandDark,
-  fontWeight: 600,
-  borderBottom: `1px solid ${vars.color.borderSubtle}`,
+  background: vars.color.accentSoft,
+  color: vars.color.textMuted,
+  fontSize: 11,
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  whiteSpace: "nowrap",
+  border: "none",
+});
+
+globalStyle(`.${tableContainer} .ant-table-thead > tr > th:first-child`, {
+  borderStartStartRadius: rowRadius,
+  borderEndStartRadius: rowRadius,
+});
+
+globalStyle(`.${tableContainer} .ant-table-thead > tr > th:last-child`, {
+  borderStartEndRadius: rowRadius,
+  borderEndEndRadius: rowRadius,
 });
 
 globalStyle(`.${tableContainer} .ant-table-thead > tr > th::before`, {
@@ -19,25 +43,51 @@ globalStyle(`.${tableContainer} .ant-table-thead > tr > th::before`, {
 });
 
 globalStyle(`.${tableContainer} .ant-table-tbody > tr > td`, {
-  borderBottom: `1px solid ${vars.color.borderSubtle}`,
+  background: vars.color.surface,
+  borderBlock: rowBorder,
+  borderInline: "none",
+  transition: "background 0.15s ease, border-color 0.15s ease",
 });
 
-globalStyle(`.${tableContainer} .ant-table-tbody > tr:last-child > td`, {
-  borderBottom: "none",
+globalStyle(`.${tableContainer} .ant-table-tbody > tr > td:first-child`, {
+  borderInlineStart: rowBorder,
+  borderStartStartRadius: rowRadius,
+  borderEndStartRadius: rowRadius,
 });
 
-globalStyle(`.${tableContainer} .ant-table-tbody > tr:hover > td`, {
-  background: vars.color.bg,
+globalStyle(`.${tableContainer} .ant-table-tbody > tr > td:last-child`, {
+  borderInlineEnd: rowBorder,
+  borderStartEndRadius: rowRadius,
+  borderEndEndRadius: rowRadius,
+});
+
+globalStyle(`.${tableContainer} .ant-table-tbody > tr.ant-table-row:hover > td`, {
+  borderColor: vars.color.border,
+});
+
+/** rc-table injects a zero-height row to measure columns — keep it out of the card treatment. */
+globalStyle(`.${tableContainer} .ant-table-measure-row > td`, {
+  background: "transparent",
+  border: "none",
+});
+
+globalStyle(`.${tableContainer} .ant-pagination .ant-pagination-item`, {
+  borderRadius: vars.radius.pill,
 });
 
 export const rowClickable = style({
   cursor: "pointer",
 });
 
+globalStyle(`.${tableContainer} .ant-table-tbody > tr.${rowClickable}:hover > td`, {
+  borderColor: vars.color.accent,
+});
+
 export const rowOverdue = style({});
 
-globalStyle(`.${tableContainer} .${rowOverdue} > td`, {
-  background: "rgba(255, 77, 79, 0.07)",
+globalStyle(`.${tableContainer} .ant-table-tbody > tr.${rowOverdue} > td`, {
+  background: vars.color.dangerBg,
+  borderColor: vars.color.dangerBorder,
 });
 
 export const rowIcon = style({
@@ -48,8 +98,8 @@ export const rowIcon = style({
   height: 28,
   flexShrink: 0,
   borderRadius: vars.radius.md,
-  background: vars.color.accent,
-  color: vars.color.brand,
+  background: vars.color.surfaceSubtle,
+  color: vars.color.text,
   fontSize: 14,
 });
 
@@ -67,7 +117,7 @@ export const columnLabel = style({
 });
 
 export const columnIcon = style({
-  color: vars.color.brandLight,
+  color: vars.color.textMuted,
   fontSize: 14,
   display: "inline-flex",
 });
@@ -79,10 +129,10 @@ globalStyle(
 
 export const slugTag = style({
   fontFamily: "inherit",
-  background: vars.color.accent,
-  color: vars.color.brand,
-  border: "none",
-  borderRadius: vars.radius.sm,
+  background: vars.color.surfaceSubtle,
+  color: vars.color.textMuted,
+  border: `1px solid ${vars.color.borderSubtle}`,
+  borderRadius: vars.radius.pill,
   fontSize: 12,
   marginInlineEnd: 0,
 });
@@ -99,17 +149,17 @@ export const iconButton = style({
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  borderRadius: vars.radius.md,
+  borderRadius: vars.radius.pill,
   border: `1px solid ${vars.color.borderSubtle}`,
   background: vars.color.surface,
-  color: vars.color.brand,
+  color: vars.color.text,
   ":hover": {
     background: vars.color.accent,
-    borderColor: vars.color.brandLight,
-    color: vars.color.brandDark,
+    borderColor: vars.color.accent,
+    color: vars.color.ink,
   },
   ":focus-visible": {
-    outline: "3px solid rgba(211, 163, 118, 0.7)",
+    outline: `3px solid ${vars.color.accentAlt}`,
     outlineOffset: 2,
   },
 });
@@ -127,8 +177,8 @@ globalStyle(`.${iconButton}.ant-btn-dangerous:hover`, {
 });
 
 globalStyle(`.${iconButton}:disabled, .${iconButton}:disabled:hover`, {
-  color: vars.color.brandLight,
-  background: vars.color.surface,
+  color: vars.color.textMuted,
+  background: vars.color.surfaceSubtle,
   borderColor: vars.color.borderSubtle,
   cursor: "not-allowed",
 });

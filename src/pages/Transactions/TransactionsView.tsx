@@ -6,7 +6,7 @@ import LedgerFilterBar from "../../components/common/filter/LedgerFilterBar";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
 import RequirePermission from "../../components/common/guard/RequirePermission";
 import DataTable from "../../components/common/table/DataTable";
-import PageHeader from "../../components/common/view/PageHeader";
+import ContentView from "../../components/common/view/ContentView";
 import { userRoleLabels } from "../../enums/role.enum";
 import { transactionTypeLabels } from "../../enums/transaction.enum";
 import { useTransactionListHook } from "../../hook/data/transaction/transaction.list.hook";
@@ -114,37 +114,32 @@ const TransactionsView = () => {
   ];
 
   return (
-    <>
-      <PageHeader
-        title="Transactions"
-        subtitle="Sales, expenses, payments, purchases and collections"
-        extra={
-          <RequirePermission can="encodeTransactions" fallback={null}>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => formModal.openModal()}
-            >
-              Record transaction
-            </Button>
-          </RequirePermission>
-        }
-      />
-
-      <LedgerFilterBar />
-
-      <SectionCard
-        title="All Transactions"
-        subtitle="Matching the current filters"
-        flush
-      >
-        <DataTable<ITransaction>
-          columns={columns}
-          data={transactions}
-          loading={loading}
-          emptyText="No transactions match the current filters"
-        />
+    <ContentView
+      title="Transactions"
+      subtitle="Sales, expenses, payments, purchases and collections"
+      meta={`${transactions.length} ${transactions.length === 1 ? "record" : "records"}`}
+      actions={
+        <RequirePermission can="encodeTransactions" fallback={null}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => formModal.openModal()}
+          >
+            Record transaction
+          </Button>
+        </RequirePermission>
+      }
+    >
+      <SectionCard dense>
+        <LedgerFilterBar />
       </SectionCard>
+
+      <DataTable<ITransaction>
+        columns={columns}
+        data={transactions}
+        loading={loading}
+        emptyText="No transactions match the current filters"
+      />
 
       <EntityFormModal<ITransactionInput>
         open={formModal.modal.open}
@@ -157,7 +152,7 @@ const TransactionsView = () => {
         onSubmit={(values) => void createMutation.mutate(values)}
         onClose={formModal.closeModal}
       />
-    </>
+    </ContentView>
   );
 };
 

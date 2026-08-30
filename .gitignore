@@ -32,3 +32,4 @@ dev-dist
 # Local tooling artifacts (machine-local only, never committed)
 graphify-out/
 .serena/
+.history

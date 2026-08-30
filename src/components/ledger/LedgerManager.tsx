@@ -36,7 +36,7 @@ import EntityFormModal from "../common/form/EntityFormModal";
 import RequirePermission from "../common/guard/RequirePermission";
 import DataTable from "../common/table/DataTable";
 import { NameCell, RowActions } from "../common/table/TableDecor";
-import PageHeader from "../common/view/PageHeader";
+import ContentView from "../common/view/ContentView";
 import PaymentsPanel from "../payment/PaymentsPanel";
 
 type IProps<Row extends ILedgerRow, Input extends FieldValues> =
@@ -158,26 +158,24 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
   ];
 
   return (
-    <>
-      <PageHeader
-        title={props.title}
-        subtitle={props.subtitle}
-        extra={
-          <Space>
-            {props.headerActions}
-            <RequirePermission can="encodeTransactions" fallback={null}>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => formModal.openModal()}
-              >
-                Add {props.partyLabel.toLowerCase()} record
-              </Button>
-            </RequirePermission>
-          </Space>
-        }
-      />
-
+    <ContentView
+      title={props.title}
+      subtitle={props.subtitle}
+      actions={
+        <Space>
+          {props.headerActions}
+          <RequirePermission can="encodeTransactions" fallback={null}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => formModal.openModal()}
+            >
+              Add {props.partyLabel.toLowerCase()} record
+            </Button>
+          </RequirePermission>
+        </Space>
+      }
+    >
       <LedgerFilterBar />
 
       <SectionCard
@@ -225,7 +223,7 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
         }}
         onClose={settleModal.closeModal}
       />
-    </>
+    </ContentView>
   );
 };
 

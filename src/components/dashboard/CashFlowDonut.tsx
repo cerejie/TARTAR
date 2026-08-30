@@ -21,13 +21,16 @@ type IProps = {
   netCashFlow: number;
 };
 
+const sliceColors = [colors.positive, colors.danger] as const;
+const netColor = colors.accent;
+
 const CashFlowDonut = ({ cashIn, cashOut, netCashFlow }: IProps) => {
   const hasMovement = cashIn > 0 || cashOut > 0;
 
   const legend = [
-    { label: "Cash In", value: cashIn, color: colors.positive },
-    { label: "Cash Out", value: cashOut, color: colors.danger },
-    { label: "Net Cash Flow", value: netCashFlow, color: colors.brand },
+    { label: "Cash In", value: cashIn, color: sliceColors[0] },
+    { label: "Cash Out", value: cashOut, color: sliceColors[1] },
+    { label: "Net Cash Flow", value: netCashFlow, color: netColor },
   ];
 
   return (
@@ -46,7 +49,7 @@ const CashFlowDonut = ({ cashIn, cashOut, netCashFlow }: IProps) => {
               height={220}
               legend={false}
               label={false}
-              scale={{ color: { range: [colors.positive, colors.danger] } }}
+              scale={{ color: { range: [...sliceColors] } }}
               tooltip={{
                 items: [
                   {

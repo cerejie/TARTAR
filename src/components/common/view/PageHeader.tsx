@@ -2,34 +2,48 @@ import { Flex, Typography } from "antd";
 import type { ReactNode } from "react";
 import {
   pageActions,
+  pageAside,
   pageHeader,
+  pageHeading,
+  pageMeta,
+  pageSubtitle,
   pageTitle,
 } from "../../../styles/view/common/common.view.css";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 type IProps = {
   title: string;
   subtitle?: string;
-  extra?: ReactNode;
+  meta?: ReactNode;
+  actions?: ReactNode;
 };
 
-const PageHeader = ({ title, subtitle, extra }: IProps) => {
+const PageHeader = ({ title, subtitle, meta, actions }: IProps) => {
   return (
     <Flex
       className={`${pageHeader}`}
-      align="center"
+      align="flex-end"
       justify="space-between"
-      gap="middle"
       wrap
     >
-      <Flex vertical>
+      <Flex vertical className={`${pageHeading}`}>
         <Title level={3} className={`${pageTitle}`}>
           {title}
         </Title>
-        {subtitle ? <Text type="secondary">{subtitle}</Text> : null}
+        {subtitle ? (
+          <span className={`${pageSubtitle}`}>{subtitle}</span>
+        ) : null}
       </Flex>
-      {extra ? <Flex className={`${pageActions}`}>{extra}</Flex> : null}
+
+      {meta || actions ? (
+        <Flex className={`${pageAside}`} align="center">
+          {meta ? <span className={`${pageMeta}`}>{meta}</span> : null}
+          {actions ? (
+            <Flex className={`${pageActions}`}>{actions}</Flex>
+          ) : null}
+        </Flex>
+      ) : null}
     </Flex>
   );
 };

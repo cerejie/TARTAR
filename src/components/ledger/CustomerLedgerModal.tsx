@@ -1,5 +1,5 @@
 import { IdcardOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Flex, Input, Modal, Tooltip } from "antd";
+import { Button, Flex, Input, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useCustomerLedgerHook } from "../../hook/data/ledger/customer.ledger.hook";
 import type { ICustomerReceivableSummary } from "../../models/data/ledger/ledger.response";
@@ -14,6 +14,7 @@ import {
 } from "../../styles/view/ledger/ledger.view.css";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import RequirePermission from "../common/guard/RequirePermission";
+import AppModal from "../common/modal/AppModal";
 import DataTable from "../common/table/DataTable";
 import { NameCell } from "../common/table/TableDecor";
 import CustomerDetailsModal from "./CustomerDetailsModal";
@@ -102,12 +103,12 @@ const CustomerLedgerModal = () => {
   ];
 
   return (
-    <Modal
+    <AppModal
       title="Customer Ledger"
+      subtitle="Outstanding receivables by customer"
       open={ledgerModal.modal.open}
-      onCancel={close}
-      footer={null}
-      width={1040}
+      size="xl"
+      onClose={close}
     >
       <Flex className={`${slidePanes}`} vertical>
         <Flex
@@ -149,7 +150,7 @@ const CustomerLedgerModal = () => {
         customer={detailsTarget}
         onClose={detailsModal.closeModal}
       />
-    </Modal>
+    </AppModal>
   );
 };
 

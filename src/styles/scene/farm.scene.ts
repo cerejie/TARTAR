@@ -14,12 +14,12 @@ const furrows = FURROW_SPREAD.flatMap((dx) => [
   .map((d) => `<path d="${d}"/>`)
   .join("");
 
-const FARM_SCENE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" fill="none" stroke="${palette.tan}" stroke-linecap="round" stroke-linejoin="round">
+const FARM_SCENE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" fill="none" stroke="${palette.limeSoft}" stroke-linecap="round" stroke-linejoin="round">
   <defs>
     <linearGradient id="furrowFade" x1="0" y1="${HORIZON}" x2="0" y2="${VIEW_H}" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="${palette.tan}" stop-opacity="0"/>
-      <stop offset=".35" stop-color="${palette.tan}" stop-opacity=".22"/>
-      <stop offset="1" stop-color="${palette.tan}" stop-opacity=".5"/>
+      <stop offset="0" stop-color="${palette.limeSoft}" stop-opacity="0"/>
+      <stop offset=".35" stop-color="${palette.limeSoft}" stop-opacity=".22"/>
+      <stop offset="1" stop-color="${palette.limeSoft}" stop-opacity=".5"/>
     </linearGradient>
   </defs>
 

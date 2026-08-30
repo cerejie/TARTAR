@@ -16,7 +16,7 @@ globalStyle("body", {
 globalStyle("#root", {
   display: "flex",
   flexDirection: "column",
-  minHeight: "100vh",
+  minHeight: "100dvh",
 });
 
 globalStyle(
@@ -28,6 +28,18 @@ globalStyle(
   {
     fontFamily: vars.font.heading,
     fontWeight: 600,
-    letterSpacing: "0.01em",
+    letterSpacing: "-0.02em",
+  }
+);
+
+globalStyle(
+  [
+    ".ant-statistic-content",
+    ".ant-table-cell",
+    ".ant-picker-input > input",
+    ".ant-input-number-input",
+  ].join(", "),
+  {
+    fontVariantNumeric: "tabular-nums",
   }
 );

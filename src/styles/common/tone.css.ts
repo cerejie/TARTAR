@@ -6,6 +6,8 @@ export const tone = styleVariants({
   positive: {},
   negative: {},
   warning: {},
+  accent: {},
+  info: {},
 });
 
 export type Tone = keyof typeof tone;

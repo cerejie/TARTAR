@@ -9,14 +9,15 @@ import {
   UserOutlined,
   WalletOutlined,
 } from "@ant-design/icons";
-import { Col, Empty, Flex, Row, Segmented, Spin } from "antd";
+import { Empty, Flex, Segmented, Spin } from "antd";
 import dayjs from "dayjs";
-import StatCard from "../../components/common/card/StatCard";
 import SectionCard from "../../components/common/card/SectionCard";
-import PageHeader from "../../components/common/view/PageHeader";
+import StatCard from "../../components/common/card/StatCard";
+import StatDelta from "../../components/common/status/StatDelta";
+import BentoCell from "../../components/common/view/BentoCell";
+import ContentView from "../../components/common/view/ContentView";
 import CashFlowDonut from "../../components/dashboard/CashFlowDonut";
 import NotificationsPanel from "../../components/dashboard/NotificationsPanel";
-import StatDelta from "../../components/dashboard/StatDelta";
 import { useDashboardHook } from "../../hook/data/dashboard/dashboard.hook";
 import {
   salesPeriodLabels,
@@ -25,10 +26,8 @@ import {
   type SalesPeriod,
 } from "../../models/data/dashboard/dashboard.response";
 import { colors } from "../../styles/common/vars.css";
-import { statGrid } from "../../styles/stat/stat.css";
 import { chartLoading } from "../../styles/view/common/common.view.css";
-import { notificationColumn } from "../../styles/view/dashboard/dashboard.view.css";
-import { formatMoney } from "../../utils/format.utils";
+import { formatDate, formatMoney, todayIso } from "../../utils/format.utils";
 
 const formatAxisLabel = (iso: string, period: SalesPeriod): string => {
   const date = dayjs(iso);
@@ -56,219 +55,206 @@ const DashboardView = () => {
     netCashFlow,
   } = useDashboardHook();
 
+  const latestDate = series.length ? series[series.length - 1].date : null;
+
   return (
-    <>
-      <PageHeader
-        title="Dashboard"
-        subtitle={
-          branchName
-            ? `Standing for ${branchName}`
-            : "Company-wide standing across all branches"
-        }
-      />
+    <ContentView
+      title="Dashboard"
+      subtitle={
+        branchName
+          ? `Standing for ${branchName}`
+          : "Company-wide standing across all branches"
+      }
+      meta={formatDate(todayIso())}
+      layout="bento"
+    >
+      <BentoCell span="quarter">
+        <StatCard
+          title="Current Cash"
+          value={summary?.currentCash}
+          loading={summaryLoading}
+          variant="brand"
+          icon={<WalletOutlined />}
+          caption="Available cash on hand"
+        />
+      </BentoCell>
+      <BentoCell span="quarter">
+        <StatCard
+          title="Bank Balance"
+          value={summary?.bankBalance}
+          loading={summaryLoading}
+          icon={<BankOutlined />}
+          caption="Total in bank accounts"
+        />
+      </BentoCell>
+      <BentoCell span="quarter">
+        <StatCard
+          title="Today's Sales"
+          value={summary?.todaysSales}
+          loading={summaryLoading}
+          variant="positive"
+          icon={<RiseOutlined />}
+          chip={
+            <StatDelta
+              current={summary?.todaysSales}
+              previous={summary?.yesterdaysSales}
+              goodDirection="up"
+              label="vs yesterday"
+            />
+          }
+          caption="vs yesterday"
+        />
+      </BentoCell>
+      <BentoCell span="quarter">
+        <StatCard
+          title="Today's Expenses"
+          value={summary?.todaysExpenses}
+          loading={summaryLoading}
+          variant="negative"
+          icon={<FileTextOutlined />}
+          chip={
+            <StatDelta
+              current={summary?.todaysExpenses}
+              previous={summary?.yesterdaysExpenses}
+              goodDirection="down"
+              label="vs yesterday"
+            />
+          }
+          caption="vs yesterday"
+        />
+      </BentoCell>
 
-      <Row gutter={[24, 24]} align="stretch">
-        <Col xs={24} xl={18}>
-          <Row gutter={[16, 16]} className={`${statGrid}`}>
-            <Col xs={24} sm={12} md={6}>
-              <StatCard
-                title="Current Cash"
-                value={summary?.currentCash}
-                loading={summaryLoading}
-                variant="brand"
-                icon={<WalletOutlined />}
-                caption="Available cash on hand"
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <StatCard
-                title="Bank Balance"
-                value={summary?.bankBalance}
-                loading={summaryLoading}
-                icon={<BankOutlined />}
-                caption="Total in bank accounts"
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <StatCard
-                title="Today's Sales"
-                value={summary?.todaysSales}
-                loading={summaryLoading}
-                variant="positive"
-                icon={<RiseOutlined />}
-                caption={
-                  <StatDelta
-                    current={summary?.todaysSales}
-                    previous={summary?.yesterdaysSales}
-                    goodDirection="up"
-                    label="vs yesterday"
-                  />
-                }
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <StatCard
-                title="Today's Expenses"
-                value={summary?.todaysExpenses}
-                loading={summaryLoading}
-                variant="negative"
-                icon={<FileTextOutlined />}
-                caption={
-                  <StatDelta
-                    current={summary?.todaysExpenses}
-                    previous={summary?.yesterdaysExpenses}
-                    goodDirection="down"
-                    label="vs yesterday"
-                  />
-                }
-              />
-            </Col>
-          </Row>
+      <BentoCell span="quarter">
+        <StatCard
+          title="Accounts Receivable"
+          value={summary?.accountsReceivable}
+          loading={summaryLoading}
+          icon={<UserOutlined />}
+          caption="Total outstanding"
+        />
+      </BentoCell>
+      <BentoCell span="quarter">
+        <StatCard
+          title="Accounts Payable"
+          value={summary?.accountsPayable}
+          loading={summaryLoading}
+          icon={<FileDoneOutlined />}
+          caption="Total outstanding"
+        />
+      </BentoCell>
+      <BentoCell span="quarter">
+        <StatCard
+          title="Monthly Sales"
+          value={summary?.monthlySales}
+          loading={summaryLoading}
+          variant="positive"
+          icon={<LineChartOutlined />}
+          caption="Month to date"
+        />
+      </BentoCell>
+      <BentoCell span="quarter">
+        <StatCard
+          title="Net Profit (MTD)"
+          value={netProfit}
+          loading={summaryLoading}
+          variant="accent"
+          icon={<PieChartOutlined />}
+          chip={
+            <StatDelta
+              current={netProfit}
+              previous={lastMonthNetProfit}
+              goodDirection="up"
+              label="vs last month"
+            />
+          }
+          caption="vs last month"
+        />
+      </BentoCell>
 
-          <Row gutter={[16, 16]} className={`${statGrid}`}>
-            <Col xs={24} sm={12} md={6}>
-              <StatCard
-                title="Accounts Receivable"
-                value={summary?.accountsReceivable}
-                loading={summaryLoading}
-                icon={<UserOutlined />}
-                caption="Total outstanding"
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <StatCard
-                title="Accounts Payable"
-                value={summary?.accountsPayable}
-                loading={summaryLoading}
-                icon={<FileDoneOutlined />}
-                caption="Total outstanding"
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <StatCard
-                title="Monthly Sales"
-                value={summary?.monthlySales}
-                loading={summaryLoading}
-                variant="positive"
-                icon={<LineChartOutlined />}
-                caption="Month to date"
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <StatCard
-                title="Net Profit (MTD)"
-                value={netProfit}
-                loading={summaryLoading}
-                variant="brand"
-                icon={<PieChartOutlined />}
-                caption={
-                  <StatDelta
-                    current={netProfit}
-                    previous={lastMonthNetProfit}
-                    goodDirection="up"
-                    label="vs last month"
-                  />
-                }
-              />
-            </Col>
-          </Row>
+      <BentoCell span="twoThirds">
+        <SectionCard
+          title="Sales Overview"
+          subtitle={salesPeriodSubtitles[salesPeriod]}
+          extra={
+            <Segmented
+              size="small"
+              value={salesPeriod}
+              onChange={(value) => setSalesPeriod(value as SalesPeriod)}
+              options={salesPeriodValues.map((period) => ({
+                label: salesPeriodLabels[period],
+                value: period,
+              }))}
+            />
+          }
+        >
+          {salesLoading ? (
+            <Flex className={`${chartLoading}`} align="center" justify="center">
+              <Spin />
+            </Flex>
+          ) : series.length ? (
+            <Column
+              data={series}
+              xField="date"
+              yField="total"
+              height={300}
+              style={{
+                fill: (item: { date: string }) =>
+                  item.date === latestDate ? colors.accent : colors.ink,
+                radiusTopLeft: 8,
+                radiusTopRight: 8,
+              }}
+              axis={{
+                x: {
+                  labelFormatter: (value: string) =>
+                    formatAxisLabel(value, salesPeriod),
+                  labelFill: colors.textMuted,
+                  line: false,
+                },
+                y: {
+                  labelFill: colors.textMuted,
+                  gridStroke: colors.border,
+                  gridStrokeOpacity: 0.6,
+                },
+              }}
+              tooltip={{
+                items: [
+                  {
+                    channel: "y",
+                    valueFormatter: (value: number) => formatMoney(value),
+                  },
+                ],
+              }}
+            />
+          ) : (
+            <Empty description="No sales recorded yet" />
+          )}
+        </SectionCard>
+      </BentoCell>
 
-          <Row gutter={[16, 16]}>
-            <Col xs={24} lg={16}>
-              <SectionCard
-                title="Sales Overview"
-                subtitle={salesPeriodSubtitles[salesPeriod]}
-                extra={
-                  <Segmented
-                    size="small"
-                    value={salesPeriod}
-                    onChange={(value) => setSalesPeriod(value as SalesPeriod)}
-                    options={salesPeriodValues.map((period) => ({
-                      label: salesPeriodLabels[period],
-                      value: period,
-                    }))}
-                  />
-                }
-              >
-                {salesLoading ? (
-                  <Flex
-                    className={`${chartLoading}`}
-                    align="center"
-                    justify="center"
-                  >
-                    <Spin />
-                  </Flex>
-                ) : series.length ? (
-                  <Column
-                    data={series}
-                    xField="date"
-                    yField="total"
-                    height={300}
-                    style={{
-                      fill: colors.brand,
-                      radiusTopLeft: 4,
-                      radiusTopRight: 4,
-                    }}
-                    axis={{
-                      x: {
-                        labelFormatter: (value: string) =>
-                          formatAxisLabel(value, salesPeriod),
-                        labelFill: colors.textMuted,
-                        line: false,
-                      },
-                      y: {
-                        labelFill: colors.textMuted,
-                        gridStroke: colors.border,
-                        gridStrokeOpacity: 0.35,
-                      },
-                    }}
-                    tooltip={{
-                      items: [
-                        {
-                          channel: "y",
-                          valueFormatter: (value: number) =>
-                            formatMoney(value),
-                        },
-                      ],
-                    }}
-                  />
-                ) : (
-                  <Empty description="No sales recorded yet" />
-                )}
-              </SectionCard>
-            </Col>
-            <Col xs={24} lg={8}>
-              <SectionCard
-                title="Cash Flow (MTD)"
-                subtitle="Cash in vs. cash out this month"
-              >
-                {summaryLoading ? (
-                  <Flex
-                    className={`${chartLoading}`}
-                    align="center"
-                    justify="center"
-                  >
-                    <Spin />
-                  </Flex>
-                ) : (
-                  <CashFlowDonut
-                    cashIn={cashIn}
-                    cashOut={cashOut}
-                    netCashFlow={netCashFlow}
-                  />
-                )}
-              </SectionCard>
-            </Col>
-          </Row>
-        </Col>
+      <BentoCell span="third">
+        <SectionCard
+          title="Cash Flow (MTD)"
+          subtitle="Cash in vs. cash out this month"
+          tone="ink"
+        >
+          {summaryLoading ? (
+            <Flex className={`${chartLoading}`} align="center" justify="center">
+              <Spin />
+            </Flex>
+          ) : (
+            <CashFlowDonut
+              cashIn={cashIn}
+              cashOut={cashOut}
+              netCashFlow={netCashFlow}
+            />
+          )}
+        </SectionCard>
+      </BentoCell>
 
-        <Col xs={24} xl={6}>
-          <Flex vertical className={`${notificationColumn}`}>
-            <NotificationsPanel data={alerts} loading={alertsLoading} />
-          </Flex>
-        </Col>
-      </Row>
-    </>
+      <BentoCell span="full">
+        <NotificationsPanel data={alerts} loading={alertsLoading} />
+      </BentoCell>
+    </ContentView>
   );
 };
 

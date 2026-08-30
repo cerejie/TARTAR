@@ -1,28 +1,7 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { card, cardBody } from "../../card/card.css";
+import { cardTone } from "../../card/card.css";
 import { tone } from "../../common/tone.css";
 import { vars } from "../../common/vars.css";
-
-export const notificationColumn = style({
-  display: "flex",
-  flexDirection: "column",
-  height: "100%",
-});
-
-globalStyle(`.${notificationColumn} .${card}`, {
-  display: "flex",
-  flexDirection: "column",
-  flex: 1,
-  minHeight: 0,
-});
-
-globalStyle(`.${notificationColumn} .${cardBody}`, {
-  display: "flex",
-  flexDirection: "column",
-  flex: 1,
-  minHeight: 0,
-  overflowY: "auto",
-});
 
 export const notificationGroup = style({
   marginBottom: vars.space.md,
@@ -196,9 +175,17 @@ export const donutCenterValue = style({
   lineHeight: 1.2,
 });
 
+globalStyle(`.${cardTone.ink} .${donutCenterValue}`, {
+  color: vars.color.onInk,
+});
+
 export const donutCenterLabel = style({
   fontSize: 12,
   color: vars.color.textMuted,
+});
+
+globalStyle(`.${cardTone.ink} .${donutCenterLabel}`, {
+  color: vars.color.onInkMuted,
 });
 
 export const donutLegend = style({
@@ -222,6 +209,10 @@ export const donutLegendKey = style({
   color: vars.color.text,
 });
 
+globalStyle(`.${cardTone.ink} .${donutLegendKey}`, {
+  color: vars.color.onInk,
+});
+
 export const donutLegendDot = style({
   width: 10,
   height: 10,
@@ -233,4 +224,8 @@ export const donutLegendValue = style({
   fontFamily: vars.font.heading,
   fontWeight: 700,
   color: vars.color.brandDark,
+});
+
+globalStyle(`.${cardTone.ink} .${donutLegendValue}`, {
+  color: vars.color.onInk,
 });

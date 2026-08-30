@@ -4,7 +4,7 @@ import { vars } from "../common/vars.css";
 
 export const statCard = style({
   height: "100%",
-  borderRadius: vars.radius.lg,
+  borderRadius: vars.radius.xxl,
   border: `1px solid ${vars.color.borderSubtle}`,
   boxShadow: vars.shadow.card,
 });
@@ -19,19 +19,32 @@ globalStyle(`.${statCard}.ant-card .ant-card-body`, {
 });
 
 export const statGrid = style({
-  marginBottom: vars.space.lg,
+  marginBottom: vars.space.md,
 });
 
 globalStyle(`.${statCard} .ant-statistic-title`, {
   color: vars.color.textMuted,
-  fontSize: 13,
+  fontSize: 12.5,
+  marginBottom: 2,
 });
 
 globalStyle(`.${statCard} .ant-statistic-content`, {
   fontFamily: vars.font.heading,
   color: vars.color.brandDark,
-  fontSize: 24,
+  fontSize: 28,
+  fontWeight: 700,
+  letterSpacing: "-0.03em",
+  lineHeight: 1.1,
   overflowWrap: "anywhere",
+});
+
+globalStyle(`.${statCard} .ant-statistic-content-suffix`, {
+  fontFamily: vars.font.body,
+  fontSize: 12,
+  fontWeight: 500,
+  letterSpacing: 0,
+  color: vars.color.textMuted,
+  marginInlineStart: 5,
 });
 
 globalStyle(`.${tone.positive} .ant-statistic-content`, {
@@ -45,8 +58,6 @@ globalStyle(`.${tone.negative} .ant-statistic-content`, {
 globalStyle(`.${tone.brand} .ant-statistic-content`, {
   color: vars.color.brand,
 });
-
-export const statBody = style({});
 
 export const statHead = style({
   display: "flex",
@@ -62,29 +73,46 @@ globalStyle(`.${statHead} .${statValue}`, {
   minWidth: 0,
 });
 
+export const statAside = style({
+  display: "flex",
+  alignItems: "center",
+  gap: 2,
+  flexShrink: 0,
+});
+
 export const statIcon = style({
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  width: 40,
-  height: 40,
+  width: 38,
+  height: 38,
   flexShrink: 0,
   borderRadius: vars.radius.pill,
-  fontSize: 18,
+  fontSize: 17,
 });
 
 globalStyle(`.${statIcon}.${tone.default}`, {
-  background: vars.color.accent,
-  color: vars.color.brand,
+  background: vars.color.surfaceSubtle,
+  color: vars.color.text,
 });
 
 globalStyle(`.${statIcon}.${tone.brand}`, {
-  background: vars.color.brand,
-  color: vars.color.surface,
+  background: vars.color.ink,
+  color: vars.color.onInk,
+});
+
+globalStyle(`.${statIcon}.${tone.accent}`, {
+  background: vars.color.accent,
+  color: vars.color.ink,
+});
+
+globalStyle(`.${statIcon}.${tone.info}`, {
+  background: vars.color.accentAltSoft,
+  color: vars.color.ink,
 });
 
 globalStyle(`.${statIcon}.${tone.positive}`, {
-  background: "rgba(35, 120, 4, 0.12)",
+  background: "rgba(62, 155, 38, 0.12)",
   color: vars.color.positive,
 });
 
@@ -93,23 +121,39 @@ globalStyle(`.${statIcon}.${tone.negative}`, {
   color: vars.color.danger,
 });
 
+globalStyle(`.${statIcon}.${tone.warning}`, {
+  background: "rgba(183, 121, 31, 0.12)",
+  color: vars.color.warning,
+});
+
+export const statChipRow = style({
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 6,
+  marginTop: 10,
+});
+
 export const statCaption = style({
   marginTop: 6,
   fontSize: 12,
   color: vars.color.textMuted,
 });
 
-export const statDelta = style({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 3,
-  fontWeight: 600,
+export const statMenu = style({});
+
+globalStyle(`.${statMenu}.ant-btn`, {
+  width: 28,
+  height: 28,
+  minWidth: 28,
+  padding: 0,
+  border: "none",
+  borderRadius: vars.radius.pill,
+  background: "transparent",
+  color: vars.color.textMuted,
 });
 
-globalStyle(`.${statDelta}.${tone.positive}`, {
-  color: vars.color.positive,
-});
-
-globalStyle(`.${statDelta}.${tone.negative}`, {
-  color: vars.color.danger,
+globalStyle(`.${statMenu}.ant-btn:not(:disabled):hover`, {
+  background: vars.color.surfaceSubtle,
+  color: vars.color.text,
 });

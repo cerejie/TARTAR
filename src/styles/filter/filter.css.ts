@@ -1,8 +1,14 @@
-import { style } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
+import { cardBody } from "../card/card.css";
 import { vars } from "../common/vars.css";
 
 export const filterBar = style({
   marginBottom: vars.space.md,
+});
+
+/** Inside a card the card owns the outer spacing, so the bar drops its own. */
+globalStyle(`.${cardBody} > .${filterBar}`, {
+  marginBottom: 0,
 });
 
 export const filterBranch = style({

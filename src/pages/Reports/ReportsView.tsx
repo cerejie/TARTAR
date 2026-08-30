@@ -1,7 +1,7 @@
 import { PrinterOutlined } from "@ant-design/icons";
 import { Button, Segmented } from "antd";
 import type { ReactNode } from "react";
-import PageHeader from "../../components/common/view/PageHeader";
+import ContentView from "../../components/common/view/ContentView";
 import CashFlowReport from "../../components/report/CashFlowReport";
 import ExpensesReport from "../../components/report/ExpensesReport";
 import LedgerReport from "../../components/report/LedgerReport";
@@ -12,7 +12,6 @@ import {
   reportTypeValues,
   type ReportType,
 } from "../../models/data/report/report.response";
-import { reportSegmented } from "../../styles/view/report/report.view.css";
 
 const ReportsView = () => {
   const {
@@ -55,39 +54,33 @@ const ReportsView = () => {
   } as Partial<Record<ReportType, ReactNode>>;
 
   return (
-    <>
-      <PageHeader
-        title="Reports"
-        subtitle={
-          branchName
-            ? `Financial reporting for ${branchName}`
-            : "Financial reporting across the business"
-        }
-        extra={
-          <Button
-            icon={<PrinterOutlined />}
-            onClick={print}
-            disabled={loading}
-          >
-            Print report
-          </Button>
-        }
-      />
-
-      <Segmented
-        className={`${reportSegmented}`}
-        value={type}
-        onChange={(value) => setType(value as ReportType)}
-        options={reportTypeValues.map((item) => ({
-          label: reportTypeLabels[item],
-          value: item,
-        }))}
-      />
-
+    <ContentView
+      title="Reports"
+      subtitle={
+        branchName
+          ? `Financial reporting for ${branchName}`
+          : "Financial reporting across the business"
+      }
+      actions={
+        <Button icon={<PrinterOutlined />} onClick={print} disabled={loading}>
+          Print report
+        </Button>
+      }
+      toolbar={
+        <Segmented
+          value={type}
+          onChange={(value) => setType(value as ReportType)}
+          options={reportTypeValues.map((item) => ({
+            label: reportTypeLabels[item],
+            value: item,
+          }))}
+        />
+      }
+    >
       {body[type] ?? (
         <PeriodReport transactions={transactions} loading={loading} />
       )}
-    </>
+    </ContentView>
   );
 };
 

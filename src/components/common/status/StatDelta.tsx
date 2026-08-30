@@ -1,7 +1,7 @@
-import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
+import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
 import { Flex } from "antd";
-import { tone } from "../../styles/common/tone.css";
-import { statDelta } from "../../styles/stat/stat.css";
+import { tone } from "../../../styles/common/tone.css";
+import { statDelta } from "../../../styles/status/status.css";
 
 type IProps = {
   current: number | undefined;
@@ -24,9 +24,10 @@ const StatDelta = ({ current, previous, goodDirection, label }: IProps) => {
       className={`${statDelta} ${isGood ? tone.positive : tone.negative}`}
       align="center"
       gap={3}
+      title={label}
     >
-      {isUp ? <CaretUpOutlined /> : <CaretDownOutlined />}
-      {Math.abs(percent).toFixed(1)}% {label}
+      {isUp ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+      {Math.abs(percent).toFixed(1)}%
     </Flex>
   );
 };
