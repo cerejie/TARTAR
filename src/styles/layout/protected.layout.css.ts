@@ -406,3 +406,184 @@ globalStyle(
     outlineOffset: 2,
   }
 );
+
+globalStyle(`.${menuWrapper}.${menuWrapper} .ant-menu-item .anticon`, {
+  fontSize: 16,
+  color: vars.color.onInkMuted,
+});
+
+globalStyle(
+  `.${menuWrapper}.${menuWrapper} .ant-menu-item-selected .anticon`,
+  { color: vars.color.onInk }
+);
+
+globalStyle(`.${branchScope}.ant-dropdown-open.ant-btn`, {
+  borderColor: vars.color.accent,
+  background: vars.color.inkOverlayStrong,
+  color: vars.color.onInk,
+});
+
+export const branchScopePopup = style({});
+
+export const branchScopePanel = style({
+  display: "flex",
+  flexDirection: "column",
+  minWidth: 232,
+  padding: vars.space.sm,
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.inkBorder}`,
+  background: vars.color.inkSoft,
+  boxShadow: vars.shadow.pop,
+});
+
+globalStyle(`.${branchScopePopup} .ant-dropdown-menu`, {
+  padding: 0,
+  maxHeight: 240,
+  overflowY: "auto",
+  background: "transparent",
+  boxShadow: "none",
+  scrollbarWidth: "thin",
+  scrollbarColor: `${vars.color.inkBorder} transparent`,
+});
+
+globalStyle(
+  `.${branchScopePopup}.${branchScopePopup} .ant-dropdown-menu-item`,
+  {
+    borderRadius: vars.radius.md,
+    color: vars.color.onInk,
+    fontSize: 13,
+  }
+);
+
+globalStyle(
+  `.${branchScopePopup}.${branchScopePopup} .ant-dropdown-menu-title-content`,
+  { color: vars.color.onInk }
+);
+
+globalStyle(
+  `.${branchScopePopup}.${branchScopePopup} .ant-dropdown-menu-item:hover`,
+  { background: vars.color.inkOverlay, color: vars.color.onInk }
+);
+
+globalStyle(
+  `.${branchScopePopup}.${branchScopePopup} .ant-dropdown-menu-item-selected`,
+  {
+    background: vars.color.inkOverlay,
+    color: vars.color.onInk,
+    fontWeight: 600,
+  }
+);
+
+globalStyle(`.${branchScopePopup} .ant-dropdown-menu-item-divider`, {
+  background: vars.color.inkBorder,
+  marginBlock: vars.space.xs,
+});
+
+export const branchScopeSearch = style({});
+
+globalStyle(`.${branchScopeSearch}.ant-input-affix-wrapper`, {
+  marginBottom: vars.space.sm,
+  border: "none",
+  borderBottom: `1px solid ${vars.color.inkBorder}`,
+  borderRadius: 0,
+  background: "transparent",
+  color: vars.color.onInk,
+  boxShadow: "none",
+});
+
+globalStyle(`.${branchScopeSearch}.ant-input-affix-wrapper .ant-input`, {
+  background: "transparent",
+  color: vars.color.onInk,
+  fontSize: 13,
+});
+
+globalStyle(
+  `.${branchScopeSearch}.ant-input-affix-wrapper .ant-input::placeholder`,
+  { color: vars.color.onInkMuted }
+);
+
+globalStyle(`.${branchScopeSearch}.ant-input-affix-wrapper .anticon`, {
+  color: vars.color.onInkMuted,
+});
+
+export const branchScopeOption = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: vars.space.sm,
+});
+
+export const branchScopeCheck = style({
+  fontSize: 12,
+  color: vars.color.accent,
+});
+
+export const branchScopeManage = style({});
+
+globalStyle(`.${branchScopeManage}.${branchScopeManage}.ant-btn`, {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-start",
+  gap: vars.space.xs,
+  width: "100%",
+  height: 36,
+  marginTop: vars.space.sm,
+  paddingInline: vars.space.sm,
+  borderTop: `1px solid ${vars.color.inkBorder}`,
+  borderRadius: 0,
+  background: "transparent",
+  color: vars.color.accent,
+  fontSize: 13,
+  fontWeight: 600,
+});
+
+globalStyle(
+  `.${branchScopeManage}.${branchScopeManage}.ant-btn:not(:disabled):hover`,
+  { background: vars.color.inkOverlay, color: vars.color.accent }
+);
+
+export const siderUserMenu = style({});
+
+globalStyle(`.${siderUserMenu} .ant-dropdown-menu`, {
+  minWidth: 200,
+  border: `1px solid ${vars.color.inkBorder}`,
+  background: vars.color.inkSoft,
+});
+
+globalStyle(
+  `.${siderUserMenu}.${siderUserMenu} .ant-dropdown-menu-item`,
+  { color: vars.color.accentSoft, fontSize: 13 }
+);
+
+globalStyle(
+  `.${siderUserMenu}.${siderUserMenu} .ant-dropdown-menu-title-content`,
+  { color: "inherit" }
+);
+
+globalStyle(
+  `.${siderUserMenu}.${siderUserMenu} .ant-dropdown-menu-item-danger`,
+  { color: vars.color.danger }
+);
+
+globalStyle(
+  `.${siderUserMenu}.${siderUserMenu} .ant-dropdown-menu-item:hover`,
+  { background: vars.color.inkOverlay }
+);
+
+export const siderUserBadge = style({
+  flexShrink: 0,
+  lineHeight: 0,
+});
+
+export const siderUserOnline = style({});
+
+globalStyle(`.${siderUserBadge} .${siderUserOnline}`, {
+  insetBlockStart: "auto",
+  insetBlockEnd: 1,
+  insetInlineEnd: 1,
+  transform: "none",
+  width: 9,
+  height: 9,
+  background: vars.color.positiveBright,
+  boxShadow: `0 0 0 2px ${vars.color.brandDark}`,
+});

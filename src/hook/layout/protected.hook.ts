@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { createElement, useMemo } from "react";
 import type { MenuProps } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
-import { userRoleLabels } from "../../enums/role.enum";
+import { effectiveRoleLabels } from "../../enums/role.enum";
 import { protectedViewsRoutes } from "../../routes/protected.view.routes";
 import { useNetworkStore } from "../../store/common/network.store";
 import { useAccountStore } from "../../store/data/account/account.store";
@@ -35,6 +35,7 @@ export const useProtectedMenuHook = () => {
         .map((route) => ({
           key: route.path as string,
           label: route.label,
+          icon: route.icon ? createElement(route.icon) : undefined,
         }));
 
       return children.length
@@ -71,23 +72,21 @@ export const useProtectedHeaderHook = () => {
 
 export const useProtectedUserHook = () => {
   const user = useAccountStore((state) => state.user);
+  const online = useNetworkStore((state) => state.online);
   const permissions = usePermissions();
   const { logoutMutation } = useAccountLogoutHook();
 
-  const displayName =
-    user?.full_name || user?.username || "superAdmin (Developer)";
+  const displayName = user?.full_name || user?.username || "superAdmin";
 
-  const roleLabel =
-    permissions.role === "superadmin"
-      ? "superAdmin"
-      : permissions.role
-        ? userRoleLabels[permissions.role]
-        : "";
+  const roleLabel = permissions.role
+    ? effectiveRoleLabels[permissions.role]
+    : "";
 
   return {
     displayName,
     roleLabel,
     initial: displayName.trim().charAt(0).toUpperCase(),
+    online,
     logoutMutation,
   };
 };

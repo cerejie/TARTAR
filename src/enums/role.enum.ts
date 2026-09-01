@@ -12,6 +12,11 @@ export const userRoleLabels: Record<UserRole, string> = {
   employee: "Employee",
 };
 
+export const effectiveRoleLabels: Record<EffectiveRole, string> = {
+  ...userRoleLabels,
+  superadmin: "Super Administrator",
+};
+
 export const approvalStatusValues = ["pending", "approved", "rejected"] as const;
 export const approvalStatusSchema = z.enum(approvalStatusValues);
 export type ApprovalStatus = z.infer<typeof approvalStatusSchema>;

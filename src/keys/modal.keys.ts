@@ -8,6 +8,7 @@ export const userResetModalKey = "user-reset";
 
 export const branchCreateModalKey = "branch-create";
 export const branchEditModalKey = "branch-edit";
+export const branchScopeSearchKey = "branch-scope-search";
 
 export const supplierCreateModalKey = "supplier-create";
 export const supplierEditModalKey = "supplier-edit";
