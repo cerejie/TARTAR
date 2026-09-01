@@ -2,11 +2,11 @@ import { globalStyle, style } from "@vanilla-extract/css";
 import { vars } from "../common/vars.css";
 
 export const filterBar = style({
-  marginBottom: vars.space.md,
+  marginBottom: vars.space.xs,
 });
 
 export const filterReference = style({
-  width: 180,
+  width: 140,
 });
 
 export const filterStatus = style({
@@ -36,7 +36,6 @@ export const filterToolbar = style({
   display: "flex",
   alignItems: "center",
   gap: vars.space.sm,
-  marginBottom: vars.space.md,
 });
 
 export const filterToolbarStart = style({

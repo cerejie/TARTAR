@@ -44,6 +44,8 @@ const LedgerFilterBar = ({ showStatus = false, scope = "page" }: IProps) => {
 
       {showStatus ? (
         <Select
+          size="middle"
+
           className={`${filterStatus}`}
           placeholder="Any status"
           allowClear
@@ -57,6 +59,7 @@ const LedgerFilterBar = ({ showStatus = false, scope = "page" }: IProps) => {
       ) : null}
 
       <Input
+        size="middle"
         className={`${filterReference}`}
         placeholder="Reference no."
         allowClear

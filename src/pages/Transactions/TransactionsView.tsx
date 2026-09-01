@@ -1,10 +1,12 @@
+import { Card } from "antd";
 import ContentView from "../../components/common/view/ContentView";
 import TransactionsTable from "../../components/transaction/tables/TransactionsTable";
 
 const TransactionsView = () => {
   return (
     <ContentView>
-      <TransactionsTable />
+      <Card>      <TransactionsTable /></Card>
+
     </ContentView>
   );
 };

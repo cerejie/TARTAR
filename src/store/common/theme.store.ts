@@ -27,7 +27,7 @@ const initialValues: States = {
       colorWarning: colors.warning,
       fontFamily: fontFamilyBase,
       borderRadius: 12,
-      borderRadiusLG: 24,
+      borderRadiusLG: 12,
       controlOutline: colors.accentSoft,
     },
     components: {
@@ -40,15 +40,15 @@ const initialValues: States = {
         controlHeight: 40,
         paddingInline: 20,
         fontWeight: 500,
-        borderRadius: 20,
+        borderRadius: 8,
         borderRadiusLG: 22,
         borderRadiusSM: 16,
         defaultBorderColor: colors.border,
         primaryShadow: "none",
         defaultShadow: "none",
       },
-      Card: { borderRadiusLG: 24 },
-      Modal: { borderRadiusLG: 24, paddingContentHorizontalLG: 28 },
+      Card: { borderRadiusLG: 15 },
+      Modal: { borderRadiusLG: 15, paddingContentHorizontalLG: 28 },
       Segmented: {
         borderRadius: 999,
         borderRadiusSM: 999,
@@ -86,8 +86,12 @@ const initialValues: States = {
         itemPaddingInline: 12,
       },
       Tag: { borderRadiusSM: 999 },
-      Input: { paddingBlock: 8 },
-      Select: { borderRadius: 12 },
+      Input: { borderRadius: 8 },
+      InputNumber: { borderRadius: 8 },
+      Select: { borderRadius: 8 },
+      DatePicker: { borderRadius: 8 },
+
+
     },
   },
 };
