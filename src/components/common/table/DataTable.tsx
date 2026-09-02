@@ -54,12 +54,17 @@ const DataTable = <T extends object>({
   rowSelection,
   rowClassName,
 }: IProps<T>) => {
-  const { expandedRow, toggleRow } = useRowExpansion(expansionKey ?? "");
+  const { expandedRow, collapsingRow, toggleRow, endCollapse } =
+    useRowExpansion(expansionKey ?? "");
 
   const resolveRowKey =
     typeof rowKey === "function" ? rowKey : (row: T) => String(row[rowKey]);
 
   const isExpandable = Boolean(expansionKey && detailSections?.length);
+
+  const expandedRowKeys = [expandedRow, collapsingRow].filter(
+    (rowKey): rowKey is string => rowKey !== null
+  );
 
   const attachedPager = pagination
     ? {
@@ -78,7 +83,7 @@ const DataTable = <T extends object>({
       ? {
           columnWidth: viewColumnWidth,
           columnTitle: <span className={`${viewHeaderLabel}`}>View</span>,
-          expandedRowKeys: expandedRow ? [expandedRow] : [],
+          expandedRowKeys,
           onExpand: (_, row) => toggleRow(resolveRowKey(row)),
           expandIcon: ({ expanded, onExpand, record }) => (
             <button
@@ -98,14 +103,19 @@ const DataTable = <T extends object>({
             </button>
           ),
           expandedRowRender: (row) => (
-            <RowDetailPanel<T> record={row} sections={detailSections} />
+            <RowDetailPanel<T>
+              record={row}
+              sections={detailSections}
+              collapsing={collapsingRow === resolveRowKey(row)}
+              onCollapsed={() => endCollapse(resolveRowKey(row))}
+            />
           ),
         }
       : undefined;
 
   const resolveRowClassName = (row: T) => {
     const base = rowClassName?.(row) ?? "";
-    const open = isExpandable && expandedRow === resolveRowKey(row);
+    const open = isExpandable && expandedRowKeys.includes(resolveRowKey(row));
     return open ? `${base} ${rowExpanded}`.trim() : base;
   };
 

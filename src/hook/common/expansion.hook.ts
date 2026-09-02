@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import {
+  selectCollapsingRow,
   selectExpandedRow,
   useExpansionStore,
 } from "../../store/common/expansion.store";
@@ -10,7 +11,11 @@ const rowExpansionPersistSelector = "[data-row-expansion-persist]";
 
 export const useRowExpansion = (key: string) => {
   const expandedRow = useExpansionStore(selectExpandedRow(key));
+  const collapsingRow = useExpansionStore(selectCollapsingRow(key));
   const setExpandedRowAt = useExpansionStore((state) => state.setExpandedRow);
+  const clearCollapsingRowAt = useExpansionStore(
+    (state) => state.clearCollapsingRow
+  );
 
   useEffect(() => {
     if (!expandedRow) return;
@@ -34,9 +39,11 @@ export const useRowExpansion = (key: string) => {
   return useMemo(
     () => ({
       expandedRow,
+      collapsingRow,
       toggleRow: (rowKey: string) =>
         setExpandedRowAt(key, expandedRow === rowKey ? null : rowKey),
+      endCollapse: (rowKey: string) => clearCollapsingRowAt(key, rowKey),
     }),
-    [expandedRow, key, setExpandedRowAt]
+    [clearCollapsingRowAt, collapsingRow, expandedRow, key, setExpandedRowAt]
   );
 };

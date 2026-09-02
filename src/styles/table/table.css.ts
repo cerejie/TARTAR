@@ -48,7 +48,8 @@ globalStyle(`.${tableContainer} .ant-table-tbody > tr > td`, {
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
-  transition: "background 0.15s ease, border-color 0.15s ease",
+  transition:
+    "background 0.15s ease, border-color 0.15s ease, border-radius 0.2s ease",
 });
 
 globalStyle(`.${tableContainer} .ant-table-tbody > tr > td:first-child`, {
@@ -371,7 +372,11 @@ export const viewTrigger = style({
   color: vars.color.textMuted,
   fontSize: 15,
   cursor: "pointer",
-  transition: "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+  transition:
+    "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.2s cubic-bezier(0.2, 0.9, 0.24, 1.2)",
+  ":active": {
+    transform: "scale(0.92)",
+  },
   ":focus-visible": {
     outline: `3px solid ${vars.color.accentAlt}`,
     outlineOffset: 2,
@@ -381,23 +386,65 @@ export const viewTriggerOpen = style({
   background: vars.color.accentTint,
   borderColor: vars.color.accent,
   color: vars.color.text,
+  transform: "scale(1.06)",
 });
 
 const detailReveal = keyframes({
-  from: { opacity: 0 },
-  to: { opacity: 1 },
+  from: { gridTemplateRows: "0fr", opacity: 0 },
+  to: { gridTemplateRows: "1fr", opacity: 1 },
+});
+
+const detailConceal = keyframes({
+  from: { gridTemplateRows: "1fr", opacity: 1 },
+  to: { gridTemplateRows: "0fr", opacity: 0 },
+});
+
+const detailRise = keyframes({
+  from: { opacity: 0, transform: "translateY(-10px)" },
+  to: { opacity: 1, transform: "translateY(0)" },
+});
+
+const instantMotion = {
+  "@media": {
+    "(prefers-reduced-motion: reduce)": {
+      animationDuration: "0.01ms",
+      animationDelay: "0ms",
+    },
+  },
+};
+
+const staggeredRise = (step: number) => ({
+  animationDelay: `${step * 60}ms`,
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { animationDelay: "0ms" },
+  },
+});
+
+export const rowDetailReveal = style({
+  display: "grid",
+  gridTemplateRows: "1fr",
+  overflow: "hidden",
+  marginInlineStart: viewColumnGutter,
+  marginTop: `-${rowGap}`,
+  animation: `${detailReveal} 0.28s cubic-bezier(0.22, 1, 0.3, 1) both`,
+  ...instantMotion,
+});
+
+export const rowDetailRevealClosing = style({
+  animationName: detailConceal,
+  animationDuration: "0.16s",
+  animationTimingFunction: "cubic-bezier(0.4, 0, 1, 1)",
+  ...instantMotion,
 });
 
 export const rowDetailPanel = style({
-  marginInlineStart: viewColumnGutter,
-  marginTop: `-${rowGap}`,
+  minHeight: 0,
   padding: vars.space.md,
   background: vars.color.accentTint,
   borderInline: `1px solid ${vars.color.accent}`,
   borderBottom: `1px solid ${vars.color.accent}`,
   borderEndStartRadius: rowRadius,
   borderEndEndRadius: rowRadius,
-  animation: `${detailReveal} 0.16s ease`,
 });
 
 export const rowDetailContent = style({
@@ -412,12 +459,17 @@ export const rowDetailContent = style({
 
 export const rowDetailSection = style({
   minWidth: 0,
+  animation: `${detailRise} 0.34s cubic-bezier(0.22, 1, 0.3, 1) both`,
   selectors: {
     "& + &": {
       paddingInlineStart: vars.space.lg,
       borderInlineStart: rowBorder,
     },
+    "&:nth-child(2)": staggeredRise(1),
+    "&:nth-child(3)": staggeredRise(2),
+    "&:nth-child(4)": staggeredRise(3),
   },
+  ...instantMotion,
 });
 
 export const rowDetailSectionTitle = style({
