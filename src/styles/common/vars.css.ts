@@ -8,6 +8,7 @@ export const palette = {
   lime: "#D6F25B",
   limeDeep: "#BCDE47",
   limeSoft: "#EAF7A9",
+  limeMist: "#FAFDEA",
   lilac: "#B9A5F5",
   lilacSoft: "#E7E0FC",
   cloud: "#F2F3EE",
@@ -43,6 +44,7 @@ export const colors = {
   inkBorder: "rgba(244, 245, 239, 0.14)",
   accentStrong: palette.limeDeep,
   accentSoft: palette.limeSoft,
+  accentTint: palette.limeMist,
   accentAlt: palette.lilac,
   accentAltSoft: palette.lilacSoft,
 } as const;

@@ -1,4 +1,10 @@
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  FileTextOutlined,
+  PlusOutlined,
+  TagOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Button, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import SectionCard from "../../common/card/SectionCard";
@@ -7,11 +13,19 @@ import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
 import DataTable from "../../common/table/DataTable";
+import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import { userRoleLabels } from "../../../enums/role.enum";
-import { transactionTypeLabels } from "../../../enums/transaction.enum";
+import {
+  cashAccountLabels,
+  incomeSourceLabels,
+  transactionTypeLabels,
+} from "../../../enums/transaction.enum";
 import { useConfirm } from "../../../hook/common/confirmation.hook";
 import { useTransactionListHook } from "../../../hook/data/transaction/transaction.list.hook";
+import { transactionExpansionKey } from "../../../keys/table.keys";
+import type { IRowAction } from "../../../models/common/action.model";
+import type { IDetailSection } from "../../../models/common/detail.model";
 import {
   transactionSchema,
   type ITransactionInput,
@@ -38,18 +52,38 @@ const TransactionsTable = () => {
 
   const openConfirm = useConfirm();
 
+  const userOf = (row: ITransaction) =>
+    row.created_by ? userById.get(row.created_by) : undefined;
+
+  const userNameOf = (row: ITransaction) => {
+    const user = userOf(row);
+    return user ? user.full_name || user.username : "—";
+  };
+
+  const actionsOf = (row: ITransaction): IRowAction[] => [
+    {
+      key: "delete",
+      label: "Delete transaction",
+      icon: <DeleteOutlined />,
+      danger: true,
+      onSelect: () =>
+        openConfirm({
+          kind: "delete",
+          title: "Delete transaction?",
+          message: `Deleting this ${transactionTypeLabels[
+            row.type
+          ].toLowerCase()} of ${formatMoney(row.amount)} cannot be undone.`,
+          onConfirm: () => removeMutation.mutate(row.id),
+        }),
+    },
+  ];
+
   const columns: ColumnsType<ITransaction> = [
     {
       title: "Date",
       dataIndex: "txn_date",
       width: 130,
       render: (value: string) => formatDate(value),
-    },
-    {
-      title: "Time",
-      dataIndex: "created_at",
-      width: 100,
-      render: (value: string) => formatTime(value),
     },
     {
       title: "Type",
@@ -64,31 +98,10 @@ const TransactionsTable = () => {
           {
             title: "User",
             key: "user",
-            render: (_: unknown, row: ITransaction) => {
-              const user = row.created_by
-                ? userById.get(row.created_by)
-                : undefined;
-              return user ? user.full_name || user.username : "—";
-            },
-          },
-          {
-            title: "Role",
-            key: "role",
-            width: 130,
-            render: (_: unknown, row: ITransaction) => {
-              const user = row.created_by
-                ? userById.get(row.created_by)
-                : undefined;
-              return user ? <Tag>{userRoleLabels[user.role]}</Tag> : "—";
-            },
+            render: (_: unknown, row: ITransaction) => userNameOf(row),
           },
         ]
       : []),
-    {
-      title: "Reference",
-      dataIndex: "reference_number",
-      render: (value: string | null) => value || "—",
-    },
     {
       title: "Amount",
       dataIndex: "amount",
@@ -98,30 +111,91 @@ const TransactionsTable = () => {
     ...(permissions.isManager
       ? [
           {
-            title: "",
+            title: "Action",
             key: "actions",
-            width: 90,
+            width: 100,
+            align: "center" as const,
             render: (_: unknown, row: ITransaction) => (
-              <Button
-                type="link"
-                danger
-                size="small"
-                onClick={() =>
-                  openConfirm({
-                    kind: "delete",
-                    title: "Delete transaction?",
-                    message: `Deleting this ${transactionTypeLabels[
-                      row.type
-                    ].toLowerCase()} of ${formatMoney(
-                      row.amount
-                    )} cannot be undone.`,
-                    onConfirm: () => removeMutation.mutate(row.id),
-                  })
-                }
-              >
-                Delete
-              </Button>
+              <RowActionMenu actions={actionsOf(row)} />
             ),
+          },
+        ]
+      : []),
+  ];
+
+  const detailSections: IDetailSection<ITransaction>[] = [
+    {
+      key: "transaction",
+      title: "Transaction",
+      icon: <FileTextOutlined />,
+      items: [
+        {
+          key: "time",
+          label: "Time",
+          render: (row) => formatTime(row.created_at),
+        },
+        {
+          key: "reference",
+          label: "Reference",
+          render: (row) => row.reference_number || "—",
+        },
+        {
+          key: "description",
+          label: "Description",
+          render: (row) => row.description || "—",
+        },
+      ],
+    },
+    {
+      key: "classification",
+      title: "Classification",
+      icon: <TagOutlined />,
+      items: [
+        {
+          key: "cash_account",
+          label: "Cash account",
+          render: (row) =>
+            row.cash_account ? cashAccountLabels[row.cash_account] : "—",
+        },
+        {
+          key: "income_source",
+          label: "Income source",
+          render: (row) =>
+            row.income_source ? incomeSourceLabels[row.income_source] : "—",
+        },
+        {
+          key: "party",
+          label: "Customer or supplier",
+          render: (row) => row.customer?.name || row.supplier?.name || "—",
+        },
+        {
+          key: "farm_section",
+          label: "Farm section",
+          render: (row) => row.farm_section || "—",
+        },
+      ],
+    },
+    ...(permissions.isManager
+      ? [
+          {
+            key: "record",
+            title: "Recorded by",
+            icon: <UserOutlined />,
+            items: [
+              {
+                key: "recorded_by",
+                label: "Recorded by",
+                render: (row: ITransaction) => userNameOf(row),
+              },
+              {
+                key: "role",
+                label: "Role",
+                render: (row: ITransaction) => {
+                  const user = userOf(row);
+                  return user ? userRoleLabels[user.role] : "—";
+                },
+              },
+            ],
           },
         ]
       : []),
@@ -154,6 +228,8 @@ const TransactionsTable = () => {
           loading={loading}
           pagination={pagination}
           detachedPagination
+          expansionKey={transactionExpansionKey}
+          detailSections={detailSections}
           emptyText="No transactions match the current filters"
         />
       </SectionCard>

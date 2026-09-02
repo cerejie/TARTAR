@@ -1,7 +1,23 @@
+import { EyeOutlined } from "@ant-design/icons";
 import { Table } from "antd";
 import type { ColumnsType, TableProps } from "antd/es/table";
+import {
+  rowExpansionPersistProps,
+  useRowExpansion,
+} from "../../../hook/common/expansion.hook";
+import type { IDetailSection } from "../../../models/common/detail.model";
 import type { IPaginationRequest } from "../../../models/common/pagination.model";
-import { rowClickable, tableContainer } from "../../../styles/table/table.css";
+import {
+  rowClickable,
+  rowExpanded,
+  tableContainer,
+  tableDetachedView,
+  viewColumnWidth,
+  viewHeaderLabel,
+  viewTrigger,
+  viewTriggerOpen,
+} from "../../../styles/table/table.css";
+import RowDetailPanel from "./RowDetailPanel";
 
 type IProps<T> = {
   columns: ColumnsType<T>;
@@ -14,6 +30,8 @@ type IProps<T> = {
   totalCount?: number;
   onPageChange?: (pageNumber: number, pageSize: number) => void;
   onRowClick?: (row: T) => void;
+  expansionKey?: string;
+  detailSections?: IDetailSection<T>[];
   emptyText?: string;
   rowSelection?: TableProps<T>["rowSelection"];
   rowClassName?: (row: T) => string;
@@ -30,10 +48,19 @@ const DataTable = <T extends object>({
   totalCount = 0,
   onPageChange,
   onRowClick,
+  expansionKey,
+  detailSections,
   emptyText,
   rowSelection,
   rowClassName,
 }: IProps<T>) => {
+  const { expandedRow, toggleRow } = useRowExpansion(expansionKey ?? "");
+
+  const resolveRowKey =
+    typeof rowKey === "function" ? rowKey : (row: T) => String(row[rowKey]);
+
+  const isExpandable = Boolean(expansionKey && detailSections?.length);
+
   const attachedPager = pagination
     ? {
         current: pagination.pageNumber,
@@ -46,19 +73,58 @@ const DataTable = <T extends object>({
       }
     : { pageSize, showSizeChanger: false, hideOnSinglePage: true };
 
+  const expandable: TableProps<T>["expandable"] =
+    isExpandable && detailSections
+      ? {
+          columnWidth: viewColumnWidth,
+          columnTitle: <span className={`${viewHeaderLabel}`}>View</span>,
+          expandedRowKeys: expandedRow ? [expandedRow] : [],
+          onExpand: (_, row) => toggleRow(resolveRowKey(row)),
+          expandIcon: ({ expanded, onExpand, record }) => (
+            <button
+              type="button"
+              aria-label={expanded ? "Hide details" : "Show details"}
+              aria-expanded={expanded}
+              className={
+                expanded ? `${viewTrigger} ${viewTriggerOpen}` : `${viewTrigger}`
+              }
+              onClick={(event) => {
+                event.stopPropagation();
+                onExpand(record, event);
+              }}
+              {...rowExpansionPersistProps}
+            >
+              <EyeOutlined />
+            </button>
+          ),
+          expandedRowRender: (row) => (
+            <RowDetailPanel<T> record={row} sections={detailSections} />
+          ),
+        }
+      : undefined;
+
+  const resolveRowClassName = (row: T) => {
+    const base = rowClassName?.(row) ?? "";
+    const open = isExpandable && expandedRow === resolveRowKey(row);
+    return open ? `${base} ${rowExpanded}`.trim() : base;
+  };
+
   return (
     <Table<T>
-      className={`${tableContainer}`}
+      className={
+        isExpandable
+          ? `${tableContainer} ${tableDetachedView}`
+          : `${tableContainer}`
+      }
       columns={columns}
       dataSource={data}
       loading={loading}
       size="middle"
-      rowKey={
-        typeof rowKey === "function" ? rowKey : (row) => String(row[rowKey])
-      }
+      tableLayout="fixed"
+      rowKey={resolveRowKey}
       rowSelection={rowSelection}
-      rowClassName={rowClassName}
-      scroll={{ x: "max-content" }}
+      rowClassName={resolveRowClassName}
+      expandable={expandable}
       locale={emptyText ? { emptyText } : undefined}
       pagination={detachedPagination ? false : attachedPager}
       onChange={

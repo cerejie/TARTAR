@@ -1,4 +1,4 @@
-import { globalStyle, style } from "@vanilla-extract/css";
+import { globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { vars } from "../common/vars.css";
 
 export const tableContainer = style({});
@@ -45,6 +45,9 @@ globalStyle(`.${tableContainer} .ant-table-tbody > tr > td`, {
   background: vars.color.surface,
   borderBlock: rowBorder,
   borderInline: "none",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
   transition: "background 0.15s ease, border-color 0.15s ease",
 });
 
@@ -248,3 +251,261 @@ globalStyle(`.${iconButton}:disabled, .${iconButton}:disabled:hover`, {
   borderColor: vars.color.borderSubtle,
   cursor: "not-allowed",
 });
+
+export const rowExpanded = style({});
+
+globalStyle(`.${tableContainer} .ant-table-tbody > tr.${rowExpanded} > td`, {
+  background: vars.color.accentTint,
+  borderColor: vars.color.accent,
+  borderBottomColor: "transparent",
+  borderEndStartRadius: 0,
+  borderEndEndRadius: 0,
+});
+
+globalStyle(
+  `.${tableContainer} .ant-table-tbody > tr.ant-table-expanded-row > td`,
+  {
+    background: "transparent",
+    border: "none",
+    borderRadius: 0,
+    overflow: "visible",
+    whiteSpace: "normal",
+    padding: "0 !important",
+  }
+);
+
+globalStyle(
+  `.${tableContainer} .ant-table-tbody > tr.ant-table-expanded-row > td:first-child, .${tableContainer} .ant-table-tbody > tr.ant-table-expanded-row > td:last-child`,
+  {
+    border: "none",
+    borderRadius: 0,
+  }
+);
+
+globalStyle(
+  `.${tableContainer} .ant-table-tbody > tr.ant-table-expanded-row:hover > td`,
+  {
+    background: "transparent",
+  }
+);
+
+export const tableDetachedView = style({});
+
+export const viewColumnWidth = 56;
+
+const viewColumnGutter = `${viewColumnWidth}px`;
+const viewBoxInset = `0 ${rowGap} 0 0`;
+
+globalStyle(
+  `.${tableContainer}.${tableDetachedView} .ant-table-thead > tr > th:first-child`,
+  {
+    position: "relative",
+    background: "transparent",
+    padding: 0,
+    borderRadius: 0,
+  }
+);
+
+globalStyle(
+  `.${tableContainer}.${tableDetachedView} .ant-table-thead > tr > th:nth-child(2)`,
+  {
+    borderStartStartRadius: rowRadius,
+    borderEndStartRadius: rowRadius,
+  }
+);
+
+globalStyle(
+  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell`,
+  {
+    position: "relative",
+    background: "transparent",
+    border: "none",
+    borderRadius: 0,
+    padding: 0,
+    overflow: "visible",
+  }
+);
+
+globalStyle(
+  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell + td`,
+  {
+    borderInlineStart: rowBorder,
+    borderStartStartRadius: rowRadius,
+    borderEndStartRadius: rowRadius,
+  }
+);
+
+globalStyle(
+  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr.${rowExpanded} > td.ant-table-row-expand-icon-cell + td`,
+  {
+    borderInlineStartColor: vars.color.accent,
+    borderEndStartRadius: 0,
+  }
+);
+
+export const viewHeaderLabel = style({
+  position: "absolute",
+  inset: viewBoxInset,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: rowRadius,
+  background: vars.color.accentSoft,
+  color: vars.color.textMuted,
+  fontSize: 11,
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+});
+
+export const viewTrigger = style({
+  position: "absolute",
+  inset: viewBoxInset,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 0,
+  border: rowBorder,
+  borderRadius: rowRadius,
+  background: vars.color.surface,
+  color: vars.color.textMuted,
+  fontSize: 15,
+  cursor: "pointer",
+  transition: "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+  ":hover": {
+    background: vars.color.accentSoft,
+    borderColor: vars.color.accentStrong,
+    color: vars.color.text,
+  },
+  ":focus-visible": {
+    outline: `3px solid ${vars.color.accentAlt}`,
+    outlineOffset: 2,
+  },
+});
+export const viewTriggerOpen = style({
+  background: vars.color.accentTint,
+  borderColor: vars.color.accent,
+  color: vars.color.text,
+});
+
+const detailReveal = keyframes({
+  from: { opacity: 0 },
+  to: { opacity: 1 },
+});
+
+export const rowDetailPanel = style({
+  marginInlineStart: viewColumnGutter,
+  marginTop: `-${rowGap}`,
+  padding: vars.space.md,
+  background: vars.color.accentTint,
+  borderInline: `1px solid ${vars.color.accent}`,
+  borderBottom: `1px solid ${vars.color.accent}`,
+  borderEndStartRadius: rowRadius,
+  borderEndEndRadius: rowRadius,
+  animation: `${detailReveal} 0.16s ease`,
+});
+
+export const rowDetailContent = style({
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: vars.space.lg,
+  padding: vars.space.md,
+  background: vars.color.surface,
+  border: rowBorder,
+  borderRadius: vars.radius.md,
+});
+
+export const rowDetailSection = style({
+  minWidth: 0,
+  selectors: {
+    "& + &": {
+      paddingInlineStart: vars.space.lg,
+      borderInlineStart: rowBorder,
+    },
+  },
+});
+
+export const rowDetailSectionTitle = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  marginBottom: vars.space.md,
+  fontSize: 11,
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: vars.color.textMuted,
+});
+
+export const rowDetailSectionIcon = style({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 24,
+  height: 24,
+  flexShrink: 0,
+  borderRadius: vars.radius.md,
+  background: vars.color.accentSoft,
+  color: vars.color.text,
+  fontSize: 12,
+});
+
+export const rowDetailField = style({
+  minWidth: 0,
+  selectors: {
+    "& + &": {
+      marginTop: vars.space.sm,
+      paddingTop: vars.space.sm,
+      borderTop: rowBorder,
+    },
+  },
+});
+
+export const rowDetailLabel = style({
+  display: "block",
+  marginBottom: 2,
+  fontSize: 12,
+  color: vars.color.textMuted,
+});
+
+export const rowDetailValue = style({
+  display: "block",
+  fontSize: 13.5,
+  fontWeight: 600,
+  color: vars.color.text,
+  wordBreak: "break-word",
+});
+
+export const rowActionMenu = style({});
+
+globalStyle(`.${rowActionMenu} .ant-dropdown-menu`, {
+  minWidth: 176,
+  padding: vars.space.xs,
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.borderSubtle}`,
+  background: vars.color.surface,
+  boxShadow: vars.shadow.pop,
+});
+
+globalStyle(`.${rowActionMenu}.${rowActionMenu} .ant-dropdown-menu-item`, {
+  padding: `${vars.space.xs} ${vars.space.sm}`,
+  borderRadius: vars.radius.md,
+  color: vars.color.text,
+  fontSize: 13,
+  fontWeight: 500,
+});
+
+globalStyle(
+  `.${rowActionMenu}.${rowActionMenu} .ant-dropdown-menu-item:hover`,
+  { background: vars.color.accentSoft }
+);
+
+globalStyle(
+  `.${rowActionMenu}.${rowActionMenu} .ant-dropdown-menu-item-danger`,
+  { color: vars.color.danger }
+);
+
+globalStyle(
+  `.${rowActionMenu}.${rowActionMenu} .ant-dropdown-menu-item-danger:hover`,
+  { background: vars.color.dangerBg, color: vars.color.danger }
+);

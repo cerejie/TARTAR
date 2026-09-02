@@ -6,3 +6,10 @@ export interface IDetailItem<TRecord> {
   render: (record: TRecord) => ReactNode;
   span?: number;
 }
+
+export interface IDetailSection<TRecord> {
+  key: string;
+  title: string;
+  icon?: ReactNode;
+  items: IDetailItem<TRecord>[];
+}
