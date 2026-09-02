@@ -372,11 +372,6 @@ export const viewTrigger = style({
   fontSize: 15,
   cursor: "pointer",
   transition: "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
-  ":hover": {
-    background: vars.color.accentSoft,
-    borderColor: vars.color.accentStrong,
-    color: vars.color.text,
-  },
   ":focus-visible": {
     outline: `3px solid ${vars.color.accentAlt}`,
     outlineOffset: 2,
@@ -508,4 +503,23 @@ globalStyle(
 globalStyle(
   `.${rowActionMenu}.${rowActionMenu} .ant-dropdown-menu-item-danger:hover`,
   { background: vars.color.dangerBg, color: vars.color.danger }
+);
+
+globalStyle(
+  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr.ant-table-row:not(.${rowExpanded}):hover > td`,
+  { borderColor: vars.color.accent }
+);
+
+globalStyle(
+  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr.ant-table-row:not(.${rowExpanded}):hover .${viewTrigger}`,
+  { borderColor: vars.color.accent, color: vars.color.text }
+);
+
+globalStyle(
+  `.${tableContainer}.${tableContainer} .ant-table-tbody > tr.${rowExpanded}.${rowExpanded}:hover > td`,
+  {
+    background: vars.color.accentTint,
+    borderColor: vars.color.accent,
+    borderBottomColor: "transparent",
+  }
 );
