@@ -4,7 +4,7 @@ import { vars } from "../common/vars.css";
 export const protectedLayout = style({
   height: "100dvh",
   overflow: "hidden",
-  background: vars.color.surfaceSubtle,
+  background: vars.color.surface,
 });
 
 export const shellMain = style({

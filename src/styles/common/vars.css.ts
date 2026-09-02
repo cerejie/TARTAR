@@ -20,7 +20,7 @@ export const colors = {
   brandDark: palette.inkDeep,
   brandLight: palette.inkSoft,
   accent: palette.lime,
-  bg: palette.cloud,
+  bg: palette.white,
   surface: palette.white,
   surfaceSubtle: palette.mist,
   text: palette.ink,

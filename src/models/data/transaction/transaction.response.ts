@@ -26,6 +26,13 @@ export interface ITransaction {
   supplier?: { name: string } | null;
 }
 
+export interface ITransactionSummary {
+  cashIn: number;
+  cashOut: number;
+  net: number;
+  sales: number;
+}
+
 export interface IDisbursement extends ITransaction {
   voucher: IVoucher | null;
 }

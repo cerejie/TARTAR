@@ -1,11 +1,13 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import SectionCard from "../../common/card/SectionCard";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
 import DataTable from "../../common/table/DataTable";
+import TablePagination from "../../common/table/TablePagination";
 import { userRoleLabels } from "../../../enums/role.enum";
 import { transactionTypeLabels } from "../../../enums/transaction.enum";
 import { useConfirm } from "../../../hook/common/confirmation.hook";
@@ -127,30 +129,39 @@ const TransactionsTable = () => {
 
   return (
     <>
-      <FilterToolbar
-        actions={
-          <RequirePermission can="encodeTransactions" fallback={null}>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => formModal.openModal()}
-            >
-              Record transaction
-            </Button>
-          </RequirePermission>
-        }
-      >
-        <LedgerFilterBar />
-      </FilterToolbar>
+      <SectionCard>
+        <FilterToolbar
+          actions={
+            <RequirePermission can="encodeTransactions" fallback={null}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => formModal.openModal()}
+              >
+                Record transaction
+              </Button>
+            </RequirePermission>
+          }
+        >
+          <LedgerFilterBar />
+        </FilterToolbar>
+      </SectionCard>
 
-      <DataTable<ITransaction>
-        columns={columns}
-        data={transactions}
-        loading={loading}
+      <SectionCard flush>
+        <DataTable<ITransaction>
+          columns={columns}
+          data={transactions}
+          loading={loading}
+          pagination={pagination}
+          detachedPagination
+          emptyText="No transactions match the current filters"
+        />
+      </SectionCard>
+
+      <TablePagination
         pagination={pagination}
         totalCount={totalCount}
         onPageChange={goToPage}
-        emptyText="No transactions match the current filters"
       />
 
       <EntityFormModal<ITransactionInput>

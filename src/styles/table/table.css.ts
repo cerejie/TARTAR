@@ -73,6 +73,74 @@ globalStyle(`.${tableContainer} .ant-pagination .ant-pagination-item`, {
   borderRadius: vars.radius.pill,
 });
 
+globalStyle(
+  `.${tableContainer}.ant-table-wrapper .ant-table-pagination.ant-pagination`,
+  {
+    marginBlock: vars.space.md,
+  }
+);
+
+export const tablePagination = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: vars.space.md,
+  flexWrap: "wrap",
+});
+
+export const tablePaginationInfo = style({
+  color: vars.color.textMuted,
+  fontSize: 12.5,
+  whiteSpace: "nowrap",
+});
+
+export const tablePaginationPages = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.xs,
+});
+
+export const tablePaginationSelect = style({
+  width: 80,
+});
+
+export const tablePaginationSize = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  color: vars.color.textMuted,
+  fontSize: 12.5,
+  whiteSpace: "nowrap",
+});
+
+globalStyle(`.${tablePaginationPages} .ant-pagination li.ant-pagination-item`, {
+  borderRadius: vars.radius.md,
+  background: "transparent",
+  borderColor: "transparent",
+});
+
+globalStyle(
+  `.${tablePaginationPages} .ant-pagination li.ant-pagination-item-active, .${tablePaginationPages} .ant-pagination li.ant-pagination-item-active:hover`,
+  {
+    background: vars.color.accentSoft,
+    borderColor: "transparent",
+  }
+);
+
+globalStyle(
+  `.${tablePaginationPages} .ant-pagination li.ant-pagination-item-active a`,
+  {
+    color: vars.color.text,
+    fontWeight: 600,
+  }
+);
+
+globalStyle(`.${tablePaginationPages} .ant-pagination`, {
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.xs,
+});
+
 export const rowClickable = style({
   cursor: "pointer",
 });

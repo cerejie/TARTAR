@@ -15,7 +15,7 @@ const initialValues: States = {
     token: {
       colorPrimary: colors.brand,
       colorLink: colors.brand,
-      colorBgLayout: colors.bg,
+      colorBgLayout: colors.surface,
       colorBgContainer: colors.surface,
       colorText: colors.text,
       colorTextSecondary: colors.textMuted,
@@ -33,8 +33,8 @@ const initialValues: States = {
     components: {
       Layout: {
         siderBg: colors.brandDark,
-        headerBg: colors.bg,
-        bodyBg: colors.bg,
+        headerBg: colors.surface,
+        bodyBg: colors.surface,
       },
       Button: {
         controlHeight: 40,
@@ -47,7 +47,6 @@ const initialValues: States = {
         primaryShadow: "none",
         defaultShadow: "none",
       },
-      Card: { borderRadiusLG: 15 },
       Modal: { borderRadiusLG: 15, paddingContentHorizontalLG: 28 },
       Segmented: {
         borderRadius: 999,

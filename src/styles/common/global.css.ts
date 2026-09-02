@@ -10,7 +10,7 @@ globalStyle("html, body, #root", {
 globalStyle("body", {
   fontFamily: vars.font.body,
   color: vars.color.text,
-  background: vars.color.bg,
+  background: vars.color.surface,
 });
 
 globalStyle("#root", {

@@ -3,10 +3,14 @@ import { vars } from "../common/vars.css";
 
 export const card = style({
   background: vars.color.surface,
-  border: `1px solid ${vars.color.borderSubtle}`,
-  borderRadius: vars.radius.xxl,
-  marginBottom: vars.space.md,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  marginBottom: vars.space.sm,
   overflow: "hidden",
+});
+
+globalStyle(`.${card}.ant-card`, {
+  boxShadow: "none",
 });
 
 export const cardTone = styleVariants({
@@ -129,20 +133,22 @@ globalStyle(`.${cardTone.ink} .${cardMenu}.ant-btn:not(:disabled):hover`, {
   color: vars.color.onInk,
 });
 
-export const cardBody = style({
-  padding: vars.space.lg,
+export const cardBody = style({});
+
+globalStyle(`.${card}.ant-card .${cardBody}`, {
+  padding: vars.space.md,
 });
 
 export const cardDense = style({});
 
-globalStyle(`.${cardDense} .${cardBody}`, {
+globalStyle(`.${card}.${cardDense}.ant-card .${cardBody}`, {
   padding: vars.space.sm,
 });
 
 export const cardFlush = style({});
 
-globalStyle(`.${cardFlush} .${cardBody}`, {
-  padding: `${vars.space.sm} ${vars.space.md} 0`,
+globalStyle(`.${card}.${cardFlush}.ant-card .${cardBody}`, {
+  padding: vars.space.md,
 });
 
 export const cardFooter = style({

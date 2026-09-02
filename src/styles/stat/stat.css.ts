@@ -4,8 +4,11 @@ import { vars } from "../common/vars.css";
 
 export const statCard = style({
   height: "100%",
-  borderRadius: vars.radius.xxl,
-  border: `1px solid ${vars.color.borderSubtle}`,
+  border: `1px solid ${vars.color.border}`,
+});
+
+globalStyle(`.${statCard}.ant-card.ant-card-small`, {
+  borderRadius: vars.radius.lg,
 });
 
 globalStyle(`.${statCard}.ant-card .ant-card-body`, {
@@ -30,8 +33,8 @@ globalStyle(`.${statCard} .ant-statistic-title`, {
 globalStyle(`.${statCard} .ant-statistic-content`, {
   fontFamily: vars.font.heading,
   color: vars.color.brandDark,
-  fontSize: 28,
-  fontWeight: 700,
+  fontSize: 24,
+  fontWeight: 600,
   letterSpacing: "-0.03em",
   lineHeight: 1.1,
   overflowWrap: "anywhere",

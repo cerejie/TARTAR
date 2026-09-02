@@ -2,6 +2,8 @@ import type { DefaultValues } from "react-hook-form";
 import {
   cashAccountLabels,
   cashAccountValues,
+  cashInflowTypes,
+  cashOutflowTypes,
   incomeSourceLabels,
   incomeSourceValues,
   transactionTypeLabels,
@@ -9,19 +11,28 @@ import {
 } from "../../../enums/transaction.enum";
 import { transactionFormModalKey } from "../../../keys/modal.keys";
 import { transactionPaginationKey } from "../../../keys/table.keys";
-import { scopedKey, transactionListKey } from "../../../keys/query.keys";
+import {
+  scopedKey,
+  transactionListKey,
+  transactionSummaryKey,
+} from "../../../keys/query.keys";
 import type { IFieldConfig } from "../../../models/common/field.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { ITransactionInput } from "../../../models/data/transaction/transaction.request";
-import type { ITransaction } from "../../../models/data/transaction/transaction.response";
+import type {
+  ITransaction,
+  ITransactionSummary,
+} from "../../../models/data/transaction/transaction.response";
+import type { TransactionType } from "../../../enums/transaction.enum";
+import type { ILedgerFilters } from "../../../models/common/filter.model";
 import transactionServices from "../../../services/data/transaction.services";
 import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
 import { scopedFilters } from "../../../utils/filter.utils";
-import { todayIso } from "../../../utils/format.utils";
+import { formatDate, todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
@@ -38,6 +49,37 @@ import { useUserListHook } from "../user/user.list.hook";
 
 const customerTypes = ["sale", "customer_payment", "collection"];
 const supplierTypes = ["purchase", "supplier_payment"];
+
+const sumAmount = (
+  transactions: readonly ITransaction[],
+  types: readonly TransactionType[]
+) =>
+  transactions
+    .filter((transaction) => types.includes(transaction.type))
+    .reduce((total, transaction) => total + transaction.amount, 0);
+
+const summarize = (
+  transactions: readonly ITransaction[]
+): ITransactionSummary => {
+  const cashIn = sumAmount(transactions, cashInflowTypes);
+  const cashOut = sumAmount(transactions, cashOutflowTypes);
+
+  return {
+    cashIn,
+    cashOut,
+    net: cashIn - cashOut,
+    sales: sumAmount(transactions, ["sale"]),
+  };
+};
+
+const periodLabel = (filters: ILedgerFilters) => {
+  if (!filters.dateFrom && !filters.dateTo) return "All time";
+
+  const from = filters.dateFrom ? formatDate(filters.dateFrom) : "Earliest";
+  const to = filters.dateTo ? formatDate(filters.dateTo) : "Today";
+
+  return `${from} – ${to}`;
+};
 
 const normalize = (values: ITransactionInput): ITransactionInput => ({
   ...values,
@@ -75,12 +117,17 @@ export const useTransactionListHook = () => {
     () => transactionServices.getList(effectiveFilters, pagination)
   );
 
+  const summaryQuery = useQuery<ITransaction[]>(
+    scopedKey(transactionSummaryKey, JSON.stringify(effectiveFilters)),
+    () => transactionServices.getAll(effectiveFilters)
+  );
+
   const createMutation = useMutation(
     (values: ITransactionInput) =>
       transactionServices.create(normalize(values), createdBy),
     {
       successMessage: "Transaction recorded",
-      invalidate: [transactionListKey],
+      invalidate: [transactionListKey, transactionSummaryKey],
       onSuccess: () => {
         formModal.closeModal();
         setPagination({ pageNumber: 1 });
@@ -90,7 +137,10 @@ export const useTransactionListHook = () => {
 
   const removeMutation = useMutation(
     (id: string) => transactionServices.remove(id),
-    { successMessage: "Transaction deleted", invalidate: [transactionListKey] }
+    {
+      successMessage: "Transaction deleted",
+      invalidate: [transactionListKey, transactionSummaryKey],
+    }
   );
 
   const encodableTypes = transactionTypeValues.filter(
@@ -170,6 +220,9 @@ export const useTransactionListHook = () => {
     pagination,
     goToPage,
     loading: listQuery.loading,
+    summary: summarize(summaryQuery.data ?? []),
+    summaryLoading: summaryQuery.loading,
+    summaryPeriod: periodLabel(effectiveFilters),
     branchName,
     userById,
     formModal,

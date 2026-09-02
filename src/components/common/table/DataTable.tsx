@@ -10,6 +10,7 @@ type IProps<T> = {
   rowKey?: keyof T | ((row: T) => string);
   pageSize?: number;
   pagination?: IPaginationRequest;
+  detachedPagination?: boolean;
   totalCount?: number;
   onPageChange?: (pageNumber: number, pageSize: number) => void;
   onRowClick?: (row: T) => void;
@@ -25,6 +26,7 @@ const DataTable = <T extends object>({
   rowKey = "id" as keyof T,
   pageSize = 15,
   pagination,
+  detachedPagination,
   totalCount = 0,
   onPageChange,
   onRowClick,
@@ -32,7 +34,7 @@ const DataTable = <T extends object>({
   rowSelection,
   rowClassName,
 }: IProps<T>) => {
-  const pager = pagination
+  const attachedPager = pagination
     ? {
         current: pagination.pageNumber,
         pageSize: pagination.pageSize,
@@ -58,7 +60,7 @@ const DataTable = <T extends object>({
       rowClassName={rowClassName}
       scroll={{ x: "max-content" }}
       locale={emptyText ? { emptyText } : undefined}
-      pagination={pager}
+      pagination={detachedPagination ? false : attachedPager}
       onChange={
         pagination
           ? (config) =>

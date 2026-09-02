@@ -7,6 +7,7 @@ export const customerListKey = "customers";
 export const supplierListKey = "suppliers";
 export const userListKey = "users";
 export const transactionListKey = "transactions";
+export const transactionSummaryKey = "transaction-summary";
 export const purchaseListKey = "purchases";
 export const expenseListKey = "expenses";
 export const voucherListKey = "vouchers";
