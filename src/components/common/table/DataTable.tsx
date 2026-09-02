@@ -82,7 +82,11 @@ const DataTable = <T extends object>({
     isExpandable && detailSections
       ? {
           columnWidth: viewColumnWidth,
-          columnTitle: <span className={`${viewHeaderLabel}`}>View</span>,
+          columnTitle: (
+            <span className={`${viewHeaderLabel}`} aria-label="View">
+              <EyeOutlined />
+            </span>
+          ),
           expandedRowKeys,
           onExpand: (_, row) => toggleRow(resolveRowKey(row)),
           expandIcon: ({ expanded, onExpand, record }) => (
@@ -130,7 +134,7 @@ const DataTable = <T extends object>({
       dataSource={data}
       loading={loading}
       size="middle"
-      tableLayout="fixed"
+      tableLayout="auto"
       rowKey={resolveRowKey}
       rowSelection={rowSelection}
       rowClassName={resolveRowClassName}

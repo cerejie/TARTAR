@@ -24,6 +24,17 @@ export const transactionTypeLabels: Record<TransactionType, string> = {
   collection: "Collection",
 };
 
+export const transactionTypeColors: Record<TransactionType, string> = {
+  sale: "green",
+  expense: "red",
+  customer_payment: "default",
+  supplier_payment: "default",
+  cash_deposit: "default",
+  petty_cash: "default",
+  purchase: "default",
+  collection: "default",
+};
+
 export const cashInflowTypes: TransactionType[] = [
   "sale",
   "customer_payment",

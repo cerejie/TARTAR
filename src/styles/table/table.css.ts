@@ -45,9 +45,8 @@ globalStyle(`.${tableContainer} .ant-table-tbody > tr > td`, {
   background: vars.color.surface,
   borderBlock: rowBorder,
   borderInline: "none",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
+  whiteSpace: "normal",
+  overflowWrap: "break-word",
   transition:
     "background 0.15s ease, border-color 0.15s ease, border-radius 0.2s ease",
 });
@@ -66,6 +65,10 @@ globalStyle(`.${tableContainer} .ant-table-tbody > tr > td:last-child`, {
 
 globalStyle(`.${tableContainer} .ant-table-tbody > tr.ant-table-row:hover > td`, {
   borderColor: vars.color.border,
+});
+
+globalStyle(`.${tableContainer} .ant-table-content`, {
+  overflowX: "auto",
 });
 
 globalStyle(`.${tableContainer} .ant-table-measure-row > td`, {
@@ -173,6 +176,12 @@ export const rowIcon = style({
   fontSize: 14,
 });
 
+export const nowrapCell = style({});
+
+globalStyle(`.${tableContainer} .ant-table-tbody > tr > td.${nowrapCell}`, {
+  whiteSpace: "nowrap",
+});
+
 export const nameCell = style({
   display: "inline-flex",
   alignItems: "center",
@@ -204,6 +213,19 @@ export const slugTag = style({
   border: `1px solid ${vars.color.borderSubtle}`,
   borderRadius: vars.radius.pill,
   fontSize: 12,
+  marginInlineEnd: 0,
+});
+
+export const typeTag = style({});
+
+globalStyle(`.ant-tag.${typeTag}`, {
+  fontFamily: "inherit",
+  fontSize: 13,
+  fontWeight: 500,
+  lineHeight: 1.6,
+  paddingBlock: vars.space.xs,
+  paddingInline: vars.space.sm,
+  borderRadius: vars.radius.pill,
   marginInlineEnd: 0,
 });
 
@@ -300,6 +322,9 @@ const viewBoxInset = `0 ${rowGap} 0 0`;
 globalStyle(
   `.${tableContainer}.${tableDetachedView} .ant-table-thead > tr > th:first-child`,
   {
+    width: viewColumnWidth,
+    minWidth: viewColumnWidth,
+    maxWidth: viewColumnWidth,
     position: "relative",
     background: "transparent",
     padding: 0,
@@ -318,12 +343,24 @@ globalStyle(
 globalStyle(
   `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell`,
   {
+    width: viewColumnWidth,
+    minWidth: viewColumnWidth,
+    maxWidth: viewColumnWidth,
     position: "relative",
     background: "transparent",
     border: "none",
     borderRadius: 0,
     padding: 0,
     overflow: "visible",
+  }
+);
+
+globalStyle(
+  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell::before`,
+  {
+    content: '""',
+    display: "block",
+    width: viewColumnWidth,
   }
 );
 
@@ -353,10 +390,7 @@ export const viewHeaderLabel = style({
   borderRadius: rowRadius,
   background: vars.color.accentSoft,
   color: vars.color.textMuted,
-  fontSize: 11,
-  fontWeight: 700,
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
+  fontSize: 15,
 });
 
 export const viewTrigger = style({
@@ -386,7 +420,6 @@ export const viewTriggerOpen = style({
   background: vars.color.accentTint,
   borderColor: vars.color.accent,
   color: vars.color.text,
-  transform: "scale(1.06)",
 });
 
 const detailReveal = keyframes({
@@ -414,7 +447,7 @@ const instantMotion = {
 };
 
 const staggeredRise = (step: number) => ({
-  animationDelay: `${step * 60}ms`,
+  animationDelay: `${step * 50}ms`,
   "@media": {
     "(prefers-reduced-motion: reduce)": { animationDelay: "0ms" },
   },
@@ -452,7 +485,7 @@ export const rowDetailContent = style({
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
   gap: vars.space.lg,
   padding: vars.space.md,
-  background: vars.color.surface,
+  background: `linear-gradient(135deg, ${vars.color.accentTintier} 30%, ${vars.color.accentTintier} 40%, ${vars.color.accentTint} 90%)`,
   border: rowBorder,
   borderRadius: vars.radius.md,
 });

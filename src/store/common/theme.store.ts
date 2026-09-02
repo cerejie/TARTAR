@@ -64,7 +64,7 @@ const initialValues: States = {
         headerSortHoverBg: colors.accent,
         bodySortBg: "transparent",
         borderColor: colors.borderSubtle,
-        rowHoverBg: colors.surfaceSubtle,
+        rowHoverBg: colors.surface,
         rowSelectedBg: colors.accentSoft,
         rowSelectedHoverBg: colors.accentSoft,
         cellPaddingBlockMD: 14,

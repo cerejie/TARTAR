@@ -19,6 +19,7 @@ import { userRoleLabels } from "../../../enums/role.enum";
 import {
   cashAccountLabels,
   incomeSourceLabels,
+  transactionTypeColors,
   transactionTypeLabels,
 } from "../../../enums/transaction.enum";
 import { useConfirm } from "../../../hook/common/confirmation.hook";
@@ -31,6 +32,7 @@ import {
   type ITransactionInput,
 } from "../../../models/data/transaction/transaction.request";
 import type { ITransaction } from "../../../models/data/transaction/transaction.response";
+import { nowrapCell, typeTag } from "../../../styles/table/table.css";
 import { formatDate, formatMoney, formatTime } from "../../../utils/format.utils";
 
 const TransactionsTable = () => {
@@ -60,6 +62,11 @@ const TransactionsTable = () => {
     return user ? user.full_name || user.username : "—";
   };
 
+  const userRoleOf = (row: ITransaction) => {
+    const user = userOf(row);
+    return user ? userRoleLabels[user.role] : "—";
+  };
+
   const actionsOf = (row: ITransaction): IRowAction[] => [
     {
       key: "delete",
@@ -82,14 +89,27 @@ const TransactionsTable = () => {
     {
       title: "Date",
       dataIndex: "txn_date",
-      width: 130,
+      className: `${nowrapCell}`,
       render: (value: string) => formatDate(value),
+    },
+    {
+      title: "Time",
+      dataIndex: "created_at",
+      className: `${nowrapCell}`,
+      render: (value: string) => formatTime(value),
     },
     {
       title: "Type",
       dataIndex: "type",
+      className: `${nowrapCell}`,
       render: (type: ITransaction["type"]) => (
-        <Tag>{transactionTypeLabels[type]}</Tag>
+        <Tag
+          className={`${typeTag}`}
+          color={transactionTypeColors[type]}
+          variant="outlined"
+        >
+          {transactionTypeLabels[type]}
+        </Tag>
       ),
     },
     { title: "Branch", dataIndex: "branch", render: branchName },
@@ -100,12 +120,18 @@ const TransactionsTable = () => {
             key: "user",
             render: (_: unknown, row: ITransaction) => userNameOf(row),
           },
+          {
+            title: "Role",
+            key: "role",
+            render: (_: unknown, row: ITransaction) => userRoleOf(row),
+          },
         ]
       : []),
     {
       title: "Amount",
       dataIndex: "amount",
       align: "right",
+      className: `${nowrapCell}`,
       render: (value: number) => formatMoney(value),
     },
     ...(permissions.isManager
@@ -113,8 +139,8 @@ const TransactionsTable = () => {
           {
             title: "Action",
             key: "actions",
-            width: 100,
             align: "center" as const,
+            className: `${nowrapCell}`,
             render: (_: unknown, row: ITransaction) => (
               <RowActionMenu actions={actionsOf(row)} />
             ),
