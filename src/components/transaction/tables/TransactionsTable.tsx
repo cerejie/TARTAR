@@ -46,7 +46,7 @@ const TransactionsTable = () => {
     branchName,
     userById,
     formModal,
-    fields,
+    sections,
     defaults,
     createMutation,
     removeMutation,
@@ -266,7 +266,9 @@ const TransactionsTable = () => {
       <EntityFormModal<ITransactionInput>
         open={formModal.modal.visible}
         title="Record transaction"
-        fields={fields}
+        subtitle="Enter the details of the transaction."
+        size="lg"
+        sections={sections}
         schema={transactionSchema}
         defaultValues={defaults}
         submitting={createMutation.loading}

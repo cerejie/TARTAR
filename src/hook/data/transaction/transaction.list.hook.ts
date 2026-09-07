@@ -16,7 +16,7 @@ import {
   transactionListKey,
   transactionSummaryKey,
 } from "../../../keys/query.keys";
-import type { IFieldConfig } from "../../../models/common/field.model";
+import type { IFieldSection } from "../../../models/common/field.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { ITransactionInput } from "../../../models/data/transaction/transaction.request";
@@ -147,56 +147,102 @@ export const useTransactionListHook = () => {
     (type) => type !== "purchase" && type !== "expense"
   );
 
-  const fields: IFieldConfig<ITransactionInput>[] = [
+  const sections: IFieldSection<ITransactionInput>[] = [
     {
-      name: "type",
-      label: "Type",
-      type: "select",
-      options: toOptions(encodableTypes, transactionTypeLabels),
+      key: "transaction",
+      title: "Transaction",
+      description: "Basic information about this transaction.",
+      fields: [
+        {
+          name: "type",
+          label: "Type",
+          type: "select",
+          span: "half",
+          required: true,
+          options: toOptions(encodableTypes, transactionTypeLabels),
+        },
+        {
+          name: "branch",
+          label: "Branch",
+          type: "select",
+          span: "half",
+          required: true,
+          options: branchOptions,
+        },
+        {
+          name: "farm_section",
+          label: "Farm section",
+          type: "select",
+          allowClear: true,
+          options: farmSectionOptions,
+          hidden: (values) => values.branch !== "farm",
+        },
+        {
+          name: "txn_date",
+          label: "Date",
+          type: "date",
+          span: "half",
+          required: true,
+        },
+        {
+          name: "amount",
+          label: "Amount",
+          type: "number",
+          span: "half",
+          required: true,
+          prefix: "₱",
+        },
+      ],
     },
-    { name: "branch", label: "Branch", type: "select", options: branchOptions },
     {
-      name: "farm_section",
-      label: "Farm section",
-      type: "select",
-      allowClear: true,
-      options: farmSectionOptions,
-      hidden: (values) => values.branch !== "farm",
+      key: "accounting",
+      title: "Accounting",
+      description: "Specify the accounting details.",
+      fields: [
+        {
+          name: "income_source",
+          label: "Income source",
+          type: "select",
+          span: "half",
+          required: true,
+          options: toOptions(incomeSourceValues, incomeSourceLabels),
+          hidden: (values) => values.type !== "sale",
+        },
+        {
+          name: "cash_account",
+          label: "Cash account",
+          type: "select",
+          span: "half",
+          allowClear: true,
+          options: toOptions(cashAccountValues, cashAccountLabels),
+        },
+        {
+          name: "customer_id",
+          label: "Customer",
+          type: "select",
+          allowClear: true,
+          options: customerOptions,
+          hidden: (values) => !customerTypes.includes(values.type),
+        },
+        {
+          name: "supplier_id",
+          label: "Supplier",
+          type: "select",
+          allowClear: true,
+          options: supplierOptions,
+          hidden: (values) => !supplierTypes.includes(values.type),
+        },
+      ],
     },
-    { name: "txn_date", label: "Date", type: "date" },
-    { name: "amount", label: "Amount", type: "number", prefix: "₱" },
     {
-      name: "income_source",
-      label: "Income source",
-      type: "select",
-      options: toOptions(incomeSourceValues, incomeSourceLabels),
-      hidden: (values) => values.type !== "sale",
+      key: "details",
+      title: "Additional details",
+      description: "Add reference number or notes (optional).",
+      fields: [
+        { name: "reference_number", label: "Reference no.", type: "text" },
+        { name: "description", label: "Description", type: "textarea" },
+      ],
     },
-    {
-      name: "customer_id",
-      label: "Customer",
-      type: "select",
-      allowClear: true,
-      options: customerOptions,
-      hidden: (values) => !customerTypes.includes(values.type),
-    },
-    {
-      name: "supplier_id",
-      label: "Supplier",
-      type: "select",
-      allowClear: true,
-      options: supplierOptions,
-      hidden: (values) => !supplierTypes.includes(values.type),
-    },
-    {
-      name: "cash_account",
-      label: "Cash account",
-      type: "select",
-      allowClear: true,
-      options: toOptions(cashAccountValues, cashAccountLabels),
-    },
-    { name: "reference_number", label: "Reference no.", type: "text" },
-    { name: "description", label: "Description", type: "textarea" },
   ];
 
   const defaults: DefaultValues<ITransactionInput> = {
@@ -226,7 +272,7 @@ export const useTransactionListHook = () => {
     branchName,
     userById,
     formModal,
-    fields,
+    sections,
     defaults,
     createMutation,
     removeMutation,

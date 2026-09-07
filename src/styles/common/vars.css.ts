@@ -10,6 +10,7 @@ export const palette = {
   limeSoft: "#EAF7A9",
   limeMist: "#FAFDEA",
   limeMistier: "#fefff9",
+  limeWash: "rgba(166, 133, 11, 0.09)",
   lilac: "#B9A5F5",
   lilacSoft: "#E7E0FC",
   cloud: "#F2F3EE",
@@ -47,6 +48,7 @@ export const colors = {
   accentSoft: palette.limeSoft,
   accentTint: palette.limeMist,
   accentTintier: palette.limeMistier,
+  accentWash: palette.limeWash,
   accentAlt: palette.lilac,
   accentAltSoft: palette.lilacSoft,
 } as const;

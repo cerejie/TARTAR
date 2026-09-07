@@ -8,18 +8,21 @@ import {
   type Resolver,
 } from "react-hook-form";
 import type { ZodType } from "zod";
-import type { IFieldConfig } from "../../../models/common/field.model";
+import type {
+  IFieldConfig,
+  IFieldSection,
+} from "../../../models/common/field.model";
 import type { ModalSize } from "../../../models/common/view.model";
 import { entityForm } from "../../../styles/form/form.css";
 import AppModal from "../modal/AppModal";
-import FormField from "./FormField";
+import FormFieldGrid from "./FormFieldGrid";
+import FormSection from "./FormSection";
 
-type IProps<TValues extends FieldValues> = {
+type IBaseProps<TValues extends FieldValues> = {
   open: boolean;
   title: string;
   subtitle?: string;
   size?: ModalSize;
-  fields: IFieldConfig<TValues>[];
   schema: ZodType<TValues>;
   defaultValues: DefaultValues<TValues>;
   onSubmit: (values: TValues) => void | Promise<void>;
@@ -28,12 +31,19 @@ type IProps<TValues extends FieldValues> = {
   submitting?: boolean;
 };
 
+type IProps<TValues extends FieldValues> = IBaseProps<TValues> &
+  (
+    | { fields: IFieldConfig<TValues>[]; sections?: never }
+    | { sections: IFieldSection<TValues>[]; fields?: never }
+  );
+
 const EntityFormModal = <TValues extends FieldValues>({
   open,
   title,
   subtitle,
   size = "md",
   fields,
+  sections,
   schema,
   defaultValues,
   onSubmit,
@@ -74,15 +84,22 @@ const EntityFormModal = <TValues extends FieldValues>({
       }
     >
       <Form layout="vertical" className={`${entityForm}`}>
-        {fields
-          .filter((field) => !field.hidden?.(values))
-          .map((field) => (
-            <FormField
-              key={String(field.name)}
-              config={field}
+        {sections ? (
+          sections.map((section) => (
+            <FormSection
+              key={section.key}
+              section={section}
               control={control}
+              values={values}
             />
-          ))}
+          ))
+        ) : (
+          <FormFieldGrid
+            fields={fields ?? []}
+            control={control}
+            values={values}
+          />
+        )}
       </Form>
     </AppModal>
   );

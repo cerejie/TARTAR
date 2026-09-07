@@ -507,7 +507,7 @@ globalStyle(`.${rowActionMenu}.${rowActionMenu} .ant-dropdown-menu-item`, {
 
 globalStyle(
   `.${rowActionMenu}.${rowActionMenu} .ant-dropdown-menu-item:hover`,
-  { background: vars.color.accentSoft }
+  { background: vars.color.accentWash }
 );
 
 globalStyle(

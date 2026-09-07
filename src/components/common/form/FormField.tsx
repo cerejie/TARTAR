@@ -7,7 +7,7 @@ import {
   type FieldValues,
 } from "react-hook-form";
 import type { IFieldConfig } from "../../../models/common/field.model";
-import { blockControl } from "../../../styles/form/form.css";
+import { blockControl, fieldSpan } from "../../../styles/form/form.css";
 
 type IProps<TValues extends FieldValues> = {
   config: IFieldConfig<TValues>;
@@ -113,7 +113,9 @@ const FormField = <TValues extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <Form.Item
+          className={`${fieldSpan[config.span ?? "full"]}`}
           label={config.label}
+          required={config.required}
           validateStatus={fieldState.error ? "error" : undefined}
           help={fieldState.error?.message}
         >

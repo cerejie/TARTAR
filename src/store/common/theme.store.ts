@@ -29,6 +29,9 @@ const initialValues: States = {
       borderRadius: 12,
       borderRadiusLG: 12,
       controlOutline: colors.accentSoft,
+      controlItemBgHover: colors.accentWash,
+      controlItemBgActive: colors.accentSoft,
+      controlItemBgActiveHover: colors.accentSoft,
     },
     components: {
       Layout: {

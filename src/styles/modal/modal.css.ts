@@ -3,23 +3,30 @@ import { vars } from "../common/vars.css";
 
 export const appModal = style({});
 
+
 globalStyle(`.${appModal} .ant-modal-content`, {
   borderRadius: vars.radius.xxl,
   padding: 0,
   overflow: "hidden",
 });
 
+
 globalStyle(`.${appModal} .ant-modal-header`, {
+  display: "flex",
+  alignItems: "center",
   margin: 0,
-  padding: `${vars.space.lg} ${vars.space.lg} 0`,
+  paddingBlock: vars.space.lg,
+  paddingInline: `0 ${vars.space.lg}`,
   borderRadius: 0,
 });
 
+
 globalStyle(`.${appModal} .ant-modal-body`, {
-  padding: `${vars.space.md} ${vars.space.lg}`,
+  padding: 0,
   maxHeight: "68dvh",
   overflowY: "auto",
 });
+
 
 globalStyle(`.${appModal} .ant-modal-footer`, {
   margin: 0,
@@ -27,11 +34,13 @@ globalStyle(`.${appModal} .ant-modal-footer`, {
   borderTop: `1px solid ${vars.color.borderSubtle}`,
 });
 
+
 globalStyle(`.${appModal} .ant-modal-close`, {
   insetInlineEnd: vars.space.md,
   top: vars.space.md,
   borderRadius: vars.radius.pill,
 });
+
 
 export const modalTitle = style({
   fontFamily: vars.font.heading,
