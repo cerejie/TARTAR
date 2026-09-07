@@ -1,6 +1,7 @@
-import { EyeOutlined } from "@ant-design/icons";
+import { RightOutlined } from "@ant-design/icons";
 import { Table } from "antd";
-import type { ColumnsType, TableProps } from "antd/es/table";
+import type { ColumnsType, ColumnType, TableProps } from "antd/es/table";
+import type { ReactNode } from "react";
 import {
   rowExpansionPersistProps,
   useRowExpansion,
@@ -8,14 +9,13 @@ import {
 import type { IDetailSection } from "../../../models/common/detail.model";
 import type { IPaginationRequest } from "../../../models/common/pagination.model";
 import {
+  expandTrigger,
+  expandTriggerOpen,
+  leadCell,
+  leadHeader,
   rowClickable,
   rowExpanded,
   tableContainer,
-  tableDetachedView,
-  viewColumnWidth,
-  viewHeaderLabel,
-  viewTrigger,
-  viewTriggerOpen,
 } from "../../../styles/table/table.css";
 import RowDetailPanel from "./RowDetailPanel";
 
@@ -66,6 +66,55 @@ const DataTable = <T extends object>({
     (rowKey): rowKey is string => rowKey !== null
   );
 
+  const withExpandTrigger = ([lead, ...rest]: ColumnsType<T>): ColumnsType<T> => {
+    if (!lead || "children" in lead) return columns;
+
+    const renderLead = (lead as ColumnType<T>).render;
+    const titleLead = (lead as ColumnType<T>).title;
+
+    return [
+      {
+        ...lead,
+        title:
+          typeof titleLead === "function" ? (
+            titleLead
+          ) : (
+            <span className={`${leadHeader}`}>{titleLead}</span>
+          ),
+        render: (value: unknown, row: T, index: number) => {
+          const key = resolveRowKey(row);
+          const expanded = expandedRow === key;
+
+          return (
+            <span className={`${leadCell}`}>
+              <button
+                type="button"
+                aria-label={expanded ? "Hide details" : "Show details"}
+                aria-expanded={expanded}
+                className={
+                  expanded
+                    ? `${expandTrigger} ${expandTriggerOpen}`
+                    : `${expandTrigger}`
+                }
+                onClick={(event) => {
+                  event.stopPropagation();
+                  toggleRow(key);
+                }}
+                {...rowExpansionPersistProps}
+              >
+                <RightOutlined />
+              </button>
+              {renderLead
+                ? (renderLead(value, row, index) as ReactNode)
+                : (value as ReactNode)}
+            </span>
+          );
+        },
+      },
+      ...rest,
+    ];
+  };
+
   const attachedPager = pagination
     ? {
         current: pagination.pageNumber,
@@ -81,31 +130,8 @@ const DataTable = <T extends object>({
   const expandable: TableProps<T>["expandable"] =
     isExpandable && detailSections
       ? {
-          columnWidth: viewColumnWidth,
-          columnTitle: (
-            <span className={`${viewHeaderLabel}`} aria-label="View">
-              <EyeOutlined />
-            </span>
-          ),
+          showExpandColumn: false,
           expandedRowKeys,
-          onExpand: (_, row) => toggleRow(resolveRowKey(row)),
-          expandIcon: ({ expanded, onExpand, record }) => (
-            <button
-              type="button"
-              aria-label={expanded ? "Hide details" : "Show details"}
-              aria-expanded={expanded}
-              className={
-                expanded ? `${viewTrigger} ${viewTriggerOpen}` : `${viewTrigger}`
-              }
-              onClick={(event) => {
-                event.stopPropagation();
-                onExpand(record, event);
-              }}
-              {...rowExpansionPersistProps}
-            >
-              <EyeOutlined />
-            </button>
-          ),
           expandedRowRender: (row) => (
             <RowDetailPanel<T>
               record={row}
@@ -125,12 +151,8 @@ const DataTable = <T extends object>({
 
   return (
     <Table<T>
-      className={
-        isExpandable
-          ? `${tableContainer} ${tableDetachedView}`
-          : `${tableContainer}`
-      }
-      columns={columns}
+      className={`${tableContainer}`}
+      columns={isExpandable ? withExpandTrigger(columns) : columns}
       dataSource={data}
       loading={loading}
       size="middle"

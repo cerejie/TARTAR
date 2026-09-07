@@ -246,8 +246,6 @@ const TransactionsTable = () => {
           <LedgerFilterBar />
         </FilterToolbar>
       </SectionCard>
-
-      <SectionCard flush>
         <DataTable<ITransaction>
           columns={columns}
           data={transactions}
@@ -258,7 +256,6 @@ const TransactionsTable = () => {
           detailSections={detailSections}
           emptyText="No transactions match the current filters"
         />
-      </SectionCard>
 
       <TablePagination
         pagination={pagination}

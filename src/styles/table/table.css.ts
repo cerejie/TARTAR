@@ -312,114 +312,45 @@ globalStyle(
   }
 );
 
-export const tableDetachedView = style({});
+const expandTriggerSize = "26px";
+const expandTriggerGap = vars.space.md;
 
-export const viewColumnWidth = 56;
-
-const viewColumnGutter = `${viewColumnWidth}px`;
-const viewBoxInset = `0 ${rowGap} 0 0`;
-
-globalStyle(
-  `.${tableContainer}.${tableDetachedView} .ant-table-thead > tr > th:first-child`,
-  {
-    width: viewColumnWidth,
-    minWidth: viewColumnWidth,
-    maxWidth: viewColumnWidth,
-    position: "relative",
-    background: "transparent",
-    padding: 0,
-    borderRadius: 0,
-  }
-);
-
-globalStyle(
-  `.${tableContainer}.${tableDetachedView} .ant-table-thead > tr > th:nth-child(2)`,
-  {
-    borderStartStartRadius: rowRadius,
-    borderEndStartRadius: rowRadius,
-  }
-);
-
-globalStyle(
-  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell`,
-  {
-    width: viewColumnWidth,
-    minWidth: viewColumnWidth,
-    maxWidth: viewColumnWidth,
-    position: "relative",
-    background: "transparent",
-    border: "none",
-    borderRadius: 0,
-    padding: 0,
-    overflow: "visible",
-  }
-);
-
-globalStyle(
-  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell::before`,
-  {
-    content: '""',
-    display: "block",
-    width: viewColumnWidth,
-  }
-);
-
-globalStyle(
-  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell + td`,
-  {
-    borderInlineStart: rowBorder,
-    borderStartStartRadius: rowRadius,
-    borderEndStartRadius: rowRadius,
-  }
-);
-
-globalStyle(
-  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr.${rowExpanded} > td.ant-table-row-expand-icon-cell + td`,
-  {
-    borderInlineStartColor: vars.color.accent,
-    borderEndStartRadius: 0,
-  }
-);
-
-export const viewHeaderLabel = style({
-  position: "absolute",
-  inset: viewBoxInset,
-  display: "flex",
+export const leadCell = style({
+  display: "inline-flex",
   alignItems: "center",
-  justifyContent: "center",
-  borderRadius: rowRadius,
-  background: vars.color.accentSoft,
-  color: vars.color.textMuted,
-  fontSize: 15,
+  gap: expandTriggerGap,
 });
 
-export const viewTrigger = style({
-  position: "absolute",
-  inset: viewBoxInset,
-  display: "flex",
+export const leadHeader = style({
+  display: "inline-block",
+  marginInlineStart: `calc(${expandTriggerSize} + ${expandTriggerGap})`,
+});
+
+export const expandTrigger = style({
+  display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
+  flex: "none",
+  width: expandTriggerSize,
+  height: expandTriggerSize,
   padding: 0,
-  border: rowBorder,
-  borderRadius: rowRadius,
-  background: vars.color.surface,
+  border: "none",
+  borderRadius: vars.radius.sm,
+  background: "transparent",
   color: vars.color.textMuted,
-  fontSize: 15,
+  fontSize: 14,
   cursor: "pointer",
   transition:
-    "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.2s cubic-bezier(0.2, 0.9, 0.24, 1.2)",
-  ":active": {
-    transform: "scale(0.92)",
-  },
+    "color 0.15s ease, transform 0.2s cubic-bezier(0.2, 0.9, 0.24, 1.2)",
   ":focus-visible": {
     outline: `3px solid ${vars.color.accentAlt}`,
     outlineOffset: 2,
   },
 });
-export const viewTriggerOpen = style({
-  background: vars.color.accentTint,
-  borderColor: vars.color.accent,
+
+export const expandTriggerOpen = style({
   color: vars.color.text,
+  transform: "rotate(90deg)",
 });
 
 const detailReveal = keyframes({
@@ -457,7 +388,6 @@ export const rowDetailReveal = style({
   display: "grid",
   gridTemplateRows: "1fr",
   overflow: "hidden",
-  marginInlineStart: viewColumnGutter,
   marginTop: `-${rowGap}`,
   animation: `${detailReveal} 0.28s cubic-bezier(0.22, 1, 0.3, 1) both`,
   ...instantMotion,
@@ -591,13 +521,13 @@ globalStyle(
 );
 
 globalStyle(
-  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr.ant-table-row:not(.${rowExpanded}):hover > td`,
+  `.${tableContainer} .ant-table-tbody > tr.ant-table-row:not(.${rowExpanded}):hover > td`,
   { borderColor: vars.color.accent }
 );
 
 globalStyle(
-  `.${tableContainer}.${tableDetachedView} .ant-table-tbody > tr.ant-table-row:not(.${rowExpanded}):hover .${viewTrigger}`,
-  { borderColor: vars.color.accent, color: vars.color.text }
+  `.${tableContainer} .ant-table-tbody > tr.ant-table-row:not(.${rowExpanded}):hover .${expandTrigger}`,
+  { color: vars.color.text }
 );
 
 globalStyle(
