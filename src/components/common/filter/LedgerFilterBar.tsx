@@ -29,6 +29,7 @@ const LedgerFilterBar = ({ showStatus = false, scope = "page" }: IProps) => {
   return (
     <Flex className={`${filterBar}`} gap="small" wrap align="center">
       <RangePicker
+        size="large"
         value={
           filters.dateFrom && filters.dateTo
             ? [dayjs(filters.dateFrom), dayjs(filters.dateTo)]
@@ -44,8 +45,7 @@ const LedgerFilterBar = ({ showStatus = false, scope = "page" }: IProps) => {
 
       {showStatus ? (
         <Select
-          size="middle"
-
+          size="large"
           className={`${filterStatus}`}
           placeholder="Any status"
           allowClear
@@ -59,7 +59,7 @@ const LedgerFilterBar = ({ showStatus = false, scope = "page" }: IProps) => {
       ) : null}
 
       <Input
-        size="middle"
+        size="large"
         className={`${filterReference}`}
         placeholder="Reference no."
         allowClear
@@ -70,21 +70,28 @@ const LedgerFilterBar = ({ showStatus = false, scope = "page" }: IProps) => {
       />
 
       <InputNumber
+        size="large"
         className={`${filterAmount}`}
         placeholder="Min ₱"
         min={0}
         value={filters.amountMin}
-        onChange={(amountMin) => setFilters({ amountMin: amountMin ?? undefined })}
+        onChange={(amountMin) =>
+          setFilters({ amountMin: amountMin ?? undefined })
+        }
       />
       <InputNumber
+        size="large"
         className={`${filterAmount}`}
         placeholder="Max ₱"
         min={0}
         value={filters.amountMax}
-        onChange={(amountMax) => setFilters({ amountMax: amountMax ?? undefined })}
+        onChange={(amountMax) =>
+          setFilters({ amountMax: amountMax ?? undefined })
+        }
       />
 
       <Button
+        size="large"
         className={`${filterClear}`}
         icon={<ClearOutlined />}
         onClick={resetFilters}

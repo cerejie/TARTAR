@@ -7,7 +7,6 @@ import {
 } from "@ant-design/icons";
 import { Button, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import SectionCard from "../../common/card/SectionCard";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import EntityFormModal from "../../common/form/EntityFormModal";
@@ -15,6 +14,7 @@ import RequirePermission from "../../common/guard/RequirePermission";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
+import TablePanel from "../../common/table/TablePanel";
 import { userRoleLabels } from "../../../enums/role.enum";
 import {
   cashAccountLabels,
@@ -229,23 +229,32 @@ const TransactionsTable = () => {
 
   return (
     <>
-      <SectionCard>
-        <FilterToolbar
-          actions={
-            <RequirePermission can="encodeTransactions" fallback={null}>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => formModal.openModal()}
-              >
-                Record transaction
-              </Button>
-            </RequirePermission>
-          }
-        >
-          <LedgerFilterBar />
-        </FilterToolbar>
-      </SectionCard>
+      <TablePanel
+        toolbar={
+          <FilterToolbar
+            actions={
+              <RequirePermission can="encodeTransactions" fallback={null}>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => formModal.openModal()}
+                >
+                  Record transaction
+                </Button>
+              </RequirePermission>
+            }
+          >
+            <LedgerFilterBar />
+          </FilterToolbar>
+        }
+        footer={
+          <TablePagination
+            pagination={pagination}
+            totalCount={totalCount}
+            onPageChange={goToPage}
+          />
+        }
+      >
         <DataTable<ITransaction>
           columns={columns}
           data={transactions}
@@ -256,12 +265,7 @@ const TransactionsTable = () => {
           detailSections={detailSections}
           emptyText="No transactions match the current filters"
         />
-
-      <TablePagination
-        pagination={pagination}
-        totalCount={totalCount}
-        onPageChange={goToPage}
-      />
+      </TablePanel>
 
       <EntityFormModal<ITransactionInput>
         open={formModal.modal.visible}

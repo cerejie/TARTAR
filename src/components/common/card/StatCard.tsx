@@ -73,7 +73,7 @@ const StatCard = ({
             title={title}
             prefix={prefix}
             suffix={unit}
-            value={raw ? value ?? "—" : formatMoney(value)}
+            value={raw ? (value ?? "—") : formatMoney(value)}
           />
           {icon || menu ? (
             <Flex className={`${statAside}`} align="center">

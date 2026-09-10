@@ -538,3 +538,26 @@ globalStyle(
     borderBottomColor: "transparent",
   }
 );
+
+export const tablePanel = style({
+  background: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  marginBottom: vars.space.sm,
+  overflow: "hidden",
+});
+
+export const tablePanelToolbar = style({
+  padding: vars.space.md,
+  borderBottom: `1px solid ${vars.color.borderSubtle}`,
+});
+
+export const tablePanelBody = style({
+  paddingInline: vars.space.md,
+  paddingBottom: vars.space.sm,
+});
+
+export const tablePanelFooter = style({
+  padding: vars.space.md,
+  borderTop: `1px solid ${vars.color.borderSubtle}`,
+});

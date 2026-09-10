@@ -54,20 +54,23 @@ export const useProtectedMenuHook = () => {
 export const useProtectedHeaderHook = () => {
   const location = useLocation();
 
-  const title = useMemo(() => {
-    const matched = protectedViewsRoutes
-      .filter((route) => route.path && route.label)
-      .sort((a, b) => (b.path as string).length - (a.path as string).length)
-      .find(
-        (route) =>
-          location.pathname === route.path ||
-          location.pathname.startsWith(`${route.path}/`)
-      );
+  const matched = useMemo(
+    () =>
+      protectedViewsRoutes
+        .filter((route) => route.path && route.label)
+        .sort((a, b) => (b.path as string).length - (a.path as string).length)
+        .find(
+          (route) =>
+            location.pathname === route.path ||
+            location.pathname.startsWith(`${route.path}/`)
+        ),
+    [location.pathname]
+  );
 
-    return matched?.label ?? "";
-  }, [location.pathname]);
-
-  return { title };
+  return {
+    title: matched?.label ?? "",
+    description: matched?.description ?? "",
+  };
 };
 
 export const useProtectedUserHook = () => {

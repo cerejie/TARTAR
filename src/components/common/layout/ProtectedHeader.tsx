@@ -4,6 +4,7 @@ import {
   header,
   headerLeft,
   headerRight,
+  headerSubtitle,
   headerTitle,
 } from "../../../styles/layout/protected.layout.css";
 import SyncIndicator from "../status/SyncIndicator";
@@ -11,13 +12,16 @@ import SyncIndicator from "../status/SyncIndicator";
 const { Header } = Layout;
 
 const ProtectedHeader = () => {
-  const { title } = useProtectedHeaderHook();
+  const { title, description } = useProtectedHeaderHook();
 
   return (
     <Header className={`${header}`}>
-      <Flex className={`${headerLeft}`} align="center">
+      <div className={`${headerLeft}`}>
         <span className={`${headerTitle}`}>{title}</span>
-      </Flex>
+        {description ? (
+          <span className={`${headerSubtitle}`}>{description}</span>
+        ) : null}
+      </div>
       <Flex className={`${headerRight}`} align="center">
         <SyncIndicator />
       </Flex>

@@ -99,21 +99,6 @@ export const menuWrapper = style({
   overflowY: "auto",
   overflowX: "hidden",
   overscrollBehavior: "contain",
-  scrollbarWidth: "thin",
-  scrollbarColor: `${vars.color.inkBorder} transparent`,
-});
-
-globalStyle(`.${menuWrapper}::-webkit-scrollbar`, {
-  width: 6,
-});
-
-globalStyle(`.${menuWrapper}::-webkit-scrollbar-track`, {
-  background: "transparent",
-});
-
-globalStyle(`.${menuWrapper}::-webkit-scrollbar-thumb`, {
-  background: vars.color.inkBorder,
-  borderRadius: vars.radius.pill,
 });
 
 globalStyle(`.${menuWrapper}.${menuWrapper} .ant-menu-item`, {
@@ -240,13 +225,17 @@ export const header = style({
   justifyContent: "space-between",
   gap: vars.space.md,
   flexShrink: 0,
-  height: 88,
+  height: "auto",
+  minHeight: 88,
+  paddingBlock: vars.space.lg,
   paddingInline: vars.space.xxl,
   background: "transparent",
+  lineHeight: "normal",
   borderBottom: `1px solid ${vars.color.borderSubtle}`,
   "@media": {
     "screen and (max-width: 991.98px)": {
-      height: 72,
+      minHeight: 72,
+      paddingBlock: vars.space.md,
       paddingInline: vars.space.md,
     },
     "screen and (max-width: 480px)": { paddingInline: vars.space.sm },
@@ -255,8 +244,9 @@ export const header = style({
 
 export const headerLeft = style({
   display: "flex",
-  alignItems: "center",
-  gap: vars.space.sm,
+  flexDirection: "column",
+  justifyContent: "center",
+  gap: 2,
   minWidth: 0,
 });
 
@@ -281,6 +271,17 @@ export const headerTitle = style({
   "@media": {
     "screen and (max-width: 575.98px)": { fontSize: 20 },
   },
+});
+
+export const headerSubtitle = style({
+  fontSize: 13,
+  fontWeight: 400,
+  lineHeight: 1.4,
+  color: vars.color.textMuted,
+  minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
 });
 
 export const branchScope = style({});
@@ -341,34 +342,11 @@ export const content = style({
   padding: `${vars.space.lg} ${vars.space.xxl}`,
   overflowY: "auto",
   overflowX: "hidden",
-  scrollbarWidth: "thin",
   scrollbarGutter: "stable",
-  scrollbarColor: `${vars.color.border} transparent`,
   "@media": {
     "screen and (max-width: 991.98px)": { padding: vars.space.md },
     "screen and (max-width: 480px)": { padding: vars.space.sm },
   },
-});
-
-globalStyle(`.${content}::-webkit-scrollbar`, {
-  width: 12,
-  height: 12,
-});
-
-globalStyle(`.${content}::-webkit-scrollbar-track`, {
-  background: "transparent",
-});
-
-globalStyle(`.${content}::-webkit-scrollbar-thumb`, {
-  background: vars.color.border,
-  borderRadius: vars.radius.pill,
-  border: "4px solid transparent",
-  backgroundClip: "content-box",
-});
-
-globalStyle(`.${content}::-webkit-scrollbar-thumb:hover`, {
-  background: vars.color.textMuted,
-  backgroundClip: "content-box",
 });
 
 export const footer = style({
@@ -442,8 +420,6 @@ globalStyle(`.${branchScopePopup} .ant-dropdown-menu`, {
   overflowY: "auto",
   background: "transparent",
   boxShadow: "none",
-  scrollbarWidth: "thin",
-  scrollbarColor: `${vars.color.inkBorder} transparent`,
 });
 
 globalStyle(

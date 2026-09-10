@@ -43,3 +43,33 @@ globalStyle(
     fontVariantNumeric: "tabular-nums",
   }
 );
+
+globalStyle("*", {
+  scrollbarWidth: "thin",
+  scrollbarColor: `${vars.color.accent} transparent`,
+});
+
+globalStyle("::-webkit-scrollbar", {
+  width: 10,
+  height: 10,
+});
+
+globalStyle("::-webkit-scrollbar-track", {
+  background: "transparent",
+});
+
+globalStyle("::-webkit-scrollbar-corner", {
+  background: "transparent",
+});
+
+globalStyle("::-webkit-scrollbar-thumb", {
+  background: vars.color.accent,
+  borderRadius: vars.radius.pill,
+  border: "3px solid transparent",
+  backgroundClip: "content-box",
+});
+
+globalStyle("::-webkit-scrollbar-thumb:hover", {
+  background: vars.color.accentStrong,
+  backgroundClip: "content-box",
+});

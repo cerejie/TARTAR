@@ -33,7 +33,7 @@ globalStyle(`.${statCard} .ant-statistic-title`, {
 globalStyle(`.${statCard} .ant-statistic-content`, {
   fontFamily: vars.font.heading,
   color: vars.color.brandDark,
-  fontSize: 24,
+  fontSize: 18,
   fontWeight: 600,
   letterSpacing: "-0.03em",
   lineHeight: 1.1,

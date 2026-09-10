@@ -1,6 +1,5 @@
 import { DoubleLeftOutlined, DoubleRightOutlined } from "@ant-design/icons";
 import { Button, Pagination, Select } from "antd";
-import SectionCard from "../card/SectionCard";
 import {
   tablePagination,
   tablePaginationInfo,
@@ -34,47 +33,45 @@ const TablePagination = ({ pagination, totalCount, onPageChange }: IProps) => {
       : `${firstItem} - ${lastItem} of ${totalCount} items`;
 
   return (
-    <SectionCard>
-      <div className={`${tablePagination}`}>
-        <span className={`${tablePaginationInfo}`}>{rangeLabel}</span>
+    <div className={`${tablePagination}`}>
+      <span className={`${tablePaginationInfo}`}>{rangeLabel}</span>
 
-        <div className={`${tablePaginationPages}`}>
-          <Button
-            type="text"
-            icon={<DoubleLeftOutlined />}
-            aria-label="First page"
-            disabled={pagination.pageNumber === 1}
-            onClick={() => onPageChange(1, pagination.pageSize)}
-          />
+      <div className={`${tablePaginationPages}`}>
+        <Button
+          type="text"
+          icon={<DoubleLeftOutlined />}
+          aria-label="First page"
+          disabled={pagination.pageNumber === 1}
+          onClick={() => onPageChange(1, pagination.pageSize)}
+        />
 
-          <Pagination
-            current={pagination.pageNumber}
-            pageSize={pagination.pageSize}
-            total={totalCount}
-            showSizeChanger={false}
-            onChange={onPageChange}
-          />
+        <Pagination
+          current={pagination.pageNumber}
+          pageSize={pagination.pageSize}
+          total={totalCount}
+          showSizeChanger={false}
+          onChange={onPageChange}
+        />
 
-          <Button
-            type="text"
-            icon={<DoubleRightOutlined />}
-            aria-label="Last page"
-            disabled={pagination.pageNumber === lastPage}
-            onClick={() => onPageChange(lastPage, pagination.pageSize)}
-          />
-        </div>
-
-        <div className={`${tablePaginationSize}`}>
-          <Select
-            className={`${tablePaginationSelect}`}
-            value={pagination.pageSize}
-            options={pageSizeOptions}
-            onChange={(size) => onPageChange(1, size)}
-          />
-          items per page
-        </div>
+        <Button
+          type="text"
+          icon={<DoubleRightOutlined />}
+          aria-label="Last page"
+          disabled={pagination.pageNumber === lastPage}
+          onClick={() => onPageChange(lastPage, pagination.pageSize)}
+        />
       </div>
-    </SectionCard>
+
+      <div className={`${tablePaginationSize}`}>
+        <Select
+          className={`${tablePaginationSelect}`}
+          value={pagination.pageSize}
+          options={pageSizeOptions}
+          onChange={(size) => onPageChange(1, size)}
+        />
+        items per page
+      </div>
+    </div>
   );
 };
 
