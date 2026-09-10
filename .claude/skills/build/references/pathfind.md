@@ -46,6 +46,10 @@ The layout is deterministic, so most paths are computable rather than discoverab
 
 Multi-word domain: dots in the filename, kebab-case in the folder — `hook/data/expense-category/expense.category.manage.hook.ts`.
 
+**Pattern source.** The path you derive has a Transaction twin — the same row with
+`transaction` in place of `<x>`. That twin is the template for whatever you are about to
+write: `reference-module.md`.
+
 Confirm a derived path with one `ls` of the domain folder, not a recursive find.
 
 
@@ -67,6 +71,7 @@ Most prompts are one of these. Open the listed files and nothing else.
 | "add a confirmation" | `useConfirm` at the call site. Nothing else — the modal is already mounted. |
 | "change a colour / spacing / radius" | `styles/common/vars.css.ts` **only** |
 | "add a whole new page/domain" | `references/module-recipe.md` |
+| "make this screen match the others" | `reference-module.md` — the Transaction files it names |
 
 **The two-file rule.** Almost every change to an existing screen resolves to its feature
 component and its list hook. Open those two, in that order, and stop. Reach for a third file

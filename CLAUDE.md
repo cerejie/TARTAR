@@ -26,6 +26,43 @@ yarn lint               # oxlint
 Gate every change on `yarn build` and `yarn lint` both clean. This repo has no
 pre-existing type errors and must not acquire any.
 
+## Every session — `.claude/` first
+
+`.claude/` is this repo's operating manual, and it applies to every prompt, not only the ones
+that write code. Answering a question, locating a file and planning a change all run through
+it, in this order — stop at the first file that answers:
+
+1. `.claude/skills/build/references/pathfind.md` — turn the question into a path. Derive the
+   path from the map; never scan the tree. Locating by exploration is the most expensive
+   mistake available here.
+2. `.claude/skills/build/references/lean.md` — token discipline. Ranges not whole files,
+   greps scoped to a directory with `--include`, no file read twice, one verification command,
+   replies under ten lines.
+3. `.claude/skills/build/references/reference-module.md` — the Transactions module, the design
+   reference for the whole app.
+4. `.claude/skills/build/references/conventions.md` — folder law, file naming, naming inside
+   files, the layer contract, the standard code shapes.
+5. `.claude/skills/build/references/architecture.md` — which layer owns a piece of logic, when
+   the layer contract does not settle it.
+
+Never read more than two of them for one task, and never re-read one already read this session.
+
+## Transactions is the reference module
+
+Every screen copies Transactions — `pages/Transactions/TransactionsView.tsx`,
+`components/transaction/tables/TransactionsTable.tsx`,
+`components/transaction/cards/TransactionSummaryCards.tsx`,
+`hook/data/transaction/transaction.list.hook.ts`. Its composition is the house design:
+a `ContentView` page; `TablePanel` with a `FilterToolbar` toolbar and a `TablePagination`
+footer around a `DataTable`; `EntityFormModal` for every form; `RowActionMenu` plus
+`useConfirm` for row actions; `StatCard` in a `BentoGrid` for metrics; enum label and colour
+maps for tags; `formatMoney` and `formatDate` for values.
+
+Read the Transaction counterpart before writing a new component, modal, table, card or hook,
+and mirror it. Where an existing screen disagrees with Transactions, Transactions wins:
+convert the screen you were asked to touch, and leave the rest alone unless asked. Detail:
+`.claude/skills/build/references/reference-module.md`.
+
 ## Before writing code — always
 
 Any prompt that asks for implementation work in this repo runs the `build` skill's

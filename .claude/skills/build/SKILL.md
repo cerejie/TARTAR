@@ -13,17 +13,18 @@ Everything you need is in this file or in `references/`. Load a reference yourse
 
 These apply for the whole task without reading anything further.
 
-1. **Reuse before creating.** Grep for an existing component, hook, or util first. Duplication is a defect here.
-2. **No `any`.** `unknown` plus narrowing. `as unknown as T` only at the data-source boundary.
-3. **`import type` for every type-only import** — `verbatimModuleSyntax` makes a miss a build error.
-4. **Minimal diff.** No drive-by refactors, no reformatting untouched lines, no renaming what works.
-5. **Never invent a business rule.** Ask instead — see step 3.
-6. **No test runner, no `*.test.*`, no throwaway verification scripts** unless the user asks.
-7. **Never run graphify**, re-index, or regenerate any derived artefact. Only when the user types `/graphify` themselves.
-8. **Never commit, push, branch, or migrate** unless asked.
-9. **Read ranges, not files** (`sed -n '40,90p'`). Never read a file twice. Never re-read a file you just edited.
-10. **Do not spawn sub-agents.** They start cold and re-derive context that already exists here.
-11. **Reply in under ten lines**, no preamble, no pasting back code you just wrote — cite `path.ts:42`.
+1. **Transactions is the reference module.** Any page, table, modal, form, card, filter row or row action must mirror `src/components/transaction/tables/TransactionsTable.tsx` and its list hook. Where an existing screen disagrees with Transactions, Transactions wins. Detail: `references/reference-module.md`.
+2. **Reuse before creating.** Grep for an existing component, hook, or util first. Duplication is a defect here.
+3. **No `any`.** `unknown` plus narrowing. `as unknown as T` only at the data-source boundary.
+4. **`import type` for every type-only import** — `verbatimModuleSyntax` makes a miss a build error.
+5. **Minimal diff.** No drive-by refactors, no reformatting untouched lines, no renaming what works.
+6. **Never invent a business rule.** Ask instead — see step 3.
+7. **No test runner, no `*.test.*`, no throwaway verification scripts** unless the user asks.
+8. **Never run graphify**, re-index, or regenerate any derived artefact. Only when the user types `/graphify` themselves.
+9. **Never commit, push, branch, or migrate** unless asked.
+10. **Read ranges, not files** (`sed -n '40,90p'`). Never read a file twice. Never re-read a file you just edited.
+11. **Do not spawn sub-agents.** They start cold and re-derive context that already exists here.
+12. **Reply in under ten lines**, no preamble, no pasting back code you just wrote — cite `path.ts:42`.
 
 Full detail, only if a situation is genuinely unclear: `references/lean.md`.
 
@@ -67,6 +68,10 @@ Derive the paths; do not search for them. This map resolves most tasks with zero
 
 Multi-word domain: dots in the filename, kebab-case in the folder — `hook/data/expense-category/expense.category.manage.hook.ts`.
 
+**Pattern source.** Whatever you are building, its Transaction counterpart is the template —
+the same row of this map with `transaction` in place of `<x>`. Read it before writing the new
+file, not after: `references/reference-module.md`.
+
 Almost every change to an existing screen is its feature component plus its list hook. Open
 those two and stop. The full request router is in `references/pathfind.md`.
 
@@ -102,6 +107,9 @@ Also read, only when it applies:
 - `references/stack.md` — touching antd, vanilla-extract, zustand, Supabase, zod, or react-hook-form.
 - `references/module-recipe.md` — creating a whole new domain end to end.
 - `references/architecture.md` — unsure which layer owns the logic.
+- `references/reference-module.md` — building or restyling any screen, table, modal, form,
+  card, filter row or row action. Read it once per session; it does not count against the cap
+  below.
 
 Never read more than two references in one task.
 

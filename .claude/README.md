@@ -17,7 +17,10 @@ On a project with a different stack, `references/stack.md` checks `package.json`
 
 That is the whole interface. `/build` locates the files, asks about anything that needs a decision, proposes a plan for large changes, implements to the house conventions, verifies once, and reports — pulling in whichever reference it needs on its own.
 
-Without `/build`, nothing fires. An ordinary prompt gets ordinary behaviour.
+In this project `/build` is optional: `CLAUDE.md` already routes every implementation prompt
+through the same pipeline, and every prompt at all through `pathfind.md` → `lean.md` →
+`reference-module.md` → `conventions.md`. Typing it only makes that explicit. Copied into a
+project without that `CLAUDE.md` section, nothing fires until you type it.
 
 ## What is registered
 
@@ -35,6 +38,7 @@ Under `skills/build/references/`:
 
 - `conventions.md` — folder law, file naming, naming inside files, globalization, layer contract, standard code shapes, TypeScript, styles, UX defaults. **The core document.**
 - `pathfind.md` — locating files without scanning, when the path map in `SKILL.md` does not resolve it.
+- `reference-module.md` — the Transactions module: the design every other screen copies. **Read before writing any UI.**
 - `plan.md` — plan format and the decisions that must reach you.
 - `architecture.md` — which layer owns which logic, caching, modals, permissions, migrations.
 - `stack.md` — library rules, applied only when the library is installed.
@@ -46,6 +50,7 @@ The most common tasks need none of them: `/build`'s own file carries the path ma
 ## Standing policies
 
 - **Plans before large changes.** New module, >3 files, migration, new dependency, route or permission change → a ≤15-line plan, then it waits for approval.
+- **Transactions is the reference module.** Every page, table, modal, form, card and row action mirrors the Transactions screen, so the app stays uniform. Where a screen disagrees with it, Transactions wins.
 - **Ask, never invent.** Business rules, money semantics, permissions, destructive database work and new dependencies always come to you as a question.
 - **Testing stays minimal.** One verification command per task at most; no test runner, no test files, no throwaway scripts unless you ask.
 - **Graphify never runs automatically.** No update, no re-index, no regeneration — only when you type `/graphify` yourself.
