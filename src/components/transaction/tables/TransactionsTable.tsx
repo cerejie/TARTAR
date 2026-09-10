@@ -244,7 +244,7 @@ const TransactionsTable = () => {
               </RequirePermission>
             }
           >
-            <LedgerFilterBar />
+            <LedgerFilterBar showType />
           </FilterToolbar>
         }
         footer={

@@ -23,8 +23,26 @@ globalStyle(`.${appModal} .ant-modal-header`, {
 
 globalStyle(`.${appModal} .ant-modal-body`, {
   padding: 0,
+  paddingInlineEnd: vars.space.md,
   maxHeight: "68dvh",
   overflowY: "auto",
+});
+
+
+globalStyle(`.${appModal}, .${appModal} *`, {
+  scrollbarColor: `${vars.color.ink} transparent`,
+});
+
+
+globalStyle(`.${appModal} ::-webkit-scrollbar-thumb`, {
+  background: vars.color.ink,
+  backgroundClip: "content-box",
+});
+
+
+globalStyle(`.${appModal} ::-webkit-scrollbar-thumb:hover`, {
+  background: vars.color.inkSoft,
+  backgroundClip: "content-box",
 });
 
 

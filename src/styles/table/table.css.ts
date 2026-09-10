@@ -3,9 +3,17 @@ import { vars } from "../common/vars.css";
 
 export const tableContainer = style({});
 
-const rowGap = "8px";
+export const rowExpanded = style({});
+
+const headerGap = "8px";
 const rowRadius = vars.radius.lg;
 const rowBorder = `1px solid ${vars.color.borderSubtle}`;
+const blockBorder = `1px solid ${vars.color.border}`;
+const headerRadius = `calc(${rowRadius} + ${headerGap})`;
+
+const bodyRow = `.${tableContainer} .ant-table-tbody > tr.ant-table-row`;
+const laterBodyRow = `${bodyRow} ~ tr.ant-table-row`;
+const lastBodyRow = `${bodyRow}:not(.${rowExpanded}):not(:has(~ tr.ant-table-row))`;
 
 globalStyle(`.${tableContainer} .ant-table`, {
   background: "transparent",
@@ -13,28 +21,31 @@ globalStyle(`.${tableContainer} .ant-table`, {
 
 globalStyle(`.${tableContainer} .ant-table table`, {
   borderCollapse: "separate",
-  borderSpacing: `0 ${rowGap}`,
+  borderSpacing: 0,
 });
 
 globalStyle(`.${tableContainer} .ant-table-thead > tr > th`, {
   background: vars.color.accentSoft,
+  backgroundClip: "padding-box",
   color: vars.color.textMuted,
   fontSize: 11,
   fontWeight: 700,
   letterSpacing: "0.08em",
   textTransform: "uppercase",
   whiteSpace: "nowrap",
-  border: "none",
+  borderInline: "none",
+  borderBlockStart: "none",
+  borderBlockEnd: `${headerGap} solid transparent`,
 });
 
 globalStyle(`.${tableContainer} .ant-table-thead > tr > th:first-child`, {
   borderStartStartRadius: rowRadius,
-  borderEndStartRadius: rowRadius,
+  borderEndStartRadius: headerRadius,
 });
 
 globalStyle(`.${tableContainer} .ant-table-thead > tr > th:last-child`, {
   borderStartEndRadius: rowRadius,
-  borderEndEndRadius: rowRadius,
+  borderEndEndRadius: headerRadius,
 });
 
 globalStyle(`.${tableContainer} .ant-table-thead > tr > th::before`, {
@@ -43,7 +54,8 @@ globalStyle(`.${tableContainer} .ant-table-thead > tr > th::before`, {
 
 globalStyle(`.${tableContainer} .ant-table-tbody > tr > td`, {
   background: vars.color.surface,
-  borderBlock: rowBorder,
+  borderBlockStart: "none",
+  borderBlockEnd: rowBorder,
   borderInline: "none",
   whiteSpace: "normal",
   overflowWrap: "break-word",
@@ -52,29 +64,61 @@ globalStyle(`.${tableContainer} .ant-table-tbody > tr > td`, {
 });
 
 globalStyle(`.${tableContainer} .ant-table-tbody > tr > td:first-child`, {
-  borderInlineStart: rowBorder,
-  borderStartStartRadius: rowRadius,
-  borderEndStartRadius: rowRadius,
+  borderInlineStart: blockBorder,
 });
 
 globalStyle(`.${tableContainer} .ant-table-tbody > tr > td:last-child`, {
-  borderInlineEnd: rowBorder,
-  borderStartEndRadius: rowRadius,
-  borderEndEndRadius: rowRadius,
+  borderInlineEnd: blockBorder,
 });
 
-globalStyle(`.${tableContainer} .ant-table-tbody > tr.ant-table-row:hover > td`, {
-  borderColor: vars.color.border,
+globalStyle(`${bodyRow} > td`, {
+  borderBlockStart: blockBorder,
+});
+
+globalStyle(`${bodyRow} > td:first-child`, {
+  borderStartStartRadius: rowRadius,
+});
+
+globalStyle(`${bodyRow} > td:last-child`, {
+  borderStartEndRadius: rowRadius,
+});
+
+globalStyle(`${laterBodyRow} > td`, {
+  borderBlockStart: "none",
+});
+
+globalStyle(`${laterBodyRow} > td:first-child`, {
+  borderStartStartRadius: 0,
+});
+
+globalStyle(`${laterBodyRow} > td:last-child`, {
+  borderStartEndRadius: 0,
+});
+
+globalStyle(`${lastBodyRow} > td`, {
+  borderBlockEnd: blockBorder,
+});
+
+globalStyle(`${lastBodyRow} > td:first-child`, {
+  borderEndStartRadius: rowRadius,
+});
+
+globalStyle(`${lastBodyRow} > td:last-child`, {
+  borderEndEndRadius: rowRadius,
 });
 
 globalStyle(`.${tableContainer} .ant-table-content`, {
   overflowX: "auto",
 });
 
-globalStyle(`.${tableContainer} .ant-table-measure-row > td`, {
-  background: "transparent",
-  border: "none",
-});
+globalStyle(
+  `.${tableContainer} .ant-table-tbody > tr.ant-table-measure-row > td`,
+  {
+    background: "transparent",
+    border: "none",
+    borderRadius: 0,
+  }
+);
 
 globalStyle(`.${tableContainer} .ant-pagination .ant-pagination-item`, {
   borderRadius: vars.radius.pill,
@@ -152,15 +196,10 @@ export const rowClickable = style({
   cursor: "pointer",
 });
 
-globalStyle(`.${tableContainer} .ant-table-tbody > tr.${rowClickable}:hover > td`, {
-  borderColor: vars.color.accent,
-});
-
 export const rowOverdue = style({});
 
 globalStyle(`.${tableContainer} .ant-table-tbody > tr.${rowOverdue} > td`, {
   background: vars.color.dangerBg,
-  borderColor: vars.color.dangerBorder,
 });
 
 export const rowIcon = style({
@@ -275,14 +314,11 @@ globalStyle(`.${iconButton}:disabled, .${iconButton}:disabled:hover`, {
   cursor: "not-allowed",
 });
 
-export const rowExpanded = style({});
+const expandedRow = `.${tableContainer}.${tableContainer} .ant-table-tbody > tr.ant-table-row.${rowExpanded}`;
 
-globalStyle(`.${tableContainer} .ant-table-tbody > tr.${rowExpanded} > td`, {
+globalStyle(`${expandedRow} > td`, {
   background: vars.color.accentTint,
-  borderColor: vars.color.accent,
-  borderBottomColor: "transparent",
-  borderEndStartRadius: 0,
-  borderEndEndRadius: 0,
+  borderBlockEndColor: "transparent",
 });
 
 globalStyle(
@@ -388,7 +424,6 @@ export const rowDetailReveal = style({
   display: "grid",
   gridTemplateRows: "1fr",
   overflow: "hidden",
-  marginTop: `-${rowGap}`,
   animation: `${detailReveal} 0.28s cubic-bezier(0.22, 1, 0.3, 1) both`,
   ...instantMotion,
 });
@@ -404,8 +439,8 @@ export const rowDetailPanel = style({
   minHeight: 0,
   padding: vars.space.md,
   background: vars.color.accentTint,
-  borderInline: `1px solid ${vars.color.accent}`,
-  borderBottom: `1px solid ${vars.color.accent}`,
+  borderInline: blockBorder,
+  borderBottom: blockBorder,
   borderEndStartRadius: rowRadius,
   borderEndEndRadius: rowRadius,
 });
@@ -522,7 +557,7 @@ globalStyle(
 
 globalStyle(
   `.${tableContainer} .ant-table-tbody > tr.ant-table-row:not(.${rowExpanded}):hover > td`,
-  { borderColor: vars.color.accent }
+  { background: vars.color.accentWash }
 );
 
 globalStyle(
@@ -530,14 +565,10 @@ globalStyle(
   { color: vars.color.text }
 );
 
-globalStyle(
-  `.${tableContainer}.${tableContainer} .ant-table-tbody > tr.${rowExpanded}.${rowExpanded}:hover > td`,
-  {
-    background: vars.color.accentTint,
-    borderColor: vars.color.accent,
-    borderBottomColor: "transparent",
-  }
-);
+globalStyle(`${expandedRow}:hover > td`, {
+  background: vars.color.accentTint,
+  borderBlockEndColor: "transparent",
+});
 
 export const tablePanel = style({
   background: vars.color.surface,
@@ -554,6 +585,7 @@ export const tablePanelToolbar = style({
 
 export const tablePanelBody = style({
   paddingInline: vars.space.md,
+  paddingTop: vars.space.md,
   paddingBottom: vars.space.sm,
 });
 

@@ -187,7 +187,7 @@ export const useTransactionListHook = () => {
         {
           name: "amount",
           label: "Amount",
-          type: "number",
+          type: "amount",
           span: "half",
           required: true,
           prefix: "₱",

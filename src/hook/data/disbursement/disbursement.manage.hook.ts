@@ -124,7 +124,7 @@ export const useDisbursementManagerHook = (
       hidden: (values) => values.branch !== "farm",
     },
     { name: "txn_date", label: "Date", type: "date" },
-    { name: "amount", label: "Amount", type: "number", prefix: "₱" },
+    { name: "amount", label: "Amount", type: "amount", prefix: "₱" },
     ...(kind === "purchase"
       ? [
           {

@@ -8,6 +8,7 @@ import {
 } from "react-hook-form";
 import type { IFieldConfig } from "../../../models/common/field.model";
 import { blockControl, fieldSpan } from "../../../styles/form/form.css";
+import { toAmount } from "../../../utils/format.utils";
 
 type IProps<TValues extends FieldValues> = {
   config: IFieldConfig<TValues>;
@@ -49,6 +50,23 @@ const renderControl = <TValues extends FieldValues>(
           placeholder={config.placeholder}
           prefix={config.prefix}
           min={0}
+        />
+      );
+    case "amount":
+      return (
+        <InputNumber
+          className={`${blockControl}`}
+          value={field.value}
+          onChange={field.onChange}
+          onBlur={() => {
+            field.onChange(toAmount(field.value));
+            field.onBlur();
+          }}
+          placeholder={config.placeholder}
+          prefix={config.prefix}
+          min={0}
+          step={0.01}
+          precision={2}
         />
       );
     case "select":

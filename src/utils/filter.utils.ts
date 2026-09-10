@@ -33,6 +33,7 @@ export const applyLedgerFilters = <T>(
   if (filters.farmSection) chain(scoped.eq("farm_section", filters.farmSection));
   if (filters.customerId) chain(scoped.eq("customer_id", filters.customerId));
   if (filters.supplierId) chain(scoped.eq("supplier_id", filters.supplierId));
+  if (columns.type && filters.type) chain(scoped.eq(columns.type, filters.type));
   if (filters.referenceNumber)
     chain(scoped.ilike("reference_number", `%${filters.referenceNumber}%`));
   if (filters.dateFrom) chain(scoped.gte(columns.date, filters.dateFrom));

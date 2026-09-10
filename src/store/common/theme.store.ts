@@ -70,7 +70,7 @@ const initialValues: States = {
         rowHoverBg: colors.surface,
         rowSelectedBg: colors.accentSoft,
         rowSelectedHoverBg: colors.accentSoft,
-        cellPaddingBlockMD: 14,
+        cellPaddingBlockMD: 10,
         cellPaddingInlineMD: 16,
       },
       Menu: {

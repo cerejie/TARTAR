@@ -1,9 +1,6 @@
 import { Flex, Modal } from "antd";
 import type { ReactNode } from "react";
-import {
-  modalWidths,
-  type ModalSize,
-} from "../../../models/common/view.model";
+import { modalWidths, type ModalSize } from "../../../models/common/view.model";
 import {
   appModal,
   modalSubtitle,
@@ -33,6 +30,7 @@ const AppModal = ({
     <Modal
       className={`${appModal}`}
       open={open}
+      centered
       width={modalWidths[size]}
       onCancel={onClose}
       footer={footer ?? null}

@@ -23,6 +23,15 @@ export const formatMoneyCompact = (
   return formatMoney(amount);
 };
 
+export const toAmount = (
+  value: number | string | null | undefined
+): number | null => {
+  if (value === null || value === undefined || value === "") return null;
+
+  const amount = Number(value);
+  return Number.isFinite(amount) ? Number(amount.toFixed(2)) : null;
+};
+
 export const formatDate = (value: string | null | undefined): string =>
   value ? dayjs(value).format("MMM D, YYYY") : "—";
 

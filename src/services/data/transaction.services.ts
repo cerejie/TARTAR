@@ -33,7 +33,11 @@ const columns = `
   customer:customers(name), supplier:suppliers(name)
 `;
 
-const transactionColumns = { date: "txn_date", amount: "amount" };
+const transactionColumns = {
+  date: "txn_date",
+  amount: "amount",
+  type: "type",
+};
 
 const reportLimit = 5000;
 

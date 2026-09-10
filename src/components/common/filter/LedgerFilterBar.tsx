@@ -1,18 +1,22 @@
-import { ClearOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Flex, Input, InputNumber, Select } from "antd";
+import { ClearOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, DatePicker, Flex, Input, Select } from "antd";
 import dayjs from "dayjs";
 import {
   ledgerStatusLabels,
   ledgerStatusValues,
 } from "../../../enums/ledger.enum";
+import {
+  transactionTypeLabels,
+  transactionTypeValues,
+} from "../../../enums/transaction.enum";
 import { useLedgerFilters } from "../../../hook/common/filter.hook";
 import type { ILedgerFilterScope } from "../../../models/common/filter.model";
 import {
-  filterAmount,
   filterBar,
   filterClear,
   filterReference,
   filterStatus,
+  filterType,
 } from "../../../styles/filter/filter.css";
 import { toOptions } from "../../../utils/option.utils";
 
@@ -20,10 +24,15 @@ const { RangePicker } = DatePicker;
 
 type IProps = {
   showStatus?: boolean;
+  showType?: boolean;
   scope?: ILedgerFilterScope;
 };
 
-const LedgerFilterBar = ({ showStatus = false, scope = "page" }: IProps) => {
+const LedgerFilterBar = ({
+  showStatus = false,
+  showType = false,
+  scope = "page",
+}: IProps) => {
   const { filters, setFilters, resetFilters } = useLedgerFilters(scope);
 
   return (
@@ -58,35 +67,27 @@ const LedgerFilterBar = ({ showStatus = false, scope = "page" }: IProps) => {
         />
       ) : null}
 
+      {showType ? (
+        <Select
+          size="large"
+          className={`${filterType}`}
+          placeholder="Any type"
+          allowClear
+          value={filters.type}
+          onChange={(type) => setFilters({ type })}
+          options={toOptions(transactionTypeValues, transactionTypeLabels)}
+        />
+      ) : null}
+
       <Input
         size="large"
         className={`${filterReference}`}
         placeholder="Reference no."
+        prefix={<SearchOutlined />}
         allowClear
         value={filters.referenceNumber}
         onChange={(event) =>
           setFilters({ referenceNumber: event.target.value || undefined })
-        }
-      />
-
-      <InputNumber
-        size="large"
-        className={`${filterAmount}`}
-        placeholder="Min ₱"
-        min={0}
-        value={filters.amountMin}
-        onChange={(amountMin) =>
-          setFilters({ amountMin: amountMin ?? undefined })
-        }
-      />
-      <InputNumber
-        size="large"
-        className={`${filterAmount}`}
-        placeholder="Max ₱"
-        min={0}
-        value={filters.amountMax}
-        onChange={(amountMax) =>
-          setFilters({ amountMax: amountMax ?? undefined })
         }
       />
 

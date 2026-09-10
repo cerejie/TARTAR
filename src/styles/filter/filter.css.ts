@@ -6,15 +6,19 @@ export const filterBar = style({
 });
 
 export const filterReference = style({
-  width: 140,
+  width: 200,
+});
+
+globalStyle(`.${filterReference} .ant-input-prefix`, {
+  color: vars.color.textMuted,
 });
 
 export const filterStatus = style({
   minWidth: 140,
 });
 
-export const filterAmount = style({
-  width: 120,
+export const filterType = style({
+  minWidth: 170,
 });
 
 export const filterClear = style({});

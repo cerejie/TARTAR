@@ -38,7 +38,7 @@ const ReceivablesView = () => {
       type: "text",
       hidden: (values) => !!values.customer_id,
     },
-    { name: "amount", label: "Amount", type: "number", prefix: "₱" },
+    { name: "amount", label: "Amount", type: "amount", prefix: "₱" },
     { name: "due_date", label: "Due date", type: "date" },
     { name: "reference_number", label: "Reference no.", type: "text" },
   ];

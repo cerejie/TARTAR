@@ -86,7 +86,7 @@ export const useVoucherListHook = () => {
     },
     { name: "branch", label: "Branch", type: "select", options: branchOptions },
     { name: "payee", label: "Payee", type: "text" },
-    { name: "amount", label: "Amount", type: "number", prefix: "₱" },
+    { name: "amount", label: "Amount", type: "amount", prefix: "₱" },
     {
       name: "supplier_id",
       label: "Supplier",

@@ -6,6 +6,7 @@ export type IFieldType =
   | "textarea"
   | "password"
   | "number"
+  | "amount"
   | "select"
   | "multiselect"
   | "date";

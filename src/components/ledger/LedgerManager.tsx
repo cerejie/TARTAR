@@ -216,7 +216,7 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
         open={settleModal.modal.visible}
         title="Record payment"
         fields={[
-          { name: "amount", label: "Payment amount", type: "number", prefix: "₱" },
+          { name: "amount", label: "Payment amount", type: "amount", prefix: "₱" },
         ]}
         schema={settlementSchema}
         defaultValues={{ amount: undefined as unknown as number }}
