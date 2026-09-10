@@ -1,8 +1,13 @@
-import DisbursementManager from "../../components/disbursement/DisbursementManager";
+import ContentView from "../../components/common/view/ContentView";
+import ExpenseSummaryCards from "../../components/expense/cards/ExpenseSummaryCards";
+import ExpensesTable from "../../components/expense/tables/ExpensesTable";
 
 const ExpensesView = () => {
   return (
-    <DisbursementManager kind="expense" title="Expenses" />
+    <ContentView>
+      <ExpenseSummaryCards />
+      <ExpensesTable />
+    </ContentView>
   );
 };
 

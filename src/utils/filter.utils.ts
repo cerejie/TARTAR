@@ -2,7 +2,7 @@ import type {
   IFilterColumns,
   ILedgerFilters,
 } from "../models/common/filter.model";
-import { todayIso } from "./format.utils";
+import { formatDate, todayIso } from "./format.utils";
 
 interface IChainable {
   eq: (column: string, value: unknown) => unknown;
@@ -63,6 +63,15 @@ export const applyStatusFilter = <T>(
   }
 
   return chainable.eq("status", status) as T;
+};
+
+export const filterPeriodLabel = (filters: ILedgerFilters): string => {
+  if (!filters.dateFrom && !filters.dateTo) return "All time";
+
+  const from = filters.dateFrom ? formatDate(filters.dateFrom) : "Earliest";
+  const to = filters.dateTo ? formatDate(filters.dateTo) : "Today";
+
+  return `${from} – ${to}`;
 };
 
 export const scopedFilters = (

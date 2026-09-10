@@ -25,14 +25,13 @@ import type {
   ITransactionSummary,
 } from "../../../models/data/transaction/transaction.response";
 import type { TransactionType } from "../../../enums/transaction.enum";
-import type { ILedgerFilters } from "../../../models/common/filter.model";
 import transactionServices from "../../../services/data/transaction.services";
 import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
-import { scopedFilters } from "../../../utils/filter.utils";
-import { formatDate, todayIso } from "../../../utils/format.utils";
+import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
+import { todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
@@ -70,15 +69,6 @@ const summarize = (
     net: cashIn - cashOut,
     sales: sumAmount(transactions, ["sale"]),
   };
-};
-
-const periodLabel = (filters: ILedgerFilters) => {
-  if (!filters.dateFrom && !filters.dateTo) return "All time";
-
-  const from = filters.dateFrom ? formatDate(filters.dateFrom) : "Earliest";
-  const to = filters.dateTo ? formatDate(filters.dateTo) : "Today";
-
-  return `${from} – ${to}`;
 };
 
 const normalize = (values: ITransactionInput): ITransactionInput => ({
@@ -268,7 +258,7 @@ export const useTransactionListHook = () => {
     loading: listQuery.loading,
     summary: summarize(summaryQuery.data ?? []),
     summaryLoading: summaryQuery.loading,
-    summaryPeriod: periodLabel(effectiveFilters),
+    summaryPeriod: filterPeriodLabel(effectiveFilters),
     branchName,
     userById,
     formModal,

@@ -1,8 +1,13 @@
-import DisbursementManager from "../../components/disbursement/DisbursementManager";
+import ContentView from "../../components/common/view/ContentView";
+import PurchaseSummaryCards from "../../components/purchase/cards/PurchaseSummaryCards";
+import PurchasesTable from "../../components/purchase/tables/PurchasesTable";
 
 const PurchasesView = () => {
   return (
-    <DisbursementManager kind="purchase" title="Purchases" />
+    <ContentView>
+      <PurchaseSummaryCards />
+      <PurchasesTable />
+    </ContentView>
   );
 };
 

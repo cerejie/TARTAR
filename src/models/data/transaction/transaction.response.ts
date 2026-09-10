@@ -37,6 +37,25 @@ export interface IDisbursement extends ITransaction {
   voucher: IVoucher | null;
 }
 
+export interface IPurchaseSummary {
+  total: number;
+  outstanding: number;
+  paid: number;
+  pendingVouchers: number;
+}
+
+export interface IExpenseCategoryTotal {
+  label: string;
+  amount: number;
+}
+
+export interface IExpenseSummary {
+  total: number;
+  topCategory: IExpenseCategoryTotal | null;
+  records: number;
+  pendingVouchers: number;
+}
+
 export interface ITransactionAudit {
   id: string;
   transaction_id: string;

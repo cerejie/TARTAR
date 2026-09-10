@@ -47,6 +47,39 @@ const referenceOf = (
 ): string | null =>
   kind === "purchase" ? values.reference_number?.trim() || null : null;
 
+const withVouchers = async (
+  rows: readonly ITransaction[]
+): Promise<IDisbursement[]> => {
+  if (rows.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from(voucherTable)
+    .select("*")
+    .in(
+      "transaction_id",
+      rows.map((row) => row.id)
+    );
+  if (error) throw toError(error);
+
+  const voucherByTransaction = new Map(
+    ((data ?? []) as IVoucher[]).map((voucher) => [
+      voucher.transaction_id,
+      voucher,
+    ])
+  );
+
+  return rows.map((row) => ({
+    ...row,
+    voucher: voucherByTransaction.get(row.id) ?? null,
+  }));
+};
+
+const disbursementQuery = (kind: DisbursementKind, filters: ILedgerFilters) =>
+  applyLedgerFilters(
+    supabase.from(table).select(columns, { count: "exact" }).eq("type", kind),
+    filters
+  );
+
 const transactionServices = {
   getList: async (
     filters: ILedgerFilters = {},
@@ -113,41 +146,34 @@ const transactionServices = {
 
   getDisbursementList: async (
     kind: DisbursementKind,
-    filters: ILedgerFilters = {}
-  ): Promise<IDisbursement[]> => {
-    const query = applyLedgerFilters(
-      supabase.from(table).select(columns).eq("type", kind),
-      filters
-    );
+    filters: ILedgerFilters = {},
+    pagination: IPaginationRequest
+  ): Promise<IPaginationResponse<IDisbursement>> => {
+    const { from, to } = pageRange(pagination);
 
-    const { data, error } = await query
+    const { data, error, count } = await disbursementQuery(kind, filters)
       .order("txn_date", { ascending: false })
-      .limit(500);
+      .range(from, to);
     if (error) throw toError(error);
 
-    const rows = (data ?? []) as unknown as ITransaction[];
-    if (rows.length === 0) return [];
+    return {
+      data: await withVouchers((data ?? []) as unknown as ITransaction[]),
+      currentPage: pagination.pageNumber,
+      pageSize: pagination.pageSize,
+      totalCount: count ?? 0,
+    };
+  },
 
-    const { data: vouchers, error: voucherError } = await supabase
-      .from(voucherTable)
-      .select("*")
-      .in(
-        "transaction_id",
-        rows.map((row) => row.id)
-      );
-    if (voucherError) throw toError(voucherError);
+  getDisbursementAll: async (
+    kind: DisbursementKind,
+    filters: ILedgerFilters = {}
+  ): Promise<IDisbursement[]> => {
+    const { data, error } = await disbursementQuery(kind, filters)
+      .order("txn_date", { ascending: false })
+      .limit(reportLimit);
+    if (error) throw toError(error);
 
-    const voucherByTransaction = new Map(
-      ((vouchers ?? []) as IVoucher[]).map((voucher) => [
-        voucher.transaction_id,
-        voucher,
-      ])
-    );
-
-    return rows.map((row) => ({
-      ...row,
-      voucher: voucherByTransaction.get(row.id) ?? null,
-    }));
+    return withVouchers((data ?? []) as unknown as ITransaction[]);
   },
 
   createDisbursement: (
