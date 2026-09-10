@@ -8,6 +8,7 @@ import {
   content,
   protectedLayout,
   shellMain,
+  siderWidth,
   siderWrapper,
 } from "../styles/layout/protected.layout.css";
 
@@ -18,7 +19,7 @@ const ProtectedLayout = () => {
 
   return (
     <Layout className={`${protectedLayout}`}>
-      <Sider className={`${siderWrapper}`} trigger={null} width={280}>
+      <Sider className={`${siderWrapper}`} trigger={null} width={siderWidth}>
         <ProtectedSider />
       </Sider>
 

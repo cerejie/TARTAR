@@ -15,6 +15,8 @@ export const shellMain = style({
   minHeight: 0,
 });
 
+export const siderWidth = "clamp(250px, 14.583vw, 448px)";
+
 export const siderWrapper = style({
   height: "100%",
   overflow: "hidden",
@@ -35,7 +37,7 @@ globalStyle(`.${siderWrapper} .ant-layout-sider-children`, {
 });
 
 export const siderLogo = style({
-  height: 84,
+  height: "clamp(59px, 4.375vw, 134px)",
   display: "flex",
   alignItems: "center",
   gap: vars.space.md,
@@ -49,11 +51,11 @@ export const siderLogoMark = style({
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  width: 36,
-  height: 36,
+  width: "clamp(25px, 1.875vw, 58px)",
+  height: "clamp(25px, 1.875vw, 58px)",
   flexShrink: 0,
   borderRadius: vars.radius.lg,
-  fontSize: 17,
+  fontSize: "clamp(12px, 0.885vw, 27px)",
   fontWeight: 700,
   color: vars.color.ink,
   background: vars.color.accent,
@@ -68,7 +70,7 @@ export const siderLogoLockup = style({
 });
 
 export const siderLogoWord = style({
-  fontSize: 15,
+  fontSize: "clamp(11px, 0.781vw, 24px)",
   letterSpacing: "0.01em",
   color: vars.color.onInk,
   whiteSpace: "nowrap",
@@ -76,7 +78,7 @@ export const siderLogoWord = style({
 
 export const siderLogoSub = style({
   fontFamily: vars.font.body,
-  fontSize: 11,
+  fontSize: "clamp(8px, 0.573vw, 18px)",
   fontWeight: 500,
   letterSpacing: "0.01em",
   color: vars.color.onInkMuted,
@@ -103,20 +105,20 @@ export const menuWrapper = style({
 
 globalStyle(`.${menuWrapper}.${menuWrapper} .ant-menu-item`, {
   position: "relative",
-  height: 42,
-  lineHeight: "42px",
+  height: "clamp(40px, 2.188vw, 67px)",
+  lineHeight: "clamp(29px, 2.188vw, 67px)",
   marginBlock: 1,
   marginInline: 0,
   paddingInlineEnd: vars.space.md,
   borderRadius: vars.radius.md,
-  fontSize: 14,
+  fontSize: "clamp(14px, 0.729vw, 50px)",
 });
 
 globalStyle(`.${menuWrapper}.${menuWrapper} .ant-menu-item-group-title`, {
   marginTop: vars.space.sm,
   padding: `${vars.space.lg} ${vars.space.md} ${vars.space.sm}`,
   fontFamily: vars.font.body,
-  fontSize: 12,
+  fontSize: "clamp(8px, 0.625vw, 19px)",
   fontWeight: 700,
   lineHeight: 1.4,
   letterSpacing: "0.14em",
@@ -179,10 +181,13 @@ export const siderUserAvatar = style({
 });
 
 globalStyle(`.${siderUserAvatar}.${siderUserAvatar}.ant-avatar`, {
+  width: "clamp(21px, 1.563vw, 48px)",
+  height: "clamp(21px, 1.563vw, 48px)",
+  lineHeight: "clamp(21px, 1.563vw, 48px)",
   background: vars.color.accent,
   color: vars.color.ink,
   fontFamily: vars.font.heading,
-  fontSize: 14,
+  fontSize: "clamp(10px, 0.729vw, 22px)",
   fontWeight: 700,
 });
 
@@ -196,7 +201,7 @@ export const siderUserMeta = style({
 });
 
 export const siderUserName = style({
-  fontSize: 14,
+  fontSize: "clamp(10px, 0.729vw, 22px)",
   fontWeight: 600,
   color: vars.color.onInk,
   overflow: "hidden",
@@ -205,7 +210,7 @@ export const siderUserName = style({
 });
 
 export const siderUserRole = style({
-  fontSize: 11,
+  fontSize: "clamp(8px, 0.573vw, 18px)",
   fontWeight: 400,
   color: vars.color.onInkMuted,
   overflow: "hidden",
@@ -214,7 +219,7 @@ export const siderUserRole = style({
 });
 
 export const siderUserCaret = style({
-  fontSize: 12,
+  fontSize: "clamp(8px, 0.625vw, 19px)",
   color: vars.color.onInkMuted,
   flexShrink: 0,
 });
@@ -291,14 +296,14 @@ globalStyle(`.${branchScope}.ant-btn`, {
   alignItems: "center",
   gap: vars.space.sm,
   width: "100%",
-  height: 44,
+  height: "clamp(31px, 2.292vw, 70px)",
   padding: `0 ${vars.space.md}`,
   border: `1px solid ${vars.color.inkBorder}`,
   borderRadius: vars.radius.lg,
   background: vars.color.inkOverlay,
   color: vars.color.onInk,
   fontFamily: vars.font.body,
-  fontSize: 13,
+  fontSize: "clamp(9px, 0.677vw, 21px)",
   fontWeight: 500,
 });
 
@@ -329,7 +334,7 @@ export const branchScopeLabel = style({
 });
 
 export const branchScopeCaret = style({
-  fontSize: 10,
+  fontSize: "clamp(7px, 0.521vw, 16px)",
   opacity: 0.7,
   flexShrink: 0,
 });

@@ -45,7 +45,7 @@ const ProtectedSiderUser = () => {
             dot={online}
             classNames={{ root: siderUserBadge, indicator: siderUserOnline }}
           >
-            <Avatar size={30} className={`${siderUserAvatar}`}>
+            <Avatar className={`${siderUserAvatar}`}>
               {initial}
             </Avatar>
           </Badge>
