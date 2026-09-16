@@ -1,4 +1,4 @@
-import { globalStyle, style, styleVariants } from "@vanilla-extract/css";
+import { style, styleVariants } from "@vanilla-extract/css";
 import { vars } from "../../common/vars.css";
 
 export const contentView = style({
@@ -34,11 +34,8 @@ export const viewMeta = style({
 export const viewBody = style({
   display: "flex",
   flexDirection: "column",
+  gap: vars.space.md,
   minWidth: 0,
-});
-
-globalStyle(`.${viewBody} > *:last-child`, {
-  marginBottom: 0,
 });
 
 export const viewFooter = style({

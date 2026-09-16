@@ -20,9 +20,7 @@ globalStyle(`.${statCard}.ant-card .ant-card-body`, {
   },
 });
 
-export const statGrid = style({
-  marginBottom: vars.space.md,
-});
+export const statGrid = style({});
 
 globalStyle(`.${statCard} .ant-statistic-title`, {
   color: vars.color.textMuted,

@@ -21,7 +21,6 @@ import NotificationsPanel from "../../components/dashboard/NotificationsPanel";
 import { useDashboardHook } from "../../hook/data/dashboard/dashboard.hook";
 import {
   salesPeriodLabels,
-  salesPeriodSubtitles,
   salesPeriodValues,
   type SalesPeriod,
 } from "../../models/data/dashboard/dashboard.response";

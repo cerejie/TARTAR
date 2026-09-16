@@ -5,7 +5,6 @@ export const card = style({
   background: vars.color.surface,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
-  marginBottom: vars.space.sm,
   overflow: "hidden",
 });
 
