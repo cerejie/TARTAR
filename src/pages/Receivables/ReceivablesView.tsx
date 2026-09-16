@@ -67,7 +67,7 @@ const ReceivablesView = () => {
         title="Receivables"
         partyLabel="Customer"
         nameOf={(row) => row.customer_name}
-        getList={receivableServices.getList}
+        getList={receivableServices.getAll}
         create={(values, createdBy) =>
           receivableServices.create(
             { ...values, customer_name: resolveCustomerName(values) },

@@ -55,13 +55,13 @@ export const useReportHook = () => {
 
   const receivableQuery = useQuery<IReceivable[]>(
     scopedKey(reportReceivableKey, branch),
-    () => receivableServices.getList(branchFilter),
+    () => receivableServices.getAll(branchFilter),
     { enabled: type === "receivables" }
   );
 
   const payableQuery = useQuery<IPayable[]>(
     scopedKey(reportPayableKey, branch),
-    () => payableServices.getList(branchFilter),
+    () => payableServices.getAll(branchFilter),
     { enabled: type === "payables" }
   );
 

@@ -1,5 +1,10 @@
 import type { LedgerStatus } from "../../enums/ledger.enum";
 import type { ILedgerFilters } from "../../models/common/filter.model";
+import {
+  pageRange,
+  type IPaginationRequest,
+  type IPaginationResponse,
+} from "../../models/common/pagination.model";
 import type {
   IPayableInput,
   IReceivableInput,
@@ -25,6 +30,7 @@ interface ILedgerConfig<Input> {
 }
 
 const ledgerColumns = { date: "due_date", amount: "amount" };
+const reportLimit = 5000;
 
 const makeLedgerServices = <Row, Input extends { branch: string; amount: number; due_date: string; reference_number?: string | null }>(
   config: ILedgerConfig<Input>
@@ -32,7 +38,34 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
   const noun = config.table.slice(0, -1);
 
   return {
-    getList: async (filters: ILedgerFilters = {}): Promise<Row[]> => {
+    getList: async (
+      filters: ILedgerFilters = {},
+      pagination: IPaginationRequest
+    ): Promise<IPaginationResponse<Row>> => {
+      const filtered = applyLedgerFilters(
+        supabase.from(config.table).select("*", { count: "exact" }),
+        filters,
+        ledgerColumns
+      );
+      const { from, to } = pageRange(pagination);
+
+      const { data, error, count } = await applyStatusFilter(
+        filtered,
+        filters.status
+      )
+        .order("due_date", { ascending: true })
+        .range(from, to);
+      if (error) throw toError(error);
+
+      return {
+        data: (data ?? []) as unknown as Row[],
+        currentPage: pagination.pageNumber,
+        pageSize: pagination.pageSize,
+        totalCount: count ?? 0,
+      };
+    },
+
+    getAll: async (filters: ILedgerFilters = {}): Promise<Row[]> => {
       const filtered = applyLedgerFilters(
         supabase.from(config.table).select("*"),
         filters,
@@ -42,7 +75,9 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
       const { data, error } = await applyStatusFilter(
         filtered,
         filters.status
-      ).order("due_date", { ascending: true });
+      )
+        .order("due_date", { ascending: true })
+        .limit(reportLimit);
       if (error) throw toError(error);
 
       return (data ?? []) as unknown as Row[];

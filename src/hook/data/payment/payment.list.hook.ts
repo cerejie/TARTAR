@@ -46,7 +46,7 @@ export const usePaymentListHook = (
   );
 
   const query = useQuery<ILedgerPayment[]>(listKey, () =>
-    paymentServices.getList(kind, filters)
+    paymentServices.getAll(kind, filters)
   );
 
   const verifyMutation = useMutation(

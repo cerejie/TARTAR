@@ -60,7 +60,7 @@ const PayablesView = () => {
       title="Payables"
       partyLabel="Supplier"
       nameOf={(row) => row.supplier_name}
-      getList={payableServices.getList}
+      getList={payableServices.getAll}
       create={(values, createdBy) =>
         payableServices.create(
           { ...values, supplier_name: resolveSupplierName(values) },

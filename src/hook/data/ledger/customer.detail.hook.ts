@@ -76,7 +76,7 @@ export const useCustomerDetailHook = () => {
   const paymentsQuery = useQuery<ILedgerPayment[]>(
     scopedKey(paymentListKey, "receivable", key),
     () =>
-      paymentServices.getList(
+      paymentServices.getAll(
         "receivable",
         customer?.customerId
           ? { partyId: customer.customerId }

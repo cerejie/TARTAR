@@ -1,4 +1,9 @@
 import type { PaymentKind } from "../../enums/ledger.enum";
+import {
+  pageRange,
+  type IPaginationRequest,
+  type IPaginationResponse,
+} from "../../models/common/pagination.model";
 import type { IRecordPaymentInput } from "../../models/data/payment/payment.request";
 import type {
   ILedgerPayment,
@@ -8,28 +13,64 @@ import { runWrite } from "../../store/common/sync.store";
 import { supabase, toError } from "../../utils/supabase.utils";
 
 const table = "payments";
+const reportLimit = 5000;
 
 const partyColumn = (kind: PaymentKind) =>
   kind === "receivable" ? "customer_id" : "supplier_id";
 
+interface IPartyChainable<T> {
+  eq: (column: string, value: unknown) => T;
+  is: (column: string, value: null) => T;
+}
+
+const applyPartyFilter = <T extends IPartyChainable<T>>(
+  query: T,
+  kind: PaymentKind,
+  filters: IPartyFilter
+): T => {
+  if (filters.partyId) return query.eq(partyColumn(kind), filters.partyId);
+  if (filters.partyName)
+    return query.is(partyColumn(kind), null).eq("party_name", filters.partyName);
+
+  return query;
+};
+
 const paymentServices = {
   getList: async (
     kind: PaymentKind,
+    filters: IPartyFilter = {},
+    pagination: IPaginationRequest
+  ): Promise<IPaginationResponse<ILedgerPayment>> => {
+    const base = supabase
+      .from(table)
+      .select("*", { count: "exact" })
+      .eq("kind", kind);
+    const query = applyPartyFilter(base, kind, filters);
+    const { from, to } = pageRange(pagination);
+
+    const { data, error, count } = await query
+      .order("paid_at", { ascending: false })
+      .range(from, to);
+    if (error) throw toError(error);
+
+    return {
+      data: (data ?? []) as ILedgerPayment[],
+      currentPage: pagination.pageNumber,
+      pageSize: pagination.pageSize,
+      totalCount: count ?? 0,
+    };
+  },
+
+  getAll: async (
+    kind: PaymentKind,
     filters: IPartyFilter = {}
   ): Promise<ILedgerPayment[]> => {
-    let query = supabase.from(table).select("*").eq("kind", kind);
-
-    if (filters.partyId) {
-      query = query.eq(partyColumn(kind), filters.partyId);
-    } else if (filters.partyName) {
-      query = query
-        .is(partyColumn(kind), null)
-        .eq("party_name", filters.partyName);
-    }
+    const base = supabase.from(table).select("*").eq("kind", kind);
+    const query = applyPartyFilter(base, kind, filters);
 
     const { data, error } = await query
       .order("paid_at", { ascending: false })
-      .limit(300);
+      .limit(reportLimit);
     if (error) throw toError(error);
 
     return (data ?? []) as ILedgerPayment[];
