@@ -11,6 +11,7 @@ export interface ILedgerFilters {
   amountMin?: number;
   amountMax?: number;
   referenceNumber?: string;
+  search?: string;
   customerId?: string;
   supplierId?: string;
   status?: LedgerStatus | "overdue";

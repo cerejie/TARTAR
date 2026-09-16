@@ -23,13 +23,17 @@ import { toOptions } from "../../../utils/option.utils";
 const { RangePicker } = DatePicker;
 
 type IProps = {
+  showSearch?: boolean;
   showStatus?: boolean;
+  showOverdue?: boolean;
   showType?: boolean;
   scope?: ILedgerFilterScope;
 };
 
 const LedgerFilterBar = ({
+  showSearch = false,
   showStatus = false,
+  showOverdue = false,
   showType = false,
   scope = "page",
 }: IProps) => {
@@ -37,6 +41,14 @@ const LedgerFilterBar = ({
 
   return (
     <Flex className={`${filterBar}`} gap="small" wrap align="center">
+      {showSearch ? (
+        <SearchInput
+          placeholder="Search name"
+          value={filters.search}
+          onChange={(search) => setFilters({ search })}
+        />
+      ) : null}
+
       <RangePicker
         size="middle"
         value={
@@ -62,7 +74,7 @@ const LedgerFilterBar = ({
           onChange={(status) => setFilters({ status })}
           options={[
             ...toOptions(ledgerStatusValues, ledgerStatusLabels),
-            { value: "overdue", label: "Overdue" },
+            ...(showOverdue ? [{ value: "overdue", label: "Overdue" }] : []),
           ]}
         />
       ) : null}
