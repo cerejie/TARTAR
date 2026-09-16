@@ -4,7 +4,8 @@ import {
   PlusOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Space, Tag, Tooltip } from "antd";
+import { Button, Space, Tooltip } from "antd";
+import StatusTag from "../common/status/StatusTag";
 import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import type { ReactNode } from "react";
@@ -76,7 +77,7 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
       render: (value: string, row) => (
         <Space>
           {formatDate(value)}
-          {isLedgerOverdue(row) ? <Tag color="red">Overdue</Tag> : null}
+          {isLedgerOverdue(row) ? <StatusTag color="negative" label="Overdue" /> : null}
         </Space>
       ),
     },
@@ -110,9 +111,7 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
       title: "Status",
       dataIndex: "status",
       render: (status: LedgerStatus) => (
-        <Tag color={ledgerStatusColors[status]}>
-          {ledgerStatusLabels[status]}
-        </Tag>
+        <StatusTag color={ledgerStatusColors[status]} label={ledgerStatusLabels[status]} />
       ),
     },
     {

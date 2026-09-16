@@ -7,7 +7,7 @@ import {
   PlusOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Space, Tag } from "antd";
+import { Button, Space } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
@@ -18,6 +18,7 @@ import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
 import DisbursementHistoryModal from "../../disbursement/modal/DisbursementHistoryModal";
+import StatusTag from "../../common/status/StatusTag";
 import { userRoleLabels } from "../../../enums/role.enum";
 import { cashAccountLabels } from "../../../enums/transaction.enum";
 import {
@@ -37,7 +38,7 @@ import {
   type IDisbursementInput,
 } from "../../../models/data/transaction/transaction.request";
 import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
-import { nowrapCell, typeTag } from "../../../styles/table/table.css";
+import { nowrapCell } from "../../../styles/table/table.css";
 import { formatDate, formatMoney, formatTime } from "../../../utils/format.utils";
 
 const PurchasesTable = () => {
@@ -137,23 +138,14 @@ const PurchasesTable = () => {
       render: (_, row) =>
         row.voucher ? (
           <Space size="small">
-            <Tag
-              className={`${typeTag}`}
+            <StatusTag
               color={voucherStatusColors[row.voucher.status]}
-              variant="outlined"
-            >
-              {voucherStatusLabels[row.voucher.status]}
-            </Tag>
-            {row.voucher.printed ? (
-              <Tag className={`${typeTag}`} variant="outlined">
-                Printed
-              </Tag>
-            ) : null}
+              label={voucherStatusLabels[row.voucher.status]}
+            />
+            {row.voucher.printed ? <StatusTag label="Printed" /> : null}
           </Space>
         ) : (
-          <Tag className={`${typeTag}`} variant="outlined">
-            Syncing
-          </Tag>
+          <StatusTag label="Syncing" />
         ),
     },
     {

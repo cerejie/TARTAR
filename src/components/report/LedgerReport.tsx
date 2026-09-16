@@ -1,4 +1,4 @@
-import { Col, Row, Tag } from "antd";
+import { Col, Row } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   ledgerStatusColors,
@@ -11,6 +11,7 @@ import {
   type IPayable,
   type IReceivable,
 } from "../../models/data/ledger/ledger.response";
+import StatusTag from "../common/status/StatusTag";
 import { rowOverdue } from "../../styles/table/table.css";
 import { reportStats } from "../../styles/view/report/report.view.css";
 import { formatDate, formatMoney } from "../../utils/format.utils";
@@ -67,11 +68,9 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
       dataIndex: "status",
       render: (status: LedgerStatus, row) =>
         isLedgerOverdue(row) ? (
-          <Tag color="red">Overdue</Tag>
+          <StatusTag color="negative" label="Overdue" />
         ) : (
-          <Tag color={ledgerStatusColors[status]}>
-            {ledgerStatusLabels[status]}
-          </Tag>
+          <StatusTag color={ledgerStatusColors[status]} label={ledgerStatusLabels[status]} />
         ),
     },
   ];

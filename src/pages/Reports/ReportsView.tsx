@@ -1,7 +1,8 @@
 import { PrinterOutlined } from "@ant-design/icons";
-import { Button, Segmented } from "antd";
+import { Button } from "antd";
 import type { ReactNode } from "react";
 import ContentView from "../../components/common/view/ContentView";
+import ViewSwitch from "../../components/common/view/ViewSwitch";
 import CashFlowReport from "../../components/report/CashFlowReport";
 import ExpensesReport from "../../components/report/ExpensesReport";
 import LedgerReport from "../../components/report/LedgerReport";
@@ -60,13 +61,11 @@ const ReportsView = () => {
         </Button>
       }
       toolbar={
-        <Segmented
+        <ViewSwitch
           value={type}
-          onChange={(value) => setType(value as ReportType)}
-          options={reportTypeValues.map((item) => ({
-            label: reportTypeLabels[item],
-            value: item,
-          }))}
+          values={reportTypeValues}
+          labels={reportTypeLabels}
+          onChange={setType}
         />
       }
     >

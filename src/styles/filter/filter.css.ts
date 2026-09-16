@@ -3,11 +3,11 @@ import { vars } from "../common/vars.css";
 
 export const filterBar = style({});
 
-export const filterReference = style({
+export const filterSearch = style({
   width: 200,
 });
 
-globalStyle(`.${filterReference} .ant-input-prefix`, {
+globalStyle(`.${filterSearch} .ant-input-prefix`, {
   color: vars.color.textMuted,
 });
 

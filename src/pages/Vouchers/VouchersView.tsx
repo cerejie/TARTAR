@@ -4,7 +4,7 @@ import {
   PlusOutlined,
   PrinterOutlined,
 } from "@ant-design/icons";
-import { Button, Space, Tag, Typography } from "antd";
+import { Button, Space, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import SectionCard from "../../components/common/card/SectionCard";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
@@ -17,6 +17,7 @@ import {
   voucherTypeLabels,
   type VoucherStatus,
 } from "../../enums/voucher.enum";
+import StatusTag from "../../components/common/status/StatusTag";
 import { useVoucherListHook } from "../../hook/data/voucher/voucher.list.hook";
 import {
   voucherSchema,
@@ -63,7 +64,7 @@ const VouchersView = () => {
       title: "Category",
       dataIndex: "category",
       width: 100,
-      render: (value: string) => <Tag>{value}</Tag>,
+      render: (value: string) => <StatusTag label={value} />,
     },
     {
       title: "Purpose",
@@ -112,10 +113,8 @@ const VouchersView = () => {
       dataIndex: "status",
       render: (status: VoucherStatus, voucher) => (
         <Space>
-          <Tag color={voucherStatusColors[status]}>
-            {voucherStatusLabels[status]}
-          </Tag>
-          {voucher.printed ? <Tag>Printed</Tag> : null}
+          <StatusTag color={voucherStatusColors[status]} label={voucherStatusLabels[status]} />
+          {voucher.printed ? <StatusTag label="Printed" /> : null}
         </Space>
       ),
     },

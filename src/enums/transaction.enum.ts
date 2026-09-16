@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { StatusColor } from "../models/common/view.model";
 
 export const transactionTypeValues = [
   "sale",
@@ -24,9 +25,9 @@ export const transactionTypeLabels: Record<TransactionType, string> = {
   collection: "Collection",
 };
 
-export const transactionTypeColors: Record<TransactionType, string> = {
-  sale: "green",
-  expense: "red",
+export const transactionTypeColors: Record<TransactionType, StatusColor> = {
+  sale: "positive",
+  expense: "negative",
   customer_payment: "default",
   supplier_payment: "default",
   cash_deposit: "default",

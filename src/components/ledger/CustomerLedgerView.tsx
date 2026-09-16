@@ -4,13 +4,14 @@ import {
   InfoCircleOutlined,
   PrinterOutlined,
 } from "@ant-design/icons";
-import { Button, Col, Flex, Row, Tag, Tooltip, Typography } from "antd";
+import { Button, Col, Flex, Row, Tooltip, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { customerDetailsModalKey } from "../../keys/modal.keys";
 import {
   ledgerStatusColors,
   ledgerStatusLabels,
 } from "../../enums/ledger.enum";
+import StatusTag from "../common/status/StatusTag";
 import { useModalActions } from "../../hook/common/modal.hook";
 import { useCustomerDetailHook } from "../../hook/data/ledger/customer.detail.hook";
 import {
@@ -105,11 +106,9 @@ const CustomerLedgerView = () => {
       dataIndex: "status",
       render: (status: IReceivable["status"], row) =>
         isLedgerOverdue(row) ? (
-          <Tag color="red">Overdue</Tag>
+          <StatusTag color="negative" label="Overdue" />
         ) : (
-          <Tag color={ledgerStatusColors[status]}>
-            {ledgerStatusLabels[status]}
-          </Tag>
+          <StatusTag color={ledgerStatusColors[status]} label={ledgerStatusLabels[status]} />
         ),
     },
     ...(permissions.isManager

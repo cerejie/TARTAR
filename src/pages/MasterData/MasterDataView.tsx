@@ -1,7 +1,7 @@
-import { Segmented } from "antd";
 import ExpenseCategoriesPanel from "../../components/master-data/ExpenseCategoriesPanel";
 import SuppliersPanel from "../../components/master-data/SuppliersPanel";
 import ContentView from "../../components/common/view/ContentView";
+import ViewSwitch from "../../components/common/view/ViewSwitch";
 import { useSearchParam } from "../../hook/common/search.param.hook";
 
 const sections = ["suppliers", "expense-categories"] as const;
@@ -22,13 +22,11 @@ const MasterDataView = () => {
   return (
     <ContentView
       toolbar={
-        <Segmented
+        <ViewSwitch
           value={section}
-          onChange={(value) => setSection(value as Section)}
-          options={sections.map((item) => ({
-            label: sectionLabels[item],
-            value: item,
-          }))}
+          values={sections}
+          labels={sectionLabels}
+          onChange={setSection}
         />
       }
     >

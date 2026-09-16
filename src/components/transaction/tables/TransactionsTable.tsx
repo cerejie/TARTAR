@@ -5,7 +5,7 @@ import {
   TagOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Tag } from "antd";
+import { Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
@@ -15,6 +15,7 @@ import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
+import StatusTag from "../../common/status/StatusTag";
 import { userRoleLabels } from "../../../enums/role.enum";
 import {
   cashAccountLabels,
@@ -32,7 +33,7 @@ import {
   type ITransactionInput,
 } from "../../../models/data/transaction/transaction.request";
 import type { ITransaction } from "../../../models/data/transaction/transaction.response";
-import { nowrapCell, typeTag } from "../../../styles/table/table.css";
+import { nowrapCell } from "../../../styles/table/table.css";
 import { formatDate, formatMoney, formatTime } from "../../../utils/format.utils";
 
 const TransactionsTable = () => {
@@ -103,13 +104,10 @@ const TransactionsTable = () => {
       dataIndex: "type",
       className: `${nowrapCell}`,
       render: (type: ITransaction["type"]) => (
-        <Tag
-          className={`${typeTag}`}
+        <StatusTag
           color={transactionTypeColors[type]}
-          variant="outlined"
-        >
-          {transactionTypeLabels[type]}
-        </Tag>
+          label={transactionTypeLabels[type]}
+        />
       ),
     },
     { title: "Branch", dataIndex: "branch", render: branchName },

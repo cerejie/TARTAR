@@ -255,19 +255,6 @@ export const slugTag = style({
   marginInlineEnd: 0,
 });
 
-export const typeTag = style({});
-
-globalStyle(`.ant-tag.${typeTag}`, {
-  fontFamily: "inherit",
-  fontSize: 13,
-  fontWeight: 500,
-  lineHeight: 1.6,
-  paddingBlock: vars.space.xs,
-  paddingInline: vars.space.sm,
-  borderRadius: vars.radius.pill,
-  marginInlineEnd: 0,
-});
-
 export const rowActions = style({
   display: "inline-flex",
   alignItems: "center",

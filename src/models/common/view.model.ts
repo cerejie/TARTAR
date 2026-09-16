@@ -9,6 +9,14 @@ export type BentoSpan =
 
 export type CardTone = "surface" | "ink" | "accent";
 
+export type StatusColor =
+  | "default"
+  | "positive"
+  | "negative"
+  | "warning"
+  | "info"
+  | "brand";
+
 export type ModalSize = "sm" | "md" | "lg" | "xl";
 
 export const modalWidths: Record<ModalSize, number> = {

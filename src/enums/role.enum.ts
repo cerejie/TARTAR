@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { StatusColor } from "../models/common/view.model";
 
 export const userRoleValues = ["admin", "accountant", "employee"] as const;
 export const userRoleSchema = z.enum(userRoleValues);
@@ -27,8 +28,8 @@ export const approvalStatusLabels: Record<ApprovalStatus, string> = {
   rejected: "Rejected",
 };
 
-export const approvalStatusColors: Record<ApprovalStatus, string> = {
-  pending: "gold",
-  approved: "green",
-  rejected: "red",
+export const approvalStatusColors: Record<ApprovalStatus, StatusColor> = {
+  pending: "warning",
+  approved: "positive",
+  rejected: "negative",
 };

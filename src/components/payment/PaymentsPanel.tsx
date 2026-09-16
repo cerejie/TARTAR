@@ -1,5 +1,6 @@
 import { CheckOutlined, CloseOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Space, Tag, Tooltip } from "antd";
+import { Button, Space, Tooltip } from "antd";
+import StatusTag from "../common/status/StatusTag";
 import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import {
@@ -68,7 +69,7 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
       dataIndex: "status",
       render: (status: ILedgerPayment["status"], payment) => {
         const tag = (
-          <Tag color={paymentStatusColors[status]}>{statusLabels[status]}</Tag>
+          <StatusTag color={paymentStatusColors[status]} label={statusLabels[status]} />
         );
 
         if (!payment.verified_by || status === "pending") return tag;

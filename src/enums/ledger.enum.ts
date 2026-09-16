@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { StatusColor } from "../models/common/view.model";
 
 export const ledgerStatusValues = ["open", "partial", "paid"] as const;
 export const ledgerStatusSchema = z.enum(ledgerStatusValues);
@@ -10,10 +11,10 @@ export const ledgerStatusLabels: Record<LedgerStatus, string> = {
   paid: "Paid",
 };
 
-export const ledgerStatusColors: Record<LedgerStatus, string> = {
+export const ledgerStatusColors: Record<LedgerStatus, StatusColor> = {
   open: "default",
-  partial: "gold",
-  paid: "green",
+  partial: "warning",
+  paid: "positive",
 };
 
 export const paymentKindValues = ["receivable", "payable"] as const;
@@ -24,10 +25,10 @@ export const paymentStatusValues = ["pending", "verified", "rejected"] as const;
 export const paymentStatusSchema = z.enum(paymentStatusValues);
 export type PaymentStatus = z.infer<typeof paymentStatusSchema>;
 
-export const paymentStatusColors: Record<PaymentStatus, string> = {
-  pending: "gold",
-  verified: "green",
-  rejected: "red",
+export const paymentStatusColors: Record<PaymentStatus, StatusColor> = {
+  pending: "warning",
+  verified: "positive",
+  rejected: "negative",
 };
 
 const receivablePaymentStatusLabels: Record<PaymentStatus, string> = {

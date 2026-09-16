@@ -1,5 +1,5 @@
-import { ClearOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Flex, Input, Select } from "antd";
+import { ClearOutlined } from "@ant-design/icons";
+import { Button, DatePicker, Flex, Select } from "antd";
 import dayjs from "dayjs";
 import {
   ledgerStatusLabels,
@@ -14,10 +14,10 @@ import type { ILedgerFilterScope } from "../../../models/common/filter.model";
 import {
   filterBar,
   filterClear,
-  filterReference,
   filterStatus,
   filterType,
 } from "../../../styles/filter/filter.css";
+import SearchInput from "./SearchInput";
 import { toOptions } from "../../../utils/option.utils";
 
 const { RangePicker } = DatePicker;
@@ -79,16 +79,10 @@ const LedgerFilterBar = ({
         />
       ) : null}
 
-      <Input
-        size="middle"
-        className={`${filterReference}`}
+      <SearchInput
         placeholder="Reference no."
-        prefix={<SearchOutlined />}
-        allowClear
         value={filters.referenceNumber}
-        onChange={(event) =>
-          setFilters({ referenceNumber: event.target.value || undefined })
-        }
+        onChange={(referenceNumber) => setFilters({ referenceNumber })}
       />
 
       <Button

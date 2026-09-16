@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { StatusColor } from "../models/common/view.model";
 
 export const voucherTypeValues = ["check", "cash"] as const;
 export const voucherTypeSchema = z.enum(voucherTypeValues);
@@ -19,10 +20,10 @@ export const voucherStatusLabels: Record<VoucherStatus, string> = {
   rejected: "Rejected",
 };
 
-export const voucherStatusColors: Record<VoucherStatus, string> = {
-  pending: "gold",
-  approved: "green",
-  rejected: "red",
+export const voucherStatusColors: Record<VoucherStatus, StatusColor> = {
+  pending: "warning",
+  approved: "positive",
+  rejected: "negative",
 };
 
 export const voucherKindValues = ["expense", "purchase"] as const;

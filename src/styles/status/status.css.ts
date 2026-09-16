@@ -154,3 +154,16 @@ globalStyle(
     background: vars.color.warning,
   }
 );
+
+export const statusTag = style({});
+
+globalStyle(`.ant-tag.${statusTag}`, {
+  fontFamily: "inherit",
+  fontSize: 13,
+  fontWeight: 500,
+  lineHeight: 1.6,
+  paddingBlock: vars.space.xs,
+  paddingInline: vars.space.sm,
+  borderRadius: vars.radius.pill,
+  marginInlineEnd: 0,
+});

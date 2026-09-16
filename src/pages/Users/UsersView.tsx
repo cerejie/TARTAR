@@ -5,7 +5,8 @@ import {
   PlusOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Space, Tag, Tooltip } from "antd";
+import { Button, Space, Tooltip } from "antd";
+import StatusTag from "../../components/common/status/StatusTag";
 import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { ColumnsType } from "antd/es/table";
 import SectionCard from "../../components/common/card/SectionCard";
@@ -71,7 +72,7 @@ const UsersView = () => {
     {
       title: "Role",
       dataIndex: "role",
-      render: (role: UserRole) => <Tag>{userRoleLabels[role]}</Tag>,
+      render: (role: UserRole) => <StatusTag label={userRoleLabels[role]} />,
     },
     {
       title: "Branches",
@@ -111,9 +112,7 @@ const UsersView = () => {
             </Button>
           </Space>
         ) : (
-          <Tag color={approvalStatusColors[status]}>
-            {approvalStatusLabels[status]}
-          </Tag>
+          <StatusTag color={approvalStatusColors[status]} label={approvalStatusLabels[status]} />
         ),
     },
     {
