@@ -45,10 +45,6 @@ export const filterToolbarStart = style({
   minWidth: 0,
 });
 
-globalStyle(`.${filterToolbarStart} > .${filterBar}`, {
-  marginBottom: 0,
-});
-
 export const filterToolbarActions = style({
   flexShrink: 0,
 });

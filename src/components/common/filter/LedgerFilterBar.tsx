@@ -38,7 +38,7 @@ const LedgerFilterBar = ({
   return (
     <Flex className={`${filterBar}`} gap="small" wrap align="center">
       <RangePicker
-        size="large"
+        size="middle"
         value={
           filters.dateFrom && filters.dateTo
             ? [dayjs(filters.dateFrom), dayjs(filters.dateTo)]
@@ -54,7 +54,7 @@ const LedgerFilterBar = ({
 
       {showStatus ? (
         <Select
-          size="large"
+          size="middle"
           className={`${filterStatus}`}
           placeholder="Any status"
           allowClear
@@ -69,7 +69,7 @@ const LedgerFilterBar = ({
 
       {showType ? (
         <Select
-          size="large"
+          size="middle"
           className={`${filterType}`}
           placeholder="Any type"
           allowClear
@@ -80,7 +80,7 @@ const LedgerFilterBar = ({
       ) : null}
 
       <Input
-        size="large"
+        size="middle"
         className={`${filterReference}`}
         placeholder="Reference no."
         prefix={<SearchOutlined />}
@@ -92,7 +92,7 @@ const LedgerFilterBar = ({
       />
 
       <Button
-        size="large"
+        size="middle"
         className={`${filterClear}`}
         icon={<ClearOutlined />}
         onClick={resetFilters}

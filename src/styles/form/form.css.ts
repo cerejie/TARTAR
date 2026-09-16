@@ -16,6 +16,9 @@ export const formGrid = style({
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   columnGap: vars.space.md,
   rowGap: vars.space.sm,
+  "@media": {
+    "screen and (max-width: 575.98px)": { gridTemplateColumns: "1fr" },
+  },
 });
 
 globalStyle(`.${formGrid} .ant-form-item`, {
