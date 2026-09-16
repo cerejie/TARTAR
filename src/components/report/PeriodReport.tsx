@@ -77,7 +77,6 @@ const PeriodReport = ({ transactions, loading }: IProps) => {
 
       <SectionCard
         title="Transactions"
-        subtitle="Every movement in the selected period"
         flush
       >
         <DataTable<ITransaction>

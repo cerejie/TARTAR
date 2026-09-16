@@ -191,7 +191,6 @@ const BranchesView = () => {
     >
       <SectionCard
         title="Branches"
-        subtitle="Add, rename, re-order and archive business units"
         flush
       >
         <DataTable<IBranch>
@@ -205,7 +204,6 @@ const BranchesView = () => {
 
       <SectionCard
         title="Branch Monitoring"
-        subtitle="Cash, sales, expenses, receivables and payables per branch"
         flush
       >
         <DataTable<IBranchMonitorRow>

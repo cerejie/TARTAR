@@ -153,7 +153,6 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
   return (
     <SectionCard
       title={kind === "receivable" ? "Customer Payments" : "Supplier Payments"}
-      subtitle={`Applied immediately — pending until a manager ${verb.toLowerCase()}s them`}
       flush
     >
       {table}

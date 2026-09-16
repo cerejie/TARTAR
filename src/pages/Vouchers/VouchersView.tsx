@@ -193,7 +193,6 @@ const VouchersView = () => {
     >
       <SectionCard
         title="All Vouchers"
-        subtitle="Draft, pending approval, approved and printed"
         flush
       >
         <DataTable<IVoucher>

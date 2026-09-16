@@ -185,7 +185,6 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
 
       <SectionCard
         title={`All ${props.title}`}
-        subtitle="Matching the current filters"
         flush
       >
         <DataTable<Row>

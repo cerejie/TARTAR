@@ -191,7 +191,6 @@ const UsersView = () => {
     >
       <SectionCard
         title="All Users"
-        subtitle="Accounts, roles and branch access"
         flush
       >
         <DataTable<IUser>

@@ -167,7 +167,6 @@ const DashboardView = () => {
       <BentoCell span="twoThirds">
         <SectionCard
           title="Sales Overview"
-          subtitle={salesPeriodSubtitles[salesPeriod]}
           extra={
             <Segmented
               size="small"
