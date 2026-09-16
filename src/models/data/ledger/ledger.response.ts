@@ -44,6 +44,32 @@ export interface ICustomerReceivableSummary extends ICustomerLedgerKey {
   lastTransactionAt: string | null;
 }
 
+export interface ILedgerPartyKey {
+  partyId: string | null;
+  partyName: string;
+}
+
+export interface ILedgerPartySummary extends ILedgerPartyKey {
+  outstanding: number;
+  unpaidCount: number;
+  lastTransactionAt: string | null;
+}
+
+export interface ILedgerSummary {
+  outstanding: number;
+  overdue: number;
+  overdueCount: number;
+  dueSoon: number;
+}
+
+export interface IPaymentTarget {
+  party: ILedgerPartyKey;
+  rows?: ILedgerRow[];
+}
+
+export const partyKeyOf = (party: ILedgerPartyKey): string =>
+  party.partyId ?? `name:${party.partyName}`;
+
 export const isLedgerOverdue = (row: {
   status: LedgerStatus;
   due_date: string;

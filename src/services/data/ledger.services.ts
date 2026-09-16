@@ -12,6 +12,8 @@ import type {
 import type {
   ICustomerLedgerKey,
   ICustomerReceivableSummary,
+  ILedgerPartyKey,
+  ILedgerPartySummary,
   IPayable,
   IReceivable,
 } from "../../models/data/ledger/ledger.response";
@@ -30,6 +32,14 @@ interface ILedgerConfig<Input> {
 }
 
 const ledgerColumns = { date: "due_date", amount: "amount" };
+
+type IPartySummaryRow = {
+  amount: number;
+  paid_amount: number;
+  status: LedgerStatus;
+  created_at: string;
+} & Record<"customer_id" | "supplier_id", string | null> &
+  Record<"customer_name" | "supplier_name", string>;
 const reportLimit = 5000;
 
 const makeLedgerServices = <Row, Input extends { branch: string; amount: number; due_date: string; reference_number?: string | null }>(
@@ -78,6 +88,65 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
       )
         .order("due_date", { ascending: true })
         .limit(reportLimit);
+      if (error) throw toError(error);
+
+      return (data ?? []) as unknown as Row[];
+    },
+
+    getPartySummaries: async (): Promise<ILedgerPartySummary[]> => {
+      const { data, error } = await supabase
+        .from(config.table)
+        .select(
+          `${config.idColumn}, ${config.nameColumn}, amount, paid_amount, status, created_at`
+        );
+      if (error) throw toError(error);
+
+      const byKey = new Map<string, ILedgerPartySummary>();
+
+      for (const row of (data ?? []) as unknown as IPartySummaryRow[]) {
+        const partyId = row[config.idColumn] ?? null;
+        const partyName = row[config.nameColumn];
+        const key = partyId ?? `name:${partyName}`;
+        const summary = byKey.get(key) ?? {
+          partyId,
+          partyName,
+          outstanding: 0,
+          unpaidCount: 0,
+          lastTransactionAt: null,
+        };
+
+        summary.outstanding += Number(row.amount) - Number(row.paid_amount);
+        if (row.status !== "paid") summary.unpaidCount += 1;
+        if (
+          !summary.lastTransactionAt ||
+          row.created_at > summary.lastTransactionAt
+        ) {
+          summary.lastTransactionAt = row.created_at;
+        }
+
+        byKey.set(key, summary);
+      }
+
+      return [...byKey.values()].sort((a, b) =>
+        a.partyName.localeCompare(b.partyName)
+      );
+    },
+
+    getPartyLedger: async (
+      party: ILedgerPartyKey,
+      filters: ILedgerFilters = {}
+    ): Promise<Row[]> => {
+      const base = supabase.from(config.table).select("*");
+      const scoped = party.partyId
+        ? base.eq(config.idColumn, party.partyId)
+        : base.is(config.idColumn, null).eq(config.nameColumn, party.partyName);
+
+      const filtered = applyLedgerFilters(scoped, filters, ledgerColumns);
+
+      const { data, error } = await applyStatusFilter(
+        filtered,
+        filters.status
+      ).order("due_date", { ascending: true });
       if (error) throw toError(error);
 
       return (data ?? []) as unknown as Row[];

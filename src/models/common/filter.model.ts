@@ -1,7 +1,11 @@
-import type { LedgerStatus } from "../../enums/ledger.enum";
+import type { LedgerStatus, PaymentStatus } from "../../enums/ledger.enum";
 import type { TransactionType } from "../../enums/transaction.enum";
 
-export type ILedgerFilterScope = "page" | "customer-ledger";
+export type ILedgerFilterScope =
+  | "page"
+  | "customer-ledger"
+  | "ledger"
+  | "payments";
 
 export interface ILedgerFilters {
   branch?: string;
@@ -14,7 +18,8 @@ export interface ILedgerFilters {
   search?: string;
   customerId?: string;
   supplierId?: string;
-  status?: LedgerStatus | "overdue";
+  status?: LedgerStatus | "overdue" | "unpaid";
+  paymentStatus?: PaymentStatus;
   type?: TransactionType;
 }
 

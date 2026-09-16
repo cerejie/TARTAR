@@ -57,6 +57,8 @@ export const applyStatusFilter = <T>(
 
   const chainable = query as IStatusChainable;
 
+  if (status === "unpaid") return chainable.neq("status", "paid") as T;
+
   if (status === "overdue") {
     const unpaid = chainable.neq("status", "paid") as IStatusChainable;
     return unpaid.lt("due_date", todayIso()) as T;

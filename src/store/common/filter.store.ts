@@ -17,7 +17,12 @@ type Actions = {
 };
 
 const initialValues: States = {
-  filters: { page: {}, "customer-ledger": {} },
+  filters: {
+    page: {},
+    "customer-ledger": {},
+    ledger: { status: "unpaid" },
+    payments: { paymentStatus: "pending" },
+  },
 };
 
 export const useFilterStore = create<States & Actions>()((set) => ({

@@ -1,4 +1,5 @@
 import type { PaymentKind } from "../../enums/ledger.enum";
+import type { ILedgerFilters } from "../../models/common/filter.model";
 import {
   pageRange,
   type IPaginationRequest,
@@ -38,14 +39,18 @@ const applyPartyFilter = <T extends IPartyChainable<T>>(
 const paymentServices = {
   getList: async (
     kind: PaymentKind,
-    filters: IPartyFilter = {},
+    filters: ILedgerFilters = {},
     pagination: IPaginationRequest
   ): Promise<IPaginationResponse<ILedgerPayment>> => {
-    const base = supabase
+    let query = supabase
       .from(table)
       .select("*", { count: "exact" })
       .eq("kind", kind);
-    const query = applyPartyFilter(base, kind, filters);
+
+    if (filters.paymentStatus) query = query.eq("status", filters.paymentStatus);
+    if (filters.dateFrom) query = query.gte("paid_at", filters.dateFrom);
+    if (filters.dateTo) query = query.lte("paid_at", filters.dateTo);
+
     const { from, to } = pageRange(pagination);
 
     const { data, error, count } = await query
