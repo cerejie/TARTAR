@@ -46,6 +46,7 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
   config: ILedgerConfig<Input>
 ) => {
   const noun = config.table.slice(0, -1);
+  const columns = { ...ledgerColumns, search: config.nameColumn };
 
   return {
     getList: async (
@@ -55,7 +56,7 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
       const filtered = applyLedgerFilters(
         supabase.from(config.table).select("*", { count: "exact" }),
         filters,
-        ledgerColumns
+        columns
       );
       const { from, to } = pageRange(pagination);
 
@@ -79,7 +80,7 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
       const filtered = applyLedgerFilters(
         supabase.from(config.table).select("*"),
         filters,
-        ledgerColumns
+        columns
       );
 
       const { data, error } = await applyStatusFilter(
@@ -141,7 +142,7 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
         ? base.eq(config.idColumn, party.partyId)
         : base.is(config.idColumn, null).eq(config.nameColumn, party.partyName);
 
-      const filtered = applyLedgerFilters(scoped, filters, ledgerColumns);
+      const filtered = applyLedgerFilters(scoped, filters, columns);
 
       const { data, error } = await applyStatusFilter(
         filtered,

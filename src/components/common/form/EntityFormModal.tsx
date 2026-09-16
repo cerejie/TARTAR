@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Flex, Form } from "antd";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import {
   useForm,
   type DefaultValues,
@@ -22,6 +22,7 @@ type IBaseProps<TValues extends FieldValues> = {
   open: boolean;
   title: string;
   subtitle?: string;
+  intro?: ReactNode;
   size?: ModalSize;
   schema: ZodType<TValues>;
   defaultValues: DefaultValues<TValues>;
@@ -41,6 +42,7 @@ const EntityFormModal = <TValues extends FieldValues>({
   open,
   title,
   subtitle,
+  intro,
   size = "md",
   fields,
   sections,
@@ -84,6 +86,7 @@ const EntityFormModal = <TValues extends FieldValues>({
       }
     >
       <Form layout="vertical" className={`${entityForm}`}>
+        {intro}
         {sections ? (
           sections.map((section) => (
             <FormSection

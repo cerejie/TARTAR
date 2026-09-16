@@ -11,6 +11,36 @@ export const entityForm = style({
   gap: vars.space.md,
 });
 
+export const formIntro = style({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: vars.space.md,
+  padding: vars.space.md,
+  borderRadius: vars.radius.lg,
+  background: vars.color.surfaceSubtle,
+});
+
+export const formIntroItem = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: 2,
+  minWidth: 120,
+});
+
+export const formIntroLabel = style({
+  fontSize: 11,
+  fontWeight: 700,
+  textTransform: "uppercase",
+  letterSpacing: "0.08em",
+  color: vars.color.textMuted,
+});
+
+export const formIntroValue = style({
+  fontSize: 14,
+  fontWeight: 600,
+  color: vars.color.text,
+});
+
 export const formGrid = style({
   display: "grid",
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",

@@ -27,4 +27,5 @@ export interface IFilterColumns {
   date: string;
   amount?: string;
   type?: string;
+  search?: string;
 }

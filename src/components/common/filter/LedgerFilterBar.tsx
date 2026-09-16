@@ -4,6 +4,9 @@ import dayjs from "dayjs";
 import {
   ledgerStatusLabels,
   ledgerStatusValues,
+  paymentStatusLabels,
+  paymentStatusValues,
+  type PaymentKind,
 } from "../../../enums/ledger.enum";
 import {
   transactionTypeLabels,
@@ -27,6 +30,7 @@ type IProps = {
   showStatus?: boolean;
   showOverdue?: boolean;
   showType?: boolean;
+  paymentKind?: PaymentKind;
   scope?: ILedgerFilterScope;
 };
 
@@ -35,6 +39,7 @@ const LedgerFilterBar = ({
   showStatus = false,
   showOverdue = false,
   showType = false,
+  paymentKind,
   scope = "page",
 }: IProps) => {
   const { filters, setFilters, resetFilters } = useLedgerFilters(scope);
@@ -73,9 +78,25 @@ const LedgerFilterBar = ({
           value={filters.status}
           onChange={(status) => setFilters({ status })}
           options={[
+            { value: "unpaid", label: "Unpaid" },
             ...toOptions(ledgerStatusValues, ledgerStatusLabels),
             ...(showOverdue ? [{ value: "overdue", label: "Overdue" }] : []),
           ]}
+        />
+      ) : null}
+
+      {paymentKind ? (
+        <Select
+          size="middle"
+          className={`${filterStatus}`}
+          placeholder="Any status"
+          allowClear
+          value={filters.paymentStatus}
+          onChange={(paymentStatus) => setFilters({ paymentStatus })}
+          options={toOptions(
+            paymentStatusValues,
+            paymentStatusLabels(paymentKind)
+          )}
         />
       ) : null}
 

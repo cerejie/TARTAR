@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import type { DefaultValues, FieldValues } from "react-hook-form";
+import type { ZodType } from "zod";
 import type { PaymentKind } from "../../../enums/ledger.enum";
 import {
   ledgerFormModalKey,
@@ -57,8 +58,8 @@ export interface ILedgerServices<Row extends ILedgerRow, Input> {
     party: ILedgerPartyKey,
     filters: ILedgerFilters
   ) => Promise<Row[]>;
-  create: (values: Input, createdBy: string | null) => Promise<IMutationResult>;
-  remove: (id: string) => Promise<IMutationResult>;
+  create(values: Input, createdBy: string | null): Promise<IMutationResult>;
+  remove(id: string): Promise<IMutationResult>;
 }
 
 export interface ILedgerListConfig<
@@ -70,10 +71,11 @@ export interface ILedgerListConfig<
   title: string;
   partyLabel: string;
   services: ILedgerServices<Row, Input>;
+  schema: ZodType<Input>;
   sections: IFieldSection<Input>[];
   defaults: DefaultValues<Input>;
-  partyOf: (row: Row) => ILedgerPartyKey;
-  prepare: (values: Input) => Input;
+  partyOf(row: Row): ILedgerPartyKey;
+  prepare(values: Input): Input;
 }
 
 const dueSoonDays = 7;
@@ -289,6 +291,7 @@ export const useLedgerListHook = <
     branchName,
     userNameOf,
     formModal,
+    schema: config.schema,
     sections: config.sections,
     defaults: config.defaults,
     createMutation,

@@ -36,6 +36,8 @@ export const applyLedgerFilters = <T>(
   if (columns.type && filters.type) chain(scoped.eq(columns.type, filters.type));
   if (filters.referenceNumber)
     chain(scoped.ilike("reference_number", `%${filters.referenceNumber}%`));
+  if (columns.search && filters.search)
+    chain(scoped.ilike(columns.search, `%${filters.search}%`));
   if (filters.dateFrom) chain(scoped.gte(columns.date, filters.dateFrom));
   if (filters.dateTo) chain(scoped.lte(columns.date, filters.dateTo));
 
