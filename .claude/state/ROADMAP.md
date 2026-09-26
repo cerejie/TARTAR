@@ -155,6 +155,13 @@ practical flow (primary action placement, destructive actions separated).
   uuid through party.services create(values, id) (runWrite, offline-safe order).
   ledger.list.hook invalidates customer/supplier lists.
 
+- [x] V7 — dashboard charts (compiled, not screenshot-verified, 2026-09-27): F26 daily axis
+  format MMM D (dashboard.response salesAxisFormats), AppBarChart minTickGap 24 +
+  interval preserveStartEnd. F27 CashFlowDonut legend dots only for the two arcs (slices shared
+  with the donut); Net Cash Flow = ruled total row, no dot (donutLegendTotal). F28 root cause =
+  Card not stretched in the bento cell: sectionCardRoot h-full, new sectionCardBody flex-1,
+  barChartFrame h-full min-h-72 so Sales Overview fills the row.
+
 ## Findings (desktop; mobile deferred by user)
 
 ### V3 — tokens + dark mode
@@ -237,16 +244,16 @@ loading/error states, long-name/large-money stress, validation errors (never pre
 
 ## Next
 
-1. **V7 — dashboard charts** (F26-F28). Optionally first a capture of V3-V6 (dark chips, row
-   menus, expanded rows, pager, Vouchers at 1440, title-row actions, Filters popover, Dashboard
-   date, Reports print divider, Record payment labels, placeholders, Customer/Supplier
-   combobox — type a new name and a reordered/typo'd existing name, cancel, never Save).
-Mobile (M*) goes to a new roadmap after V7.
+1. **Capture V3-V7** with the audit harness (dark chips, row menus, expanded rows, pager,
+   Vouchers at 1440, title-row actions, Filters popover, Dashboard date + charts at 1440/1280,
+   Reports print divider, Record payment labels, placeholders, Customer/Supplier combobox —
+   type a new name and a reordered/typo'd one, cancel, never Save). Fix any regressions, then
+   delete this file + .claude/state/audit/ and start the Mobile (M*) roadmap.
 
 ## Open
 - Migration 20260926000009_accountant_voucher_read.sql (and possibly 20260718000004..
   20260722000008) not yet applied to Supabase — accountant voucher views stay empty until then.
 
 ## State
-Branch: development-overhaul · Uncommitted: F24 src changes + .claude/state · Last check:
-yarn build + yarn lint clean (after V6).
+Branch: development-overhaul · Uncommitted: V7 src changes + .claude/state · Last check:
+tsc -b + yarn lint clean (after V7).

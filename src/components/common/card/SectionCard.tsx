@@ -11,6 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn.utils";
 import {
+  sectionCardBody,
   sectionCardExtra,
   sectionCardFlushBody,
   sectionCardFooter,
@@ -83,7 +84,7 @@ const SectionCard = ({
       ) : null}
 
       <CardContent
-        className={flush ? sectionCardFlushBody : undefined}
+        className={cn(sectionCardBody, flush && sectionCardFlushBody)}
         aria-busy={loading}
       >
         {renderBody()}

@@ -45,7 +45,7 @@ export const salesPeriodSubtitles: Record<SalesPeriod, string> = {
 };
 
 export const salesAxisFormats: Record<SalesPeriod, string> = {
-  daily: "MM-DD",
+  daily: "MMM D",
   weekly: "MMM D",
   monthly: "MMM",
   yearly: "YYYY",

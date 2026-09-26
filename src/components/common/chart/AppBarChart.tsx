@@ -14,6 +14,7 @@ import ChartTooltipRow from "./ChartTooltipRow";
 
 const barRadius: [number, number, number, number] = [8, 8, 0, 0];
 const axisTickMargin = 8;
+const axisMinTickGap = 24;
 
 type IProps<T> = {
   label: string;
@@ -50,6 +51,8 @@ const AppBarChart = <T,>({
           tickLine={false}
           axisLine={false}
           tickMargin={axisTickMargin}
+          minTickGap={axisMinTickGap}
+          interval="preserveStartEnd"
           tickFormatter={(value) => formatX(String(value))}
         />
         <YAxis

@@ -10,6 +10,9 @@ export const donutLegendRow = "flex items-center justify-between gap-2 text-sm";
 
 export const donutLegendKey = "flex items-center gap-2 text-muted-foreground";
 
+export const donutLegendTotal =
+  "flex items-center justify-between gap-2 border-t pt-2.5 text-sm";
+
 export const donutLegendDot = "size-2.5 shrink-0 rounded-full";
 
 export const donutLegendValue = "font-heading font-bold tabular-nums text-foreground";

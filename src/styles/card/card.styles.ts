@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const sectionCardRoot = cva("", {
+export const sectionCardRoot = cva("h-full", {
   variants: {
     flush: {
       true: "py-0",
@@ -13,6 +13,8 @@ export const sectionCardRoot = cva("", {
 export const sectionCardTitle = "font-heading font-semibold";
 
 export const sectionCardExtra = "flex items-center gap-2";
+
+export const sectionCardBody = "flex-1";
 
 export const sectionCardFlushBody = "px-0";
 

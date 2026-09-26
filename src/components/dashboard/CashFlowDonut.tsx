@@ -6,12 +6,14 @@ import {
   donutLegendDot,
   donutLegendKey,
   donutLegendRow,
+  donutLegendTotal,
   donutLegendValue,
   donutValue,
 } from "../../styles/dashboard/dashboard.styles";
 import { formatMoney } from "../../utils/format.utils";
 import AppDonutChart from "../common/chart/AppDonutChart";
 import EmptyState from "../common/status/EmptyState";
+import type { ChartTone } from "../../models/common/view.model";
 
 type IProps = {
   cashIn: number;
@@ -20,18 +22,18 @@ type IProps = {
 };
 
 type ILegendItem = {
+  key: string;
   label: string;
   value: number;
-  tone: Tone;
+  tone: Tone & ChartTone;
 };
 
 const CashFlowDonut = ({ cashIn, cashOut, netCashFlow }: IProps) => {
   const hasMovement = cashIn > 0 || cashOut > 0;
 
-  const legend: readonly ILegendItem[] = [
-    { label: "Cash In", value: cashIn, tone: "positive" },
-    { label: "Cash Out", value: cashOut, tone: "negative" },
-    { label: "Net Cash Flow", value: netCashFlow, tone: "brand" },
+  const slices: readonly ILegendItem[] = [
+    { key: "cashIn", label: "Cash In", value: cashIn, tone: "positive" },
+    { key: "cashOut", label: "Cash Out", value: cashOut, tone: "negative" },
   ];
 
   return (
@@ -39,10 +41,7 @@ const CashFlowDonut = ({ cashIn, cashOut, netCashFlow }: IProps) => {
       {hasMovement ? (
         <AppDonutChart
           label="Cash flow this month"
-          slices={[
-            { key: "cashIn", label: "Cash In", value: cashIn, tone: "positive" },
-            { key: "cashOut", label: "Cash Out", value: cashOut, tone: "negative" },
-          ]}
+          slices={slices}
           formatValue={formatMoney}
           center={
             <>
@@ -56,8 +55,8 @@ const CashFlowDonut = ({ cashIn, cashOut, netCashFlow }: IProps) => {
       )}
 
       <div className={donutLegend}>
-        {legend.map((item) => (
-          <div key={item.label} className={donutLegendRow}>
+        {slices.map((item) => (
+          <div key={item.key} className={donutLegendRow}>
             <span className={donutLegendKey}>
               <span className={cn(donutLegendDot, toneFill({ tone: item.tone }))} />
               {item.label}
@@ -65,6 +64,10 @@ const CashFlowDonut = ({ cashIn, cashOut, netCashFlow }: IProps) => {
             <span className={donutLegendValue}>{formatMoney(item.value)}</span>
           </div>
         ))}
+        <div className={donutLegendTotal}>
+          <span className={donutLegendKey}>Net Cash Flow</span>
+          <span className={donutLegendValue}>{formatMoney(netCashFlow)}</span>
+        </div>
       </div>
     </>
   );
