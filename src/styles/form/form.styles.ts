@@ -28,3 +28,13 @@ export const formSectionHeader = "flex flex-col gap-1";
 export const formSectionTitle = "font-heading text-sm font-semibold";
 
 export const formSectionDescription = "text-sm text-muted-foreground";
+
+export const fieldLabelHidden = "sr-only";
+
+export const formIntro = "flex flex-wrap gap-4 rounded-lg bg-muted p-4";
+
+export const formIntroItem = "flex min-w-30 flex-col gap-0.5";
+
+export const formIntroLabel = "text-xs font-bold tracking-widest text-muted-foreground uppercase";
+
+export const formIntroValue = "text-sm font-semibold text-foreground";

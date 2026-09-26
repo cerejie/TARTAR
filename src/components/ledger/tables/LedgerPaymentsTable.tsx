@@ -1,5 +1,4 @@
-import { CheckOutlined, CloseOutlined, UserOutlined } from "@ant-design/icons";
-import { Tooltip } from "antd";
+import { Check, User, X } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
@@ -17,7 +16,7 @@ import { useConfirm } from "../../../hook/common/confirmation.hook";
 import { usePaymentListHook } from "../../../hook/data/payment/payment.list.hook";
 import type { IRowAction } from "../../../models/common/action.model";
 import type { ILedgerPayment } from "../../../models/data/payment/payment.response";
-import { nowrapCell } from "../../../styles/table/table.css";
+import { nowrapCell } from "../../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../../utils/format.utils";
 
 type IProps = {
@@ -42,6 +41,11 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
   const openConfirm = useConfirm();
   const partyLabel = kind === "receivable" ? "Customer" : "Supplier";
 
+  const verifiedHintOf = (payment: ILedgerPayment) =>
+    payment.verified_by && payment.status !== "pending"
+      ? `${userNameOf(payment.verified_by)} · ${formatDate(payment.verified_at)}`
+      : undefined;
+
   const approve = (payment: ILedgerPayment) => {
     if (kind === "receivable") {
       void verifyMutation.mutate(payment.id);
@@ -63,7 +67,7 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
           {
             key: "verify",
             label: verb,
-            icon: <CheckOutlined />,
+            icon: <Check />,
             onSelect: () => approve(payment),
           },
         ]
@@ -73,7 +77,7 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
           {
             key: "reject",
             label: "Reject",
-            icon: <CloseOutlined />,
+            icon: <X />,
             danger: true,
             onSelect: () =>
               openConfirm({
@@ -92,21 +96,21 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
     {
       title: "Date",
       dataIndex: "paid_at",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     {
       title: partyLabel,
       dataIndex: "party_name",
       render: (name: string) => (
-        <NameCell icon={<UserOutlined />}>{name}</NameCell>
+        <NameCell icon={<User />}>{name}</NameCell>
       ),
     },
     {
       title: "Amount",
       dataIndex: "amount",
       align: "right",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: number) => formatMoney(value),
     },
     {
@@ -117,27 +121,14 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
     {
       title: "Status",
       dataIndex: "status",
-      className: `${nowrapCell}`,
-      render: (status: ILedgerPayment["status"], payment) => {
-        const tag = (
-          <StatusTag
-            color={paymentStatusColors[status]}
-            label={statusLabels[status]}
-          />
-        );
-
-        if (!payment.verified_by || status === "pending") return tag;
-
-        return (
-          <Tooltip
-            title={`${userNameOf(payment.verified_by)} · ${formatDate(
-              payment.verified_at
-            )}`}
-          >
-            <span>{tag}</span>
-          </Tooltip>
-        );
-      },
+      className: nowrapCell,
+      render: (status: ILedgerPayment["status"], payment) => (
+        <StatusTag
+          color={paymentStatusColors[status]}
+          label={statusLabels[status]}
+          hint={verifiedHintOf(payment)}
+        />
+      ),
     },
     ...(permissions.isManager
       ? [
@@ -151,7 +142,7 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
             title: "Action",
             key: "actions",
             align: "center" as const,
-            className: `${nowrapCell}`,
+            className: nowrapCell,
             render: (_: unknown, payment: ILedgerPayment) => (
               <RowActionMenu actions={actionsOf(payment)} />
             ),

@@ -27,6 +27,8 @@ export interface IFieldConfig<TValues extends FieldValues = FieldValues> {
   options?: IFieldOption[];
   placeholder?: string;
   prefix?: string;
+  max?: number;
+  hideLabel?: boolean;
   icon?: ReactNode;
   autoComplete?: string;
   allowClear?: boolean;

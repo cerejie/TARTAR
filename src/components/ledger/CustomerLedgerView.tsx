@@ -1,10 +1,4 @@
-import {
-  ArrowLeftOutlined,
-  DollarOutlined,
-  InfoCircleOutlined,
-  PrinterOutlined,
-} from "@ant-design/icons";
-import { Button, Col, Flex, Row, Tooltip, Typography } from "antd";
+import { ArrowLeft, CircleDollarSign, Info, Printer } from "lucide-react";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import { customerDetailsModalKey } from "../../keys/modal.keys";
 import {
@@ -19,24 +13,26 @@ import {
   ledgerBalance,
   type IReceivable,
 } from "../../models/data/ledger/ledger.response";
-import { cardTitle } from "../../styles/card/card.css";
-import { statGrid } from "../../styles/stat/stat.css";
-import { dataTableRowOverdue } from "../../styles/table/table.styles";
 import {
   ledgerHead,
-  ledgerSection,
-} from "../../styles/view/ledger/ledger.view.css";
+  ledgerHeadActions,
+  ledgerHeadStart,
+  ledgerSectionTitle,
+  ledgerTitle,
+} from "../../styles/ledger/ledger.styles";
+import { dataTableRowOverdue } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { printStatement } from "../../utils/print.utils";
+import AppButton from "../common/button/AppButton";
 import StatCard from "../common/card/StatCard";
 import LedgerFilterBar from "../common/filter/LedgerFilterBar";
 import RequirePermission from "../common/guard/RequirePermission";
 import DataTable from "../common/table/DataTable";
+import BentoCell from "../common/view/BentoCell";
+import BentoGrid from "../common/view/BentoGrid";
 import PaymentsPanel from "../payment/PaymentsPanel";
 import CustomerInfoModal from "./CustomerInfoModal";
 import PaymentAllocationModal from "./PaymentAllocationModal";
-
-const { Title } = Typography;
 
 const CustomerLedgerView = () => {
   const {
@@ -125,62 +121,49 @@ const CustomerLedgerView = () => {
 
   return (
     <>
-      <Flex
-        className={`${ledgerHead}`}
-        align="center"
-        gap="middle"
-        wrap
-        justify="space-between"
-      >
-        <Flex align="center" gap="middle">
-          <Button icon={<ArrowLeftOutlined />} onClick={closeLedgerDetail}>
+      <div className={ledgerHead}>
+        <div className={ledgerHeadStart}>
+          <AppButton variant="outline" onPress={closeLedgerDetail}>
+            <ArrowLeft />
             Back to customers
-          </Button>
-          <Title level={4} className={`${cardTitle}`}>
-            {customer.customerName}
-          </Title>
-        </Flex>
-        <Flex align="center" gap="small">
-          <Tooltip title="Customer information">
-            <Button
-              icon={<InfoCircleOutlined />}
-              aria-label={`Information for ${customer.customerName}`}
-              onClick={() => infoModal.openModal()}
-            />
-          </Tooltip>
-          <Button
-            icon={<PrinterOutlined />}
-            onClick={() =>
+          </AppButton>
+          <h2 className={ledgerTitle}>{customer.customerName}</h2>
+        </div>
+        <div className={ledgerHeadActions}>
+          <AppButton
+            variant="outline"
+            size="icon"
+            aria-label={`Information for ${customer.customerName}`}
+            tooltip="Customer information"
+            onPress={() => infoModal.openModal()}
+          >
+            <Info />
+          </AppButton>
+          <AppButton
+            variant="outline"
+            onPress={() =>
               printStatement(customer, summary, rows, payments, branchName)
             }
           >
+            <Printer />
             Print statement
-          </Button>
+          </AppButton>
           <RequirePermission can="encodeTransactions" fallback={null}>
-            <Tooltip
-              title={
-                selectedRows.length
-                  ? undefined
-                  : "Tick the receivables being paid first"
-              }
+            <AppButton
+              disabled={selectedRows.length === 0}
+              onPress={() => paymentModal.openModal()}
             >
-              <span>
-                <Button
-                  type="primary"
-                  icon={<DollarOutlined />}
-                  disabled={selectedRows.length === 0}
-                  onClick={() => paymentModal.openModal()}
-                >
-                  Record payment
-                </Button>
-              </span>
-            </Tooltip>
+              <CircleDollarSign />
+              {selectedRows.length === 0
+                ? "Tick receivables to pay"
+                : "Record payment"}
+            </AppButton>
           </RequirePermission>
-        </Flex>
-      </Flex>
+        </div>
+      </div>
 
-      <Row gutter={[16, 16]} className={`${statGrid}`}>
-        <Col xs={12} md={6}>
+      <BentoGrid>
+        <BentoCell span="quarter">
           <StatCard
             title="Outstanding balance"
             value={summary?.outstanding ?? 0}
@@ -189,32 +172,32 @@ const CustomerLedgerView = () => {
               summary && summary.outstanding > 0 ? "negative" : "positive"
             }
           />
-        </Col>
-        <Col xs={12} md={6}>
+        </BentoCell>
+        <BentoCell span="quarter">
           <StatCard
             title="Unpaid transactions"
             value={summary?.unpaidCount ?? 0}
             loading={summaryLoading}
             raw
           />
-        </Col>
-        <Col xs={12} md={6}>
+        </BentoCell>
+        <BentoCell span="quarter">
           <StatCard
             title="Last payment"
             value={formatDate(lastPayment)}
             loading={lastPaymentLoading}
             raw
           />
-        </Col>
-        <Col xs={12} md={6}>
+        </BentoCell>
+        <BentoCell span="quarter">
           <StatCard
             title="Last transaction"
             value={formatDate(summary?.lastTransactionAt ?? null)}
             loading={summaryLoading}
             raw
           />
-        </Col>
-      </Row>
+        </BentoCell>
+      </BentoGrid>
 
       <LedgerFilterBar scope="customer-ledger" showStatus showOverdue />
 
@@ -232,9 +215,7 @@ const CustomerLedgerView = () => {
         }}
       />
 
-      <Title level={5} className={`${ledgerSection}`}>
-        Payments
-      </Title>
+      <h3 className={ledgerSectionTitle}>Payments</h3>
       <PaymentsPanel
         kind="receivable"
         party={{

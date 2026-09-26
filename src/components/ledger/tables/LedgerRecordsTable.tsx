@@ -1,12 +1,6 @@
-import {
-  DeleteOutlined,
-  DollarOutlined,
-  FileTextOutlined,
-  PlusOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Button } from "antd";
+import { CircleDollarSign, FileText, Plus, Trash2, User } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
+import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import EntityFormModal from "../../common/form/EntityFormModal";
@@ -35,7 +29,7 @@ import {
   isLedgerOverdue,
   ledgerBalance,
 } from "../../../models/data/ledger/ledger.response";
-import { nowrapCell } from "../../../styles/table/table.css";
+import { nowrapCell } from "../../../styles/table/table.styles";
 import {
   formatDate,
   formatDateTime,
@@ -77,7 +71,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       key: "payment",
       label:
         row.status === "paid" ? "Record payment — already paid" : "Record payment",
-      icon: <DollarOutlined />,
+      icon: <CircleDollarSign />,
       disabled: row.status === "paid",
       onSelect: () => openPaymentFor(row),
     },
@@ -86,7 +80,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
           {
             key: "delete",
             label: `Delete ${noun}`,
-            icon: <DeleteOutlined />,
+            icon: <Trash2 />,
             danger: true,
             onSelect: () =>
               openConfirm({
@@ -104,14 +98,14 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     {
       title: "Due date",
       dataIndex: "due_date",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     {
       title: partyLabel,
       key: "party",
       render: (_, row) => (
-        <NameCell icon={<UserOutlined />}>{partyNameOf(row)}</NameCell>
+        <NameCell icon={<User />}>{partyNameOf(row)}</NameCell>
       ),
     },
     { title: "Branch", dataIndex: "branch", render: branchName },
@@ -119,13 +113,13 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       title: "Balance",
       key: "balance",
       align: "right",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (_, row) => formatMoney(ledgerBalance(row)),
     },
     {
       title: "Status",
       dataIndex: "status",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (status: ILedgerRecord["status"], row) =>
         isLedgerOverdue(row) ? (
           <StatusTag color="negative" label="Overdue" />
@@ -145,7 +139,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       title: "Action",
       key: "actions",
       align: "center",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (_, row) => <RowActionMenu actions={actionsOf(row)} />,
     },
   ];
@@ -154,7 +148,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     {
       key: "record",
       title: "Record",
-      icon: <FileTextOutlined />,
+      icon: <FileText />,
       items: [
         {
           key: "amount",
@@ -187,13 +181,10 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
           <FilterToolbar
             actions={
               <RequirePermission can="encodeTransactions" fallback={null}>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => formModal.openModal()}
-                >
+                <AppButton onPress={() => formModal.openModal()}>
+                  <Plus />
                   Record {noun}
-                </Button>
+                </AppButton>
               </RequirePermission>
             }
           >

@@ -1,18 +1,16 @@
-import { IdcardOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Flex, Input, Tooltip } from "antd";
+import { IdCard, User } from "lucide-react";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import { useCustomerLedgerHook } from "../../hook/data/ledger/customer.ledger.hook";
 import type { ICustomerReceivableSummary } from "../../models/data/ledger/ledger.response";
 import { ledgerKeyOf } from "../../models/data/ledger/ledger.response";
-import { filterBar } from "../../styles/filter/filter.css";
-import { iconButton } from "../../styles/table/table.css";
 import {
-  slideDetail,
   slidePane,
   slidePanes,
   slideTrack,
-} from "../../styles/view/ledger/ledger.view.css";
+} from "../../styles/ledger/ledger.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
+import AppButton from "../common/button/AppButton";
+import SearchInput from "../common/filter/SearchInput";
 import RequirePermission from "../common/guard/RequirePermission";
 import AppModal from "../common/modal/AppModal";
 import DataTable from "../common/table/DataTable";
@@ -42,7 +40,7 @@ const CustomerLedgerModal = () => {
       key: "name",
       sorter: (a, b) => a.customerName.localeCompare(b.customerName),
       render: (_, customer) => (
-        <NameCell icon={<UserOutlined />}>{customer.customerName}</NameCell>
+        <NameCell icon={<User />}>{customer.customerName}</NameCell>
       ),
     },
     {
@@ -80,23 +78,19 @@ const CustomerLedgerModal = () => {
       align: "center",
       render: (_, customer) => (
         <RequirePermission can="encodeTransactions" fallback={null}>
-          <Tooltip
-            title={
+          <AppButton
+            variant="outline"
+            size="icon-sm"
+            aria-label={`Customer details for ${customer.customerName}`}
+            tooltip={
               recordFor(customer)
                 ? "Edit customer details"
                 : "Fill in customer details"
             }
+            onPress={() => detailsModal.openModal(customer)}
           >
-            <Button
-              className={`${iconButton}`}
-              icon={<IdcardOutlined />}
-              aria-label={`Customer details for ${customer.customerName}`}
-              onClick={(event) => {
-                event.stopPropagation();
-                detailsModal.openModal(customer);
-              }}
-            />
-          </Tooltip>
+            <IdCard />
+          </AppButton>
         </RequirePermission>
       ),
     },
@@ -110,19 +104,13 @@ const CustomerLedgerModal = () => {
       size="xl"
       onClose={close}
     >
-      <Flex className={`${slidePanes}`} vertical>
-        <Flex
-          className={`${slideTrack} ${detailOpen ? slideDetail : ""}`}
-          align="flex-start"
-        >
-          <Flex vertical className={`${slidePane}`} aria-hidden={detailOpen}>
-            <Input
-              className={`${filterBar}`}
-              prefix={<SearchOutlined />}
+      <div className={slidePanes}>
+        <div className={slideTrack({ detail: detailOpen })}>
+          <div className={slidePane} aria-hidden={detailOpen} inert={detailOpen}>
+            <SearchInput
               placeholder="Search customer"
-              allowClear
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(value) => setSearch(value ?? "")}
             />
             <DataTable<ICustomerReceivableSummary>
               columns={columns}
@@ -138,12 +126,12 @@ const CustomerLedgerModal = () => {
               }
               emptyText="No customers with receivables"
             />
-          </Flex>
-          <Flex vertical className={`${slidePane}`} aria-hidden={!detailOpen}>
+          </div>
+          <div className={slidePane} aria-hidden={!detailOpen} inert={!detailOpen}>
             <CustomerLedgerView />
-          </Flex>
-        </Flex>
-      </Flex>
+          </div>
+        </div>
+      </div>
 
       <CustomerDetailsModal
         open={detailsModal.modal.visible}

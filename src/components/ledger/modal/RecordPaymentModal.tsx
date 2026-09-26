@@ -13,7 +13,7 @@ import {
   formIntroItem,
   formIntroLabel,
   formIntroValue,
-} from "../../../styles/form/form.css";
+} from "../../../styles/form/form.styles";
 import { formatMoney } from "../../../utils/format.utils";
 
 type IProps = {
@@ -38,20 +38,20 @@ const RecordPaymentModal = ({ scope }: IProps) => {
   );
 
   const intro = (
-    <div className={`${formIntro}`}>
-      <div className={`${formIntroItem}`}>
-        <span className={`${formIntroLabel}`}>{partyLabel}</span>
-        <span className={`${formIntroValue}`}>
+    <div className={formIntro}>
+      <div className={formIntroItem}>
+        <span className={formIntroLabel}>{partyLabel}</span>
+        <span className={formIntroValue}>
           {paymentTarget?.party.partyName ?? "—"}
         </span>
       </div>
-      <div className={`${formIntroItem}`}>
-        <span className={`${formIntroLabel}`}>Records</span>
-        <span className={`${formIntroValue}`}>{paymentRows.length}</span>
+      <div className={formIntroItem}>
+        <span className={formIntroLabel}>Records</span>
+        <span className={formIntroValue}>{paymentRows.length}</span>
       </div>
-      <div className={`${formIntroItem}`}>
-        <span className={`${formIntroLabel}`}>Balance</span>
-        <span className={`${formIntroValue}`}>{formatMoney(totalBalance)}</span>
+      <div className={formIntroItem}>
+        <span className={formIntroLabel}>Balance</span>
+        <span className={formIntroValue}>{formatMoney(totalBalance)}</span>
       </div>
     </div>
   );

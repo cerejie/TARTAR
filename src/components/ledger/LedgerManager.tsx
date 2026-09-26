@@ -1,10 +1,4 @@
-import {
-  DeleteOutlined,
-  DollarOutlined,
-  PlusOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Button, Space, Tooltip } from "antd";
+import { CircleDollarSign, Plus, Trash2, User } from "lucide-react";
 import StatusTag from "../common/status/StatusTag";
 import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { IDataTableColumn } from "../../models/common/table.model";
@@ -30,9 +24,12 @@ import {
   settlementSchema,
   type ISettlementInput,
 } from "../../models/data/ledger/ledger.request";
-import { iconButton } from "../../styles/table/table.css";
-import { dataTableRowOverdue } from "../../styles/table/table.styles";
+import {
+  dataTableRowOverdue,
+  tagRow,
+} from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
+import AppButton from "../common/button/AppButton";
 import SectionCard from "../common/card/SectionCard";
 import FilterToolbar from "../common/filter/FilterToolbar";
 import LedgerFilterBar from "../common/filter/LedgerFilterBar";
@@ -76,17 +73,17 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
       dataIndex: "due_date",
       width: 190,
       render: (value: string, row) => (
-        <Space>
+        <span className={tagRow}>
           {formatDate(value)}
           {isLedgerOverdue(row) ? <StatusTag color="negative" label="Overdue" /> : null}
-        </Space>
+        </span>
       ),
     },
     {
       title: props.partyLabel,
       key: "name",
       render: (_, row) => (
-        <NameCell icon={<UserOutlined />}>{props.nameOf(row)}</NameCell>
+        <NameCell icon={<User />}>{props.nameOf(row)}</NameCell>
       ),
     },
     { title: "Branch", dataIndex: "branch", render: branchName },
@@ -127,35 +124,32 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
       align: "center",
       render: (_, row) => (
         <RowActions>
-          <Tooltip
-            title={row.status === "paid" ? "Fully paid" : "Record payment"}
+          <AppButton
+            variant="outline"
+            size="icon-sm"
+            aria-label={row.status === "paid" ? "Fully paid" : "Record payment"}
+            tooltip={row.status === "paid" ? "Fully paid" : "Record payment"}
+            disabled={row.status === "paid"}
+            onPress={() => settleModal.openModal(row)}
           >
-            <span>
-              <Button
-                className={`${iconButton}`}
-                icon={<DollarOutlined />}
-                aria-label="Record payment"
-                disabled={row.status === "paid"}
-                onClick={() => settleModal.openModal(row)}
-              />
-            </span>
-          </Tooltip>
+            <CircleDollarSign />
+          </AppButton>
           <RequirePermission can="isManager" fallback={null}>
-            <Tooltip title="Delete record">
-              <Button
-                className={`${iconButton}`}
-                danger
-                icon={<DeleteOutlined />}
-                aria-label="Delete record"
-                onClick={() =>
-                  openConfirm({
-                    kind: "delete",
-                    title: "Delete record?",
-                    onConfirm: () => removeMutation.mutate(row.id),
-                  })
-                }
-              />
-            </Tooltip>
+            <AppButton
+              variant="destructive"
+              size="icon-sm"
+              aria-label="Delete record"
+              tooltip="Delete record"
+              onPress={() =>
+                openConfirm({
+                  kind: "delete",
+                  title: "Delete record?",
+                  onConfirm: () => removeMutation.mutate(row.id),
+                })
+              }
+            >
+              <Trash2 />
+            </AppButton>
           </RequirePermission>
         </RowActions>
       ),
@@ -169,13 +163,10 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
           <>
             {props.headerActions}
             <RequirePermission can="encodeTransactions" fallback={null}>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => formModal.openModal()}
-              >
+              <AppButton onPress={() => formModal.openModal()}>
+                <Plus />
                 Add {props.partyLabel.toLowerCase()} record
-              </Button>
+              </AppButton>
             </RequirePermission>
           </>
         }

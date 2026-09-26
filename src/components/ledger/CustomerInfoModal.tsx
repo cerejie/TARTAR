@@ -1,8 +1,8 @@
-import { Button, Flex } from "antd";
 import { useCustomerRecordHook } from "../../hook/data/party/customer.record.hook";
 import type { IDetailItem } from "../../models/common/detail.model";
 import type { ICustomerLedgerKey } from "../../models/data/ledger/ledger.response";
 import type { ICustomer } from "../../models/data/party/party.response";
+import AppButton from "../common/button/AppButton";
 import DetailModal from "../common/modal/DetailModal";
 import CustomerInfoTag from "./CustomerInfoTag";
 
@@ -62,14 +62,16 @@ const CustomerInfoModal = ({ open, customer, onClose, onEdit }: IProps) => {
       emptyText="No customer selected"
       onClose={onClose}
       footer={
-        <Flex justify="flex-end" gap={8}>
-          <Button onClick={onClose}>Close</Button>
+        <>
+          <AppButton variant="outline" onPress={onClose}>
+            Close
+          </AppButton>
           {onEdit ? (
-            <Button type="primary" onClick={onEdit}>
+            <AppButton onPress={onEdit}>
               {record ? "Edit details" : "Fill in details"}
-            </Button>
+            </AppButton>
           ) : null}
-        </Flex>
+        </>
       }
     />
   );

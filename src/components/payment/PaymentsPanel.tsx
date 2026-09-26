@@ -1,5 +1,4 @@
-import { CheckOutlined, CloseOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Space, Tooltip } from "antd";
+import { Check, User, X } from "lucide-react";
 import StatusTag from "../common/status/StatusTag";
 import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { IDataTableColumn } from "../../models/common/table.model";
@@ -10,10 +9,11 @@ import {
 import { usePaymentListHook } from "../../hook/data/payment/payment.list.hook";
 import type { ILedgerPayment } from "../../models/data/payment/payment.response";
 import { formatDate, formatMoney } from "../../utils/format.utils";
+import AppButton from "../common/button/AppButton";
 import SectionCard from "../common/card/SectionCard";
 import RequirePermission from "../common/guard/RequirePermission";
 import DataTable from "../common/table/DataTable";
-import { NameCell } from "../common/table/TableDecor";
+import { NameCell, RowActions } from "../common/table/TableDecor";
 
 type IProps = {
   kind: PaymentKind;
@@ -35,6 +35,11 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
 
   const openConfirm = useConfirm();
 
+  const verifiedHintOf = (payment: ILedgerPayment) =>
+    payment.verified_by && payment.status !== "pending"
+      ? `${userNameOf(payment.verified_by)} · ${formatDate(payment.verified_at)}`
+      : undefined;
+
   const columns: IDataTableColumn<ILedgerPayment>[] = [
     {
       title: "Date",
@@ -49,7 +54,7 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
             title: kind === "receivable" ? "Customer" : "Supplier",
             dataIndex: "party_name" as const,
             render: (name: string) => (
-              <NameCell icon={<UserOutlined />}>{name}</NameCell>
+              <NameCell icon={<User />}>{name}</NameCell>
             ),
           },
         ]),
@@ -67,23 +72,13 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
     {
       title: "Status",
       dataIndex: "status",
-      render: (status: ILedgerPayment["status"], payment) => {
-        const tag = (
-          <StatusTag color={paymentStatusColors[status]} label={statusLabels[status]} />
-        );
-
-        if (!payment.verified_by || status === "pending") return tag;
-
-        return (
-          <Tooltip
-            title={`${userNameOf(payment.verified_by)} · ${formatDate(
-              payment.verified_at
-            )}`}
-          >
-            {tag}
-          </Tooltip>
-        );
-      },
+      render: (status: ILedgerPayment["status"], payment) => (
+        <StatusTag
+          color={paymentStatusColors[status]}
+          label={statusLabels[status]}
+          hint={verifiedHintOf(payment)}
+        />
+      ),
     },
     ...(permissions.isManager
       ? [
@@ -101,24 +96,22 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
       width: 190,
       render: (_, payment) => (
         <RequirePermission can="isManager" fallback={null}>
-          <Space>
+          <RowActions>
             {payment.status === "pending" ? (
-              <Button
-                type="link"
-                size="small"
-                icon={<CheckOutlined />}
-                onClick={() => void verifyMutation.mutate(payment.id)}
+              <AppButton
+                variant="ghost"
+                size="sm"
+                onPress={() => void verifyMutation.mutate(payment.id)}
               >
+                <Check />
                 {verb}
-              </Button>
+              </AppButton>
             ) : null}
             {payment.status !== "rejected" ? (
-              <Button
-                type="link"
-                danger
-                size="small"
-                icon={<CloseOutlined />}
-                onClick={() =>
+              <AppButton
+                variant="destructive"
+                size="sm"
+                onPress={() =>
                   openConfirm({
                     kind: "delete",
                     title: "Reject payment?",
@@ -130,10 +123,11 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
                   })
                 }
               >
+                <X />
                 Reject
-              </Button>
+              </AppButton>
             ) : null}
-          </Space>
+          </RowActions>
         </RequirePermission>
       ),
     },

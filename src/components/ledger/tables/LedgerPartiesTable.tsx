@@ -1,4 +1,4 @@
-import { DollarOutlined, IdcardOutlined, UserOutlined } from "@ant-design/icons";
+import { CircleDollarSign, IdCard, User } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import SearchInput from "../../common/filter/SearchInput";
@@ -16,7 +16,7 @@ import {
 import { customerDetailsModalKey } from "../../../keys/modal.keys";
 import type { IRowAction } from "../../../models/common/action.model";
 import type { ILedgerPartySummary } from "../../../models/data/ledger/ledger.response";
-import { nowrapCell } from "../../../styles/table/table.css";
+import { nowrapCell } from "../../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../../utils/format.utils";
 
 type IProps = {
@@ -36,7 +36,7 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
         party.unpaidCount === 0
           ? "Record payment — nothing unpaid"
           : "Record payment",
-      icon: <DollarOutlined />,
+      icon: <CircleDollarSign />,
       disabled: party.unpaidCount === 0,
       onSelect: () => openPaymentForParty(party),
     },
@@ -45,7 +45,7 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
           {
             key: "details",
             label: "Customer details",
-            icon: <IdcardOutlined />,
+            icon: <IdCard />,
             onSelect: () => detailsModal.openModal(party),
           },
         ]
@@ -57,33 +57,33 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
       title: partyLabel,
       dataIndex: "partyName",
       render: (name: string) => (
-        <NameCell icon={<UserOutlined />}>{name}</NameCell>
+        <NameCell icon={<User />}>{name}</NameCell>
       ),
     },
     {
       title: "Outstanding",
       dataIndex: "outstanding",
       align: "right",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: number) => formatMoney(value),
     },
     {
       title: "Unpaid records",
       dataIndex: "unpaidCount",
       align: "right",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
     },
     {
       title: "Last transaction",
       dataIndex: "lastTransactionAt",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: string | null) => (value ? formatDate(value) : "—"),
     },
     {
       title: "Action",
       key: "actions",
       align: "center",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (_, party) => <RowActionMenu actions={actionsOf(party)} />,
     },
   ];

@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Flex, Form, InputNumber, Typography } from "antd";
-import type { IDataTableColumn } from "../../models/common/table.model";
-import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useEffect, useId } from "react";
+import { useForm } from "react-hook-form";
 import type { IFieldConfig } from "../../models/common/field.model";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import type { ICustomerLedgerKey } from "../../models/data/ledger/ledger.response";
 import { ledgerBalance } from "../../models/data/ledger/ledger.response";
 import type { IReceivable } from "../../models/data/ledger/ledger.response";
@@ -12,14 +11,16 @@ import {
   type IPaymentFormInput,
   type IRecordPaymentInput,
 } from "../../models/data/payment/payment.request";
-import { entityForm } from "../../styles/form/form.css";
-import { paymentTotal } from "../../styles/view/ledger/ledger.view.css";
+import { entityForm } from "../../styles/form/form.styles";
+import {
+  paymentTotal,
+  paymentTotalValue,
+} from "../../styles/ledger/ledger.styles";
 import { formatDate, formatMoney, todayIso } from "../../utils/format.utils";
+import AppButton from "../common/button/AppButton";
 import FormField from "../common/form/FormField";
 import AppModal from "../common/modal/AppModal";
 import DataTable from "../common/table/DataTable";
-
-const { Paragraph, Text } = Typography;
 
 const detailFields: IFieldConfig<IPaymentFormInput>[] = [
   { name: "paid_at", label: "Payment date", type: "date" },
@@ -43,6 +44,8 @@ const PaymentAllocationModal = ({
   onSubmit,
   onClose,
 }: IProps) => {
+  const formId = useId();
+
   const defaults: IPaymentFormInput = {
     paid_at: todayIso(),
     reference_number: "",
@@ -109,18 +112,16 @@ const PaymentAllocationModal = ({
       align: "right",
       width: 160,
       render: (_, row) => (
-        <Controller
-          name={`amounts.${row.id}`}
+        <FormField<IPaymentFormInput>
           control={control}
-          render={({ field }) => (
-            <InputNumber
-              {...field}
-              prefix="₱"
-              min={0}
-              max={ledgerBalance(row)}
-              aria-label={`Payment for ${row.reference_number ?? row.id}`}
-            />
-          )}
+          config={{
+            name: `amounts.${row.id}`,
+            label: `Payment for ${row.reference_number ?? row.id}`,
+            type: "amount",
+            prefix: "₱",
+            max: ledgerBalance(row),
+            hideLabel: true,
+          }}
         />
       ),
     },
@@ -134,35 +135,43 @@ const PaymentAllocationModal = ({
       size="lg"
       onClose={onClose}
       footer={
-        <Flex justify="flex-end" gap={8}>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button
-            type="primary"
+        <>
+          <AppButton variant="outline" disabled={submitting} onPress={onClose}>
+            Cancel
+          </AppButton>
+          <AppButton
+            type="submit"
+            form={formId}
             disabled={total <= 0}
             loading={submitting}
-            onClick={handleSubmit(submit)}
           >
             Record payment
-          </Button>
-        </Flex>
+          </AppButton>
+        </>
       }
     >
-      <Form layout="vertical" className={`${entityForm}`}>
+      <form
+        id={formId}
+        noValidate
+        className={entityForm}
+        onSubmit={handleSubmit(submit)}
+      >
         {detailFields.map((field) => (
           <FormField key={field.name} config={field} control={control} />
         ))}
-      </Form>
 
-      <DataTable<IReceivable>
-        columns={columns}
-        data={rows}
-        pageSize={Math.max(rows.length, 1)}
-        emptyText="No receivables selected"
-      />
+        <DataTable<IReceivable>
+          columns={columns}
+          data={rows}
+          pageSize={Math.max(rows.length, 1)}
+          emptyText="No receivables selected"
+        />
 
-      <Paragraph className={`${paymentTotal}`}>
-        Total payment: <Text strong>{formatMoney(total)}</Text>
-      </Paragraph>
+        <p className={paymentTotal}>
+          Total payment:{" "}
+          <strong className={paymentTotalValue}>{formatMoney(total)}</strong>
+        </p>
+      </form>
     </AppModal>
   );
 };

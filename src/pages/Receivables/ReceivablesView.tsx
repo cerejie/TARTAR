@@ -1,6 +1,6 @@
-import { BookOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { BookOpen } from "lucide-react";
 import type { DefaultValues } from "react-hook-form";
+import AppButton from "../../components/common/button/AppButton";
 import CustomerLedgerModal from "../../components/ledger/CustomerLedgerModal";
 import LedgerManager from "../../components/ledger/LedgerManager";
 import { useModal } from "../../hook/common/modal.hook";
@@ -92,12 +92,10 @@ const ReceivablesView = () => {
         fields={fields}
         defaults={defaults}
         headerActions={
-          <Button
-            icon={<BookOutlined />}
-            onClick={() => ledgerModal.openModal()}
-          >
+          <AppButton variant="outline" onPress={() => ledgerModal.openModal()}>
+            <BookOpen />
             Customer Ledger
-          </Button>
+          </AppButton>
         }
       />
       <CustomerLedgerModal />

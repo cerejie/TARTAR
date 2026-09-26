@@ -40,6 +40,7 @@ import {
   fieldDatePlaceholder,
   fieldDatePopover,
   fieldDateTrigger,
+  fieldLabelHidden,
   fieldRequired,
   fieldSpan,
 } from "../../../styles/form/form.styles";
@@ -133,6 +134,7 @@ const renderControl = <TValues extends FieldValues>(
             aria-invalid={invalid}
             type="number"
             min={0}
+            max={config.max}
             step={config.type === "amount" ? 0.01 : 1}
             inputMode={config.type === "amount" ? "decimal" : "numeric"}
             value={asText(field.value)}
@@ -284,7 +286,10 @@ const FormField = <TValues extends FieldValues>({
           data-invalid={fieldState.invalid}
           className={fieldSpan({ span: config.span ?? "full" })}
         >
-          <FieldLabel htmlFor={String(config.name)}>
+          <FieldLabel
+            htmlFor={String(config.name)}
+            className={config.hideLabel ? fieldLabelHidden : undefined}
+          >
             {config.label}
             {config.required ? <span className={fieldRequired}>*</span> : null}
           </FieldLabel>
