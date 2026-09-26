@@ -1,10 +1,4 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  ShopOutlined,
-} from "@ant-design/icons";
-import { Button, Tooltip } from "antd";
+import { Pencil, Plus, Store, Trash2 } from "lucide-react";
 import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import { useSupplierManageHook } from "../../hook/data/party/supplier.manage.hook";
@@ -14,7 +8,7 @@ import {
   type IPartyInput,
 } from "../../models/data/party/party.request";
 import type { ISupplier } from "../../models/data/party/party.response";
-import { iconButton } from "../../styles/table/table.css";
+import AppButton from "../common/button/AppButton";
 import SectionCard from "../common/card/SectionCard";
 import EntityFormModal from "../common/form/EntityFormModal";
 import DataTable from "../common/table/DataTable";
@@ -63,7 +57,7 @@ const SuppliersPanel = () => {
       title: "Supplier",
       dataIndex: "name",
       render: (name: string) => (
-        <NameCell icon={<ShopOutlined />}>{name}</NameCell>
+        <NameCell icon={<Store />}>{name}</NameCell>
       ),
     },
     {
@@ -88,30 +82,31 @@ const SuppliersPanel = () => {
       align: "center",
       render: (_, supplier) => (
         <RowActions>
-          <Tooltip title="Edit supplier">
-            <Button
-              className={`${iconButton}`}
-              icon={<EditOutlined />}
-              aria-label={`Edit ${supplier.name}`}
-              onClick={() => editModal.openModal(supplier)}
-            />
-          </Tooltip>
-          <Tooltip title="Delete supplier">
-            <Button
-              className={`${iconButton}`}
-              danger
-              icon={<DeleteOutlined />}
-              aria-label={`Delete ${supplier.name}`}
-              onClick={() =>
-                openConfirm({
-                  kind: "delete",
-                  title: `Delete ${supplier.name}?`,
-                  message: "Only possible while no record references it.",
-                  onConfirm: () => removeMutation.mutate(supplier.id),
-                })
-              }
-            />
-          </Tooltip>
+          <AppButton
+            variant="outline"
+            size="icon-sm"
+            aria-label={`Edit ${supplier.name}`}
+            tooltip="Edit supplier"
+            onPress={() => editModal.openModal(supplier)}
+          >
+            <Pencil />
+          </AppButton>
+          <AppButton
+            variant="destructive"
+            size="icon-sm"
+            aria-label={`Delete ${supplier.name}`}
+            tooltip="Delete supplier"
+            onPress={() =>
+              openConfirm({
+                kind: "delete",
+                title: `Delete ${supplier.name}?`,
+                message: "Only possible while no record references it.",
+                onConfirm: () => removeMutation.mutate(supplier.id),
+              })
+            }
+          >
+            <Trash2 />
+          </AppButton>
         </RowActions>
       ),
     },
@@ -123,13 +118,10 @@ const SuppliersPanel = () => {
         title="Suppliers"
         subtitle="Master records offered by every supplier selector in the app"
         extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => createModal.openModal()}
-          >
+          <AppButton onPress={() => createModal.openModal()}>
+            <Plus />
             Add supplier
-          </Button>
+          </AppButton>
         }
         flush
       >

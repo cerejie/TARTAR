@@ -1,21 +1,22 @@
 import {
-  BankOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  FallOutlined,
-  FileTextOutlined,
-  PlusOutlined,
-  RiseOutlined,
-  ShopOutlined,
-  SolutionOutlined,
-  UndoOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
-import { Badge, Button, Tag, Tooltip } from "antd";
+  FileText,
+  Landmark,
+  Pencil,
+  Plus,
+  Store,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  Undo2,
+  UserRound,
+  Wallet,
+} from "lucide-react";
 import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { IDataTableColumn } from "../../models/common/table.model";
+import AppButton from "../../components/common/button/AppButton";
 import SectionCard from "../../components/common/card/SectionCard";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
+import StatusTag from "../../components/common/status/StatusTag";
 import DataTable from "../../components/common/table/DataTable";
 import {
   ColumnLabel,
@@ -33,7 +34,6 @@ import {
 } from "../../models/data/branch/branch.request";
 import type { IBranch } from "../../models/data/branch/branch.response";
 import type { IBranchMonitorRow } from "../../models/data/dashboard/dashboard.response";
-import { iconButton, slugTag } from "../../styles/table/table.css";
 import { formatMoney } from "../../utils/format.utils";
 
 const BranchesView = () => {
@@ -59,14 +59,14 @@ const BranchesView = () => {
       title: "Branch Name",
       dataIndex: "name",
       render: (name: string) => (
-        <NameCell icon={<ShopOutlined />}>{name}</NameCell>
+        <NameCell icon={<Store />}>{name}</NameCell>
       ),
     },
     {
       title: "Slug",
       dataIndex: "slug",
       width: 160,
-      render: (value: string) => <Tag className={`${slugTag}`}>{value}</Tag>,
+      render: (value: string) => <StatusTag label={value} />,
     },
     { title: "Order", dataIndex: "sort", width: 90, align: "center" },
     {
@@ -76,9 +76,9 @@ const BranchesView = () => {
       align: "center",
       render: (active: boolean) =>
         active ? (
-          <Badge status="success" text="Active" />
+          <StatusTag color="positive" label="Active" />
         ) : (
-          <Badge status="default" text="Archived" />
+          <StatusTag label="Archived" />
         ),
     },
     {
@@ -88,49 +88,51 @@ const BranchesView = () => {
       align: "center",
       render: (_, branch) => (
         <RowActions>
-          <Tooltip title="Edit branch">
-            <Button
-              className={`${iconButton}`}
-              icon={<EditOutlined />}
-              aria-label={`Edit ${branch.name}`}
-              onClick={() => editModal.openModal(branch)}
-            />
-          </Tooltip>
+          <AppButton
+            variant="outline"
+            size="icon-sm"
+            aria-label={`Edit ${branch.name}`}
+            tooltip="Edit branch"
+            onPress={() => editModal.openModal(branch)}
+          >
+            <Pencil />
+          </AppButton>
           {branch.active ? (
-            <Tooltip title="Archive branch">
-              <Button
-                className={`${iconButton}`}
-                danger
-                icon={<DeleteOutlined />}
-                aria-label={`Archive ${branch.name}`}
-                onClick={() =>
-                  openConfirm({
-                    title: `Archive ${branch.name}?`,
-                    message:
-                      "It is hidden from selectors but its history is kept.",
-                    onConfirm: () =>
-                      setActiveMutation.mutate({
-                        slug: branch.slug,
-                        active: false,
-                      }),
-                  })
-                }
-              />
-            </Tooltip>
+            <AppButton
+              variant="destructive"
+              size="icon-sm"
+              aria-label={`Archive ${branch.name}`}
+              tooltip="Archive branch"
+              onPress={() =>
+                openConfirm({
+                  title: `Archive ${branch.name}?`,
+                  message:
+                    "It is hidden from selectors but its history is kept.",
+                  onConfirm: () =>
+                    setActiveMutation.mutate({
+                      slug: branch.slug,
+                      active: false,
+                    }),
+                })
+              }
+            >
+              <Trash2 />
+            </AppButton>
           ) : (
-            <Tooltip title="Restore branch">
-              <Button
-                className={`${iconButton}`}
-                icon={<UndoOutlined />}
-                aria-label={`Restore ${branch.name}`}
-                onClick={() =>
-                  void setActiveMutation.mutate({
-                    slug: branch.slug,
-                    active: true,
-                  })
-                }
-              />
-            </Tooltip>
+            <AppButton
+              variant="outline"
+              size="icon-sm"
+              aria-label={`Restore ${branch.name}`}
+              tooltip="Restore branch"
+              onPress={() =>
+                void setActiveMutation.mutate({
+                  slug: branch.slug,
+                  active: true,
+                })
+              }
+            >
+              <Undo2 />
+            </AppButton>
           )}
         </RowActions>
       ),
@@ -139,38 +141,38 @@ const BranchesView = () => {
 
   const monitorColumns: IDataTableColumn<IBranchMonitorRow>[] = [
     {
-      title: <ColumnLabel icon={<BankOutlined />}>Branch</ColumnLabel>,
+      title: <ColumnLabel icon={<Landmark />}>Branch</ColumnLabel>,
       dataIndex: "branchName",
       render: (name: string) => (
-        <NameCell icon={<ShopOutlined />}>{name}</NameCell>
+        <NameCell icon={<Store />}>{name}</NameCell>
       ),
     },
     {
-      title: <ColumnLabel icon={<WalletOutlined />}>Cash Balance</ColumnLabel>,
+      title: <ColumnLabel icon={<Wallet />}>Cash Balance</ColumnLabel>,
       dataIndex: "cashBalance",
       align: "right",
       render: (value: number) => formatMoney(value),
     },
     {
-      title: <ColumnLabel icon={<RiseOutlined />}>Sales</ColumnLabel>,
+      title: <ColumnLabel icon={<TrendingUp />}>Sales</ColumnLabel>,
       dataIndex: "sales",
       align: "right",
       render: (value: number) => formatMoney(value),
     },
     {
-      title: <ColumnLabel icon={<FallOutlined />}>Expenses</ColumnLabel>,
+      title: <ColumnLabel icon={<TrendingDown />}>Expenses</ColumnLabel>,
       dataIndex: "expenses",
       align: "right",
       render: (value: number) => formatMoney(value),
     },
     {
-      title: <ColumnLabel icon={<SolutionOutlined />}>Receivables</ColumnLabel>,
+      title: <ColumnLabel icon={<UserRound />}>Receivables</ColumnLabel>,
       dataIndex: "receivables",
       align: "right",
       render: (value: number) => formatMoney(value),
     },
     {
-      title: <ColumnLabel icon={<FileTextOutlined />}>Payables</ColumnLabel>,
+      title: <ColumnLabel icon={<FileText />}>Payables</ColumnLabel>,
       dataIndex: "payables",
       align: "right",
       render: (value: number) => formatMoney(value),
@@ -180,13 +182,10 @@ const BranchesView = () => {
   return (
     <ContentView
       actions={
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => createModal.openModal()}
-        >
+        <AppButton onPress={() => createModal.openModal()}>
+          <Plus />
           Add Branch
-        </Button>
+        </AppButton>
       }
     >
       <SectionCard

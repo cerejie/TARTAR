@@ -1,15 +1,11 @@
-import {
-  CheckOutlined,
-  CloseOutlined,
-  PlusOutlined,
-  PrinterOutlined,
-} from "@ant-design/icons";
-import { Button, Space, Typography } from "antd";
-import type { IDataTableColumn } from "../../models/common/table.model";
+import { Check, Plus, Printer, X } from "lucide-react";
+import AppButton from "../../components/common/button/AppButton";
 import SectionCard from "../../components/common/card/SectionCard";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
 import RequirePermission from "../../components/common/guard/RequirePermission";
+import StatusTag from "../../components/common/status/StatusTag";
 import DataTable from "../../components/common/table/DataTable";
+import { RowActions } from "../../components/common/table/TableDecor";
 import ContentView from "../../components/common/view/ContentView";
 import {
   voucherStatusColors,
@@ -17,8 +13,8 @@ import {
   voucherTypeLabels,
   type VoucherStatus,
 } from "../../enums/voucher.enum";
-import StatusTag from "../../components/common/status/StatusTag";
 import { useVoucherListHook } from "../../hook/data/voucher/voucher.list.hook";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   voucherSchema,
   type IVoucherInput,
@@ -28,12 +24,15 @@ import {
   type IVoucher,
 } from "../../models/data/voucher/voucher.response";
 import {
+  cellHint,
+  stackedCell,
+  tagRow,
+} from "../../styles/table/table.styles";
+import {
   formatDate,
   formatDateTime,
   formatMoney,
 } from "../../utils/format.utils";
-
-const { Text } = Typography;
 
 const VouchersView = () => {
   const {
@@ -85,9 +84,9 @@ const VouchersView = () => {
       width: 180,
       render: (_, voucher) =>
         voucher.type === "check" && voucher.check_number ? (
-          <Space direction="vertical" size={0}>
+          <span className={stackedCell}>
             <span>{voucher.check_number}</span>
-            <Text type="secondary">
+            <span className={cellHint}>
               {[
                 voucher.check_bank,
                 voucher.check_due_date
@@ -96,8 +95,8 @@ const VouchersView = () => {
               ]
                 .filter(Boolean)
                 .join(" · ")}
-            </Text>
-          </Space>
+            </span>
+          </span>
         ) : (
           "—"
         ),
@@ -112,10 +111,10 @@ const VouchersView = () => {
       title: "Status",
       dataIndex: "status",
       render: (status: VoucherStatus, voucher) => (
-        <Space>
+        <span className={tagRow}>
           <StatusTag color={voucherStatusColors[status]} label={voucherStatusLabels[status]} />
           {voucher.printed ? <StatusTag label="Printed" /> : null}
-        </Space>
+        </span>
       ),
     },
     {
@@ -123,55 +122,49 @@ const VouchersView = () => {
       key: "actions",
       width: 240,
       render: (_, voucher) => (
-        <Space>
+        <RowActions>
           <RequirePermission can="approveVouchers" fallback={null}>
             {voucher.status === "pending" ? (
               <>
-                <Button
-                  type="link"
-                  size="small"
-                  icon={<CheckOutlined />}
-                  onClick={() =>
+                <AppButton
+                  variant="ghost"
+                  size="sm"
+                  onPress={() =>
                     void decideMutation.mutate({
                       id: voucher.id,
                       approve: true,
                     })
                   }
                 >
+                  <Check />
                   Approve
-                </Button>
-                <Button
-                  type="link"
-                  danger
-                  size="small"
-                  icon={<CloseOutlined />}
-                  onClick={() =>
+                </AppButton>
+                <AppButton
+                  variant="destructive"
+                  size="sm"
+                  onPress={() =>
                     void decideMutation.mutate({
                       id: voucher.id,
                       approve: false,
                     })
                   }
                 >
+                  <X />
                   Reject
-                </Button>
+                </AppButton>
               </>
             ) : null}
           </RequirePermission>
-          <Button
-            type="link"
-            size="small"
-            icon={<PrinterOutlined />}
+          <AppButton
+            variant="outline"
+            size="sm"
             disabled={voucher.status !== "approved"}
-            title={
-              voucher.status !== "approved"
-                ? "Only approved vouchers can be printed"
-                : undefined
-            }
-            onClick={() => print(voucher)}
+            onPress={() => print(voucher)}
           >
-            Print
-          </Button>
-        </Space>
+            <Printer />
+            {voucher.status === "approved" ? "Print" : "Approve to print"}
+          </AppButton>
+        </RowActions>
       ),
     },
   ];
@@ -180,13 +173,10 @@ const VouchersView = () => {
     <ContentView
       actions={
         <RequirePermission can="createManualVouchers" fallback={null}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => formModal.openModal()}
-          >
+          <AppButton onPress={() => formModal.openModal()}>
+            <Plus />
             Manual voucher
-          </Button>
+          </AppButton>
         </RequirePermission>
       }
     >

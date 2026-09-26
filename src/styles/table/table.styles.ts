@@ -119,3 +119,7 @@ export const tablePaginationSelect = "w-20";
 export const nowrapCell = "whitespace-nowrap";
 
 export const tagRow = "inline-flex items-center gap-2";
+
+export const stackedCell = "flex flex-col";
+
+export const cellHint = "text-xs text-muted-foreground";

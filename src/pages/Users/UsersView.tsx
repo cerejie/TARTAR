@@ -1,11 +1,5 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  KeyOutlined,
-  PlusOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Button, Space, Tooltip } from "antd";
+import { KeyRound, Pencil, Plus, Trash2, User } from "lucide-react";
+import AppButton from "../../components/common/button/AppButton";
 import StatusTag from "../../components/common/status/StatusTag";
 import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { IDataTableColumn } from "../../models/common/table.model";
@@ -31,7 +25,6 @@ import {
   type IUpdateUserInput,
 } from "../../models/data/account/account.request";
 import type { IUser } from "../../models/data/account/account.response";
-import { iconButton } from "../../styles/table/table.css";
 import { formatDate } from "../../utils/format.utils";
 
 const UsersView = () => {
@@ -61,7 +54,7 @@ const UsersView = () => {
       title: "Username",
       dataIndex: "username",
       render: (value: string) => (
-        <NameCell icon={<UserOutlined />}>{value}</NameCell>
+        <NameCell icon={<User />}>{value}</NameCell>
       ),
     },
     {
@@ -85,11 +78,10 @@ const UsersView = () => {
       dataIndex: "approval_status",
       render: (status: ApprovalStatus, user) =>
         status === "pending" ? (
-          <Space>
-            <Button
-              size="small"
-              type="primary"
-              onClick={() =>
+          <RowActions>
+            <AppButton
+              size="sm"
+              onPress={() =>
                 void approvalMutation.mutate({
                   id: user.id,
                   status: "approved",
@@ -97,11 +89,11 @@ const UsersView = () => {
               }
             >
               Approve
-            </Button>
-            <Button
-              size="small"
-              danger
-              onClick={() =>
+            </AppButton>
+            <AppButton
+              size="sm"
+              variant="destructive"
+              onPress={() =>
                 void approvalMutation.mutate({
                   id: user.id,
                   status: "rejected",
@@ -109,8 +101,8 @@ const UsersView = () => {
               }
             >
               Reject
-            </Button>
-          </Space>
+            </AppButton>
+          </RowActions>
         ) : (
           <StatusTag color={approvalStatusColors[status]} label={approvalStatusLabels[status]} />
         ),
@@ -127,50 +119,44 @@ const UsersView = () => {
       align: "center",
       render: (_, user) => (
         <RowActions>
-          <Tooltip title="Edit user">
-            <Button
-              className={`${iconButton}`}
-              icon={<EditOutlined />}
-              aria-label={`Edit ${user.username}`}
-              onClick={() => editModal.openModal(user)}
-            />
-          </Tooltip>
-          <Tooltip title="Reset password">
-            <Button
-              className={`${iconButton}`}
-              icon={<KeyOutlined />}
-              aria-label={`Reset password for ${user.username}`}
-              onClick={() => resetModal.openModal(user)}
-            />
-          </Tooltip>
-          {user.id === currentUserId ? (
-            <Tooltip title="You cannot delete your own account">
-              <span>
-                <Button
-                  className={`${iconButton}`}
-                  danger
-                  disabled
-                  icon={<DeleteOutlined />}
-                />
-              </span>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Delete user">
-              <Button
-                className={`${iconButton}`}
-                danger
-                icon={<DeleteOutlined />}
-                aria-label={`Delete ${user.username}`}
-                onClick={() =>
-                  openConfirm({
-                    kind: "delete",
-                    title: `Delete ${user.username}?`,
-                    onConfirm: () => removeMutation.mutate(user.id),
-                  })
-                }
-              />
-            </Tooltip>
-          )}
+          <AppButton
+            variant="outline"
+            size="icon-sm"
+            aria-label={`Edit ${user.username}`}
+            tooltip="Edit user"
+            onPress={() => editModal.openModal(user)}
+          >
+            <Pencil />
+          </AppButton>
+          <AppButton
+            variant="outline"
+            size="icon-sm"
+            aria-label={`Reset password for ${user.username}`}
+            tooltip="Reset password"
+            onPress={() => resetModal.openModal(user)}
+          >
+            <KeyRound />
+          </AppButton>
+          <AppButton
+            variant="destructive"
+            size="icon-sm"
+            aria-label={
+              user.id === currentUserId
+                ? "You cannot delete your own account"
+                : `Delete ${user.username}`
+            }
+            tooltip="Delete user"
+            disabled={user.id === currentUserId}
+            onPress={() =>
+              openConfirm({
+                kind: "delete",
+                title: `Delete ${user.username}?`,
+                onConfirm: () => removeMutation.mutate(user.id),
+              })
+            }
+          >
+            <Trash2 />
+          </AppButton>
         </RowActions>
       ),
     },
@@ -179,13 +165,10 @@ const UsersView = () => {
   return (
     <ContentView
       actions={
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => createModal.openModal()}
-        >
+        <AppButton onPress={() => createModal.openModal()}>
+          <Plus />
           Add user
-        </Button>
+        </AppButton>
       }
     >
       <SectionCard

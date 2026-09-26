@@ -1,12 +1,4 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  InboxOutlined,
-  PlusOutlined,
-  UndoOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
-import { Badge, Button, Tag, Tooltip } from "antd";
+import { Archive, Pencil, Plus, Trash2, Undo2, Wallet } from "lucide-react";
 import { useConfirm } from "../../hook/common/confirmation.hook";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import { useExpenseCategoryManageHook } from "../../hook/data/expense-category/expense.category.manage.hook";
@@ -16,9 +8,10 @@ import {
   type IExpenseCategoryInput,
 } from "../../models/data/expense-category/expense.category.request";
 import type { IExpenseCategory } from "../../models/data/expense-category/expense.category.response";
-import { iconButton, slugTag } from "../../styles/table/table.css";
+import AppButton from "../common/button/AppButton";
 import SectionCard from "../common/card/SectionCard";
 import EntityFormModal from "../common/form/EntityFormModal";
+import StatusTag from "../common/status/StatusTag";
 import DataTable from "../common/table/DataTable";
 import { NameCell, RowActions } from "../common/table/TableDecor";
 
@@ -60,14 +53,14 @@ const ExpenseCategoriesPanel = () => {
       title: "Category",
       dataIndex: "name",
       render: (name: string) => (
-        <NameCell icon={<WalletOutlined />}>{name}</NameCell>
+        <NameCell icon={<Wallet />}>{name}</NameCell>
       ),
     },
     {
       title: "Voucher code",
       dataIndex: "code",
       width: 150,
-      render: (value: string) => <Tag className={`${slugTag}`}>{value}</Tag>,
+      render: (value: string) => <StatusTag label={value} />,
     },
     { title: "Order", dataIndex: "sort", width: 90, align: "center" },
     {
@@ -77,9 +70,9 @@ const ExpenseCategoriesPanel = () => {
       align: "center",
       render: (active: boolean) =>
         active ? (
-          <Badge status="success" text="Active" />
+          <StatusTag color="positive" label="Active" />
         ) : (
-          <Badge status="default" text="Archived" />
+          <StatusTag label="Archived" />
         ),
     },
     {
@@ -89,66 +82,69 @@ const ExpenseCategoriesPanel = () => {
       align: "center",
       render: (_, category) => (
         <RowActions>
-          <Tooltip title="Edit category">
-            <Button
-              className={`${iconButton}`}
-              icon={<EditOutlined />}
-              aria-label={`Edit ${category.name}`}
-              onClick={() => editModal.openModal(category)}
-            />
-          </Tooltip>
+          <AppButton
+            variant="outline"
+            size="icon-sm"
+            aria-label={`Edit ${category.name}`}
+            tooltip="Edit category"
+            onPress={() => editModal.openModal(category)}
+          >
+            <Pencil />
+          </AppButton>
           {category.active ? (
-            <Tooltip title="Archive category">
-              <Button
-                className={`${iconButton}`}
-                icon={<InboxOutlined />}
-                aria-label={`Archive ${category.name}`}
-                onClick={() =>
-                  openConfirm({
-                    title: `Archive ${category.name}?`,
-                    message:
-                      "It stops appearing on the expense form but past expenses keep it.",
-                    onConfirm: () =>
-                      setActiveMutation.mutate({
-                        slug: category.slug,
-                        active: false,
-                      }),
-                  })
-                }
-              />
-            </Tooltip>
-          ) : (
-            <Tooltip title="Restore category">
-              <Button
-                className={`${iconButton}`}
-                icon={<UndoOutlined />}
-                aria-label={`Restore ${category.name}`}
-                onClick={() =>
-                  void setActiveMutation.mutate({
-                    slug: category.slug,
-                    active: true,
-                  })
-                }
-              />
-            </Tooltip>
-          )}
-          <Tooltip title="Delete category">
-            <Button
-              className={`${iconButton}`}
-              danger
-              icon={<DeleteOutlined />}
-              aria-label={`Delete ${category.name}`}
-              onClick={() =>
+            <AppButton
+              variant="outline"
+              size="icon-sm"
+              aria-label={`Archive ${category.name}`}
+              tooltip="Archive category"
+              onPress={() =>
                 openConfirm({
-                  kind: "delete",
-                  title: `Delete ${category.name}?`,
+                  title: `Archive ${category.name}?`,
                   message:
-                    "Only possible while no expense uses it — otherwise archive it.",
-                  onConfirm: () => removeMutation.mutate(category.slug),
+                    "It stops appearing on the expense form but past expenses keep it.",
+                  onConfirm: () =>
+                    setActiveMutation.mutate({
+                      slug: category.slug,
+                      active: false,
+                    }),
                 })
               }
-            />
-          </Tooltip>
+            >
+              <Archive />
+            </AppButton>
+          ) : (
+            <AppButton
+              variant="outline"
+              size="icon-sm"
+              aria-label={`Restore ${category.name}`}
+              tooltip="Restore category"
+              onPress={() =>
+                void setActiveMutation.mutate({
+                  slug: category.slug,
+                  active: true,
+                })
+              }
+            >
+              <Undo2 />
+            </AppButton>
+          )}
+          <AppButton
+            variant="destructive"
+            size="icon-sm"
+            aria-label={`Delete ${category.name}`}
+            tooltip="Delete category"
+            onPress={() =>
+              openConfirm({
+                kind: "delete",
+                title: `Delete ${category.name}?`,
+                message:
+                  "Only possible while no expense uses it — otherwise archive it.",
+                onConfirm: () => removeMutation.mutate(category.slug),
+              })
+            }
+          >
+            <Trash2 />
+          </AppButton>
         </RowActions>
       ),
     },
@@ -160,13 +156,10 @@ const ExpenseCategoriesPanel = () => {
         title="Expense Categories"
         subtitle="Options on the expense form — each owns its voucher numbering code"
         extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => createModal.openModal()}
-          >
+          <AppButton onPress={() => createModal.openModal()}>
+            <Plus />
             Add category
-          </Button>
+          </AppButton>
         }
         flush
       >
