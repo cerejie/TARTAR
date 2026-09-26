@@ -87,7 +87,7 @@ Any value used in **two or more places** moves to its home. Never inline these:
 | Modal key | `keys/modal.keys.ts` — a function when the modal is per-scope |
 | localStorage key | `keys/storage.keys.ts` |
 | A status/kind literal, its label, and its colour | `enums/<domain>.enum.ts` |
-| Colour, radius, shadow, font | a token in `styles/common/theme.css`, used as a utility (`bg-ink`, `shadow-card`) |
+| Colour, radius, shadow, font | a token in `styles/common/theme.css`, used as a utility (`bg-brand`, `shadow-panel`) |
 | A class string | a named export in `styles/<area>/<area>.styles.ts` |
 | Money / date / time formatting | `utils/format.utils.ts` — `formatMoney`, `formatDate`, `todayIso` |
 | A reusable zod field | `utils/schema.utils.ts` — `amountField`, `isoDateField`, `optionalText(n)` |
@@ -235,7 +235,7 @@ component and its hook.
   `styles/<area>/<area>.styles.ts` — plain strings, or `cva` when they vary — applied with
   `cn()` from `utils/cn.utils.ts`. JSX never holds a literal class string.
 - Every colour, radius, shadow and font is a token in `styles/common/theme.css`, used as a
-  utility (`bg-ink`, `text-on-ink-muted`, `shadow-card`, `rounded-shell`, `font-heading`).
+  utility (`bg-brand`, `text-on-brand-muted`, `shadow-panel`, `rounded-panel`, `font-heading`).
   No hex, no arbitrary values.
 - `components/ui` files are restyled through tokens, never edited; `className` on them is
   layout only.
@@ -243,8 +243,9 @@ component and its hook.
 
 ## 9. UX defaults
 
-- Every page renders exactly one **`ContentView`** — it owns the title, subtitle, meta,
-  actions, optional toolbar, body layout (`stack` | `bento`) and footer. There is no
+- Every page renders exactly one **`ContentView`** — it owns the title row (route
+  label h1, `tabs` status pills, `actions`), the toolbar row (`toolbar` Filters popover,
+  `meta` Sort by), body layout (`stack` | `bento`) and footer. There is no route subtitle and no
   `PageHeader` component; it was deleted.
 - Tables go through `DataTable<T>`, content panels through `SectionCard`, metric tiles
   through `StatCard`, entity forms through `EntityFormModal` driven by an `IFieldConfig[]`.

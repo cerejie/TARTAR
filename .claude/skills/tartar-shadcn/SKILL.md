@@ -83,14 +83,20 @@ sed -i '/type DialogProps as AlertDialogPrimitiveProps,/d' src/components/ui/ale
 
 | Need | Use | Never |
 |---|---|---|
-| Page shell, title, meta, actions, toolbar | `common/view/ContentView` | a per-page header block |
+| Page shell, title, status pills, actions, toolbar | `common/view/ContentView` (`tabs`, `actions`, `toolbar`, `meta`) | a per-page header block |
+| Status pills (title row) | `common/view/ViewSwitch` / `common/filter/StatusFilterTabs` | buttons with manual active state |
 | Bento metrics layout | `common/view/BentoGrid` + `BentoCell` | raw grid CSS |
 | Content panel | `card` via `common/card/SectionCard` | a styled bordered `<div>`; a card in a card |
 | Metric tile | `card` via `common/card/StatCard` | a bespoke tile |
+| Recommended-style card + section heading | `common/card/InfoCard` under `common/view/SectionHeading` | a bespoke card grid |
 | Records table | `table` via `common/table/DataTable` in `TablePanel` | a custom grid or `<table>` |
+| Person / progress cell | `common/table/AvatarCell` / `ProgressCell` | an inline avatar or bar |
 | Paging | `pagination` via `common/table/TablePagination` | hand-built prev/next |
-| Filter row | `common/filter/FilterToolbar` (+ `SearchInput`) | a card around filters |
+| Filter row | `common/filter/FilterToolbar` + `FilterPopover` (+ `SearchInput`) | a card around filters |
+| Sort | `common/filter/SortSelect` + `useSortOption` | a column-header sort toggle |
 | Row actions | `dropdown-menu` via `common/table/RowActionMenu` | a popover of buttons |
+| Route loading / route error | `common/view/PageSkeleton` / `common/status/RouteErrorView` via `routes/route.lazy.ts` | a spinner page, a try/catch in a view |
+| Data error | `common/status/ErrorState` via `error` + `onRetry` on `DataTable` / `StatCard` / `SectionCard` | a toast for a failed load |
 | Status / type chip | `badge` via `common/status/StatusTag` + enum label/colour maps | a styled `<span>` |
 | Form modal | `dialog` via `common/form/EntityFormModal` on `common/modal/AppModal` | antd `Modal`, a custom overlay |
 | Read-only record | `common/modal/DetailModal` | a bespoke dialog |
@@ -127,7 +133,7 @@ a domain folder for a style only one screen uses (`dashboard`, `ledger`, `disbur
 never colocated, never `style={{}}` except a computed value such as a percentage width.
 
 ```ts
-export const cardRoot = "rounded-xl border bg-card shadow-card";
+export const cardRoot = "rounded-xl border bg-card shadow-panel";
 export const cardHeader = "flex items-start justify-between gap-3 p-4";
 ```
 
@@ -153,17 +159,24 @@ export const moneyValue = cva("font-medium tabular-nums", {
 All values come from `theme.css`; a hex, px or rgba literal in a component or styles module
 is a defect — add a token instead.
 
-- shadcn set: `bg-background`, `text-foreground`, `bg-card`, `bg-primary` (ink),
-  `text-primary-foreground`, `bg-secondary` / `bg-muted` (cloud), `text-muted-foreground`,
-  `bg-accent` (lime mist), `text-destructive`, `border-border`, `ring-ring` (lilac).
-- TARTAR extras: `ink`, `ink-deep`, `ink-soft`, `ink-lift`, `on-ink`, `on-ink-muted`, `lime`,
-  `lime-deep`, `lime-soft`, `lime-mist`, `lime-wash`, `lilac`, `lilac-soft`, `cloud`, `mist`,
-  `border-subtle`, `positive`, `positive-bright`, `warning`, `danger`, `danger-bg`,
-  `danger-border` — as `bg-*`, `text-*`, `border-*`.
-- Radii `rounded-sm|md|lg|xl|shell|pill`; shadows `shadow-card|raised|pop`; fonts
-  `font-sans`, `font-heading`. Sidebar: `--sidebar-*` (dark ink rail, lime active).
-- Meaning: money keeps green/red (`positive` / `danger`); lime and lilac are decorative only;
-  focus rings are always lilac (`ring`); primary is ink, never lime.
+- Palette: "airy blue" in light mode (primary `#0B6BF5`), navy in `.dark`.
+- shadcn set: `bg-background`, `text-foreground`, `bg-card`, `bg-primary` (brand blue),
+  `text-primary-foreground`, `bg-secondary` / `bg-muted` (cool grey), `text-muted-foreground`,
+  `bg-accent` (brand-soft), `text-destructive`, `border-border`, `ring-ring` (blue).
+- TARTAR extras: `brand`, `brand-deep`, `brand-soft`, `brand-mist`, `on-brand`,
+  `on-brand-muted`, `panel`, `track`, `info`, `info-soft`, `overlay`, `positive`,
+  `positive-bright`, `warning`, `danger`, `danger-bg`, `danger-border` — as `bg-*`,
+  `text-*`, `border-*`. Charts `--chart-1..6` = brand, sky, violet, positive, warning,
+  negative (`ChartTone`).
+- Radii `rounded-sm|md|lg|xl|panel|pill`; shadows `shadow-panel|raised|pop`; fonts
+  `font-sans`, `font-heading` (Plus Jakarta Sans). Sidebar: `--sidebar-*` (white floating
+  panel, solid blue active item). Utilities: `bg-app` (pastel backdrop behind the shell),
+  `bg-auth-hero`, `pb-safe`; keyframe `animate-route-progress`.
+- Surfaces: top bar, sidebar, content card, dialogs, sheets and auth/error cards are all
+  `rounded-panel bg-panel shadow-panel` — floating, no backdrop blur. Cards have no tone.
+- Meaning: money keeps green/red (`positive` / `danger`); status chips are soft fills
+  (`toneChip`); overdue rows `bg-danger/5`; focus rings are always `ring`; primary is brand
+  blue.
 - A new token goes in `theme.css` (`@layer base :root` for shadcn slots, `@theme` for
   extras) and, for a shadow or radius, in `cn.utils.ts`'s `extendTailwindMerge` too.
 

@@ -22,8 +22,10 @@ Reference stack: React 19, react-router-dom 7, Tailwind v4 (`@tailwindcss/vite`)
 ## shadcn/ui aria-vega (React Aria)
 
 - Use the project's primitives first: `ContentView`, `DataTable`, `SectionCard`, `StatCard`,
-  `BentoGrid` / `BentoCell`, `EntityFormModal`, `FormField`, `AppModal`, `DetailModal`,
-  `FilterToolbar`, `FilterSelect`, `DateRangeFilter`, `AppButton`, `StatusTag`, `EmptyState`,
+  `InfoCard`, `SectionHeading`, `BentoGrid` / `BentoCell`, `ViewSwitch`, `EntityFormModal`,
+  `FormField`, `AppModal`, `DetailModal`, `FilterToolbar`, `FilterPopover`, `SortSelect`,
+  `StatusFilterTabs`, `FilterSelect`, `DateRangeFilter`, `AvatarCell`, `ProgressCell`,
+  `RowActionMenu`, `AppButton`, `StatusTag`, `EmptyState`, `ErrorState`, `PageSkeleton`,
   `AppBarChart` / `AppDonutChart`, `RequirePermission`. Reach for a raw `components/ui` file
   only when no primitive fits, and prefer extending the primitive.
 - `components/ui/` is registry output. Add with `npx shadcn@latest add <name>` (style comes
@@ -52,8 +54,8 @@ Reference stack: React 19, react-router-dom 7, Tailwind v4 (`@tailwindcss/vite`)
 - Class strings live in `src/styles/<area>/<area>.styles.ts` as named exports — plain
   strings, or `cva` when something varies so variants are typed. Components combine them
   with `cn()`. JSX never carries a literal class string.
-- Every colour is a token utility (`bg-ink`, `text-on-ink-muted`, `ring-lime-soft`,
-  `shadow-card`). Arbitrary values (`bg-[#...]`, `p-[13px]`) are a defect; add a token.
+- Every colour is a token utility (`bg-brand`, `text-on-brand-muted`, `bg-brand-soft`,
+  `rounded-panel`, `shadow-panel`). Arbitrary values (`bg-[#...]`, `p-[13px]`) are a defect; add a token.
 - Dynamic values that cannot be a class (a computed percentage width) are the one case for
   `style={{}}`.
 - Tailwind only sees classes it can find as whole strings — never build one by

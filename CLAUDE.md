@@ -198,7 +198,8 @@ These are the reusable shapes. Extend them; do not fork them.
 - `IFieldConfig<TValues>` — declarative form field descriptors.
 - `IRoute` — `RouteObject` plus `key`, `label`, `description`, `icon`, `group`,
   `can`, `isNotNav`, `children`.
-- `ViewLayout`, `BentoSpan`, `CardTone`, `ModalSize` — the view vocabulary.
+- `ViewLayout`, `BentoSpan`, `ModalSize` — the view vocabulary. Cards have no tone;
+  every card is white.
 
 A form-value class (`IXFormValue implements IXRequest`) is the pattern for defaults:
 fields initialised inline, `constructor(values?)` doing `Object.assign(this, values)`.
@@ -259,7 +260,7 @@ openConfirm({
 });
 ```
 
-`kind` is `"confirm"` (lime badge, primary button) or `"delete"` (danger badge, danger
+`kind` is `"confirm"` (brand-soft badge, primary button) or `"delete"` (danger badge, danger
 button). `title`, `message`, `okText` and `cancelText` all have sensible defaults. The
 store keeps the dialog open with a spinner until an async `onConfirm` settles.
 
@@ -279,17 +280,35 @@ Forms are react-hook-form + zod, driven declaratively — never a hand-built for
 
 ## Views, tables, filters
 
-- Every page renders exactly one `ContentView` — it owns the title, subtitle, meta,
-  actions, optional toolbar, body layout (`stack` | `bento`) and footer.
+- Every page renders exactly one `ContentView` — the floating content card. Its title row
+  holds the page `h1` (from the route `label` via `useProtectedTitleHook`; the route
+  `description` is not rendered), then `tabs` (status pills — `ViewSwitch` /
+  `StatusFilterTabs`) and `actions` (the primary action). The toolbar row under it holds
+  `toolbar` (the Filters popover) and `meta` (Sort by). Then the body layout
+  (`stack` | `bento`) and an optional `footer`.
 - Bento layouts use `BentoGrid` + `BentoCell` with named spans, never raw grid CSS.
-- `SectionCard` is the content panel; `StatCard` the metric tile. A card with no
-  title renders no head — use that for chrome-only panels.
+- `SectionCard` is the content panel; `StatCard` the metric tile; `InfoCard` the
+  "recommended" card (chip, meta, title, clamped body, action) under a `SectionHeading`
+  (heading + "View all" link). A card with no title renders no head.
+- Every data surface renders all four states: loading (`DataTable` skeleton rows,
+  `StatCard` / `SectionCard` `loading`), refreshing (`DataTable` `refreshing` dims the
+  body), error (`error` + `onRetry` → `ErrorState`) and empty (`EmptyState` with icon and
+  optional action). The feature hook supplies `loading` (`isInitialLoading`),
+  `refreshing` (`isRefreshing`), `error` and `retry` from `useQuery`.
+- Person columns use `AvatarCell` (initials fallback, name over a muted hint), progress
+  columns `ProgressCell`, row actions `RowActionMenu`. Overdue rows take the danger tint
+  through `DataTable`'s row class, never a per-cell colour.
 - Never nest a card in a card. The content shell is already a surface; one card layer
   on top of it is the maximum.
-- Filters are a bare row sitting directly on the content surface above the table, laid out
-  by `FilterToolbar` with the primary action on the trailing edge — no card. Branch is not a
-  filter field; the sider branch scope is the only branch control. Filter state lives in
-  `store/common/filter.store.ts` via `useLedgerFilters(scope)` — never in component state.
+- Filters are a bare row on the content surface above the table, laid out by
+  `FilterToolbar` — no card. Fields sit in a `FilterPopover` ("Filters" pill with an
+  active-count badge and Reset; `LedgerFilterBar layout="popover"`); sort is a
+  `SortSelect` fed by `useSortOption(key, options, onChange)`, which resets to page 1 and
+  threads `sort` into the query key and the service `.order()`. Status is a title-row
+  pill set, not a filter field, and does not count in the badge. Branch is not a filter
+  field; the top-bar branch scope is the only branch control. Filter state lives in
+  `store/common/filter.store.ts` via `useLedgerFilters(scope)` / `useFilterField`, sort in
+  `store/common/sort.store.ts` — never in component state.
 - Tables are `DataTable<T>` only. Columns are declared in the feature component; cell
   renderers are extracted to `components/<domain>/table/cells/` when reused.
 - Transactional tables are **server-paged**: the feature hook calls
@@ -313,16 +332,20 @@ Full standard: the `tartar-shadcn` skill. The rules that are never optional:
   `.css` file, never inline styles, never styled-components.
 - Tokens live in one file, `src/styles/common/theme.css`: shadcn semantic variables
   (`--background`, `--primary`, `--ring`, `--sidebar-*`, `--chart-*`) with `.dark`
-  overrides, plus TARTAR's `@theme` palette (`ink`, `on-ink`, `lime`, `lilac`, `cloud`,
-  `positive`, `warning`, `danger`, `shadow-card`, `radius-shell`, `font-heading`). A
-  hex literal anywhere else is a defect; a new colour is a new token. Print windows
-  cannot read CSS variables, so `styles/print/print.styles.ts` (`printPalette`) is the
-  one other place hex may appear.
+  overrides (light = airy blue, dark = navy), plus TARTAR's `@theme` palette (`brand`,
+  `brand-deep`, `brand-soft`, `brand-mist`, `on-brand`, `on-brand-muted`, `panel`,
+  `track`, `info`, `info-soft`, `overlay`, `positive`, `warning`, `danger`,
+  `radius-panel`, `shadow-panel`, `font-heading` = Plus Jakarta Sans) and the utilities
+  `bg-app` (pastel backdrop), `bg-auth-hero`, `pb-safe`. A hex literal anywhere else is
+  a defect; a new colour is a new token. Print windows cannot read CSS variables, so
+  `styles/print/print.styles.ts` (`printPalette`) is the one other place hex may appear.
+- The shell is three floating panels on `bg-app` — top bar, sidebar, content card — each
+  `rounded-panel bg-panel shadow-panel`, no backdrop blur. Modals and auth/error cards use
+  the same surface.
 - Semantic tones live in `styles/common/tone.styles.ts` (`toneText`, `toneChip`); money
-  keeps green/red meaning, lime and lilac are decorative only, focus rings are `ring`
-  (lilac).
+  keeps green/red meaning, status chips are soft fills, focus rings are `ring` (blue).
 - shadcn components render as the registry ships them. `className` on a `ui` component
-  is layout only; colour comes from tokens. `primary` is ink in light mode.
+  is layout only; colour comes from tokens. `primary` is brand blue.
 - Never hand-roll a table, form, dialog, sheet, date picker, select, combobox, tooltip
   or toast the `components/ui` set already provides. Icons are `lucide-react`, charts go
   through `components/common/chart/` (recharts via `ui/chart`), toasts are `sonner`.
@@ -339,6 +362,12 @@ entries), with the same pair for public. The sider menu, breadcrumbs and permiss
 guards are all derived from that same data — `label`, `description`, `icon`, `group`
 and `can` are what the chrome reads. Adding a page means adding one entry, never
 touching the menu.
+
+Protected views are lazy: an entry spreads `...lazyView(() => import(view))` from
+`routes/route.lazy.ts`, which supplies the chunk loader, `PageSkeleton` as
+`HydrateFallback` and `RouteErrorView` as the per-view `ErrorBoundary`; the root boundary
+is `RootErrorView`. `ProtectedMenu` preloads a chunk on hover/focus and `RouteProgress`
+shows navigation. Public auth views stay eager.
 
 Permission gating is `can` plus `permissionLoader` in `route.guard.ts`; in-page gating
 is `RequirePermission`.

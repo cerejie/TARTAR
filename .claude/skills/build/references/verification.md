@@ -39,7 +39,7 @@ re-edit the rule. Establish, in order, where the chain breaks:
    (`tailwind-merge` keeps the last of two conflicting utilities).
 2. **Is the class a whole string Tailwind can see?** A class built by concatenation is
    never generated. `grep` the emitted CSS in `dist/assets/*.css` for it.
-3. **Does the token resolve?** A utility like `bg-lime-mist` exists only if `--color-lime-mist`
+3. **Does the token resolve?** A utility like `bg-brand-mist` exists only if `--color-brand-mist`
    is in the `@theme` block of `theme.css`; a semantic colour needs both its `:root` and
    `.dark` values.
 4. **Is a `ui` component's own class winning?** Its variant classes apply first; a layout
