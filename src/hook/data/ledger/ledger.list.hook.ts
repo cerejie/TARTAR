@@ -10,10 +10,12 @@ import {
   ledgerPaymentModalKey,
 } from "../../../keys/modal.keys";
 import {
+  customerListKey,
   ledgerPartyKey,
   ledgerSummaryKey,
   paymentListKey,
   scopedKey,
+  supplierListKey,
 } from "../../../keys/query.keys";
 import {
   ledgerPaginationKey,
@@ -82,7 +84,7 @@ export interface ILedgerListConfig<
   sections: IFieldSection<Input>[];
   defaults: DefaultValues<Input>;
   partyOf(row: Row): ILedgerPartyKey;
-  prepare(values: Input): Input;
+  prepare(values: Input): Promise<Input>;
 }
 
 const dueSoonDays = 7;
@@ -148,6 +150,8 @@ export const useLedgerListHook = <
     ledgerSummaryKey,
     ledgerPartyKey,
     paymentListKey,
+    customerListKey,
+    supplierListKey,
   ];
 
   const listQuery = useQuery<IPaginationResponse<Row>>(
@@ -198,8 +202,8 @@ export const useLedgerListHook = <
     paymentTarget?.rows ?? partyLedgerQuery.data ?? [];
 
   const createMutation = useMutation(
-    (values: Input) =>
-      config.services.create(config.prepare(values), createdBy),
+    async (values: Input) =>
+      config.services.create(await config.prepare(values), createdBy),
     {
       successMessage: `${config.title} recorded`,
       invalidate,

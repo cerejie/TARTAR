@@ -33,12 +33,12 @@ const makePartyServices = <Row extends IParty>(table: PartyTable) => {
       return (data ?? []) as unknown as Row[];
     },
 
-    create: (values: IPartyInput) =>
+    create: (values: IPartyInput, id?: string) =>
       runWrite({
         label: `New ${noun} "${values.name}"`,
         kind: "insert",
         table,
-        values: toValues(values),
+        values: id ? { id, ...toValues(values) } : toValues(values),
       }),
 
     update: (id: string, values: IPartyInput) =>

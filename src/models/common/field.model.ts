@@ -8,6 +8,7 @@ export type IFieldType =
   | "number"
   | "amount"
   | "select"
+  | "creatable"
   | "multiselect"
   | "date";
 

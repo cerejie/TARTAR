@@ -11,11 +11,18 @@ import type {
   IPayable,
   IReceivable,
 } from "../../../models/data/ledger/ledger.response";
+import type { IPartyInput } from "../../../models/data/party/party.request";
+import type { IParty } from "../../../models/data/party/party.response";
 import {
   payableServices,
   receivableServices,
 } from "../../../services/data/ledger.services";
+import {
+  customerServices,
+  supplierServices,
+} from "../../../services/data/party.services";
 import { todayIso } from "../../../utils/format.utils";
+import { nameKey } from "../../../utils/fuzzy.utils";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useCustomerListHook } from "../party/customer.list.hook";
 import { useSupplierListHook } from "../party/supplier.list.hook";
@@ -29,30 +36,35 @@ interface ISectionSource {
   key: string;
   title: string;
   description: string;
-  partyIdField: "customer_id" | "supplier_id";
   partyNameField: "customer_name" | "supplier_name";
   partyLabel: string;
   branchOptions: IFieldOption[];
   partyOptions: IFieldOption[];
 }
 
-const pickedPartyId = (values: ILedgerInput): unknown =>
-  ("customer_id" in values && values.customer_id) ||
-  ("supplier_id" in values && values.supplier_id);
-
 const partyOf = (row: ILedgerRecord): ILedgerPartyKey =>
   "customer_name" in row
     ? { partyId: row.customer_id, partyName: row.customer_name }
     : { partyId: row.supplier_id, partyName: row.supplier_name };
 
-const resolveName = (
-  records: readonly { id: string; name: string }[],
-  id: unknown,
-  typed: unknown
-) =>
-  (typeof id === "string"
-    ? records.find((record) => record.id === id)?.name
-    : undefined) ?? (typeof typed === "string" ? typed.trim() : "");
+const resolveParty = async (
+  records: readonly IParty[],
+  typed: string,
+  create: (values: IPartyInput, id?: string) => Promise<unknown>
+): Promise<Pick<IParty, "id" | "name">> => {
+  const name = typed.trim();
+  const existing = records.find(
+    (record) => nameKey(record.name) === nameKey(name)
+  );
+  if (existing) return existing;
+
+  const id = crypto.randomUUID();
+  await create(
+    { name, contact: null, contact_person: null, address: null },
+    id
+  );
+  return { id, name };
+};
 
 const buildSections = (source: ISectionSource): IFieldSection<ILedgerInput>[] => [
   {
@@ -76,17 +88,11 @@ const buildSections = (source: ISectionSource): IFieldSection<ILedgerInput>[] =>
         required: true,
       },
       {
-        name: source.partyIdField,
-        label: source.partyLabel,
-        type: "select",
-        allowClear: true,
-        options: source.partyOptions,
-      },
-      {
         name: source.partyNameField,
-        label: `${source.partyLabel} name (if not in the list)`,
-        type: "text",
-        hidden: (values) => !!pickedPartyId(values),
+        label: source.partyLabel,
+        type: "creatable",
+        required: true,
+        options: source.partyOptions,
       },
       {
         name: "amount",
@@ -123,7 +129,6 @@ export const useLedgerScopeHook = (scope: LedgerScope) => {
       key: "receivable",
       title: "Receivable",
       description: "Who owes this amount and when it is due.",
-      partyIdField: "customer_id",
       partyNameField: "customer_name",
       partyLabel: "Customer",
       branchOptions,
@@ -131,23 +136,25 @@ export const useLedgerScopeHook = (scope: LedgerScope) => {
     }),
     defaults: {
       branch,
-      customer_id: null,
       customer_name: "",
       due_date: todayIso(),
       reference_number: "",
     },
     partyOf,
-    prepare: (values) =>
-      "customer_id" in values
-        ? {
-            ...values,
-            customer_name: resolveName(
-              customers,
-              values.customer_id,
-              values.customer_name
-            ),
-          }
-        : values,
+    prepare: async (values) => {
+      if (!("customer_name" in values)) return values;
+
+      const customer = await resolveParty(
+        customers,
+        values.customer_name,
+        customerServices.create
+      );
+      return {
+        ...values,
+        customer_id: customer.id,
+        customer_name: customer.name,
+      };
+    },
   };
 
   const payableConfig: ILedgerListConfig<ILedgerRecord, ILedgerInput> = {
@@ -161,7 +168,6 @@ export const useLedgerScopeHook = (scope: LedgerScope) => {
       key: "payable",
       title: "Payable",
       description: "Who we owe this amount to and when it is due.",
-      partyIdField: "supplier_id",
       partyNameField: "supplier_name",
       partyLabel: "Supplier",
       branchOptions,
@@ -169,23 +175,25 @@ export const useLedgerScopeHook = (scope: LedgerScope) => {
     }),
     defaults: {
       branch,
-      supplier_id: null,
       supplier_name: "",
       due_date: todayIso(),
       reference_number: "",
     },
     partyOf,
-    prepare: (values) =>
-      "supplier_id" in values
-        ? {
-            ...values,
-            supplier_name: resolveName(
-              suppliers,
-              values.supplier_id,
-              values.supplier_name
-            ),
-          }
-        : values,
+    prepare: async (values) => {
+      if (!("supplier_name" in values)) return values;
+
+      const supplier = await resolveParty(
+        suppliers,
+        values.supplier_name,
+        supplierServices.create
+      );
+      return {
+        ...values,
+        supplier_id: supplier.id,
+        supplier_name: supplier.name,
+      };
+    },
   };
 
   return useLedgerListHook(

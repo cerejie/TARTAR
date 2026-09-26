@@ -146,6 +146,15 @@ practical flow (primary action placement, destructive actions separated).
   Print report = solid primary, divided from pills. F19 skipped — needs new voucher aggregates
   (metric meaning = business decision); raise with user if wanted.
 
+- [x] V6 — modals + forms (compiled, not screenshot-verified, 2026-09-27): F20-F23, F25 in
+  v1.30. F24: new field type `creatable` (models/common/field.model.ts, FormField.tsx) = RAC
+  combobox with allowsCustomValue bound to the party NAME field; suggestions via new
+  utils/fuzzy.utils.ts (order-free tokens, prefix + Damerau similarity, >= 0.8, best first).
+  ledger.request: name required, refine dropped. ledger.scope.hook prepare is async: exact
+  word-order-free match (nameKey) reuses the existing party, else creates one with a client
+  uuid through party.services create(values, id) (runWrite, offline-safe order).
+  ledger.list.hook invalidates customer/supplier lists.
+
 ## Findings (desktop; mobile deferred by user)
 
 ### V3 — tokens + dark mode
@@ -228,17 +237,16 @@ loading/error states, long-name/large-money stress, validation errors (never pre
 
 ## Next
 
-1. **V6 — modals + forms** (F20-F25; F24 decided, see Decisions locked). Optionally first a
-   capture of V3-V5 (dark chips, row menus, expanded rows, pager, Vouchers at 1440, title-row
-   actions on Branches/Users/Master Data, Filters popover header + labels, Dashboard date,
-   Reports print divider).
-2. **V7 — dashboard charts** (F26-F28).
-Order may be changed by the user. Mobile (M*) goes to a new roadmap after V7.
+1. **V7 — dashboard charts** (F26-F28). Optionally first a capture of V3-V6 (dark chips, row
+   menus, expanded rows, pager, Vouchers at 1440, title-row actions, Filters popover, Dashboard
+   date, Reports print divider, Record payment labels, placeholders, Customer/Supplier
+   combobox — type a new name and a reordered/typo'd existing name, cancel, never Save).
+Mobile (M*) goes to a new roadmap after V7.
 
 ## Open
 - Migration 20260926000009_accountant_voucher_read.sql (and possibly 20260718000004..
   20260722000008) not yet applied to Supabase — accountant voucher views stay empty until then.
 
 ## State
-Branch: development-overhaul · Uncommitted: V5 src changes + .claude/state · Last check:
-yarn build + yarn lint clean (after V5).
+Branch: development-overhaul · Uncommitted: F24 src changes + .claude/state · Last check:
+yarn build + yarn lint clean (after V6).

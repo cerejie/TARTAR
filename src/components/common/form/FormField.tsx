@@ -53,6 +53,7 @@ import {
   fieldSpan,
 } from "../../../styles/form/form.styles";
 import { formatDate, toAmount } from "../../../utils/format.utils";
+import { fuzzyOptions } from "../../../utils/fuzzy.utils";
 
 const isoDate = /^\d{4}-\d{2}-\d{2}/;
 
@@ -78,6 +79,10 @@ const asDate = (value: unknown): CalendarDate | null => {
 const selectPlaceholder = <TValues extends FieldValues>(
   config: IFieldConfig<TValues>
 ) => config.placeholder ?? `Select ${config.label.toLowerCase()}`;
+
+const creatablePlaceholder = <TValues extends FieldValues>(
+  config: IFieldConfig<TValues>
+) => config.placeholder ?? `Select or type a ${config.label.toLowerCase()}`;
 
 const asNumber = (text: string): number | null => {
   if (text === "") return null;
@@ -193,6 +198,47 @@ const renderControl = <TValues extends FieldValues>(
           </ComboboxContent>
         </Combobox>
       );
+    case "creatable": {
+      const typed = asText(field.value);
+
+      return (
+        <Combobox
+          allowsCustomValue
+          inputValue={typed}
+          onInputChange={field.onChange}
+          onChange={(key) => {
+            const picked = options.find((option) => option.value === key);
+            if (picked) field.onChange(picked.label);
+          }}
+          onBlur={field.onBlur}
+          isInvalid={invalid}
+          aria-label={config.label}
+          menuTrigger="focus"
+          defaultFilter={() => true}
+          allowsEmptyCollection
+          className={fieldControl}
+        >
+          <ComboboxInput id={fieldId} placeholder={creatablePlaceholder(config)} />
+          <ComboboxContent>
+            <ComboboxList
+              renderEmptyState={() => (
+                <ComboboxEmpty>
+                  {typed.trim()
+                    ? `No close match. "${typed.trim()}" is added as new.`
+                    : "No match found."}
+                </ComboboxEmpty>
+              )}
+            >
+              {fuzzyOptions(options, typed).map((option) => (
+                <ComboboxItem key={option.value} id={option.value}>
+                  {option.label}
+                </ComboboxItem>
+              ))}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      );
+    }
     case "multiselect": {
       const selected = asList(field.value);
 
