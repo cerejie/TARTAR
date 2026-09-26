@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["antd", "antd/*", "@ant-design/*"],
+            "message": "antd is removed. Use src/components/ui (shadcn aria-vega) through src/components/common."
+          },
+          {
+            "group": ["@vanilla-extract/*", "**/*.css.ts", "**/*.css"],
+            "message": "vanilla-extract is removed. Put class constants in src/styles/<area>/<area>.styles.ts; tokens live in src/styles/common/theme.css."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/main.tsx"],
+      "rules": { "no-restricted-imports": "off" }
+    }
+  ]
+}
