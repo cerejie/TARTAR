@@ -1,9 +1,9 @@
 export const printPalette = {
-  text: "#16161A",
-  heading: "#0B0B0E",
-  muted: "#6B6B72",
-  border: "#E3E4DE",
-  danger: "#C2372B",
+  text: "#1B1F2A",
+  heading: "#0F172A",
+  muted: "#6B7280",
+  border: "#ECEEF3",
+  danger: "#DC2626",
 } as const;
 
 export const printFont =

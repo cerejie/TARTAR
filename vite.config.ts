@@ -15,11 +15,12 @@ export default defineConfig({
         name: 'TARTAR Business Management System',
         short_name: 'TARTAR',
         description: 'Multi-branch business management system for TARTAR.',
-        theme_color: '#c1121f',
+        theme_color: '#0b6bf5',
         background_color: '#ffffff',
         display: 'standalone',
       },
       workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
     }),

@@ -8,7 +8,7 @@ export const shellContent =
   "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-4 [scrollbar-gutter:stable] sm:px-4 lg:px-10 lg:py-6";
 
 export const shellFooter =
-  "mx-3 flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border-subtle py-4 text-xs text-muted-foreground sm:mx-4 lg:mx-10";
+  "mx-3 flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border py-4 text-xs text-muted-foreground sm:mx-4 lg:mx-10";
 
 export const shellFooterNote = "inline-flex items-center gap-1.5";
 

@@ -7,8 +7,8 @@ export const statusTag = cva("", {
       positive: "border-positive/30 bg-positive/10 text-positive",
       negative: "border-danger-border bg-danger-bg text-danger",
       warning: "border-warning/30 bg-warning/10 text-warning",
-      info: "border-lilac bg-lilac-soft text-ink",
-      brand: "border-lime-deep bg-lime-soft text-ink",
+      info: "border-info/30 bg-info-soft text-info",
+      brand: "border-brand/30 bg-brand-soft text-brand",
     },
   },
   defaultVariants: { color: "default" },
@@ -33,7 +33,7 @@ export const syncBadge = cva("", {
   variants: {
     state: {
       offline: "border-warning/30 bg-warning/10 text-warning",
-      pending: "border-lilac bg-lilac-soft text-ink",
+      pending: "border-info/30 bg-info-soft text-info",
     },
   },
 });

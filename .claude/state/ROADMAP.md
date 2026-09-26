@@ -70,14 +70,14 @@ Cards (mockup "Recommended for you")
 - White cards with light border, radius ~16px, pastel category chip top-left (blue-100/
   amber-100/near-black variants), muted meta top-right, semibold title, 2-line clamped muted
   body, outlined blue "Learn more" button. Section heading + "View all" blue link on the right.
-Palette (approximate — pick exact values in T0 and record them here)
+Palette (chosen in T0 — exact values live in theme.css :root / .dark)
 - primary #0B6BF5 (hover a step darker), primary-soft #E8F0FE, text #1B1F2A,
   muted text #6B7280, border #ECEEF3, track #E5E7EB, panel #FFFFFF,
   backdrop stops ~#E7ECFB / #F4E6F4 / #DDE9F8. positive/warning/danger keep their meaning,
   as soft-fill chips. Charts: blue, sky, violet, green, amber, red.
 
 ## Path map
-- Tokens / base / utilities: src/styles/common/theme.css ; tones: src/styles/common/tone.styles.ts
+- Tokens / base / utilities: src/styles/common/theme.css (shell backdrop = `bg-app`, panels = `rounded-panel shadow-panel bg-panel`) ; tones: src/styles/common/tone.styles.ts
 - Font import: src/main.tsx ; PWA precache globs: vite.config.ts
 - Shell: src/layouts/ProtectedLayout.tsx ; src/components/common/layout/{ProtectedHeader,ProtectedSider,ProtectedMenu,ProtectedBranchScope,ProtectedSiderUser,ProtectedFooter,RouteRoot}.tsx ; src/hook/layout/protected.hook.ts (header title/description at :61) ; styles/layout/{shell,header,sidebar}.styles.ts
 - Content view: src/components/common/view/{ContentView,ViewSwitch,BentoGrid,BentoCell}.tsx ; styles/view/view.styles.ts
@@ -92,36 +92,34 @@ Palette (approximate — pick exact values in T0 and record them here)
 - Reference screen: components/transaction/tables/TransactionsTable.tsx + hook/data/transaction/transaction.list.hook.ts
 
 ## Done
-- (none yet)
+- T0 tokens + font (v1.12): src/styles/common/theme.css (blue :root / navy .dark, intent tokens
+  brand, brand-deep, brand-soft, brand-mist, on-brand, on-brand-muted, panel, track, info,
+  info-soft, backdrop-*; --radius-panel, --shadow-panel; @utility bg-app replaces bg-auth-page +
+  bg-error-page; bg-auth-hero/-submit now blue; scrollbar = track). Sweep: styles/{card,common/tone,
+  dashboard,layout/{header,shell,sidebar,public},modal,status,table,print}. Font import in
+  src/main.tsx; vite.config.ts globPatterns + woff2, manifest theme_color blue. Old tokens
+  (ink*, on-ink*, lime*, lilac*, cloud, mist, border-subtle) deleted — grep returns nothing.
+  CardTone/ChartTone keep the value name "ink" (model rename left to T5b Dashboard).
 
 ## Next
-1. If v1.10 (docs rewrite) is still uncommitted, remind the user once, then continue.
-2. **T0 tokens + font** — `yarn add @fontsource-variable/plus-jakarta-sans`, import in main.tsx,
-   confirm vite.config PWA globPatterns include woff2. Rewrite theme.css: `:root` + `.dark`
-   semantic vars to the blue palette (primary, ring, sidebar-*, chart-1..6), `@theme` palette
-   renamed to intent names (`brand`, `brand-soft`, `brand-mist`, `panel`, `track`, keep
-   `positive/warning/danger(-bg)`), `--radius-panel`, `--shadow-panel`, `@utility bg-app`,
-   fonts -> Plus Jakarta Sans. Sweep every `styles/**/*.styles.ts` + tone.styles.ts off
-   `lime*`, `lilac*`, `ink*`, `on-ink*`, `cloud`, `mist` onto the new names, then delete the
-   old tokens (grep must return nothing). Scrollbar colour -> track grey.
-3. **T1 shell + title move** — ProtectedLayout becomes backdrop + grid (top bar row; sidebar |
+1. **T1 shell + title move** — ProtectedLayout becomes backdrop + grid (top bar row; sidebar |
    content card). New top bar in ProtectedHeader: logo, ProtectedBranchScope restyled as the
    search-slot pill, sync icon button (badge = queued writes, offline state), user chip with the
    ProtectedSiderUser menu moved in. Sidebar: floating light card, blue active pill, admin group
    pinned to the bottom. Delete ProtectedFooter + its styles. protected.hook stops returning
    `description`; ContentView renders the route label as the h1 title row, with a `tabs` slot
    (segmented status pills) and `actions` on the right. Mobile: trigger in the top bar.
-4. **T2 table + toolbar + pagination** — DataTable restyle per spec (drop border-separate row
+2. **T2 table + toolbar + pagination** — DataTable restyle per spec (drop border-separate row
    cards, divider rows, tint states, expanded row as soft inset). New common cells only where a
    screen uses them now: `AvatarCell` (person/recorded-by), `ProgressCell` (ledger paid/total).
    TablePagination -> circle prev | centred circle pages with ellipsis | circle next (keep the
    page-size select, compact, beside next). FilterToolbar -> "Filters" popover (active-count
    badge, Reset) + right-side sort select; ViewSwitch -> segmented pills. Apply on Transactions.
-5. **T3 modals** — port crm2 AppModal header/body/footer rules and mobile sheet (pb-safe);
+3. **T3 modals** — port crm2 AppModal header/body/footer rules and mobile sheet (pb-safe);
    rounded-panel dialog, overlay navy/20. ConfirmationModal gets the same ruled footer +
    h-11 actions; DetailModal -> crm2 sections + 2-col grid; EntityFormModal submit/cancel in
    the ruled footer. Check every modal renders header + footer.
-6. **T4 loading / error / lazy** — routes use react-router `lazy` for every view (pages become
+4. **T4 loading / error / lazy** — routes use react-router `lazy` for every view (pages become
    separate chunks; recharts only loads with Dashboard/Reports) + `HydrateFallback`/pending
    `PageSkeleton` inside the content card + thin blue top progress bar on
    `useNavigation().state`; prefetch a route chunk on menu hover/focus. `errorElement` ->
@@ -132,13 +130,13 @@ Palette (approximate — pick exact values in T0 and record them here)
    skeleton rows mirror column shapes (circle for avatar cells). StatCard / SectionCard / chart
    skeleton + error states. EmptyState: icon + sentence + optional action. Respect
    prefers-reduced-motion.
-7. **T5a screen sweep — transaction family + ledger** — Purchases, Expenses, Receivables,
+5. **T5a screen sweep — transaction family + ledger** — Purchases, Expenses, Receivables,
    Payables (LedgerManager), Payments: status pills in the title row, Filters popover,
    AvatarCell/ProgressCell where the data fits, error/empty states wired.
-8. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
+6. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
    white cards, blue charts, the "Recommended" card style for list cards), Reports, Auth +
    Error pages (backdrop gradient, blue submit, retire bg-auth-* lime/lilac utilities).
-9. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
+7. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
    updated to the new token names, new primitives, lazy routes and state rules; delete this file.
 
 ## Open
@@ -149,4 +147,4 @@ Palette (approximate — pick exact values in T0 and record them here)
   sorting should move server-side (service `order` param) or the select is left out.
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (v1.10 docs rewrite) · Last check: yarn build + yarn lint clean
+Branch: development-overhaul · Uncommitted: yes (T0, suggest v1.12) · Last check: yarn build + yarn lint clean

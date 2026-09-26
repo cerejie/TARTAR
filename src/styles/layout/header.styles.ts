@@ -1,5 +1,5 @@
 export const headerRoot =
-  "sticky top-0 z-20 flex min-h-18 shrink-0 items-center gap-3 border-b border-border-subtle bg-background px-3 py-3 sm:px-4 lg:min-h-22 lg:px-10 lg:py-4";
+  "sticky top-0 z-20 flex min-h-18 shrink-0 items-center gap-3 border-b border-border bg-background px-3 py-3 sm:px-4 lg:min-h-22 lg:px-10 lg:py-4";
 
 export const headerTrigger = "shrink-0";
 

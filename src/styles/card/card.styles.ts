@@ -4,8 +4,8 @@ export const sectionCardRoot = cva("", {
   variants: {
     tone: {
       surface: "",
-      ink: "bg-ink text-on-ink ring-0",
-      accent: "bg-lime-mist ring-lime-soft",
+      ink: "bg-brand text-on-brand ring-0",
+      accent: "bg-brand-mist ring-brand-soft",
     },
     flush: {
       true: "py-0",
@@ -19,7 +19,7 @@ export const sectionCardSubtitle = cva("", {
   variants: {
     tone: {
       surface: "",
-      ink: "text-on-ink-muted",
+      ink: "text-on-brand-muted",
       accent: "",
     },
   },

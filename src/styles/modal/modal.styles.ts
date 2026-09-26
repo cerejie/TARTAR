@@ -27,7 +27,7 @@ export const modalFooterActions = "flex justify-end gap-2";
 export const confirmMedia = cva("", {
   variants: {
     kind: {
-      confirm: "bg-lime-mist text-ink",
+      confirm: "bg-brand-soft text-brand",
       delete: "bg-danger-bg text-danger",
     },
   },

@@ -7,7 +7,7 @@ export const dataTableGrid = "border-separate border-spacing-y-2";
 export const dataTableHeader = "[&_tr]:border-b-0";
 
 export const dataTableHead = cva(
-  "bg-cloud px-4 py-2.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase first:rounded-l-md last:rounded-r-md",
+  "bg-muted px-4 py-2.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase first:rounded-l-md last:rounded-r-md",
   {
     variants: {
       align: { left: "", center: "text-center", right: "text-right" },
@@ -28,7 +28,7 @@ export const dataTableRowClickable = "cursor-pointer";
 export const dataTableRowOverdue = "[&>td]:bg-danger-bg";
 
 export const dataTableCell = cva(
-  "border-y border-border bg-card px-4 py-3 transition-colors group-hover/row:border-foreground/30 group-data-selected/row:bg-lime-mist",
+  "border-y border-border bg-card px-4 py-3 transition-colors group-hover/row:border-foreground/30 group-data-selected/row:bg-brand-mist",
   {
     variants: {
       align: { left: "", center: "text-center", right: "text-right tabular-nums" },
@@ -89,7 +89,7 @@ export const rowDetailLabel = "text-muted-foreground";
 export const rowDetailValue = "min-w-0 text-right font-medium";
 
 export const rowIcon =
-  "inline-flex size-7 shrink-0 items-center justify-center rounded-md bg-cloud text-foreground [&_svg]:size-3.5";
+  "inline-flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-foreground [&_svg]:size-3.5";
 
 export const nameCell = "inline-flex items-center gap-2 font-medium";
 

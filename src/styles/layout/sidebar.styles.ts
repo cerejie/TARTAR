@@ -8,14 +8,14 @@ export const sidebarLogoText = "grid min-w-0 group-data-[collapsible=icon]:hidde
 
 export const sidebarLogoWord = "truncate font-heading text-base leading-tight font-bold tracking-tight";
 
-export const sidebarLogoSub = "truncate text-xs text-on-ink-muted";
+export const sidebarLogoSub = "truncate text-xs text-muted-foreground";
 
 export const sidebarScope = "px-2 pt-3";
 
 export const sidebarContent = "gap-0 pt-2";
 
 export const sidebarGroupLabel =
-  "text-xs font-medium tracking-wider text-on-ink-muted uppercase group-data-[collapsible=icon]:pointer-events-none";
+  "text-xs font-medium tracking-wider text-muted-foreground uppercase group-data-[collapsible=icon]:pointer-events-none";
 
 export const sidebarMenuButton =
   "rounded-pill px-3 data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground";
@@ -30,9 +30,9 @@ export const sidebarUserText = "grid min-w-0 flex-1 text-left leading-tight grou
 
 export const sidebarUserName = "truncate text-sm font-semibold";
 
-export const sidebarUserRole = "truncate text-xs text-on-ink-muted";
+export const sidebarUserRole = "truncate text-xs text-muted-foreground";
 
-export const sidebarCaret = "ml-auto size-4 text-on-ink-muted group-data-[collapsible=icon]:hidden";
+export const sidebarCaret = "ml-auto size-4 text-muted-foreground group-data-[collapsible=icon]:hidden";
 
 export const sidebarUserMenu = "min-w-56";
 
