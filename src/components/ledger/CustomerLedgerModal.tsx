@@ -1,6 +1,6 @@
 import { IdcardOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Flex, Input, Tooltip } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import { useCustomerLedgerHook } from "../../hook/data/ledger/customer.ledger.hook";
 import type { ICustomerReceivableSummary } from "../../models/data/ledger/ledger.response";
 import { ledgerKeyOf } from "../../models/data/ledger/ledger.response";
@@ -36,7 +36,7 @@ const CustomerLedgerModal = () => {
     close,
   } = useCustomerLedgerHook();
 
-  const columns: ColumnsType<ICustomerReceivableSummary> = [
+  const columns: IDataTableColumn<ICustomerReceivableSummary>[] = [
     {
       title: "Customer",
       key: "name",

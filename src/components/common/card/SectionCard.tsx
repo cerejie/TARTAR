@@ -1,28 +1,29 @@
-import { MoreOutlined } from "@ant-design/icons";
-import { Button, Card, Dropdown, Flex, Typography, type MenuProps } from "antd";
 import type { ReactNode } from "react";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/utils/cn.utils";
 import type { CardTone } from "../../../models/common/view.model";
 import {
-  card,
-  cardBody,
-  cardDense,
-  cardExtra,
-  cardFlush,
-  cardFooter,
-  cardHead,
-  cardMenu,
-  cardSubtitle,
-  cardTitle,
-  cardTone,
-} from "../../../styles/card/card.css";
-
-const { Title, Text } = Typography;
+  sectionCardExtra,
+  sectionCardFlushBody,
+  sectionCardFooter,
+  sectionCardInset,
+  sectionCardRoot,
+  sectionCardSubtitle,
+  sectionCardTitle,
+} from "../../../styles/card/card.styles";
 
 type IProps = {
   title?: string;
   subtitle?: string;
   extra?: ReactNode;
-  menu?: MenuProps;
   tone?: CardTone;
   flush?: boolean;
   dense?: boolean;
@@ -34,61 +35,42 @@ const SectionCard = ({
   title,
   subtitle,
   extra,
-  menu,
   tone = "surface",
-  flush,
-  dense,
+  flush = false,
+  dense = false,
   footer,
   children,
 }: IProps) => {
-  const aside =
-    extra || menu ? (
-      <Flex className={`${cardExtra}`} align="center">
-        {extra}
-        {menu ? (
-          <Dropdown menu={menu} trigger={["click"]} placement="bottomRight">
-            <Button
-              type="text"
-              className={`${cardMenu}`}
-              aria-label={title ? `${title} options` : "Card options"}
-              icon={<MoreOutlined />}
-            />
-          </Dropdown>
-        ) : null}
-      </Flex>
-    ) : undefined;
-
-  const heading =
-    title || subtitle ? (
-      <Flex vertical>
-        {title ? (
-          <Title level={4} className={`${cardTitle}`}>
-            {title}
-          </Title>
-        ) : null}
-        {subtitle ? (
-          <Text type="secondary" className={`${cardSubtitle}`}>
-            {subtitle}
-          </Text>
-        ) : null}
-      </Flex>
-    ) : undefined;
+  const inset = flush ? sectionCardInset : undefined;
 
   return (
     <Card
-      className={[
-        card,
-        cardTone[tone],
-        flush ? cardFlush : "",
-        dense ? cardDense : "",
-      ].join(" ")}
-      variant="borderless"
-      classNames={{ header: `${cardHead}`, body: `${cardBody}` }}
-      title={heading}
-      extra={aside}
+      size={dense ? "sm" : "default"}
+      className={sectionCardRoot({ tone, flush })}
     >
-      {children}
-      {footer ? <div className={`${cardFooter}`}>{footer}</div> : null}
+      {title || subtitle || extra ? (
+        <CardHeader className={inset}>
+          {title ? (
+            <CardTitle className={sectionCardTitle}>{title}</CardTitle>
+          ) : null}
+          {subtitle ? (
+            <CardDescription className={sectionCardSubtitle({ tone })}>
+              {subtitle}
+            </CardDescription>
+          ) : null}
+          {extra ? (
+            <CardAction className={sectionCardExtra}>{extra}</CardAction>
+          ) : null}
+        </CardHeader>
+      ) : null}
+
+      <CardContent className={flush ? sectionCardFlushBody : undefined}>
+        {children}
+      </CardContent>
+
+      {footer ? (
+        <CardFooter className={cn(sectionCardFooter, inset)}>{footer}</CardFooter>
+      ) : null}
     </Card>
   );
 };

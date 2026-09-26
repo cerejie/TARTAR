@@ -1,27 +1,64 @@
-import { RightOutlined } from "@ant-design/icons";
-import { Table } from "antd";
-import type { ColumnsType, ColumnType, TableProps } from "antd/es/table";
-import type { ReactNode } from "react";
+import { Fragment, useId, type ReactNode } from "react";
+import { ArrowDown, ArrowUp, ChevronRight, ChevronsUpDown, Inbox } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+} from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/utils/cn.utils";
 import {
   rowExpansionPersistProps,
   useRowExpansion,
 } from "../../../hook/common/expansion.hook";
+import { usePagination } from "../../../hook/common/pagination.hook";
+import { useSort } from "../../../hook/common/sort.hook";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import type { IPaginationRequest } from "../../../models/common/pagination.model";
+import type {
+  IDataTableColumn,
+  IDataTableSelection,
+  ISortDirection,
+} from "../../../models/common/table.model";
 import {
+  dataTableCell,
+  dataTableEmpty,
+  dataTableExpansionCell,
+  dataTableGrid,
+  dataTableHead,
+  dataTableHeader,
+  dataTableLoadingAnnounce,
+  dataTableRoot,
+  dataTableRow,
+  dataTableRowClickable,
+  dataTableSelectionCell,
+  dataTableSkeletonBar,
+  dataTableSortIcon,
+  dataTableSortLabel,
+  dataTableStateCell,
   expandTrigger,
-  expandTriggerOpen,
   leadCell,
-  leadHeader,
-  rowClickable,
-  rowExpanded,
-  tableContainer,
-} from "../../../styles/table/table.css";
+} from "../../../styles/table/table.styles";
 import RowDetailPanel from "./RowDetailPanel";
+import TablePagination from "./TablePagination";
+
+const skeletonRows = 5;
 
 type IProps<T> = {
-  columns: ColumnsType<T>;
-  data: T[];
+  columns: readonly IDataTableColumn<T>[];
+  data: readonly T[];
+  label?: string;
   loading?: boolean;
   rowKey?: keyof T | ((row: T) => string);
   pageSize?: number;
@@ -33,13 +70,26 @@ type IProps<T> = {
   expansionKey?: string;
   detailSections?: IDetailSection<T>[];
   emptyText?: string;
-  rowSelection?: TableProps<T>["rowSelection"];
+  rowSelection?: IDataTableSelection<T>;
   rowClassName?: (row: T) => string;
+};
+
+const toCellContent = (value: unknown): ReactNode =>
+  typeof value === "string" || typeof value === "number" ? value : null;
+
+const columnId = <T,>(column: IDataTableColumn<T>, index: number) =>
+  column.key ?? column.dataIndex ?? String(index);
+
+const sortIcon = (direction: ISortDirection | undefined) => {
+  if (direction === "ascending") return <ArrowUp className={dataTableSortIcon} />;
+  if (direction === "descending") return <ArrowDown className={dataTableSortIcon} />;
+  return <ChevronsUpDown className={dataTableSortIcon} />;
 };
 
 const DataTable = <T extends object>({
   columns,
   data,
+  label = "Records",
   loading,
   rowKey = "id" as keyof T,
   pageSize = 15,
@@ -50,137 +100,239 @@ const DataTable = <T extends object>({
   onRowClick,
   expansionKey,
   detailSections,
-  emptyText,
+  emptyText = "No records",
   rowSelection,
   rowClassName,
 }: IProps<T>) => {
+  const tableId = useId();
   const { expandedRow, collapsingRow, toggleRow, endCollapse } =
-    useRowExpansion(expansionKey ?? "");
+    useRowExpansion(expansionKey ?? tableId);
+  const { sort, setSort } = useSort(tableId);
+  const { pagination: clientPagination, setPagination: setClientPagination } =
+    usePagination(tableId);
 
   const resolveRowKey =
     typeof rowKey === "function" ? rowKey : (row: T) => String(row[rowKey]);
 
   const isExpandable = Boolean(expansionKey && detailSections?.length);
+  const columnCount = columns.length + (rowSelection ? 1 : 0);
 
-  const expandedRowKeys = [expandedRow, collapsingRow].filter(
-    (rowKey): rowKey is string => rowKey !== null
-  );
+  const activeSorter = sort
+    ? columns.find((column, index) => columnId(column, index) === sort.column)?.sorter
+    : undefined;
+  const sortedRows =
+    sort && activeSorter
+      ? [...data].sort((left, right) =>
+          sort.direction === "ascending"
+            ? activeSorter(left, right)
+            : activeSorter(right, left)
+        )
+      : data;
 
-  const withExpandTrigger = ([lead, ...rest]: ColumnsType<T>): ColumnsType<T> => {
-    if (!lead || "children" in lead) return columns;
+  const clientLastPage = Math.max(1, Math.ceil(sortedRows.length / pageSize));
+  const clientPage = Math.min(clientPagination.pageNumber, clientLastPage);
+  const rows = pagination
+    ? sortedRows
+    : sortedRows.slice((clientPage - 1) * pageSize, clientPage * pageSize);
 
-    const renderLead = (lead as ColumnType<T>).render;
-    const titleLead = (lead as ColumnType<T>).title;
+  const disabledKeys = rowSelection?.getCheckboxProps
+    ? rows
+        .filter((row) => rowSelection.getCheckboxProps?.(row).disabled)
+        .map(resolveRowKey)
+    : [];
 
-    return [
-      {
-        ...lead,
-        title:
-          typeof titleLead === "function" ? (
-            titleLead
-          ) : (
-            <span className={`${leadHeader}`}>{titleLead}</span>
-          ),
-        render: (value: unknown, row: T, index: number) => {
-          const key = resolveRowKey(row);
-          const expanded = expandedRow === key;
-
-          return (
-            <span className={`${leadCell}`}>
-              <button
-                type="button"
-                aria-label={expanded ? "Hide details" : "Show details"}
-                aria-expanded={expanded}
-                className={
-                  expanded
-                    ? `${expandTrigger} ${expandTriggerOpen}`
-                    : `${expandTrigger}`
-                }
-                onClick={(event) => {
-                  event.stopPropagation();
-                  toggleRow(key);
-                }}
-                {...rowExpansionPersistProps}
-              >
-                <RightOutlined />
-              </button>
-              {renderLead
-                ? (renderLead(value, row, index) as ReactNode)
-                : (value as ReactNode)}
-            </span>
-          );
-        },
-      },
-      ...rest,
-    ];
+  const selectRows = (keys: "all" | Set<string | number>) => {
+    if (!rowSelection) return;
+    const selected =
+      keys === "all"
+        ? rows.map(resolveRowKey).filter((key) => !disabledKeys.includes(key))
+        : [...keys].map(String);
+    rowSelection.onChange(selected);
   };
 
-  const attachedPager = pagination
-    ? {
-        current: pagination.pageNumber,
-        pageSize: pagination.pageSize,
-        total: totalCount,
-        showSizeChanger: true,
-        showLessItems: true,
-        showTotal: (total: number) =>
-          `${total} ${total === 1 ? "record" : "records"}`,
-      }
-    : { pageSize, showSizeChanger: false, hideOnSinglePage: true };
+  const renderLead = (key: string, content: ReactNode) => {
+    const expanded = expandedRow === key;
 
-  const expandable: TableProps<T>["expandable"] =
-    isExpandable && detailSections
-      ? {
-          showExpandColumn: false,
-          expandedRowKeys,
-          expandedRowRender: (row) => (
-            <RowDetailPanel<T>
-              record={row}
-              sections={detailSections}
-              collapsing={collapsingRow === resolveRowKey(row)}
-              onCollapsed={() => endCollapse(resolveRowKey(row))}
-            />
-          ),
-        }
-      : undefined;
+    return (
+      <span className={leadCell}>
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          aria-label={expanded ? "Hide details" : "Show details"}
+          aria-expanded={expanded}
+          onPress={() => toggleRow(key)}
+          {...rowExpansionPersistProps}
+        >
+          <ChevronRight className={expandTrigger({ open: expanded })} />
+        </Button>
+        {content}
+      </span>
+    );
+  };
 
-  const resolveRowClassName = (row: T) => {
-    const base = rowClassName?.(row) ?? "";
-    const open = isExpandable && expandedRowKeys.includes(resolveRowKey(row));
-    return open ? `${base} ${rowExpanded}`.trim() : base;
+  const renderRow = (row: T, rowIndex: number) => {
+    const key = resolveRowKey(row);
+    const isOpen =
+      isExpandable && (expandedRow === key || collapsingRow === key);
+
+    return (
+      <Fragment key={key}>
+        <TableRow
+          id={key}
+          className={cn(
+            dataTableRow,
+            onRowClick && dataTableRowClickable,
+            rowClassName?.(row)
+          )}
+          onAction={onRowClick ? () => onRowClick(row) : undefined}
+        >
+          {rowSelection ? (
+            <TableCell className={cn(dataTableCell({ expanded: isOpen }), dataTableSelectionCell)}>
+              <Checkbox slot="selection" />
+            </TableCell>
+          ) : null}
+          {columns.map((column, index) => {
+            const value = column.dataIndex ? row[column.dataIndex] : undefined;
+            const content = column.render
+              ? column.render(value, row, rowIndex)
+              : toCellContent(value);
+
+            return (
+              <TableCell
+                key={columnId(column, index)}
+                className={cn(
+                  dataTableCell({ align: column.align, expanded: isOpen }),
+                  column.className
+                )}
+              >
+                {isExpandable && index === 0 ? renderLead(key, content) : content}
+              </TableCell>
+            );
+          })}
+        </TableRow>
+
+        {isOpen && detailSections ? (
+          <TableRow id={`${key}-detail`} className={dataTableRow}>
+            <TableCell colSpan={columnCount} className={dataTableExpansionCell}>
+              <RowDetailPanel<T>
+                record={row}
+                sections={detailSections}
+                collapsing={collapsingRow === key}
+                onCollapsed={() => endCollapse(key)}
+              />
+            </TableCell>
+          </TableRow>
+        ) : null}
+      </Fragment>
+    );
+  };
+
+  const renderBody = () => {
+    if (loading) {
+      return Array.from({ length: skeletonRows }, (_, rowIndex) => (
+        <TableRow key={`skeleton-${rowIndex}`} id={`skeleton-${rowIndex}`} className={dataTableRow}>
+          {Array.from({ length: columnCount }, (__, cellIndex) => (
+            <TableCell key={cellIndex} className={dataTableCell()}>
+              <Skeleton className={dataTableSkeletonBar} />
+            </TableCell>
+          ))}
+        </TableRow>
+      ));
+    }
+
+    if (rows.length === 0) {
+      return (
+        <TableRow id="empty" className={dataTableRow}>
+          <TableCell colSpan={columnCount} className={dataTableStateCell}>
+            <Empty className={dataTableEmpty}>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Inbox />
+                </EmptyMedia>
+                <EmptyDescription>{emptyText}</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return rows.map(renderRow);
   };
 
   return (
-    <Table<T>
-      className={`${tableContainer}`}
-      columns={isExpandable ? withExpandTrigger(columns) : columns}
-      dataSource={data}
-      loading={loading}
-      size="middle"
-      tableLayout="auto"
-      rowKey={resolveRowKey}
-      rowSelection={rowSelection}
-      rowClassName={resolveRowClassName}
-      expandable={expandable}
-      locale={emptyText ? { emptyText } : undefined}
-      pagination={detachedPagination ? false : attachedPager}
-      onChange={
-        pagination
-          ? (config) =>
-              onPageChange?.(
-                config.current ?? 1,
-                config.pageSize ?? pagination.pageSize
-              )
-          : undefined
-      }
-      onRow={
-        onRowClick
-          ? (row) => ({
-              onClick: () => onRowClick(row),
-              className: `${rowClickable}`,
-            })
-          : undefined
-      }
-    />
+    <div className={dataTableRoot}>
+      <Table
+        aria-label={label}
+        className={dataTableGrid}
+        selectionMode={rowSelection ? "multiple" : "none"}
+        selectedKeys={rowSelection ? rowSelection.selectedRowKeys : undefined}
+        onSelectionChange={selectRows}
+        disabledKeys={disabledKeys}
+        disabledBehavior="selection"
+        sortDescriptor={sort ?? undefined}
+        onSortChange={(descriptor) =>
+          setSort({ column: String(descriptor.column), direction: descriptor.direction })
+        }
+      >
+        <TableHeader className={dataTableHeader}>
+          {rowSelection ? (
+            <TableHead className={cn(dataTableHead(), dataTableSelectionCell)}>
+              <Checkbox slot="selection" />
+            </TableHead>
+          ) : null}
+          {columns.map((column, index) => (
+            <TableHead
+              key={columnId(column, index)}
+              id={columnId(column, index)}
+              isRowHeader={index === 0}
+              allowsSorting={Boolean(column.sorter)}
+              className={dataTableHead({
+                align: column.align,
+                sortable: Boolean(column.sorter),
+              })}
+              style={column.width === undefined ? undefined : { width: column.width }}
+            >
+              {({ sortDirection }) =>
+                column.sorter ? (
+                  <span className={dataTableSortLabel}>
+                    {column.title}
+                    {sortIcon(sortDirection)}
+                  </span>
+                ) : (
+                  column.title
+                )
+              }
+            </TableHead>
+          ))}
+        </TableHeader>
+
+        <TableBody aria-busy={loading}>{renderBody()}</TableBody>
+      </Table>
+
+      {loading ? (
+        <p role="status" className={dataTableLoadingAnnounce}>
+          Loading
+        </p>
+      ) : null}
+
+      {pagination && !detachedPagination ? (
+        <TablePagination
+          pagination={pagination}
+          totalCount={totalCount}
+          onPageChange={(pageNumber, size) => onPageChange?.(pageNumber, size)}
+        />
+      ) : null}
+
+      {!pagination && sortedRows.length > pageSize ? (
+        <TablePagination
+          pagination={{ pageNumber: clientPage, pageSize }}
+          totalCount={sortedRows.length}
+          onPageChange={(pageNumber) => setClientPagination({ pageNumber })}
+          showSizeChanger={false}
+        />
+      ) : null}
+    </div>
   );
 };
 

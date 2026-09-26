@@ -5,14 +5,12 @@ import {
   rowDetailContent,
   rowDetailField,
   rowDetailLabel,
-  rowDetailPanel,
   rowDetailReveal,
-  rowDetailRevealClosing,
   rowDetailSection,
   rowDetailSectionIcon,
   rowDetailSectionTitle,
   rowDetailValue,
-} from "../../../styles/table/table.css";
+} from "../../../styles/table/table.styles";
 
 type IProps<TRecord> = {
   record: TRecord;
@@ -34,37 +32,29 @@ const RowDetailPanel = <TRecord,>({
 
   return (
     <div
-      className={
-        collapsing
-          ? `${rowDetailReveal} ${rowDetailRevealClosing}`
-          : `${rowDetailReveal}`
-      }
+      className={rowDetailReveal({ closing: collapsing })}
       onAnimationEnd={handleAnimationEnd}
       {...rowExpansionPersistProps}
     >
-      <div className={`${rowDetailPanel}`}>
-        <div className={`${rowDetailContent}`}>
-          {sections.map((section) => (
-            <div key={section.key} className={`${rowDetailSection}`}>
-              <div className={`${rowDetailSectionTitle}`}>
-                {section.icon ? (
-                  <span className={`${rowDetailSectionIcon}`} aria-hidden="true">
-                    {section.icon}
-                  </span>
-                ) : null}
-                {section.title}
-              </div>
-              {section.items.map((item) => (
-                <div key={item.key} className={`${rowDetailField}`}>
-                  <span className={`${rowDetailLabel}`}>{item.label}</span>
-                  <span className={`${rowDetailValue}`}>
-                    {item.render(record)}
-                  </span>
-                </div>
-              ))}
+      <div className={rowDetailContent}>
+        {sections.map((section) => (
+          <div key={section.key} className={rowDetailSection}>
+            <div className={rowDetailSectionTitle}>
+              {section.icon ? (
+                <span className={rowDetailSectionIcon} aria-hidden="true">
+                  {section.icon}
+                </span>
+              ) : null}
+              {section.title}
             </div>
-          ))}
-        </div>
+            {section.items.map((item) => (
+              <div key={item.key} className={rowDetailField}>
+                <span className={rowDetailLabel}>{item.label}</span>
+                <span className={rowDetailValue}>{item.render(record)}</span>
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );

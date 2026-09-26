@@ -5,7 +5,7 @@ import {
   formSectionDescription,
   formSectionHeader,
   formSectionTitle,
-} from "../../../styles/form/form.css";
+} from "../../../styles/form/form.styles";
 import FormFieldGrid from "./FormFieldGrid";
 
 type IProps<TValues extends FieldValues> = {
@@ -20,13 +20,11 @@ const FormSection = <TValues extends FieldValues>({
   values,
 }: IProps<TValues>) => {
   return (
-    <section className={`${formSection}`}>
-      <div className={`${formSectionHeader}`}>
-        <div className={`${formSectionTitle}`}>{section.title}</div>
+    <section className={formSection}>
+      <div className={formSectionHeader}>
+        <div className={formSectionTitle}>{section.title}</div>
         {section.description ? (
-          <div className={`${formSectionDescription}`}>
-            {section.description}
-          </div>
+          <div className={formSectionDescription}>{section.description}</div>
         ) : null}
       </div>
       <FormFieldGrid

@@ -1,5 +1,5 @@
 import { Col, Row } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   ledgerStatusColors,
   ledgerStatusLabels,
@@ -12,7 +12,7 @@ import {
   type IReceivable,
 } from "../../models/data/ledger/ledger.response";
 import StatusTag from "../common/status/StatusTag";
-import { rowOverdue } from "../../styles/table/table.css";
+import { dataTableRowOverdue } from "../../styles/table/table.styles";
 import { reportStats } from "../../styles/view/report/report.view.css";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { orderedLedger } from "../../utils/report.utils";
@@ -43,7 +43,7 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
     0
   );
 
-  const columns: ColumnsType<Row> = [
+  const columns: IDataTableColumn<Row>[] = [
     {
       title: "Due date",
       dataIndex: "due_date",
@@ -114,7 +114,7 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
           data={orderedLedger(rows)}
           loading={loading}
           emptyText="Nothing outstanding"
-          rowClassName={(row) => (isLedgerOverdue(row) ? `${rowOverdue}` : "")}
+          rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
         />
       </SectionCard>
     </>

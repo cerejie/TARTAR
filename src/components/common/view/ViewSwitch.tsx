@@ -1,4 +1,4 @@
-import { Segmented } from "antd";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type IProps<T extends string> = {
   value: T;
@@ -12,12 +12,29 @@ const ViewSwitch = <T extends string>({
   values,
   labels,
   onChange,
-}: IProps<T>) => (
-  <Segmented
-    value={value}
-    onChange={(next) => onChange(next as T)}
-    options={values.map((item) => ({ label: labels[item], value: item }))}
-  />
-);
+}: IProps<T>) => {
+  const selectView = (key: unknown) => {
+    const next = values.find((item) => item === key);
+    if (next) onChange(next);
+  };
+
+  return (
+    <ToggleGroup
+      variant="outline"
+      spacing={0}
+      selectionMode="single"
+      disallowEmptySelection
+      selectedKeys={[value]}
+      onSelectionChange={(keys) => selectView([...keys][0])}
+      aria-label="View"
+    >
+      {values.map((item) => (
+        <ToggleGroupItem key={item} id={item}>
+          {labels[item]}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  );
+};
 
 export default ViewSwitch;

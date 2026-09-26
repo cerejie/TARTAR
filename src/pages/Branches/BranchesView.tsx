@@ -13,7 +13,7 @@ import {
 } from "@ant-design/icons";
 import { Badge, Button, Tag, Tooltip } from "antd";
 import { useConfirm } from "../../hook/common/confirmation.hook";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import SectionCard from "../../components/common/card/SectionCard";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
 import DataTable from "../../components/common/table/DataTable";
@@ -54,7 +54,7 @@ const BranchesView = () => {
 
   const openConfirm = useConfirm();
 
-  const columns: ColumnsType<IBranch> = [
+  const columns: IDataTableColumn<IBranch>[] = [
     {
       title: "Branch Name",
       dataIndex: "name",
@@ -137,7 +137,7 @@ const BranchesView = () => {
     },
   ];
 
-  const monitorColumns: ColumnsType<IBranchMonitorRow> = [
+  const monitorColumns: IDataTableColumn<IBranchMonitorRow>[] = [
     {
       title: <ColumnLabel icon={<BankOutlined />}>Branch</ColumnLabel>,
       dataIndex: "branchName",

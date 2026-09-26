@@ -1,5 +1,5 @@
 import { DollarOutlined, IdcardOutlined, UserOutlined } from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import SearchInput from "../../common/filter/SearchInput";
 import DataTable from "../../common/table/DataTable";
@@ -52,7 +52,7 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
       : []),
   ];
 
-  const columns: ColumnsType<ILedgerPartySummary> = [
+  const columns: IDataTableColumn<ILedgerPartySummary>[] = [
     {
       title: partyLabel,
       dataIndex: "partyName",

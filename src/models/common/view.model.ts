@@ -18,10 +18,3 @@ export type StatusColor =
   | "brand";
 
 export type ModalSize = "sm" | "md" | "lg" | "xl";
-
-export const modalWidths: Record<ModalSize, number> = {
-  sm: 420,
-  md: 560,
-  lg: 760,
-  xl: 1040,
-};

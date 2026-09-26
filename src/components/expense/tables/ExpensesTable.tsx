@@ -8,7 +8,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Button, Space } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import EntityFormModal from "../../common/form/EntityFormModal";
@@ -123,7 +123,7 @@ const ExpensesTable = () => {
     ];
   };
 
-  const columns: ColumnsType<IDisbursement> = [
+  const columns: IDataTableColumn<IDisbursement>[] = [
     {
       title: "Date",
       dataIndex: "txn_date",

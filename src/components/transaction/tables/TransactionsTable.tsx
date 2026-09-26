@@ -6,7 +6,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Button } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import EntityFormModal from "../../common/form/EntityFormModal";
@@ -86,7 +86,7 @@ const TransactionsTable = () => {
     },
   ];
 
-  const columns: ColumnsType<ITransaction> = [
+  const columns: IDataTableColumn<ITransaction>[] = [
     {
       title: "Date",
       dataIndex: "txn_date",

@@ -1,18 +1,22 @@
-import { DeleteFilled, ExclamationCircleFilled } from "@ant-design/icons";
-import { Button, Flex } from "antd";
+import { CircleAlert, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import type { ConfirmKind } from "../../../models/common/modal.model";
 import {
   selectConfirm,
   selectConfirmRunning,
   useConfirmStore,
 } from "../../../store/common/confirm.store";
-import {
-  confirmBody,
-  confirmIcon,
-  confirmIconTone,
-  confirmMessage,
-} from "../../../styles/modal/modal.css";
-import AppModal from "./AppModal";
+import { confirmMedia } from "../../../styles/modal/modal.styles";
 
 const defaultTitles: Record<ConfirmKind, string> = {
   confirm: "Confirm action?",
@@ -35,37 +39,36 @@ const ConfirmationModal = () => {
 
   const kind = confirm.kind ?? "confirm";
 
+  const handleOpenChange = (next: boolean) => {
+    if (!next && !running) closeConfirm();
+  };
+
   return (
-    <AppModal
-      open={confirm.visible}
-      size="sm"
-      title={confirm.title ?? defaultTitles[kind]}
-      onClose={closeConfirm}
-      footer={
-        <Flex justify="flex-end" gap="small">
-          <Button onClick={closeConfirm} disabled={running}>
-            {confirm.cancelText ?? "No"}
-          </Button>
-          <Button
-            type="primary"
-            danger={kind === "delete"}
-            loading={running}
-            onClick={() => void runConfirm()}
-          >
-            {confirm.okText ?? "Yes"}
-          </Button>
-        </Flex>
-      }
-    >
-      <Flex className={`${confirmBody}`} align="flex-start" gap="middle">
-        <span className={`${confirmIcon} ${confirmIconTone[kind]}`}>
-          {kind === "delete" ? <DeleteFilled /> : <ExclamationCircleFilled />}
-        </span>
-        <span className={`${confirmMessage}`}>
+    <AlertDialog isOpen={confirm.visible} onOpenChange={handleOpenChange}>
+      <AlertDialogHeader>
+        <AlertDialogMedia className={confirmMedia({ kind })}>
+          {kind === "delete" ? <Trash2 /> : <CircleAlert />}
+        </AlertDialogMedia>
+        <AlertDialogTitle>{confirm.title ?? defaultTitles[kind]}</AlertDialogTitle>
+        <AlertDialogDescription>
           {confirm.message ?? defaultMessage(kind, confirm.itemName)}
-        </span>
-      </Flex>
-    </AppModal>
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+
+      <AlertDialogFooter>
+        <AlertDialogCancel isDisabled={running}>
+          {confirm.cancelText ?? "No"}
+        </AlertDialogCancel>
+        <Button
+          variant={kind === "delete" ? "destructive" : "default"}
+          isDisabled={running}
+          onPress={() => void runConfirm()}
+        >
+          {running ? <Spinner /> : null}
+          {confirm.okText ?? "Yes"}
+        </Button>
+      </AlertDialogFooter>
+    </AlertDialog>
   );
 };
 

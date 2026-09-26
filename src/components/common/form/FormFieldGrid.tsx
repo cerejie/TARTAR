@@ -1,6 +1,6 @@
 import type { Control, FieldValues } from "react-hook-form";
 import type { IFieldConfig } from "../../../models/common/field.model";
-import { formGrid } from "../../../styles/form/form.css";
+import { formGrid } from "../../../styles/form/form.styles";
 import FormField from "./FormField";
 
 type IProps<TValues extends FieldValues> = {
@@ -15,7 +15,7 @@ const FormFieldGrid = <TValues extends FieldValues>({
   values,
 }: IProps<TValues>) => {
   return (
-    <div className={`${formGrid}`}>
+    <div className={formGrid}>
       {fields
         .filter((field) => !field.hidden?.(values))
         .map((field) => (

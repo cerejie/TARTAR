@@ -1,4 +1,4 @@
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import type { IExpenseCategory } from "../../models/data/expense-category/expense.category.response";
 import type { IExpenseRow } from "../../models/data/report/report.response";
 import type { ITransaction } from "../../models/data/transaction/transaction.response";
@@ -7,7 +7,7 @@ import { expenseRows } from "../../utils/report.utils";
 import SectionCard from "../common/card/SectionCard";
 import DataTable from "../common/table/DataTable";
 
-const columns: ColumnsType<IExpenseRow> = [
+const columns: IDataTableColumn<IExpenseRow>[] = [
   { title: "Expense type", dataIndex: "label" },
   {
     title: "Total",

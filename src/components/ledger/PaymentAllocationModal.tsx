@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Flex, Form, InputNumber, Typography } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type { IFieldConfig } from "../../models/common/field.model";
@@ -85,7 +85,7 @@ const PaymentAllocationModal = ({
     });
   };
 
-  const columns: ColumnsType<IReceivable> = [
+  const columns: IDataTableColumn<IReceivable>[] = [
     {
       title: "Due date",
       dataIndex: "due_date",

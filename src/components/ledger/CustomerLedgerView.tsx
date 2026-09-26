@@ -5,7 +5,7 @@ import {
   PrinterOutlined,
 } from "@ant-design/icons";
 import { Button, Col, Flex, Row, Tooltip, Typography } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import { customerDetailsModalKey } from "../../keys/modal.keys";
 import {
   ledgerStatusColors,
@@ -21,7 +21,7 @@ import {
 } from "../../models/data/ledger/ledger.response";
 import { cardTitle } from "../../styles/card/card.css";
 import { statGrid } from "../../styles/stat/stat.css";
-import { rowOverdue } from "../../styles/table/table.css";
+import { dataTableRowOverdue } from "../../styles/table/table.styles";
 import {
   ledgerHead,
   ledgerSection,
@@ -64,7 +64,7 @@ const CustomerLedgerView = () => {
 
   if (!customer) return null;
 
-  const columns: ColumnsType<IReceivable> = [
+  const columns: IDataTableColumn<IReceivable>[] = [
     {
       title: "Date",
       dataIndex: "created_at",
@@ -224,7 +224,7 @@ const CustomerLedgerView = () => {
         loading={listLoading}
         pageSize={10}
         emptyText="No receivables match the filters"
-        rowClassName={(row) => (isLedgerOverdue(row) ? `${rowOverdue}` : "")}
+        rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
         rowSelection={{
           selectedRowKeys: selection,
           onChange: (keys) => setSelection(keys as string[]),

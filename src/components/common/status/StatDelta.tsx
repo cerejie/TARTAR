@@ -1,7 +1,7 @@
-import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
-import { Flex } from "antd";
-import { tone } from "../../../styles/common/tone.css";
-import { statDelta } from "../../../styles/status/status.css";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { cn } from "@/utils/cn.utils";
+import { toneText } from "../../../styles/common/tone.styles";
+import { statDelta } from "../../../styles/status/status.styles";
 
 type IProps = {
   current: number | undefined;
@@ -19,16 +19,13 @@ const StatDelta = ({ current, previous, goodDirection, label }: IProps) => {
   const isGood = isUp === (goodDirection === "up");
 
   return (
-    <Flex
-      component="span"
-      className={`${statDelta} ${isGood ? tone.positive : tone.negative}`}
-      align="center"
-      gap={3}
+    <span
+      className={cn(statDelta, toneText({ tone: isGood ? "positive" : "negative" }))}
       title={label}
     >
-      {isUp ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+      {isUp ? <ArrowUp /> : <ArrowDown />}
       {Math.abs(percent).toFixed(1)}%
-    </Flex>
+    </span>
   );
 };
 

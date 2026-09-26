@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import { Badge, Button, Tag, Tooltip } from "antd";
 import { useConfirm } from "../../hook/common/confirmation.hook";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import { useExpenseCategoryManageHook } from "../../hook/data/expense-category/expense.category.manage.hook";
 import type { IFieldConfig } from "../../models/common/field.model";
 import {
@@ -55,7 +55,7 @@ const ExpenseCategoriesPanel = () => {
 
   const openConfirm = useConfirm();
 
-  const columns: ColumnsType<IExpenseCategory> = [
+  const columns: IDataTableColumn<IExpenseCategory>[] = [
     {
       title: "Category",
       dataIndex: "name",

@@ -1,8 +1,22 @@
-import { Descriptions, Empty, Skeleton } from "antd";
 import type { ReactNode } from "react";
+import { Inbox } from "lucide-react";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+} from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { IDetailItem } from "../../../models/common/detail.model";
 import type { ModalSize } from "../../../models/common/view.model";
-import { modalEmpty } from "../../../styles/modal/modal.css";
+import {
+  detailLabel,
+  detailList,
+  detailRow,
+  detailSkeletonBar,
+  detailSkeletonList,
+  detailValue,
+} from "../../../styles/modal/modal.styles";
 import AppModal from "./AppModal";
 
 type IProps<TRecord> = {
@@ -30,6 +44,42 @@ const DetailModal = <TRecord,>({
   footer,
   onClose,
 }: IProps<TRecord>) => {
+  const renderBody = () => {
+    if (loading) {
+      return (
+        <div className={detailSkeletonList}>
+          {items.map((item) => (
+            <Skeleton key={item.key} className={detailSkeletonBar} />
+          ))}
+        </div>
+      );
+    }
+
+    if (!record) {
+      return (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Inbox />
+            </EmptyMedia>
+            <EmptyDescription>{emptyText}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      );
+    }
+
+    return (
+      <div className={detailList}>
+        {items.map((item) => (
+          <div key={item.key} className={detailRow}>
+            <div className={detailLabel}>{item.label}</div>
+            <div className={detailValue}>{item.render(record)}</div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <AppModal
       open={open}
@@ -39,23 +89,7 @@ const DetailModal = <TRecord,>({
       footer={footer}
       onClose={onClose}
     >
-      {loading ? (
-        <Skeleton active paragraph={{ rows: items.length }} />
-      ) : record ? (
-        <Descriptions
-          column={1}
-          size="small"
-          bordered
-          items={items.map((item) => ({
-            key: item.key,
-            label: item.label,
-            span: item.span,
-            children: item.render(record),
-          }))}
-        />
-      ) : (
-        <Empty className={`${modalEmpty}`} description={emptyText} />
-      )}
+      {renderBody()}
     </AppModal>
   );
 };

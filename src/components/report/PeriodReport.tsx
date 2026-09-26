@@ -1,5 +1,5 @@
 import { Col, Row } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   transactionTypeLabels,
   type TransactionType,
@@ -12,7 +12,7 @@ import SectionCard from "../common/card/SectionCard";
 import StatCard from "../common/card/StatCard";
 import DataTable from "../common/table/DataTable";
 
-const columns: ColumnsType<ITransaction> = [
+const columns: IDataTableColumn<ITransaction>[] = [
   {
     title: "Date",
     dataIndex: "txn_date",

@@ -1,6 +1,10 @@
-import { SearchOutlined } from "@ant-design/icons";
-import { Input } from "antd";
-import { filterSearch } from "../../../styles/filter/filter.css";
+import { Search } from "lucide-react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { filterSearch } from "../../../styles/filter/filter.styles";
 
 type IProps = {
   value: string | undefined;
@@ -9,14 +13,18 @@ type IProps = {
 };
 
 const SearchInput = ({ value, placeholder, onChange }: IProps) => (
-  <Input
-    className={`${filterSearch}`}
-    placeholder={placeholder}
-    prefix={<SearchOutlined />}
-    allowClear
-    value={value}
-    onChange={(event) => onChange(event.target.value || undefined)}
-  />
+  <InputGroup className={filterSearch}>
+    <InputGroupAddon>
+      <Search />
+    </InputGroupAddon>
+    <InputGroupInput
+      type="search"
+      aria-label={placeholder}
+      placeholder={placeholder}
+      value={value ?? ""}
+      onChange={(event) => onChange(event.target.value || undefined)}
+    />
+  </InputGroup>
 );
 
 export default SearchInput;

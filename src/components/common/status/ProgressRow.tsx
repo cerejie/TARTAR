@@ -1,15 +1,18 @@
-import { Flex } from "antd";
-import { tone, type Tone } from "../../../styles/common/tone.css";
+import {
+  Progress,
+  ProgressIndicator,
+  ProgressTrack,
+} from "@/components/ui/progress";
+import { cn } from "@/utils/cn.utils";
+import { toneFill, type Tone } from "../../../styles/common/tone.styles";
 import {
   progressDot,
-  progressFill,
   progressHead,
   progressLabel,
   progressRow,
-  progressTrack,
   progressUnit,
   progressValue,
-} from "../../../styles/status/status.css";
+} from "../../../styles/status/status.styles";
 
 type IProps = {
   label: string;
@@ -29,34 +32,24 @@ const ProgressRow = ({
   const clamped = Math.min(100, Math.max(0, percent));
 
   return (
-    <Flex vertical className={`${progressRow}`}>
-      <Flex className={`${progressHead}`} align="baseline">
-        <span className={`${progressValue}`}>
+    <Progress value={clamped} aria-label={label} className={progressRow}>
+      <div className={progressHead}>
+        <span className={progressValue}>
           {display ?? clamped.toFixed(0)}
-          {unit ? <span className={`${progressUnit}`}>{unit}</span> : null}
+          {unit ? <span className={progressUnit}>{unit}</span> : null}
         </span>
-        <span className={`${progressLabel}`}>
+        <span className={progressLabel}>
           {label}
           <span
-            className={`${progressDot} ${tone[variant]}`}
+            className={cn(progressDot, toneFill({ tone: variant }))}
             aria-hidden="true"
           />
         </span>
-      </Flex>
-      <div
-        className={`${progressTrack}`}
-        role="progressbar"
-        aria-valuenow={Math.round(clamped)}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={label}
-      >
-        <span
-          className={`${progressFill} ${tone[variant]}`}
-          style={{ width: `${clamped}%` }}
-        />
       </div>
-    </Flex>
+      <ProgressTrack>
+        <ProgressIndicator className={toneFill({ tone: variant })} />
+      </ProgressTrack>
+    </Progress>
   );
 };
 

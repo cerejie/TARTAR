@@ -1,4 +1,3 @@
-import { Flex } from "antd";
 import type { ReactNode } from "react";
 import {
   columnIcon,
@@ -6,7 +5,7 @@ import {
   nameCell,
   rowActions,
   rowIcon,
-} from "../../../styles/table/table.css";
+} from "../../../styles/table/table.styles";
 
 type IIconProps = {
   icon: ReactNode;
@@ -18,35 +17,27 @@ type ILabelProps = {
 };
 
 export const RowIcon = ({ icon }: IIconProps) => (
-  <Flex
-    component="span"
-    className={`${rowIcon}`}
-    align="center"
-    justify="center"
-    aria-hidden="true"
-  >
+  <span className={rowIcon} aria-hidden="true">
     {icon}
-  </Flex>
+  </span>
 );
 
 export const NameCell = ({ icon, children }: ILabelProps) => (
-  <Flex component="span" className={`${nameCell}`} align="center" gap={8}>
+  <span className={nameCell}>
     <RowIcon icon={icon} />
     <span>{children}</span>
-  </Flex>
+  </span>
 );
 
 export const ColumnLabel = ({ icon, children }: ILabelProps) => (
-  <Flex component="span" className={`${columnLabel}`} align="center" gap={4}>
-    <Flex component="span" className={`${columnIcon}`} aria-hidden="true">
+  <span className={columnLabel}>
+    <span className={columnIcon} aria-hidden="true">
       {icon}
-    </Flex>
+    </span>
     {children}
-  </Flex>
+  </span>
 );
 
 export const RowActions = ({ children }: { children: ReactNode }) => (
-  <Flex component="span" className={`${rowActions}`} align="center" gap={8}>
-    {children}
-  </Flex>
+  <span className={rowActions}>{children}</span>
 );

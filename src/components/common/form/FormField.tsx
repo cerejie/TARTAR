@@ -1,121 +1,271 @@
-import { DatePicker, Form, Input, InputNumber, Select } from "antd";
-import dayjs from "dayjs";
+import { parseDate, type CalendarDate } from "@internationalized/date";
+import { CalendarIcon } from "lucide-react";
 import {
   Controller,
   type Control,
   type ControllerRenderProps,
   type FieldValues,
+  type Path,
 } from "react-hook-form";
-import type { IFieldConfig } from "../../../models/common/field.model";
-import { blockControl, fieldSpan } from "../../../styles/form/form.css";
-import { toAmount } from "../../../utils/format.utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChipList,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
+import type {
+  IFieldConfig,
+  IFieldOption,
+} from "../../../models/common/field.model";
+import {
+  fieldControl,
+  fieldDatePlaceholder,
+  fieldDatePopover,
+  fieldDateTrigger,
+  fieldRequired,
+  fieldSpan,
+} from "../../../styles/form/form.styles";
+import { formatDate, toAmount } from "../../../utils/format.utils";
+
+const isoDate = /^\d{4}-\d{2}-\d{2}/;
+
+const asText = (value: unknown): string =>
+  typeof value === "string" || typeof value === "number" ? String(value) : "";
+
+const asList = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+
+const asDate = (value: unknown): CalendarDate | null => {
+  const match = typeof value === "string" ? isoDate.exec(value) : null;
+  if (!match) return null;
+
+  try {
+    return parseDate(match[0]);
+  } catch {
+    return null;
+  }
+};
+
+const asNumber = (text: string): number | null => {
+  if (text === "") return null;
+  const amount = Number(text);
+  return Number.isFinite(amount) ? amount : null;
+};
 
 type IProps<TValues extends FieldValues> = {
   config: IFieldConfig<TValues>;
   control: Control<TValues>;
 };
 
-type IFieldBinding = Omit<ControllerRenderProps<FieldValues>, "ref">;
+type IFieldBinding<TValues extends FieldValues> = ControllerRenderProps<
+  TValues,
+  Path<TValues>
+>;
 
 const renderControl = <TValues extends FieldValues>(
   config: IFieldConfig<TValues>,
-  field: IFieldBinding
+  field: IFieldBinding<TValues>,
+  invalid: boolean
 ) => {
+  const fieldId = String(config.name);
+  const options: IFieldOption[] = config.options ?? [];
+
   switch (config.type) {
     case "textarea":
       return (
-        <Input.TextArea
+        <Textarea
           {...field}
+          id={fieldId}
+          aria-invalid={invalid}
           rows={3}
+          value={asText(field.value)}
           placeholder={config.placeholder}
-          allowClear={config.allowClear}
         />
       );
     case "password":
       return (
-        <Input.Password
-          {...field}
-          placeholder={config.placeholder}
-          prefix={config.icon}
-          autoComplete={config.autoComplete ?? "new-password"}
-        />
+        <InputGroup>
+          {config.icon ? <InputGroupAddon>{config.icon}</InputGroupAddon> : null}
+          <InputGroupInput
+            {...field}
+            id={fieldId}
+            aria-invalid={invalid}
+            type="password"
+            value={asText(field.value)}
+            placeholder={config.placeholder}
+            autoComplete={config.autoComplete ?? "new-password"}
+          />
+        </InputGroup>
       );
     case "number":
-      return (
-        <InputNumber
-          className={`${blockControl}`}
-          value={field.value}
-          onChange={field.onChange}
-          onBlur={field.onBlur}
-          placeholder={config.placeholder}
-          prefix={config.prefix}
-          min={0}
-        />
-      );
     case "amount":
       return (
-        <InputNumber
-          className={`${blockControl}`}
-          value={field.value}
-          onChange={field.onChange}
-          onBlur={() => {
-            field.onChange(toAmount(field.value));
-            field.onBlur();
-          }}
-          placeholder={config.placeholder}
-          prefix={config.prefix}
-          min={0}
-          step={0.01}
-          precision={2}
-        />
+        <InputGroup>
+          {config.prefix ? (
+            <InputGroupAddon>
+              <InputGroupText>{config.prefix}</InputGroupText>
+            </InputGroupAddon>
+          ) : null}
+          <InputGroupInput
+            id={fieldId}
+            name={field.name}
+            ref={field.ref}
+            aria-invalid={invalid}
+            type="number"
+            min={0}
+            step={config.type === "amount" ? 0.01 : 1}
+            inputMode={config.type === "amount" ? "decimal" : "numeric"}
+            value={asText(field.value)}
+            placeholder={config.placeholder}
+            onChange={(event) => field.onChange(asNumber(event.target.value))}
+            onBlur={() => {
+              if (config.type === "amount") field.onChange(toAmount(field.value));
+              field.onBlur();
+            }}
+          />
+        </InputGroup>
       );
     case "select":
       return (
-        <Select
-          value={field.value ?? undefined}
-          onChange={field.onChange}
-          onBlur={field.onBlur}
-          options={config.options}
-          placeholder={config.placeholder}
-          allowClear={config.allowClear}
-          showSearch
-          optionFilterProp="label"
-        />
-      );
-    case "multiselect":
-      return (
-        <Select
-          mode="multiple"
-          value={field.value ?? []}
-          onChange={field.onChange}
-          onBlur={field.onBlur}
-          options={config.options}
-          placeholder={config.placeholder}
-          allowClear={config.allowClear}
-          optionFilterProp="label"
-        />
-      );
-    case "date":
-      return (
-        <DatePicker
-          className={`${blockControl}`}
-          value={field.value ? dayjs(field.value) : null}
-          onChange={(date) =>
-            field.onChange(date ? date.format("YYYY-MM-DD") : null)
+        <Combobox
+          value={asText(field.value) || null}
+          onChange={(key) =>
+            field.onChange(key === null ? undefined : String(key))
           }
           onBlur={field.onBlur}
-          format="MMM D, YYYY"
-        />
+          isInvalid={invalid}
+          aria-label={config.label}
+          menuTrigger="focus"
+          allowsEmptyCollection
+          className={fieldControl}
+        >
+          <ComboboxInput
+            id={fieldId}
+            placeholder={config.placeholder}
+            showClear={config.allowClear}
+          />
+          <ComboboxContent>
+            <ComboboxList
+              renderEmptyState={() => <ComboboxEmpty>No match found.</ComboboxEmpty>}
+            >
+              {options.map((option) => (
+                <ComboboxItem key={option.value} id={option.value}>
+                  {option.label}
+                </ComboboxItem>
+              ))}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       );
+    case "multiselect": {
+      const selected = asList(field.value);
+
+      return (
+        <Combobox
+          selectionMode="multiple"
+          value={selected}
+          onChange={(keys) => field.onChange(keys.map(String))}
+          onBlur={field.onBlur}
+          isInvalid={invalid}
+          aria-label={config.label}
+          allowsEmptyCollection
+          className={fieldControl}
+        >
+          <ComboboxChips>
+            <ComboboxChipList<IFieldOption>>
+              {(option) => (
+                <ComboboxChip id={option.value}>{option.label}</ComboboxChip>
+              )}
+            </ComboboxChipList>
+            <ComboboxChipsInput
+              id={fieldId}
+              placeholder={selected.length === 0 ? config.placeholder : undefined}
+            />
+          </ComboboxChips>
+          <ComboboxContent>
+            <ComboboxList
+              renderEmptyState={() => <ComboboxEmpty>No match found.</ComboboxEmpty>}
+            >
+              {options.map((option) => (
+                <ComboboxItem key={option.value} id={option.value} value={option}>
+                  {option.label}
+                </ComboboxItem>
+              ))}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      );
+    }
+    case "date": {
+      const selected = asDate(field.value);
+
+      return (
+        <PopoverTrigger>
+          <Button id={fieldId} variant="outline" className={fieldDateTrigger}>
+            <CalendarIcon />
+            {selected ? (
+              formatDate(selected.toString())
+            ) : (
+              <span className={fieldDatePlaceholder}>
+                {config.placeholder ?? "Pick a date"}
+              </span>
+            )}
+          </Button>
+          <Popover placement="bottom start" className={fieldDatePopover}>
+            <Calendar
+              captionLayout="dropdown"
+              value={selected}
+              onChange={(next) => field.onChange(next.toString())}
+            />
+          </Popover>
+        </PopoverTrigger>
+      );
+    }
     default:
+      if (config.icon) {
+        return (
+          <InputGroup>
+            <InputGroupAddon>{config.icon}</InputGroupAddon>
+            <InputGroupInput
+              {...field}
+              id={fieldId}
+              aria-invalid={invalid}
+              value={asText(field.value)}
+              placeholder={config.placeholder}
+              autoComplete={config.autoComplete}
+            />
+          </InputGroup>
+        );
+      }
+
       return (
         <Input
           {...field}
-          value={field.value ?? ""}
+          id={fieldId}
+          aria-invalid={invalid}
+          value={asText(field.value)}
           placeholder={config.placeholder}
-          prefix={config.icon}
           autoComplete={config.autoComplete}
-          allowClear={config.allowClear}
         />
       );
   }
@@ -130,15 +280,17 @@ const FormField = <TValues extends FieldValues>({
       name={config.name}
       control={control}
       render={({ field, fieldState }) => (
-        <Form.Item
-          className={`${fieldSpan[config.span ?? "full"]}`}
-          label={config.label}
-          required={config.required}
-          validateStatus={fieldState.error ? "error" : undefined}
-          help={fieldState.error?.message}
+        <Field
+          data-invalid={fieldState.invalid}
+          className={fieldSpan({ span: config.span ?? "full" })}
         >
-          {renderControl(config, field as unknown as IFieldBinding)}
-        </Form.Item>
+          <FieldLabel htmlFor={String(config.name)}>
+            {config.label}
+            {config.required ? <span className={fieldRequired}>*</span> : null}
+          </FieldLabel>
+          {renderControl(config, field, fieldState.invalid)}
+          <FieldError errors={[fieldState.error]} />
+        </Field>
       )}
     />
   );

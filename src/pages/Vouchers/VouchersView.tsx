@@ -5,7 +5,7 @@ import {
   PrinterOutlined,
 } from "@ant-design/icons";
 import { Button, Space, Typography } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import SectionCard from "../../components/common/card/SectionCard";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
 import RequirePermission from "../../components/common/guard/RequirePermission";
@@ -48,7 +48,7 @@ const VouchersView = () => {
     print,
   } = useVoucherListHook();
 
-  const columns: ColumnsType<IVoucher> = [
+  const columns: IDataTableColumn<IVoucher>[] = [
     {
       title: "Voucher no.",
       dataIndex: "voucher_no",

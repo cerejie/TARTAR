@@ -2,7 +2,7 @@ import { CheckOutlined, CloseOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Space, Tooltip } from "antd";
 import StatusTag from "../common/status/StatusTag";
 import { useConfirm } from "../../hook/common/confirmation.hook";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   paymentStatusColors,
   type PaymentKind,
@@ -35,7 +35,7 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
 
   const openConfirm = useConfirm();
 
-  const columns: ColumnsType<ILedgerPayment> = [
+  const columns: IDataTableColumn<ILedgerPayment>[] = [
     {
       title: "Date",
       dataIndex: "paid_at",
@@ -47,7 +47,7 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
       : [
           {
             title: kind === "receivable" ? "Customer" : "Supplier",
-            dataIndex: "party_name",
+            dataIndex: "party_name" as const,
             render: (name: string) => (
               <NameCell icon={<UserOutlined />}>{name}</NameCell>
             ),

@@ -1,9 +1,6 @@
 import type { ReactNode } from "react";
 import type { BentoSpan } from "../../../models/common/view.model";
-import {
-  bentoCell,
-  bentoSpan,
-} from "../../../styles/view/content/content.view.css";
+import { bentoCell } from "../../../styles/view/view.styles";
 
 type IProps = {
   span?: BentoSpan;
@@ -11,9 +8,7 @@ type IProps = {
 };
 
 const BentoCell = ({ span = "quarter", children }: IProps) => {
-  return (
-    <div className={`${bentoCell} ${bentoSpan[span]}`}>{children}</div>
-  );
+  return <div className={bentoCell({ span })}>{children}</div>;
 };
 
 export default BentoCell;

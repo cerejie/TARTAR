@@ -7,7 +7,7 @@ import {
 import { Button, Space, Tooltip } from "antd";
 import StatusTag from "../common/status/StatusTag";
 import { useConfirm } from "../../hook/common/confirmation.hook";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import type { ReactNode } from "react";
 import type { DefaultValues, FieldValues } from "react-hook-form";
 import type { ZodType } from "zod";
@@ -30,7 +30,8 @@ import {
   settlementSchema,
   type ISettlementInput,
 } from "../../models/data/ledger/ledger.request";
-import { iconButton, rowOverdue } from "../../styles/table/table.css";
+import { iconButton } from "../../styles/table/table.css";
+import { dataTableRowOverdue } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import SectionCard from "../common/card/SectionCard";
 import FilterToolbar from "../common/filter/FilterToolbar";
@@ -69,7 +70,7 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
 
   const openConfirm = useConfirm();
 
-  const columns: ColumnsType<Row> = [
+  const columns: IDataTableColumn<Row>[] = [
     {
       title: "Due date",
       dataIndex: "due_date",
@@ -191,7 +192,7 @@ const LedgerManager = <Row extends ILedgerRow, Input extends FieldValues>(
           data={rows}
           loading={loading}
           emptyText="No records match the filters"
-          rowClassName={(row) => (isLedgerOverdue(row) ? `${rowOverdue}` : "")}
+          rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
         />
       </SectionCard>
 

@@ -1,6 +1,6 @@
 import { CheckOutlined, CloseOutlined, UserOutlined } from "@ant-design/icons";
 import { Tooltip } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import StatusTag from "../../common/status/StatusTag";
@@ -88,7 +88,7 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
       : []),
   ];
 
-  const columns: ColumnsType<ILedgerPayment> = [
+  const columns: IDataTableColumn<ILedgerPayment>[] = [
     {
       title: "Date",
       dataIndex: "paid_at",

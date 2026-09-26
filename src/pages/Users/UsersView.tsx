@@ -8,7 +8,7 @@ import {
 import { Button, Space, Tooltip } from "antd";
 import StatusTag from "../../components/common/status/StatusTag";
 import { useConfirm } from "../../hook/common/confirmation.hook";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import SectionCard from "../../components/common/card/SectionCard";
 import EntityFormModal from "../../components/common/form/EntityFormModal";
 import DataTable from "../../components/common/table/DataTable";
@@ -56,7 +56,7 @@ const UsersView = () => {
 
   const openConfirm = useConfirm();
 
-  const columns: ColumnsType<IUser> = [
+  const columns: IDataTableColumn<IUser>[] = [
     {
       title: "Username",
       dataIndex: "username",

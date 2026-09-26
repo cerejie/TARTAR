@@ -1,7 +1,12 @@
-import { MenuOutlined } from "@ant-design/icons";
-import { Button, Dropdown, Tooltip, type MenuProps } from "antd";
+import { EllipsisVertical } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import type { IRowAction } from "../../../models/common/action.model";
-import { iconButton, rowActionMenu } from "../../../styles/table/table.css";
 
 type IProps = {
   actions: readonly IRowAction[];
@@ -13,43 +18,42 @@ const RowActionMenu = ({ actions }: IProps) => {
   if (actions.length === 1) {
     const [action] = actions;
     return (
-      <Tooltip title={action.label}>
+      <TooltipTrigger>
         <Button
-          className={`${iconButton}`}
-          danger={action.danger}
-          disabled={action.disabled}
-          icon={action.icon}
+          variant={action.danger ? "destructive" : "outline"}
+          size="icon-sm"
+          isDisabled={action.disabled}
           aria-label={action.label}
-          onClick={action.onSelect}
-        />
-      </Tooltip>
+          onPress={action.onSelect}
+        >
+          {action.icon}
+        </Button>
+        <Tooltip>{action.label}</Tooltip>
+      </TooltipTrigger>
     );
   }
 
-  const items: MenuProps["items"] = actions.map((action) => ({
-    key: action.key,
-    label: action.label,
-    danger: action.danger,
-    disabled: action.disabled,
-  }));
-
-  const selectAction: MenuProps["onClick"] = ({ key }) => {
-    actions.find((action) => action.key === key)?.onSelect();
-  };
-
   return (
-    <Dropdown
-      menu={{ items, onClick: selectAction }}
-      trigger={["click"]}
-      placement="bottomRight"
-      classNames={{ root: rowActionMenu }}
-    >
-      <Button
-        className={`${iconButton}`}
-        icon={<MenuOutlined />}
-        aria-label="Row actions"
-      />
-    </Dropdown>
+    <DropdownMenuTrigger>
+      <Button variant="outline" size="icon-sm" aria-label="Row actions">
+        <EllipsisVertical />
+      </Button>
+      <DropdownMenu placement="bottom end" aria-label="Row actions">
+        {actions.map((action) => (
+          <DropdownMenuItem
+            key={action.key}
+            id={action.key}
+            textValue={action.label}
+            variant={action.danger ? "destructive" : "default"}
+            isDisabled={action.disabled}
+            onAction={action.onSelect}
+          >
+            {action.icon}
+            {action.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenu>
+    </DropdownMenuTrigger>
   );
 };
 

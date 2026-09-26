@@ -1,6 +1,5 @@
-import { ClearOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Flex, Select } from "antd";
-import dayjs from "dayjs";
+import { Eraser } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   ledgerStatusLabels,
   ledgerStatusValues,
@@ -13,17 +12,22 @@ import {
   transactionTypeValues,
 } from "../../../enums/transaction.enum";
 import { useLedgerFilters } from "../../../hook/common/filter.hook";
-import type { ILedgerFilterScope } from "../../../models/common/filter.model";
-import {
-  filterBar,
-  filterClear,
-  filterStatus,
-  filterType,
-} from "../../../styles/filter/filter.css";
+import type {
+  ILedgerFilters,
+  ILedgerFilterScope,
+} from "../../../models/common/filter.model";
+import { filterBar } from "../../../styles/filter/filter.styles";
+import DateRangeFilter from "./DateRangeFilter";
+import FilterSelect from "./FilterSelect";
 import SearchInput from "./SearchInput";
-import { toOptions } from "../../../utils/option.utils";
 
-const { RangePicker } = DatePicker;
+type ILedgerStatusFilter = NonNullable<ILedgerFilters["status"]>;
+
+const statusFilterLabels: Record<ILedgerStatusFilter, string> = {
+  unpaid: "Unpaid",
+  ...ledgerStatusLabels,
+  overdue: "Overdue",
+};
 
 type IProps = {
   showSearch?: boolean;
@@ -44,8 +48,12 @@ const LedgerFilterBar = ({
 }: IProps) => {
   const { filters, setFilters, resetFilters } = useLedgerFilters(scope);
 
+  const statusFilterValues: readonly ILedgerStatusFilter[] = showOverdue
+    ? ["unpaid", ...ledgerStatusValues, "overdue"]
+    : ["unpaid", ...ledgerStatusValues];
+
   return (
-    <Flex className={`${filterBar}`} gap="small" wrap align="center">
+    <div className={filterBar}>
       {showSearch ? (
         <SearchInput
           placeholder="Search name"
@@ -54,57 +62,39 @@ const LedgerFilterBar = ({
         />
       ) : null}
 
-      <RangePicker
-        value={
-          filters.dateFrom && filters.dateTo
-            ? [dayjs(filters.dateFrom), dayjs(filters.dateTo)]
-            : null
-        }
-        onChange={(range) =>
-          setFilters({
-            dateFrom: range?.[0]?.format("YYYY-MM-DD"),
-            dateTo: range?.[1]?.format("YYYY-MM-DD"),
-          })
-        }
+      <DateRangeFilter
+        from={filters.dateFrom}
+        to={filters.dateTo}
+        onChange={(dateFrom, dateTo) => setFilters({ dateFrom, dateTo })}
       />
 
       {showStatus ? (
-        <Select
-          className={`${filterStatus}`}
+        <FilterSelect
           placeholder="Any status"
-          allowClear
           value={filters.status}
+          values={statusFilterValues}
+          labels={statusFilterLabels}
           onChange={(status) => setFilters({ status })}
-          options={[
-            { value: "unpaid", label: "Unpaid" },
-            ...toOptions(ledgerStatusValues, ledgerStatusLabels),
-            ...(showOverdue ? [{ value: "overdue", label: "Overdue" }] : []),
-          ]}
         />
       ) : null}
 
       {paymentKind ? (
-        <Select
-          className={`${filterStatus}`}
+        <FilterSelect
           placeholder="Any status"
-          allowClear
           value={filters.paymentStatus}
+          values={paymentStatusValues}
+          labels={paymentStatusLabels(paymentKind)}
           onChange={(paymentStatus) => setFilters({ paymentStatus })}
-          options={toOptions(
-            paymentStatusValues,
-            paymentStatusLabels(paymentKind)
-          )}
         />
       ) : null}
 
       {showType ? (
-        <Select
-          className={`${filterType}`}
+        <FilterSelect
           placeholder="Any type"
-          allowClear
           value={filters.type}
+          values={transactionTypeValues}
+          labels={transactionTypeLabels}
           onChange={(type) => setFilters({ type })}
-          options={toOptions(transactionTypeValues, transactionTypeLabels)}
         />
       ) : null}
 
@@ -114,14 +104,11 @@ const LedgerFilterBar = ({
         onChange={(referenceNumber) => setFilters({ referenceNumber })}
       />
 
-      <Button
-        className={`${filterClear}`}
-        icon={<ClearOutlined />}
-        onClick={resetFilters}
-      >
+      <Button variant="outline" onPress={resetFilters}>
+        <Eraser />
         Clear
       </Button>
-    </Flex>
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 import { Col, Row } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   cashInflowTypes,
   cashOutflowTypes,
@@ -13,7 +13,7 @@ import SectionCard from "../common/card/SectionCard";
 import StatCard from "../common/card/StatCard";
 import DataTable from "../common/table/DataTable";
 
-const columns: ColumnsType<ICashFlowRow> = [
+const columns: IDataTableColumn<ICashFlowRow>[] = [
   { title: "Category", dataIndex: "label" },
   { title: "Direction", dataIndex: "direction" },
   {

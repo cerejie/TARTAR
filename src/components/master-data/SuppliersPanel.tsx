@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
 import { useConfirm } from "../../hook/common/confirmation.hook";
-import type { ColumnsType } from "antd/es/table";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import { useSupplierManageHook } from "../../hook/data/party/supplier.manage.hook";
 import type { IFieldConfig } from "../../models/common/field.model";
 import {
@@ -58,7 +58,7 @@ const SuppliersPanel = () => {
 
   const openConfirm = useConfirm();
 
-  const columns: ColumnsType<ISupplier> = [
+  const columns: IDataTableColumn<ISupplier>[] = [
     {
       title: "Supplier",
       dataIndex: "name",

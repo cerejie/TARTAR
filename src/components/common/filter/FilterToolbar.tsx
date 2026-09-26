@@ -1,10 +1,9 @@
-import { Flex } from "antd";
 import type { ReactNode } from "react";
 import {
   filterToolbar,
   filterToolbarActions,
   filterToolbarStart,
-} from "../../../styles/filter/filter.css";
+} from "../../../styles/filter/filter.styles";
 
 type IProps = {
   actions?: ReactNode;
@@ -13,17 +12,11 @@ type IProps = {
 
 const FilterToolbar = ({ actions, children }: IProps) => {
   return (
-    <Flex className={`${filterToolbar}`} align="center" gap="small" wrap>
-      <Flex className={`${filterToolbarStart}`} align="center" gap="small" wrap>
-        {children}
-      </Flex>
+    <div className={filterToolbar}>
+      <div className={filterToolbarStart}>{children}</div>
 
-      {actions ? (
-        <Flex className={`${filterToolbarActions}`} align="center" gap="small">
-          {actions}
-        </Flex>
-      ) : null}
-    </Flex>
+      {actions ? <div className={filterToolbarActions}>{actions}</div> : null}
+    </div>
   );
 };
 
