@@ -29,13 +29,15 @@ export const branchFormFields: IFieldConfig<IBranchInput>[] = [
     name: "name",
     label: "Branch name",
     type: "text",
+    required: true,
     placeholder: "e.g. LGC Poultry",
   },
-  { name: "sort", label: "Sort order", type: "number" },
+  { name: "sort", label: "Sort order", type: "number", required: true },
   {
     name: "voucher_prefix",
     label: "Voucher prefix (3 letters)",
     type: "text",
+    required: true,
     placeholder: "e.g. LGC",
   },
 ];

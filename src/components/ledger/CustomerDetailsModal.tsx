@@ -8,7 +8,7 @@ import {
 import EntityFormModal from "../common/form/EntityFormModal";
 
 const fields: IFieldConfig<IPartyInput>[] = [
-  { name: "name", label: "Customer name", type: "text" },
+  { name: "name", label: "Customer name", type: "text", required: true },
   {
     name: "contact_person",
     label: "Contact person",

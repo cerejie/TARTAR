@@ -100,10 +100,21 @@ export const useUserManageHook = () => {
   );
 
   const createFields: IFieldConfig<ICreateUserInput>[] = [
-    { name: "username", label: "Username", type: "text" },
+    { name: "username", label: "Username", type: "text", required: true },
     { name: "full_name", label: "Full name", type: "text" },
-    { name: "password", label: "Temporary password", type: "password" },
-    { name: "role", label: "Role", type: "select", options: roleOptions },
+    {
+      name: "password",
+      label: "Temporary password",
+      type: "password",
+      required: true,
+    },
+    {
+      name: "role",
+      label: "Role",
+      type: "select",
+      required: true,
+      options: roleOptions,
+    },
     {
       name: "branch_access",
       label: "Branch access",

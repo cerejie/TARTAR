@@ -29,7 +29,12 @@ import { nowrapCell } from "../../../styles/table/table.styles";
 import { formatDate } from "../../../utils/format.utils";
 
 const resetFields: IFieldConfig<IResetPasswordInput>[] = [
-  { name: "password", label: "New password", type: "password" },
+  {
+    name: "password",
+    label: "New password",
+    type: "password",
+    required: true,
+  },
 ];
 
 const UsersTable = () => {

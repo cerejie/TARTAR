@@ -18,6 +18,7 @@ export const supplierFormFields: IFieldConfig<IPartyInput>[] = [
     name: "name",
     label: "Supplier name",
     type: "text",
+    required: true,
     placeholder: "e.g. Cebu Steel Trading",
   },
   {

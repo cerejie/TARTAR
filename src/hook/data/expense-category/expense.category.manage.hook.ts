@@ -19,15 +19,17 @@ export const expenseCategoryFormFields: IFieldConfig<IExpenseCategoryInput>[] =
       name: "name",
       label: "Category name",
       type: "text",
+      required: true,
       placeholder: "e.g. Fuel",
     },
     {
       name: "code",
       label: "Voucher code (3 letters)",
       type: "text",
+      required: true,
       placeholder: "e.g. FUE",
     },
-    { name: "sort", label: "Sort order", type: "number" },
+    { name: "sort", label: "Sort order", type: "number", required: true },
   ];
 
 export const useExpenseCategoryManageHook = () => {

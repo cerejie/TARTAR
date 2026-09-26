@@ -26,6 +26,7 @@ export interface IFieldConfig<TValues extends FieldValues = FieldValues> {
   required?: boolean;
   options?: IFieldOption[];
   placeholder?: string;
+  hint?: string;
   prefix?: string;
   max?: number;
   hideLabel?: boolean;

@@ -21,7 +21,12 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   InputGroup,
@@ -31,6 +36,7 @@ import {
 } from "@/components/ui/input-group";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/utils/cn.utils";
 import type {
   IFieldConfig,
   IFieldOption,
@@ -41,7 +47,9 @@ import {
   fieldDatePopover,
   fieldDateTrigger,
   fieldLabelHidden,
+  fieldNumberInput,
   fieldRequired,
+  fieldSelectClearable,
   fieldSpan,
 } from "../../../styles/form/form.styles";
 import { formatDate, toAmount } from "../../../utils/format.utils";
@@ -66,6 +74,10 @@ const asDate = (value: unknown): CalendarDate | null => {
     return null;
   }
 };
+
+const selectPlaceholder = <TValues extends FieldValues>(
+  config: IFieldConfig<TValues>
+) => config.placeholder ?? `Select ${config.label.toLowerCase()}`;
 
 const asNumber = (text: string): number | null => {
   if (text === "") return null;
@@ -133,6 +145,7 @@ const renderControl = <TValues extends FieldValues>(
             ref={field.ref}
             aria-invalid={invalid}
             type="number"
+            className={fieldNumberInput}
             min={0}
             max={config.max}
             step={config.type === "amount" ? 0.01 : 1}
@@ -163,8 +176,9 @@ const renderControl = <TValues extends FieldValues>(
         >
           <ComboboxInput
             id={fieldId}
-            placeholder={config.placeholder}
+            placeholder={selectPlaceholder(config)}
             showClear={config.allowClear}
+            className={cn(config.allowClear && fieldSelectClearable)}
           />
           <ComboboxContent>
             <ComboboxList
@@ -201,7 +215,9 @@ const renderControl = <TValues extends FieldValues>(
             </ComboboxChipList>
             <ComboboxChipsInput
               id={fieldId}
-              placeholder={selected.length === 0 ? config.placeholder : undefined}
+              placeholder={
+                selected.length === 0 ? selectPlaceholder(config) : undefined
+              }
             />
           </ComboboxChips>
           <ComboboxContent>
@@ -294,6 +310,7 @@ const FormField = <TValues extends FieldValues>({
             {config.required ? <span className={fieldRequired}>*</span> : null}
           </FieldLabel>
           {renderControl(config, field, fieldState.invalid)}
+          {config.hint ? <FieldDescription>{config.hint}</FieldDescription> : null}
           <FieldError errors={[fieldState.error]} />
         </Field>
       )}
