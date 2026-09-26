@@ -1,36 +1,30 @@
-import { Layout } from "antd";
 import { Outlet } from "react-router-dom";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import ProtectedFooter from "../components/common/layout/ProtectedFooter";
 import ProtectedHeader from "../components/common/layout/ProtectedHeader";
 import ProtectedSider from "../components/common/layout/ProtectedSider";
 import { useProtectedLayoutHook } from "../hook/layout/protected.hook";
 import {
-  content,
-  protectedLayout,
-  shellMain,
-  siderWidth,
-  siderWrapper,
-} from "../styles/layout/protected.layout.css";
-
-const { Sider, Content } = Layout;
+  shellContent,
+  shellInset,
+  shellRoot,
+} from "../styles/layout/shell.styles";
 
 const ProtectedLayout = () => {
   useProtectedLayoutHook();
 
   return (
-    <Layout className={`${protectedLayout}`}>
-      <Sider className={`${siderWrapper}`} trigger={null} width={siderWidth}>
-        <ProtectedSider />
-      </Sider>
+    <SidebarProvider className={shellRoot}>
+      <ProtectedSider />
 
-      <Layout className={`${shellMain}`}>
+      <SidebarInset className={shellInset}>
         <ProtectedHeader />
-        <Content className={`${content}`}>
+        <div id="main-content" className={shellContent}>
           <Outlet />
-        </Content>
+        </div>
         <ProtectedFooter />
-      </Layout>
-    </Layout>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 

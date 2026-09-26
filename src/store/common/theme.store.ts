@@ -1,16 +1,23 @@
 import type { ThemeConfig } from "antd";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { themeStorageKey } from "../../keys/storage.keys";
 import { colors, fontFamilyBase } from "../../styles/common/vars.css";
 
+export type IThemeMode = "light" | "dark";
+
 type States = {
+  mode: IThemeMode;
   theme: ThemeConfig;
 };
 
 type Actions = {
+  toggleMode: () => void;
   setTheme: (theme: ThemeConfig) => void;
 };
 
 const initialValues: States = {
+  mode: "light",
   theme: {
     token: {
       colorPrimary: colors.brand,
@@ -92,13 +99,23 @@ const initialValues: States = {
       InputNumber: { borderRadius: 8 },
       Select: { borderRadius: 8 },
       DatePicker: { borderRadius: 8 },
-
-
     },
   },
 };
 
-export const useThemeStore = create<States & Actions>((set) => ({
-  ...initialValues,
-  setTheme: (theme: ThemeConfig) => set(() => ({ theme })),
-}));
+export const selectThemeMode = (state: States) => state.mode;
+
+export const useThemeStore = create<States & Actions>()(
+  persist(
+    (set) => ({
+      ...initialValues,
+      toggleMode: () =>
+        set((state) => ({ mode: state.mode === "dark" ? "light" : "dark" })),
+      setTheme: (theme: ThemeConfig) => set(() => ({ theme })),
+    }),
+    {
+      name: themeStorageKey,
+      partialize: (state) => ({ mode: state.mode }),
+    }
+  )
+);

@@ -1,62 +1,81 @@
-import { DownOutlined, LogoutOutlined } from "@ant-design/icons";
-import { Avatar, Badge, Button, Dropdown, Flex, type MenuProps } from "antd";
+import { ChevronsUpDown, LogOut, Moon, Sun } from "lucide-react";
+import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 import { useProtectedUserHook } from "../../../hook/layout/protected.hook";
 import {
-  siderFooter,
-  siderUser,
-  siderUserAvatar,
-  siderUserBadge,
-  siderUserCaret,
-  siderUserMenu,
-  siderUserMeta,
-  siderUserName,
-  siderUserOnline,
-  siderUserRole,
-} from "../../../styles/layout/protected.layout.css";
+  sidebarCaret,
+  sidebarUserAvatarFallback,
+  sidebarUserMenu,
+  sidebarUserName,
+  sidebarUserOnline,
+  sidebarUserRole,
+  sidebarUserText,
+} from "../../../styles/layout/sidebar.styles";
 
 const ProtectedSiderUser = () => {
-  const { displayName, roleLabel, initial, online, logoutMutation } =
-    useProtectedUserHook();
+  const {
+    displayName,
+    roleLabel,
+    initial,
+    online,
+    isDark,
+    toggleMode,
+    logoutMutation,
+  } = useProtectedUserHook();
 
-  const menu: MenuProps = {
-    items: [
-      {
-        key: "logout",
-        icon: <LogoutOutlined />,
-        label: "Sign out",
-        danger: true,
-      },
-    ],
-    onClick: ({ key }) => {
-      if (key === "logout") void logoutMutation.mutate();
-    },
-  };
+  const themeLabel = isDark ? "Light mode" : "Dark mode";
 
   return (
-    <div className={`${siderFooter}`}>
-      <Dropdown
-        menu={menu}
-        trigger={["click"]}
-        placement="topLeft"
-        classNames={{ root: siderUserMenu }}
-      >
-        <Button type="text" className={`${siderUser}`}>
-          <Badge
-            dot={online}
-            classNames={{ root: siderUserBadge, indicator: siderUserOnline }}
-          >
-            <Avatar className={`${siderUserAvatar}`}>
-              {initial}
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenuTrigger>
+          <SidebarMenuButton size="lg" aria-label="Account menu">
+            <Avatar>
+              <AvatarFallback className={sidebarUserAvatarFallback}>
+                {initial}
+              </AvatarFallback>
+              {online ? <AvatarBadge className={sidebarUserOnline} /> : null}
             </Avatar>
-          </Badge>
-          <Flex vertical component="span" className={`${siderUserMeta}`}>
-            <span className={`${siderUserName}`}>{displayName}</span>
-            <span className={`${siderUserRole}`}>{roleLabel}</span>
-          </Flex>
-          <DownOutlined className={`${siderUserCaret}`} />
-        </Button>
-      </Dropdown>
-    </div>
+            <span className={sidebarUserText}>
+              <span className={sidebarUserName}>{displayName}</span>
+              <span className={sidebarUserRole}>{roleLabel}</span>
+            </span>
+            <ChevronsUpDown className={sidebarCaret} />
+          </SidebarMenuButton>
+
+          <DropdownMenu
+            placement="top start"
+            aria-label="Account"
+            className={sidebarUserMenu}
+          >
+            <DropdownMenuItem id="theme" textValue={themeLabel} onAction={toggleMode}>
+              {isDark ? <Sun /> : <Moon />}
+              {themeLabel}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              id="logout"
+              textValue="Sign out"
+              variant="destructive"
+              onAction={() => logoutMutation.mutate()}
+            >
+              <LogOut />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenu>
+        </DropdownMenuTrigger>
+      </SidebarMenuItem>
+    </SidebarMenu>
   );
 };
 

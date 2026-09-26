@@ -1,31 +1,29 @@
-import { Flex, Layout } from "antd";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useProtectedHeaderHook } from "../../../hook/layout/protected.hook";
 import {
-  header,
-  headerLeft,
-  headerRight,
+  headerActions,
+  headerRoot,
   headerSubtitle,
+  headerText,
   headerTitle,
-} from "../../../styles/layout/protected.layout.css";
+  headerTrigger,
+} from "../../../styles/layout/header.styles";
 import SyncIndicator from "../status/SyncIndicator";
-
-const { Header } = Layout;
 
 const ProtectedHeader = () => {
   const { title, description } = useProtectedHeaderHook();
 
   return (
-    <Header className={`${header}`}>
-      <div className={`${headerLeft}`}>
-        <span className={`${headerTitle}`}>{title}</span>
-        {description ? (
-          <span className={`${headerSubtitle}`}>{description}</span>
-        ) : null}
+    <header className={headerRoot}>
+      <SidebarTrigger variant="outline" size="icon" className={headerTrigger} />
+      <div className={headerText}>
+        <h1 className={headerTitle}>{title}</h1>
+        {description ? <p className={headerSubtitle}>{description}</p> : null}
       </div>
-      <Flex className={`${headerRight}`} align="center">
+      <div className={headerActions}>
         <SyncIndicator />
-      </Flex>
-    </Header>
+      </div>
+    </header>
   );
 };
 

@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { branchScopeSearchKey } from "../../../keys/modal.keys";
 import {
@@ -22,21 +21,12 @@ export const useBranchScopeHook = () => {
     ? branches.find((item) => item.slug === branch)?.name ?? branch
     : null;
 
-  const visibleBranches = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (!term) return branches;
-
-    return branches.filter((item) => item.name.toLowerCase().includes(term));
-  }, [branches, search]);
-
   return {
     enabled: isManager,
     branch,
     branchName,
     setBranch,
     branches,
-    visibleBranches,
     search,
     setSearch,
     goToManageBranches: () => navigate("/branches"),

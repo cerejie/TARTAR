@@ -1,9 +1,12 @@
-import { createElement, useMemo } from "react";
-import type { MenuProps } from "antd";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { effectiveRoleLabels } from "../../enums/role.enum";
 import { protectedViewsRoutes } from "../../routes/protected.view.routes";
 import { useNetworkStore } from "../../store/common/network.store";
+import {
+  selectThemeMode,
+  useThemeStore,
+} from "../../store/common/theme.store";
 import { useAccountStore } from "../../store/data/account/account.store";
 import {
   filterRoutesByPermission,
@@ -20,35 +23,21 @@ export const useProtectedLayoutHook = () => {
 };
 
 export const useProtectedMenuHook = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const permissions = usePermissions();
 
-  const items: MenuProps["items"] = useMemo(() => {
+  const groups = useMemo(() => {
     const allowed = navigableRoutes(
       filterRoutesByPermission(protectedViewsRoutes, permissions)
     );
 
-    return routeGroups(allowed).flatMap((group) => {
-      const children = allowed
-        .filter((route) => route.group === group)
-        .map((route) => ({
-          key: route.path as string,
-          label: route.label,
-          icon: route.icon ? createElement(route.icon) : undefined,
-        }));
-
-      return children.length
-        ? [{ type: "group" as const, key: group, label: group, children }]
-        : [];
-    });
+    return routeGroups(allowed).map((group) => ({
+      label: group,
+      routes: allowed.filter((route) => route.group === group),
+    }));
   }, [permissions.role]);
 
-  return {
-    items,
-    selectedKey: location.pathname,
-    onSelect: (key: string) => navigate(key),
-  };
+  return { groups, activePath: location.pathname };
 };
 
 export const useProtectedHeaderHook = () => {
@@ -78,6 +67,8 @@ export const useProtectedUserHook = () => {
   const online = useNetworkStore((state) => state.online);
   const permissions = usePermissions();
   const { logoutMutation } = useAccountLogoutHook();
+  const mode = useThemeStore(selectThemeMode);
+  const toggleMode = useThemeStore((state) => state.toggleMode);
 
   const displayName = user?.full_name || user?.username || "superAdmin";
 
@@ -90,6 +81,8 @@ export const useProtectedUserHook = () => {
     roleLabel,
     initial: displayName.trim().charAt(0).toUpperCase(),
     online,
+    isDark: mode === "dark",
+    toggleMode,
     logoutMutation,
   };
 };

@@ -1,25 +1,35 @@
+import { Check, ChevronsUpDown, Plus, Store } from "lucide-react";
 import {
-  CheckOutlined,
-  DownOutlined,
-  PlusOutlined,
-  SearchOutlined,
-  ShopOutlined,
-} from "@ant-design/icons";
-import { Button, Dropdown, Input, type MenuProps } from "antd";
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
+import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Popover } from "@/components/ui/popover";
+import {
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 import { useBranchScopeHook } from "../../../hook/data/branch/branch.scope.hook";
 import {
-  branchScope,
-  branchScopeActive,
-  branchScopeCaret,
-  branchScopeCheck,
-  branchScopeLabel,
-  branchScopeManage,
-  branchScopeOption,
-  branchScopePanel,
-  branchScopePopup,
-  branchScopeSearch,
-  siderScope,
-} from "../../../styles/layout/protected.layout.css";
+  sidebarCaret,
+  sidebarScope,
+  sidebarScopeCheck,
+  sidebarScopeEmpty,
+  sidebarScopeLabel,
+  sidebarScopeList,
+  sidebarScopePopover,
+} from "../../../styles/layout/sidebar.styles";
+
+import type { Key } from "react-aria-components";
+
+const allBranchesKey = "all";
+const manageBranchesKey = "manage";
 
 const ProtectedBranchScope = () => {
   const {
@@ -28,7 +38,6 @@ const ProtectedBranchScope = () => {
     branchName,
     setBranch,
     branches,
-    visibleBranches,
     search,
     setSearch,
     goToManageBranches,
@@ -36,73 +45,72 @@ const ProtectedBranchScope = () => {
 
   if (!enabled || branches.length === 0) return null;
 
-  const selectedKey = branch ?? "all";
+  const selectedKey = branch ?? allBranchesKey;
+  const scopeLabel = branchName ?? "All branches";
 
-  const option = (key: string, label: string) => ({
-    key,
-    label: (
-      <span className={`${branchScopeOption}`}>
-        {label}
-        {selectedKey === key ? (
-          <CheckOutlined className={`${branchScopeCheck}`} />
-        ) : null}
-      </span>
-    ),
-  });
+  const handleAction = (key: Key) => {
+    if (key === manageBranchesKey) {
+      goToManageBranches();
+      return;
+    }
 
-  const menu: MenuProps = {
-    items: [
-      option("all", "All branches"),
-      { type: "divider" },
-      ...visibleBranches.map((item) => option(item.slug, item.name)),
-    ],
-    selectable: true,
-    selectedKeys: [selectedKey],
-    onClick: ({ key }) => setBranch(key === "all" ? null : key),
+    setBranch(key === allBranchesKey ? null : String(key));
   };
 
+  const renderCheck = (key: string) =>
+    selectedKey === key ? <Check className={sidebarScopeCheck} /> : null;
+
   return (
-    <div className={`${siderScope}`}>
-      <Dropdown
-        menu={menu}
-        trigger={["click"]}
-        placement="bottomLeft"
-        classNames={{ root: branchScopePopup }}
-        popupRender={(node) => (
-          <div className={`${branchScopePanel}`}>
-            <Input
-              className={`${branchScopeSearch}`}
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              prefix={<SearchOutlined />}
-              placeholder="Search branches..."
-              allowClear
-            />
-            {node}
-            <Button
-              type="text"
-              className={`${branchScopeManage}`}
-              icon={<PlusOutlined />}
-              onClick={goToManageBranches}
+    <SidebarGroup className={sidebarScope}>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenuTrigger>
+            <SidebarMenuButton
+              variant="outline"
+              tooltip={scopeLabel}
+              aria-label="Choose which branch to view"
             >
-              Manage branches
-            </Button>
-          </div>
-        )}
-      >
-        <Button
-          type="text"
-          className={`${branchScope} ${branch ? branchScopeActive : ""}`}
-          aria-label="Choose which branch to view"
-        >
-          <ShopOutlined />
-          <span className={`${branchScopeLabel}`}>
-            {branchName ?? "All branches"}
-          </span>
-          <DownOutlined className={`${branchScopeCaret}`} />
-        </Button>
-      </Dropdown>
-    </div>
+              <Store aria-hidden="true" />
+              <span className={sidebarScopeLabel}>{scopeLabel}</span>
+              <ChevronsUpDown className={sidebarCaret} />
+            </SidebarMenuButton>
+
+            <Popover placement="bottom start" className={sidebarScopePopover}>
+              <Command inputValue={search} onInputChange={setSearch}>
+                <CommandInput placeholder="Search branches..." />
+                <CommandList
+                  aria-label="Branches"
+                  className={sidebarScopeList}
+                  onAction={handleAction}
+                  renderEmptyState={() => (
+                    <CommandEmpty className={sidebarScopeEmpty}>
+                      No branches match.
+                    </CommandEmpty>
+                  )}
+                >
+                  <CommandItem id={allBranchesKey} textValue="All branches">
+                    All branches
+                    {renderCheck(allBranchesKey)}
+                  </CommandItem>
+                  <CommandSeparator />
+                  {branches.map((item) => (
+                    <CommandItem key={item.slug} id={item.slug} textValue={item.name}>
+                      {item.name}
+                      {renderCheck(item.slug)}
+                    </CommandItem>
+                  ))}
+                  <CommandSeparator />
+                  <CommandItem id={manageBranchesKey} textValue="Manage branches">
+                    <Plus />
+                    Manage branches
+                  </CommandItem>
+                </CommandList>
+              </Command>
+            </Popover>
+          </DropdownMenuTrigger>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarGroup>
   );
 };
 
