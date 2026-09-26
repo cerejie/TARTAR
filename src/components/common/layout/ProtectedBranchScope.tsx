@@ -9,22 +9,18 @@ import {
 } from "@/components/ui/command";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover } from "@/components/ui/popover";
-import {
-  SidebarGroup,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
 import { useBranchScopeHook } from "../../../hook/data/branch/branch.scope.hook";
 import {
-  sidebarCaret,
-  sidebarScope,
-  sidebarScopeCheck,
-  sidebarScopeEmpty,
-  sidebarScopeLabel,
-  sidebarScopeList,
-  sidebarScopePopover,
-} from "../../../styles/layout/sidebar.styles";
+  headerCaret,
+  headerScope,
+  headerScopeCheck,
+  headerScopeEmpty,
+  headerScopeLabel,
+  headerScopeList,
+  headerScopePopover,
+  headerScopeTrigger,
+} from "../../../styles/layout/header.styles";
+import AppButton from "../button/AppButton";
 
 import type { Key } from "react-aria-components";
 
@@ -58,59 +54,55 @@ const ProtectedBranchScope = () => {
   };
 
   const renderCheck = (key: string) =>
-    selectedKey === key ? <Check className={sidebarScopeCheck} /> : null;
+    selectedKey === key ? <Check className={headerScopeCheck} /> : null;
 
   return (
-    <SidebarGroup className={sidebarScope}>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <DropdownMenuTrigger>
-            <SidebarMenuButton
-              variant="outline"
-              tooltip={scopeLabel}
-              aria-label="Choose which branch to view"
-            >
-              <Store aria-hidden="true" />
-              <span className={sidebarScopeLabel}>{scopeLabel}</span>
-              <ChevronsUpDown className={sidebarCaret} />
-            </SidebarMenuButton>
+    <div className={headerScope}>
+      <DropdownMenuTrigger>
+        <AppButton
+          variant="ghost"
+          aria-label="Choose which branch to view"
+          className={headerScopeTrigger}
+        >
+          <Store aria-hidden="true" />
+          <span className={headerScopeLabel}>{scopeLabel}</span>
+          <ChevronsUpDown className={headerCaret} />
+        </AppButton>
 
-            <Popover placement="bottom start" className={sidebarScopePopover}>
-              <Command inputValue={search} onInputChange={setSearch}>
-                <CommandInput placeholder="Search branches..." />
-                <CommandList
-                  aria-label="Branches"
-                  className={sidebarScopeList}
-                  onAction={handleAction}
-                  renderEmptyState={() => (
-                    <CommandEmpty className={sidebarScopeEmpty}>
-                      No branches match.
-                    </CommandEmpty>
-                  )}
-                >
-                  <CommandItem id={allBranchesKey} textValue="All branches">
-                    All branches
-                    {renderCheck(allBranchesKey)}
-                  </CommandItem>
-                  <CommandSeparator />
-                  {branches.map((item) => (
-                    <CommandItem key={item.slug} id={item.slug} textValue={item.name}>
-                      {item.name}
-                      {renderCheck(item.slug)}
-                    </CommandItem>
-                  ))}
-                  <CommandSeparator />
-                  <CommandItem id={manageBranchesKey} textValue="Manage branches">
-                    <Plus />
-                    Manage branches
-                  </CommandItem>
-                </CommandList>
-              </Command>
-            </Popover>
-          </DropdownMenuTrigger>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarGroup>
+        <Popover placement="bottom start" className={headerScopePopover}>
+          <Command inputValue={search} onInputChange={setSearch}>
+            <CommandInput placeholder="Search branches..." />
+            <CommandList
+              aria-label="Branches"
+              className={headerScopeList}
+              onAction={handleAction}
+              renderEmptyState={() => (
+                <CommandEmpty className={headerScopeEmpty}>
+                  No branches match.
+                </CommandEmpty>
+              )}
+            >
+              <CommandItem id={allBranchesKey} textValue="All branches">
+                All branches
+                {renderCheck(allBranchesKey)}
+              </CommandItem>
+              <CommandSeparator />
+              {branches.map((item) => (
+                <CommandItem key={item.slug} id={item.slug} textValue={item.name}>
+                  {item.name}
+                  {renderCheck(item.slug)}
+                </CommandItem>
+              ))}
+              <CommandSeparator />
+              <CommandItem id={manageBranchesKey} textValue="Manage branches">
+                <Plus />
+                Manage branches
+              </CommandItem>
+            </CommandList>
+          </Command>
+        </Popover>
+      </DropdownMenuTrigger>
+    </div>
   );
 };
 

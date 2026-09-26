@@ -1,27 +1,40 @@
+import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useProtectedHeaderHook } from "../../../hook/layout/protected.hook";
 import {
   headerActions,
+  headerBrand,
+  headerDivider,
+  headerLogoMark,
   headerRoot,
-  headerSubtitle,
-  headerText,
-  headerTitle,
   headerTrigger,
+  headerWordmark,
 } from "../../../styles/layout/header.styles";
 import SyncIndicator from "../status/SyncIndicator";
+import ProtectedBranchScope from "./ProtectedBranchScope";
+import ProtectedNotifications from "./ProtectedNotifications";
+import ProtectedUserMenu from "./ProtectedUserMenu";
 
 const ProtectedHeader = () => {
-  const { title, description } = useProtectedHeaderHook();
+  const { showNotifications } = useProtectedHeaderHook();
 
   return (
     <header className={headerRoot}>
       <SidebarTrigger variant="outline" size="icon" className={headerTrigger} />
-      <div className={headerText}>
-        <h1 className={headerTitle}>{title}</h1>
-        {description ? <p className={headerSubtitle}>{description}</p> : null}
+      <div className={headerBrand}>
+        <span className={headerLogoMark} aria-hidden="true">
+          T
+        </span>
+        <span className={headerWordmark}>TARTAR</span>
       </div>
+
+      <ProtectedBranchScope />
+
       <div className={headerActions}>
+        {showNotifications ? <ProtectedNotifications /> : null}
         <SyncIndicator />
+        <Separator orientation="vertical" className={headerDivider} />
+        <ProtectedUserMenu />
       </div>
     </header>
   );

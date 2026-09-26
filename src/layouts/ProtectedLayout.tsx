@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import ProtectedFooter from "../components/common/layout/ProtectedFooter";
 import ProtectedHeader from "../components/common/layout/ProtectedHeader";
 import ProtectedSider from "../components/common/layout/ProtectedSider";
 import { useProtectedLayoutHook } from "../hook/layout/protected.hook";
 import {
+  shellBody,
   shellContent,
   shellInset,
   shellRoot,
@@ -15,15 +15,17 @@ const ProtectedLayout = () => {
 
   return (
     <SidebarProvider className={shellRoot}>
-      <ProtectedSider />
+      <ProtectedHeader />
 
-      <SidebarInset className={shellInset}>
-        <ProtectedHeader />
-        <div id="main-content" className={shellContent}>
-          <Outlet />
-        </div>
-        <ProtectedFooter />
-      </SidebarInset>
+      <div className={shellBody}>
+        <ProtectedSider />
+
+        <SidebarInset className={shellInset}>
+          <div id="main-content" className={shellContent}>
+            <Outlet />
+          </div>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   );
 };

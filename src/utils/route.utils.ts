@@ -1,6 +1,8 @@
 import type { IPermissions } from "../models/common/permission.model";
 import type { IRoute } from "../models/common/route.model";
 
+export const pinnedRouteGroup = "System";
+
 export const filterRoutesByPermission = (
   routes: IRoute[],
   permissions: IPermissions

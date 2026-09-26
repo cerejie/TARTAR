@@ -67,3 +67,9 @@ export interface IDueAlerts {
   nearDueReceivables: IReceivable[];
   nearDuePayables: IPayable[];
 }
+
+export const dueAlertCount = (alerts: IDueAlerts): number =>
+  alerts.overdueReceivables.length +
+  alerts.overduePayables.length +
+  alerts.nearDueReceivables.length +
+  alerts.nearDuePayables.length;

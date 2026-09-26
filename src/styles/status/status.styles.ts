@@ -29,20 +29,15 @@ export const progressLabel = "flex items-center gap-1.5 text-sm text-muted-foreg
 
 export const progressDot = "size-2 rounded-full";
 
-export const syncBadge = cva("", {
-  variants: {
-    state: {
-      offline: "border-warning/30 bg-warning/10 text-warning",
-      pending: "border-info/30 bg-info-soft text-info",
-    },
-  },
-});
+export const countButton = "relative rounded-pill";
+
+export const countBadge =
+  "absolute -top-1 -right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-pill bg-brand px-1 text-[10px] leading-none font-semibold text-on-brand";
+
+export const offlineDot =
+  "absolute right-0.5 bottom-0.5 size-2.5 rounded-pill border-2 border-panel bg-warning";
 
 export const syncSpin = "animate-spin";
-
-export const syncOnline = "inline-flex items-center gap-1.5 text-xs text-muted-foreground";
-
-export const syncOnlineDot = "size-2 rounded-full bg-positive";
 
 export const permissionDenied = "border";
 

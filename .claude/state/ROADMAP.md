@@ -79,7 +79,7 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
 ## Path map
 - Tokens / base / utilities: src/styles/common/theme.css (shell backdrop = `bg-app`, panels = `rounded-panel shadow-panel bg-panel`) ; tones: src/styles/common/tone.styles.ts
 - Font import: src/main.tsx ; PWA precache globs: vite.config.ts
-- Shell: src/layouts/ProtectedLayout.tsx ; src/components/common/layout/{ProtectedHeader,ProtectedSider,ProtectedMenu,ProtectedBranchScope,ProtectedSiderUser,ProtectedFooter,RouteRoot}.tsx ; src/hook/layout/protected.hook.ts (header title/description at :61) ; styles/layout/{shell,header,sidebar}.styles.ts
+- Shell: src/layouts/ProtectedLayout.tsx ; src/components/common/layout/{ProtectedHeader,ProtectedSider,ProtectedMenu,ProtectedBranchScope,ProtectedUserMenu,ProtectedNotifications,RouteRoot}.tsx ; src/hook/layout/protected.hook.ts (menu, header, notifications, title, user hooks) ; styles/layout/{shell,header,sidebar}.styles.ts ; round count buttons = countButton/countBadge/offlineDot in styles/status/status.styles.ts
 - Content view: src/components/common/view/{ContentView,ViewSwitch,BentoGrid,BentoCell}.tsx ; styles/view/view.styles.ts
 - Table: src/components/common/table/{DataTable (339 lines, skeleton at :231),TablePagination,TablePanel,RowActionMenu,RowDetailPanel,TableDecor}.tsx ; styles/table/table.styles.ts ; models/common/table.model.ts
 - Filters: src/components/common/filter/{FilterToolbar,LedgerFilterBar,FilterSelect,DateRangeFilter,SearchInput}.tsx ; styles/filter/filter.styles.ts ; store/common/{filter,sort}.store.ts
@@ -100,26 +100,31 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
   src/main.tsx; vite.config.ts globPatterns + woff2, manifest theme_color blue. Old tokens
   (ink*, on-ink*, lime*, lilac*, cloud, mist, border-subtle) deleted — grep returns nothing.
   CardTone/ChartTone keep the value name "ink" (model rename left to T5b Dashboard).
+- T1 shell + title move (v1.13): ProtectedLayout = SidebarProvider(bg-app, flex-col) > ProtectedHeader
+  top bar + shellBody row (ProtectedSider | SidebarInset content card). Sidebar container is
+  repositioned by `shellSidebar` (top-24 bottom-4 left-4 = gutter + h-16 bar); SIDEBAR_WIDTH 14rem
+  in components/ui/sidebar.tsx. Header: logo "T" + TARTAR, ProtectedBranchScope pill (AppButton
+  ghost), ProtectedNotifications (bell + popover of dashboard/NotificationsFeed, mobile only via
+  useProtectedHeaderHook.showNotifications), SyncIndicator (outlined round icon button, count badge,
+  offline dot), ProtectedUserMenu (renamed from ProtectedSiderUser; name over role — IAuthUser has no
+  email). Sidebar pins route group `pinnedRouteGroup = "System"` (utils/route.utils.ts) in the footer;
+  Branch Monitoring stays in Monitoring. ProtectedFooter deleted. useProtectedTitleHook feeds
+  ContentView's h1; ContentView gained `tabs` (title row, before `actions`); `meta` moved to the
+  toolbar row's right side. NotificationsPanel now wraps NotificationsFeed; dueAlertCount in
+  models/data/dashboard/dashboard.response.ts.
 
 ## Next
-1. **T1 shell + title move** — ProtectedLayout becomes backdrop + grid (top bar row; sidebar |
-   content card). New top bar in ProtectedHeader: logo, ProtectedBranchScope restyled as the
-   search-slot pill, sync icon button (badge = queued writes, offline state), user chip with the
-   ProtectedSiderUser menu moved in. Sidebar: floating light card, blue active pill, admin group
-   pinned to the bottom. Delete ProtectedFooter + its styles. protected.hook stops returning
-   `description`; ContentView renders the route label as the h1 title row, with a `tabs` slot
-   (segmented status pills) and `actions` on the right. Mobile: trigger in the top bar.
-2. **T2 table + toolbar + pagination** — DataTable restyle per spec (drop border-separate row
+1. **T2 table + toolbar + pagination** — DataTable restyle per spec (drop border-separate row
    cards, divider rows, tint states, expanded row as soft inset). New common cells only where a
    screen uses them now: `AvatarCell` (person/recorded-by), `ProgressCell` (ledger paid/total).
    TablePagination -> circle prev | centred circle pages with ellipsis | circle next (keep the
    page-size select, compact, beside next). FilterToolbar -> "Filters" popover (active-count
    badge, Reset) + right-side sort select; ViewSwitch -> segmented pills. Apply on Transactions.
-3. **T3 modals** — port crm2 AppModal header/body/footer rules and mobile sheet (pb-safe);
+2. **T3 modals** — port crm2 AppModal header/body/footer rules and mobile sheet (pb-safe);
    rounded-panel dialog, overlay navy/20. ConfirmationModal gets the same ruled footer +
    h-11 actions; DetailModal -> crm2 sections + 2-col grid; EntityFormModal submit/cancel in
    the ruled footer. Check every modal renders header + footer.
-4. **T4 loading / error / lazy** — routes use react-router `lazy` for every view (pages become
+3. **T4 loading / error / lazy** — routes use react-router `lazy` for every view (pages become
    separate chunks; recharts only loads with Dashboard/Reports) + `HydrateFallback`/pending
    `PageSkeleton` inside the content card + thin blue top progress bar on
    `useNavigation().state`; prefetch a route chunk on menu hover/focus. `errorElement` ->
@@ -130,21 +135,18 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
    skeleton rows mirror column shapes (circle for avatar cells). StatCard / SectionCard / chart
    skeleton + error states. EmptyState: icon + sentence + optional action. Respect
    prefers-reduced-motion.
-5. **T5a screen sweep — transaction family + ledger** — Purchases, Expenses, Receivables,
+4. **T5a screen sweep — transaction family + ledger** — Purchases, Expenses, Receivables,
    Payables (LedgerManager), Payments: status pills in the title row, Filters popover,
    AvatarCell/ProgressCell where the data fits, error/empty states wired.
-6. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
+5. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
    white cards, blue charts, the "Recommended" card style for list cards), Reports, Auth +
    Error pages (backdrop gradient, blue submit, retire bg-auth-* lime/lilac utilities).
-7. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
+6. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
    updated to the new token names, new primitives, lazy routes and state rules; delete this file.
 
 ## Open
-- Top bar bell: TARTAR has a notification feed only on the Dashboard (NotificationsPanel).
-  Confirm in T1 whether the bell opens that feed in a popover, or the bell is dropped and only
-  the sync button stays.
 - "Sort by" select: server-paged tables sort only the current page today. Confirm in T2 whether
   sorting should move server-side (service `order` param) or the select is left out.
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (T0, suggest v1.12) · Last check: yarn build + yarn lint clean
+Branch: development-overhaul · Uncommitted: yes (T1, suggest v1.13) · Last check: yarn build + yarn lint clean

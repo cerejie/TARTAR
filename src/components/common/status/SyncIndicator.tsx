@@ -1,57 +1,53 @@
-import { CloudUpload, RefreshCw, WifiOff } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import { CloudCheck, CloudUpload, RefreshCw, WifiOff } from "lucide-react";
 import { useSyncStatus } from "../../../hook/common/network.hook";
 import {
-  syncBadge,
-  syncOnline,
-  syncOnlineDot,
+  countBadge,
+  countButton,
+  offlineDot,
   syncSpin,
 } from "../../../styles/status/status.styles";
+import AppButton from "../button/AppButton";
+
+type IProps = {
+  online: boolean;
+  pending: number;
+  flushing: boolean;
+};
+
+const describeSync = (online: boolean, pending: number, flushing: boolean) => {
+  if (!online) {
+    return pending
+      ? `Offline — ${pending} change(s) will sync when back online`
+      : "You are offline";
+  }
+  if (flushing) return "Syncing queued changes…";
+  if (pending > 0) return `${pending} change(s) waiting to sync`;
+  return "Online — all changes saved";
+};
+
+const SyncIcon = ({ online, pending, flushing }: IProps) => {
+  if (!online) return <WifiOff />;
+  if (flushing) return <RefreshCw className={syncSpin} />;
+  if (pending > 0) return <CloudUpload />;
+  return <CloudCheck />;
+};
 
 const SyncIndicator = () => {
   const { online, pending, flushing } = useSyncStatus();
-
-  if (!online) {
-    return (
-      <TooltipTrigger>
-        <Badge variant="outline" tabIndex={0} className={syncBadge({ state: "offline" })}>
-          <WifiOff />
-          Offline{pending ? ` · ${pending} pending` : ""}
-        </Badge>
-        <Tooltip>
-          {pending
-            ? `${pending} change(s) will sync when back online`
-            : "You are offline"}
-        </Tooltip>
-      </TooltipTrigger>
-    );
-  }
-
-  if (pending > 0 || flushing) {
-    return (
-      <TooltipTrigger>
-        <Badge variant="outline" tabIndex={0} className={syncBadge({ state: "pending" })}>
-          {flushing ? <RefreshCw className={syncSpin} /> : <CloudUpload />}
-          {flushing ? "Syncing…" : `${pending} pending`}
-        </Badge>
-        <Tooltip>
-          {flushing
-            ? "Syncing queued changes…"
-            : `${pending} change(s) waiting to sync`}
-        </Tooltip>
-      </TooltipTrigger>
-    );
-  }
+  const description = describeSync(online, pending, flushing);
 
   return (
-    <TooltipTrigger>
-      <span tabIndex={0} className={syncOnline}>
-        <span className={syncOnlineDot} aria-hidden="true" />
-        Online
-      </span>
-      <Tooltip>Online — all changes saved</Tooltip>
-    </TooltipTrigger>
+    <AppButton
+      variant="outline"
+      size="icon"
+      aria-label={description}
+      tooltip={description}
+      className={countButton}
+    >
+      <SyncIcon online={online} pending={pending} flushing={flushing} />
+      {pending ? <span className={countBadge}>{pending}</span> : null}
+      {online ? null : <span className={offlineDot} aria-hidden="true" />}
+    </AppButton>
   );
 };
 

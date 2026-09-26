@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hook/use-mobile";
 import { effectiveRoleLabels } from "../../enums/role.enum";
+import { dashboardAlertsKey, scopedKey } from "../../keys/query.keys";
+import { dueAlertCount } from "../../models/data/dashboard/dashboard.response";
 import { protectedViewsRoutes } from "../../routes/protected.view.routes";
+import dashboardServices from "../../services/data/dashboard.services";
 import { useNetworkStore } from "../../store/common/network.store";
 import {
   selectThemeMode,
@@ -11,18 +15,21 @@ import { useAccountStore } from "../../store/data/account/account.store";
 import {
   filterRoutesByPermission,
   navigableRoutes,
+  pinnedRouteGroup,
   routeGroups,
 } from "../../utils/route.utils";
 import { usePermissions } from "../account/account.permission.hook";
 import { useAccountLogoutHook } from "../account/account.logout.hook";
 import { useNetwork } from "../common/network.hook";
+import { useQuery } from "../common/query.hook";
 import { useBranchScopeHook } from "../data/branch/branch.scope.hook";
+import type { IDueAlerts } from "../../models/data/dashboard/dashboard.response";
 
 export const useProtectedLayoutHook = () => {
   useNetwork();
 };
 
-export const useProtectedMenuHook = () => {
+export const useProtectedMenuHook = (pinned: boolean) => {
   const location = useLocation();
   const permissions = usePermissions();
 
@@ -31,16 +38,39 @@ export const useProtectedMenuHook = () => {
       filterRoutesByPermission(protectedViewsRoutes, permissions)
     );
 
-    return routeGroups(allowed).map((group) => ({
-      label: group,
-      routes: allowed.filter((route) => route.group === group),
-    }));
-  }, [permissions.role]);
+    return routeGroups(allowed)
+      .filter((group) => (group === pinnedRouteGroup) === pinned)
+      .map((group) => ({
+        label: group,
+        routes: allowed.filter((route) => route.group === group),
+      }));
+  }, [permissions.role, pinned]);
 
   return { groups, activePath: location.pathname };
 };
 
 export const useProtectedHeaderHook = () => {
+  const isMobile = useIsMobile();
+  const permissions = usePermissions();
+
+  return { showNotifications: isMobile && permissions.viewDashboard };
+};
+
+export const useProtectedNotificationsHook = () => {
+  const { branch } = useBranchScopeHook();
+  const alertsQuery = useQuery<IDueAlerts>(
+    scopedKey(dashboardAlertsKey, branch),
+    () => dashboardServices.getDueAlerts(7, branch)
+  );
+
+  return {
+    alerts: alertsQuery.data,
+    alertsLoading: alertsQuery.loading,
+    alertCount: alertsQuery.data ? dueAlertCount(alertsQuery.data) : 0,
+  };
+};
+
+export const useProtectedTitleHook = () => {
   const location = useLocation();
 
   const matched = useMemo(
@@ -56,10 +86,7 @@ export const useProtectedHeaderHook = () => {
     [location.pathname]
   );
 
-  return {
-    title: matched?.label ?? "",
-    description: matched?.description ?? "",
-  };
+  return { title: matched?.label ?? "" };
 };
 
 export const useProtectedUserHook = () => {
@@ -84,16 +111,5 @@ export const useProtectedUserHook = () => {
     isDark: mode === "dark",
     toggleMode,
     logoutMutation,
-  };
-};
-
-export const useProtectedFooterHook = () => {
-  const online = useNetworkStore((state) => state.online);
-  const { branchName } = useBranchScopeHook();
-
-  return {
-    year: new Date().getFullYear(),
-    branchLabel: branchName ? `Branch: ${branchName}` : "All branches",
-    online,
   };
 };

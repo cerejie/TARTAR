@@ -12,11 +12,17 @@ import {
   sidebarMenuButton,
 } from "../../../styles/layout/sidebar.styles";
 
-const ProtectedMenu = () => {
-  const { groups, activePath } = useProtectedMenuHook();
+type IProps = {
+  pinned?: boolean;
+};
+
+const ProtectedMenu = ({ pinned = false }: IProps) => {
+  const { groups, activePath } = useProtectedMenuHook(pinned);
+
+  if (groups.length === 0) return null;
 
   return (
-    <nav aria-label="Main">
+    <nav aria-label={pinned ? "Administration" : "Main"}>
       {groups.map((group) => (
         <SidebarGroup key={group.label}>
           <SidebarGroupLabel className={sidebarGroupLabel}>
