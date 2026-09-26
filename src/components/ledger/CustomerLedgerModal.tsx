@@ -1,4 +1,4 @@
-import { IdCard, User } from "lucide-react";
+import { IdCard } from "lucide-react";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import { useCustomerLedgerHook } from "../../hook/data/ledger/customer.ledger.hook";
 import type { ICustomerReceivableSummary } from "../../models/data/ledger/ledger.response";
@@ -13,8 +13,8 @@ import AppButton from "../common/button/AppButton";
 import SearchInput from "../common/filter/SearchInput";
 import RequirePermission from "../common/guard/RequirePermission";
 import AppModal from "../common/modal/AppModal";
+import AvatarCell from "../common/table/AvatarCell";
 import DataTable from "../common/table/DataTable";
-import { NameCell } from "../common/table/TableDecor";
 import CustomerDetailsModal from "./CustomerDetailsModal";
 import CustomerInfoTag from "./CustomerInfoTag";
 import CustomerLedgerView from "./CustomerLedgerView";
@@ -38,9 +38,10 @@ const CustomerLedgerModal = () => {
     {
       title: "Customer",
       key: "name",
+      skeleton: "avatar",
       sorter: (a, b) => a.customerName.localeCompare(b.customerName),
       render: (_, customer) => (
-        <NameCell icon={<User />}>{customer.customerName}</NameCell>
+        <AvatarCell name={customer.customerName} />
       ),
     },
     {

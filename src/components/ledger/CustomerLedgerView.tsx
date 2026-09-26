@@ -222,7 +222,6 @@ const CustomerLedgerView = () => {
           partyId: customer.customerId,
           partyName: customer.customerName,
         }}
-        compact
       />
 
       <CustomerInfoModal

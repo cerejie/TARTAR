@@ -1,4 +1,3 @@
-import { Check, X } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
@@ -6,16 +5,14 @@ import SortSelect from "../../common/filter/SortSelect";
 import StatusTag from "../../common/status/StatusTag";
 import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
-import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
+import PaymentRowActions from "../../payment/menus/PaymentRowActions";
 import {
   paymentStatusColors,
   type PaymentKind,
 } from "../../../enums/ledger.enum";
-import { useConfirm } from "../../../hook/common/confirmation.hook";
 import { usePaymentListHook } from "../../../hook/data/payment/payment.list.hook";
-import type { IRowAction } from "../../../models/common/action.model";
 import type { ILedgerPayment } from "../../../models/data/payment/payment.response";
 import { nowrapCell } from "../../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../../utils/format.utils";
@@ -41,63 +38,12 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
     statusLabels,
     verb,
     userNameOf,
-    verifyMutation,
-    rejectMutation,
+    verifiedHintOf,
+    approvePayment,
+    rejectPayment,
   } = usePaymentListHook(kind);
 
-  const openConfirm = useConfirm();
   const partyLabel = kind === "receivable" ? "Customer" : "Supplier";
-
-  const verifiedHintOf = (payment: ILedgerPayment) =>
-    payment.verified_by && payment.status !== "pending"
-      ? `${userNameOf(payment.verified_by)} · ${formatDate(payment.verified_at)}`
-      : undefined;
-
-  const approve = (payment: ILedgerPayment) => {
-    if (kind === "receivable") {
-      void verifyMutation.mutate(payment.id);
-      return;
-    }
-
-    openConfirm({
-      kind: "confirm",
-      title: "Approve payment?",
-      message: `Approve payment of ${formatMoney(payment.amount)} to ${payment.party_name}?`,
-      okText: "Approve",
-      onConfirm: () => verifyMutation.mutate(payment.id),
-    });
-  };
-
-  const actionsOf = (payment: ILedgerPayment): IRowAction[] => [
-    ...(payment.status === "pending"
-      ? [
-          {
-            key: "verify",
-            label: verb,
-            icon: <Check />,
-            onSelect: () => approve(payment),
-          },
-        ]
-      : []),
-    ...(payment.status !== "rejected"
-      ? [
-          {
-            key: "reject",
-            label: "Reject",
-            icon: <X />,
-            danger: true,
-            onSelect: () =>
-              openConfirm({
-                kind: "delete",
-                title: "Reject payment?",
-                message: `Rejecting this ${formatMoney(payment.amount)} payment restores the balances it settled.`,
-                okText: "Reject",
-                onConfirm: () => rejectMutation.mutate(payment.id),
-              }),
-          },
-        ]
-      : []),
-  ];
 
   const columns: IDataTableColumn<ILedgerPayment>[] = [
     {
@@ -150,7 +96,12 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
             align: "center" as const,
             className: nowrapCell,
             render: (_: unknown, payment: ILedgerPayment) => (
-              <RowActionMenu actions={actionsOf(payment)} />
+              <PaymentRowActions
+                payment={payment}
+                verb={verb}
+                onApprove={approvePayment}
+                onReject={rejectPayment}
+              />
             ),
           },
         ]

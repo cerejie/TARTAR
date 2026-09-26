@@ -101,13 +101,6 @@ export const rowDetailLabel = "text-muted-foreground";
 
 export const rowDetailValue = "min-w-0 text-right font-medium";
 
-export const rowIcon =
-  "inline-flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-foreground [&_svg]:size-3.5";
-
-export const nameCell = "inline-flex items-center gap-2 font-medium";
-
-export const rowActions = "inline-flex items-center gap-2";
-
 export const tablePanel = "flex min-w-0 flex-col gap-3";
 
 export const tablePanelBody = "min-w-0";

@@ -26,11 +26,13 @@ import {
   useAccountStore,
 } from "../../../store/data/account/account.store";
 import { usePermissions } from "../../account/account.permission.hook";
+import { useConfirm } from "../../common/confirmation.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
+import { formatDate, formatMoney } from "../../../utils/format.utils";
 import { useUserListHook } from "../user/user.list.hook";
 
 export const usePaymentListHook = (
@@ -40,6 +42,7 @@ export const usePaymentListHook = (
   const permissions = usePermissions();
   const verifierId = useAccountStore(selectUserId);
   const { userNameOf } = useUserListHook();
+  const openConfirm = useConfirm();
   const { filters } = useLedgerFilters("payments");
   const { pagination, setPagination, goToPage } = usePagination(
     paymentPaginationKey(kind)
@@ -95,6 +98,35 @@ export const usePaymentListHook = (
     invalidate,
   });
 
+  const verifiedHintOf = (payment: ILedgerPayment) =>
+    payment.verified_by && payment.status !== "pending"
+      ? `${userNameOf(payment.verified_by)} · ${formatDate(payment.verified_at)}`
+      : undefined;
+
+  const approvePayment = (payment: ILedgerPayment) => {
+    if (kind === "receivable") {
+      void verifyMutation.mutate(payment.id);
+      return;
+    }
+
+    openConfirm({
+      kind: "confirm",
+      title: "Approve payment?",
+      message: `Approve payment of ${formatMoney(payment.amount)} to ${payment.party_name}?`,
+      okText: "Approve",
+      onConfirm: () => verifyMutation.mutate(payment.id),
+    });
+  };
+
+  const rejectPayment = (payment: ILedgerPayment) =>
+    openConfirm({
+      kind: "delete",
+      title: "Reject payment?",
+      message: `Rejecting this ${formatMoney(payment.amount)} payment restores the balances it settled.`,
+      okText: "Reject",
+      onConfirm: () => rejectMutation.mutate(payment.id),
+    });
+
   return {
     permissions,
     payments: party ? partyQuery.data ?? [] : listQuery.data?.data ?? [],
@@ -111,7 +143,8 @@ export const usePaymentListHook = (
     statusLabels: paymentStatusLabels(kind),
     verb: kind === "receivable" ? "Verify" : "Approve",
     userNameOf,
-    verifyMutation,
-    rejectMutation,
+    verifiedHintOf,
+    approvePayment,
+    rejectPayment,
   };
 };

@@ -1,67 +1,49 @@
-import { Check, User, X } from "lucide-react";
 import StatusTag from "../common/status/StatusTag";
-import { useConfirm } from "../../hook/common/confirmation.hook";
-import type { IDataTableColumn } from "../../models/common/table.model";
+import DataTable from "../common/table/DataTable";
+import PaymentRowActions from "./menus/PaymentRowActions";
 import {
   paymentStatusColors,
   type PaymentKind,
 } from "../../enums/ledger.enum";
 import { usePaymentListHook } from "../../hook/data/payment/payment.list.hook";
+import type { IDataTableColumn } from "../../models/common/table.model";
 import type { ILedgerPayment } from "../../models/data/payment/payment.response";
+import { nowrapCell } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
-import AppButton from "../common/button/AppButton";
-import SectionCard from "../common/card/SectionCard";
-import RequirePermission from "../common/guard/RequirePermission";
-import DataTable from "../common/table/DataTable";
-import { NameCell, RowActions } from "../common/table/TableDecor";
 
 type IProps = {
   kind: PaymentKind;
-  party?: { partyId: string | null; partyName: string };
-  compact?: boolean;
+  party: { partyId: string | null; partyName: string };
 };
 
-const PaymentsPanel = ({ kind, party, compact }: IProps) => {
+const PaymentsPanel = ({ kind, party }: IProps) => {
   const {
     permissions,
     payments,
     loading,
+    refreshing,
+    error,
+    retry,
     statusLabels,
     verb,
     userNameOf,
-    verifyMutation,
-    rejectMutation,
+    verifiedHintOf,
+    approvePayment,
+    rejectPayment,
   } = usePaymentListHook(kind, party);
-
-  const openConfirm = useConfirm();
-
-  const verifiedHintOf = (payment: ILedgerPayment) =>
-    payment.verified_by && payment.status !== "pending"
-      ? `${userNameOf(payment.verified_by)} · ${formatDate(payment.verified_at)}`
-      : undefined;
 
   const columns: IDataTableColumn<ILedgerPayment>[] = [
     {
       title: "Date",
       dataIndex: "paid_at",
-      width: 120,
+      className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
-    ...(party
-      ? []
-      : [
-          {
-            title: kind === "receivable" ? "Customer" : "Supplier",
-            dataIndex: "party_name" as const,
-            render: (name: string) => (
-              <NameCell icon={<User />}>{name}</NameCell>
-            ),
-          },
-        ]),
     {
       title: "Amount",
       dataIndex: "amount",
       align: "right",
+      className: nowrapCell,
       render: (value: number) => formatMoney(value),
     },
     {
@@ -72,6 +54,7 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
     {
       title: "Status",
       dataIndex: "status",
+      className: nowrapCell,
       render: (status: ILedgerPayment["status"], payment) => (
         <StatusTag
           color={paymentStatusColors[status]}
@@ -88,70 +71,35 @@ const PaymentsPanel = ({ kind, party, compact }: IProps) => {
             render: (_: unknown, payment: ILedgerPayment) =>
               userNameOf(payment.created_by),
           },
+          {
+            title: "Action",
+            key: "actions",
+            align: "center" as const,
+            className: nowrapCell,
+            render: (_: unknown, payment: ILedgerPayment) => (
+              <PaymentRowActions
+                payment={payment}
+                verb={verb}
+                onApprove={approvePayment}
+                onReject={rejectPayment}
+              />
+            ),
+          },
         ]
       : []),
-    {
-      title: "",
-      key: "actions",
-      width: 190,
-      render: (_, payment) => (
-        <RequirePermission can="isManager" fallback={null}>
-          <RowActions>
-            {payment.status === "pending" ? (
-              <AppButton
-                variant="ghost"
-                size="sm"
-                onPress={() => void verifyMutation.mutate(payment.id)}
-              >
-                <Check />
-                {verb}
-              </AppButton>
-            ) : null}
-            {payment.status !== "rejected" ? (
-              <AppButton
-                variant="destructive"
-                size="sm"
-                onPress={() =>
-                  openConfirm({
-                    kind: "delete",
-                    title: "Reject payment?",
-                    message:
-                      "Rejecting this payment restores the balances it settled.",
-                    okText: "Reject",
-                    cancelText: "Cancel",
-                    onConfirm: () => rejectMutation.mutate(payment.id),
-                  })
-                }
-              >
-                <X />
-                Reject
-              </AppButton>
-            ) : null}
-          </RowActions>
-        </RequirePermission>
-      ),
-    },
   ];
 
-  const table = (
+  return (
     <DataTable<ILedgerPayment>
       columns={columns}
       data={payments}
       loading={loading}
-      pageSize={compact ? 5 : 10}
+      refreshing={refreshing}
+      error={error}
+      onRetry={retry}
+      pageSize={5}
       emptyText="No payments recorded yet"
     />
-  );
-
-  if (compact) return table;
-
-  return (
-    <SectionCard
-      title={kind === "receivable" ? "Customer Payments" : "Supplier Payments"}
-      flush
-    >
-      {table}
-    </SectionCard>
   );
 };
 
