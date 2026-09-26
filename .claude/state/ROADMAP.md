@@ -1,5 +1,5 @@
 # ROADMAP — "Airy blue" redesign (EduMate mockup) on shadcn + Tailwind
-Updated: 2026-09-26
+Updated: 2026-09-26 (T2 closed)
 
 ## Goal
 Every screen matches the design spec below: pastel backdrop, floating top bar + floating
@@ -81,8 +81,8 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
 - Font import: src/main.tsx ; PWA precache globs: vite.config.ts
 - Shell: src/layouts/ProtectedLayout.tsx ; src/components/common/layout/{ProtectedHeader,ProtectedSider,ProtectedMenu,ProtectedBranchScope,ProtectedUserMenu,ProtectedNotifications,RouteRoot}.tsx ; src/hook/layout/protected.hook.ts (menu, header, notifications, title, user hooks) ; styles/layout/{shell,header,sidebar}.styles.ts ; round count buttons = countButton/countBadge/offlineDot in styles/status/status.styles.ts
 - Content view: src/components/common/view/{ContentView,ViewSwitch,BentoGrid,BentoCell}.tsx ; styles/view/view.styles.ts
-- Table: src/components/common/table/{DataTable (339 lines, skeleton at :231),TablePagination,TablePanel,RowActionMenu,RowDetailPanel,TableDecor}.tsx ; styles/table/table.styles.ts ; models/common/table.model.ts
-- Filters: src/components/common/filter/{FilterToolbar,LedgerFilterBar,FilterSelect,DateRangeFilter,SearchInput}.tsx ; styles/filter/filter.styles.ts ; store/common/{filter,sort}.store.ts
+- Table: src/components/common/table/{DataTable (skeleton in renderBody),TablePagination,AvatarCell,TablePanel,RowActionMenu,RowDetailPanel,TableDecor}.tsx ; styles/table/table.styles.ts ; models/common/table.model.ts
+- Filters: src/components/common/filter/{FilterToolbar,LedgerFilterBar,FilterPopover,SortSelect,FilterSelect,DateRangeFilter,SearchInput}.tsx ; styles/filter/filter.styles.ts ; store/common/{filter,sort}.store.ts
 - Modals: src/components/common/modal/{AppModal (isMobile -> Sheet at :53),ConfirmationModal,DetailModal}.tsx ; components/common/form/EntityFormModal.tsx ; styles/modal/modal.styles.ts
 - crm2 modal reference: D:/EJIE BUSINESS/EJIE WORK DCWD/dcwd_apps-crm-customer2/src/components/common/modal/AppModal.tsx + src/styles/modal/{modal,confirmation,detail}.styles.ts (modalHeaderRuled, modalFooter `-mx-6 -mb-6 rounded-b-2xl border-t bg-muted/50 px-6 py-4`, modalActionSize h-11 px-6, drawerFooter pb-safe, detailSections/detailGrid)
 - Cards / status: components/common/card/{SectionCard,StatCard}.tsx, components/common/status/{StatusTag,EmptyState,ProgressRow,SyncIndicator}.tsx ; styles/{card,stat,status}/*.styles.ts
@@ -112,19 +112,27 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
   ContentView's h1; ContentView gained `tabs` (title row, before `actions`); `meta` moved to the
   toolbar row's right side. NotificationsPanel now wraps NotificationsFeed; dueAlertCount in
   models/data/dashboard/dashboard.response.ts.
+- T2 table + toolbar + pagination (v1.14): styles/table/table.styles.ts (plain divider rows,
+  dataTableRowExpanded / dataTableRowStatic, overdue = bg-danger/5, cell cva lost `expanded`,
+  tablePagination* + avatarCell*). DataTable row classes. TablePagination = outline round prev |
+  centred circle pages via `pageItems()` (models/common/pagination.model.ts, gap-start/gap-end) |
+  range + size select (md+) | round next. New common: table/AvatarCell.tsx (formatInitials in
+  utils/format.utils.ts), filter/FilterPopover.tsx (Filters pill + Badge count + Reset),
+  filter/SortSelect.tsx. FilterToolbar `sort` slot (before actions). LedgerFilterBar
+  `layout="popover"` (stacked fields in FilterPopover, count = activeFilterCount in
+  utils/filter.utils.ts; inline stays default). ViewSwitch = spaced pills (viewSwitchItem).
+  Server sort: IPaginationRequest.sort, ISortOption (table.model), transactionSortOptions
+  (enums/transaction.enum.ts), transactionSortKey (keys/table.keys.ts), hook sortKey /
+  sortOptions / changeSort (resets to page 1, sort key in query key), service .order(sort)
+  + created_at tie-break. Transactions: Filters popover + Sort by + "Recorded by" AvatarCell
+  (name + role hint; Role column merged into it).
 
 ## Next
-1. **T2 table + toolbar + pagination** — DataTable restyle per spec (drop border-separate row
-   cards, divider rows, tint states, expanded row as soft inset). New common cells only where a
-   screen uses them now: `AvatarCell` (person/recorded-by), `ProgressCell` (ledger paid/total).
-   TablePagination -> circle prev | centred circle pages with ellipsis | circle next (keep the
-   page-size select, compact, beside next). FilterToolbar -> "Filters" popover (active-count
-   badge, Reset) + right-side sort select; ViewSwitch -> segmented pills. Apply on Transactions.
-2. **T3 modals** — port crm2 AppModal header/body/footer rules and mobile sheet (pb-safe);
+1. **T3 modals** — port crm2 AppModal header/body/footer rules and mobile sheet (pb-safe);
    rounded-panel dialog, overlay navy/20. ConfirmationModal gets the same ruled footer +
    h-11 actions; DetailModal -> crm2 sections + 2-col grid; EntityFormModal submit/cancel in
    the ruled footer. Check every modal renders header + footer.
-3. **T4 loading / error / lazy** — routes use react-router `lazy` for every view (pages become
+2. **T4 loading / error / lazy** — routes use react-router `lazy` for every view (pages become
    separate chunks; recharts only loads with Dashboard/Reports) + `HydrateFallback`/pending
    `PageSkeleton` inside the content card + thin blue top progress bar on
    `useNavigation().state`; prefetch a route chunk on menu hover/focus. `errorElement` ->
@@ -135,18 +143,19 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
    skeleton rows mirror column shapes (circle for avatar cells). StatCard / SectionCard / chart
    skeleton + error states. EmptyState: icon + sentence + optional action. Respect
    prefers-reduced-motion.
-4. **T5a screen sweep — transaction family + ledger** — Purchases, Expenses, Receivables,
-   Payables (LedgerManager), Payments: status pills in the title row, Filters popover,
-   AvatarCell/ProgressCell where the data fits, error/empty states wired.
-5. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
+3. **T5a screen sweep — transaction family + ledger** — Purchases, Expenses, Receivables,
+   Payables (LedgerManager), Payments: status pills in the title row, LedgerFilterBar
+   layout="popover" + FilterToolbar `sort` (server sort per the Transactions shape: sort
+   options enum + sort key + getList .order), AvatarCell where a person shows, NEW
+   `ProgressCell` (paid/total, deferred from T2 — no consumer yet), error/empty states wired.
+4. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
    white cards, blue charts, the "Recommended" card style for list cards), Reports, Auth +
    Error pages (backdrop gradient, blue submit, retire bg-auth-* lime/lilac utilities).
-6. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
+5. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
    updated to the new token names, new primitives, lazy routes and state rules; delete this file.
 
 ## Open
-- "Sort by" select: server-paged tables sort only the current page today. Confirm in T2 whether
-  sorting should move server-side (service `order` param) or the select is left out.
+- none
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (T1, suggest v1.13) · Last check: yarn build + yarn lint clean
+Branch: development-overhaul · Uncommitted: yes (T2, suggest v1.14) · Last check: yarn build + yarn lint clean

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ISortOption } from "../models/common/table.model";
 import type { StatusColor } from "../models/common/view.model";
 
 export const transactionTypeValues = [
@@ -70,3 +71,10 @@ export const cashAccountLabels: Record<CashAccount, string> = {
   cash_drawer: "Cash Drawer",
   bank_account: "Bank Account",
 };
+
+export const transactionSortOptions: readonly ISortOption[] = [
+  { key: "newest", label: "Newest first", column: "txn_date", direction: "descending" },
+  { key: "oldest", label: "Oldest first", column: "txn_date", direction: "ascending" },
+  { key: "amount-high", label: "Amount: high to low", column: "amount", direction: "descending" },
+  { key: "amount-low", label: "Amount: low to high", column: "amount", direction: "ascending" },
+];

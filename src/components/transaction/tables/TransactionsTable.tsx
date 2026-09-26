@@ -3,8 +3,10 @@ import type { IDataTableColumn } from "../../../models/common/table.model";
 import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
+import SortSelect from "../../common/filter/SortSelect";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
+import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
@@ -37,6 +39,9 @@ const TransactionsTable = () => {
     totalCount,
     pagination,
     goToPage,
+    sortKey,
+    sortOptions,
+    changeSort,
     loading,
     branchName,
     userById,
@@ -108,14 +113,11 @@ const TransactionsTable = () => {
     ...(permissions.isManager
       ? [
           {
-            title: "User",
+            title: "Recorded by",
             key: "user",
-            render: (_: unknown, row: ITransaction) => userNameOf(row),
-          },
-          {
-            title: "Role",
-            key: "role",
-            render: (_: unknown, row: ITransaction) => userRoleOf(row),
+            render: (_: unknown, row: ITransaction) => (
+              <AvatarCell name={userNameOf(row)} hint={userRoleOf(row)} />
+            ),
           },
         ]
       : []),
@@ -208,10 +210,7 @@ const TransactionsTable = () => {
               {
                 key: "role",
                 label: "Role",
-                render: (row: ITransaction) => {
-                  const user = userOf(row);
-                  return user ? userRoleLabels[user.role] : "—";
-                },
+                render: (row: ITransaction) => userRoleOf(row),
               },
             ],
           },
@@ -224,6 +223,13 @@ const TransactionsTable = () => {
       <TablePanel
         toolbar={
           <FilterToolbar
+            sort={
+              <SortSelect
+                value={sortKey}
+                options={sortOptions}
+                onChange={changeSort}
+              />
+            }
             actions={
               <RequirePermission can="encodeTransactions" fallback={null}>
                 <AppButton onPress={() => formModal.openModal()}>
@@ -233,7 +239,7 @@ const TransactionsTable = () => {
               </RequirePermission>
             }
           >
-            <LedgerFilterBar showType />
+            <LedgerFilterBar showType layout="popover" />
           </FilterToolbar>
         }
         footer={

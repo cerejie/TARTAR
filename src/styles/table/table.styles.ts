@@ -2,16 +2,16 @@ import { cva } from "class-variance-authority";
 
 export const dataTableRoot = "flex min-w-0 flex-col";
 
-export const dataTableGrid = "border-separate border-spacing-y-2";
+export const dataTableGrid = "border-collapse";
 
-export const dataTableHeader = "[&_tr]:border-b-0";
+export const dataTableHeader = "[&_tr]:border-border";
 
 export const dataTableHead = cva(
-  "bg-muted px-4 py-2.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase first:rounded-l-md last:rounded-r-md",
+  "h-11 px-4 text-[0.8125rem] font-medium text-muted-foreground",
   {
     variants: {
       align: { left: "", center: "text-center", right: "text-right" },
-      sortable: { true: "cursor-pointer select-none", false: "" },
+      sortable: { true: "cursor-pointer select-none hover:text-foreground", false: "" },
     },
     defaultVariants: { align: "left", sortable: false },
   }
@@ -21,32 +21,29 @@ export const dataTableSortLabel = "inline-flex items-center gap-1";
 
 export const dataTableSortIcon = "size-3.5";
 
-export const dataTableRow = "group/row border-b-0 hover:bg-transparent data-selected:bg-transparent";
+export const dataTableRow =
+  "group/row border-b border-border hover:bg-muted/40 data-selected:bg-brand-mist";
+
+export const dataTableRowExpanded = "border-b-0 bg-muted/40";
+
+export const dataTableRowStatic = "hover:bg-transparent";
 
 export const dataTableRowClickable = "cursor-pointer";
 
-export const dataTableRowOverdue = "[&>td]:bg-danger-bg";
+export const dataTableRowOverdue = "bg-danger/5 hover:bg-danger/10";
 
-export const dataTableCell = cva(
-  "border-y border-border bg-card px-4 py-3 transition-colors group-hover/row:border-foreground/30 group-data-selected/row:bg-brand-mist",
-  {
-    variants: {
-      align: { left: "", center: "text-center", right: "text-right tabular-nums" },
-      expanded: {
-        true: "border-foreground/30 first:rounded-tl-md first:border-l last:rounded-tr-md last:border-r",
-        false: "first:rounded-l-md first:border-l last:rounded-r-md last:border-r",
-      },
-    },
-    defaultVariants: { align: "left", expanded: false },
-  }
-);
+export const dataTableCell = cva("h-14 px-4 py-2 text-sm text-foreground", {
+  variants: {
+    align: { left: "", center: "text-center", right: "text-right tabular-nums" },
+  },
+  defaultVariants: { align: "left" },
+});
 
 export const dataTableSelectionCell = "w-px";
 
-export const dataTableExpansionCell =
-  "rounded-md border border-foreground/30 bg-card p-0 whitespace-normal";
+export const dataTableExpansionCell = "bg-muted/40 p-0 whitespace-normal";
 
-export const dataTableStateCell = "rounded-md border border-border bg-card whitespace-normal";
+export const dataTableStateCell = "whitespace-normal";
 
 export const dataTableSkeletonBar = "h-4 w-full";
 
@@ -103,18 +100,37 @@ export const tablePanel = "flex min-w-0 flex-col gap-3";
 
 export const tablePanelBody = "min-w-0";
 
-export const tablePagination =
-  "flex flex-col items-center justify-between gap-3 py-2 md:flex-row";
+export const tablePagination = "flex items-center gap-2 pt-2";
 
-export const tablePaginationInfo = "text-sm text-muted-foreground tabular-nums";
+export const tablePaginationStep = "rounded-full";
+
+export const tablePaginationNav = "flex-1";
 
 export const tablePaginationPages = "flex items-center gap-1";
 
-export const tablePaginationPage = "px-2 text-sm whitespace-nowrap text-muted-foreground tabular-nums";
+export const tablePaginationPage = cva("size-8 rounded-full tabular-nums", {
+  variants: {
+    active: { true: "", false: "text-muted-foreground" },
+  },
+  defaultVariants: { active: false },
+});
 
-export const tablePaginationSize = "flex items-center gap-2 text-sm text-muted-foreground";
+export const tablePaginationEllipsis = "size-8 text-muted-foreground";
 
-export const tablePaginationSelect = "w-20";
+export const tablePaginationSize =
+  "hidden items-center gap-2 text-sm whitespace-nowrap text-muted-foreground tabular-nums md:flex";
+
+export const tablePaginationSelect = "w-18";
+
+export const tablePaginationSelectTrigger = "rounded-full";
+
+export const avatarCell = "inline-flex min-w-0 items-center gap-3";
+
+export const avatarCellFallback = "bg-brand-soft text-xs font-semibold text-brand";
+
+export const avatarCellText = "flex min-w-0 flex-col";
+
+export const avatarCellName = "truncate font-medium";
 
 export const nowrapCell = "whitespace-nowrap";
 

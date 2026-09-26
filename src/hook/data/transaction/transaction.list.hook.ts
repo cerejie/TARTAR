@@ -6,11 +6,15 @@ import {
   cashOutflowTypes,
   incomeSourceLabels,
   incomeSourceValues,
+  transactionSortOptions,
   transactionTypeLabels,
   transactionTypeValues,
 } from "../../../enums/transaction.enum";
 import { transactionFormModalKey } from "../../../keys/modal.keys";
-import { transactionPaginationKey } from "../../../keys/table.keys";
+import {
+  transactionPaginationKey,
+  transactionSortKey,
+} from "../../../keys/table.keys";
 import {
   scopedKey,
   transactionListKey,
@@ -39,6 +43,7 @@ import { useModal } from "../../common/modal.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { useQuery } from "../../common/query.hook";
+import { useSort } from "../../common/sort.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useFarmSectionListHook } from "../farm-section/farm.section.list.hook";
@@ -85,6 +90,7 @@ export const useTransactionListHook = () => {
   const { pagination, setPagination, goToPage } = usePagination(
     transactionPaginationKey
   );
+  const { sort, setSort } = useSort(transactionSortKey);
   const permissions = usePermissions();
   const createdBy = useAccountStore(selectUserId);
 
@@ -97,15 +103,29 @@ export const useTransactionListHook = () => {
   const { branch: scopeBranch } = useBranchScopeHook();
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
+  const sortOption =
+    transactionSortOptions.find(
+      (option) =>
+        option.column === sort?.column && option.direction === sort.direction
+    ) ?? transactionSortOptions.at(0);
+  const pageRequest = { ...pagination, sort: sortOption };
   const listQuery = useQuery<IPaginationResponse<ITransaction>>(
     scopedKey(
       transactionListKey,
       JSON.stringify(effectiveFilters),
       pagination.pageNumber,
-      pagination.pageSize
+      pagination.pageSize,
+      sortOption?.key ?? ""
     ),
-    () => transactionServices.getList(effectiveFilters, pagination)
+    () => transactionServices.getList(effectiveFilters, pageRequest)
   );
+
+  const changeSort = (key: string) => {
+    const option = transactionSortOptions.find((item) => item.key === key);
+    if (!option) return;
+    setSort({ column: option.column, direction: option.direction });
+    setPagination({ pageNumber: 1 });
+  };
 
   const summaryQuery = useQuery<ITransaction[]>(
     scopedKey(transactionSummaryKey, JSON.stringify(effectiveFilters)),
@@ -255,6 +275,9 @@ export const useTransactionListHook = () => {
     totalCount: listQuery.data?.totalCount ?? 0,
     pagination,
     goToPage,
+    sortKey: sortOption?.key ?? "",
+    sortOptions: transactionSortOptions,
+    changeSort,
     loading: listQuery.loading,
     summary: summarize(summaryQuery.data ?? []),
     summaryLoading: summaryQuery.loading,

@@ -90,3 +90,13 @@ export const scopeToBranch = <T>(query: T, branch?: string | null): T =>
         branch
       ) as T)
     : query;
+
+export const activeFilterCount = (filters: ILedgerFilters): number =>
+  [
+    filters.dateFrom || filters.dateTo,
+    filters.status,
+    filters.paymentStatus,
+    filters.type,
+    filters.referenceNumber,
+    filters.search,
+  ].filter(Boolean).length;

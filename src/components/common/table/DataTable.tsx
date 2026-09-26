@@ -42,6 +42,8 @@ import {
   dataTableRoot,
   dataTableRow,
   dataTableRowClickable,
+  dataTableRowExpanded,
+  dataTableRowStatic,
   dataTableSelectionCell,
   dataTableSkeletonBar,
   dataTableSortIcon,
@@ -182,12 +184,13 @@ const DataTable = <T extends object>({
           className={cn(
             dataTableRow,
             onRowClick && dataTableRowClickable,
+            isOpen && dataTableRowExpanded,
             rowClassName?.(row)
           )}
           onAction={onRowClick ? () => onRowClick(row) : undefined}
         >
           {rowSelection ? (
-            <TableCell className={cn(dataTableCell({ expanded: isOpen }), dataTableSelectionCell)}>
+            <TableCell className={cn(dataTableCell(), dataTableSelectionCell)}>
               <Checkbox slot="selection" />
             </TableCell>
           ) : null}
@@ -201,7 +204,7 @@ const DataTable = <T extends object>({
               <TableCell
                 key={columnId(column, index)}
                 className={cn(
-                  dataTableCell({ align: column.align, expanded: isOpen }),
+                  dataTableCell({ align: column.align }),
                   column.className
                 )}
               >
@@ -212,7 +215,7 @@ const DataTable = <T extends object>({
         </TableRow>
 
         {isOpen && detailSections ? (
-          <TableRow id={`${key}-detail`} className={dataTableRow}>
+          <TableRow id={`${key}-detail`} className={cn(dataTableRow, dataTableRowStatic)}>
             <TableCell colSpan={columnCount} className={dataTableExpansionCell}>
               <RowDetailPanel<T>
                 record={row}
@@ -230,7 +233,11 @@ const DataTable = <T extends object>({
   const renderBody = () => {
     if (loading) {
       return Array.from({ length: skeletonRows }, (_, rowIndex) => (
-        <TableRow key={`skeleton-${rowIndex}`} id={`skeleton-${rowIndex}`} className={dataTableRow}>
+        <TableRow
+          key={`skeleton-${rowIndex}`}
+          id={`skeleton-${rowIndex}`}
+          className={cn(dataTableRow, dataTableRowStatic)}
+        >
           {Array.from({ length: columnCount }, (__, cellIndex) => (
             <TableCell key={cellIndex} className={dataTableCell()}>
               <Skeleton className={dataTableSkeletonBar} />
@@ -242,7 +249,7 @@ const DataTable = <T extends object>({
 
     if (rows.length === 0) {
       return (
-        <TableRow id="empty" className={dataTableRow}>
+        <TableRow id="empty" className={cn(dataTableRow, dataTableRowStatic)}>
           <TableCell colSpan={columnCount} className={dataTableStateCell}>
             <Empty className={dataTableEmpty}>
               <EmptyHeader>

@@ -1,11 +1,10 @@
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
 } from "@/components/ui/pagination";
 import {
   Select,
@@ -15,14 +14,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { IPaginationRequest } from "../../../models/common/pagination.model";
+import {
+  pageItems,
+  type IPaginationRequest,
+} from "../../../models/common/pagination.model";
 import {
   tablePagination,
-  tablePaginationInfo,
+  tablePaginationEllipsis,
+  tablePaginationNav,
   tablePaginationPage,
   tablePaginationPages,
   tablePaginationSelect,
+  tablePaginationSelectTrigger,
   tablePaginationSize,
+  tablePaginationStep,
 } from "../../../styles/table/table.styles";
 
 type IProps = {
@@ -44,12 +49,8 @@ const TablePagination = ({
   const lastPage = Math.max(1, Math.ceil(totalCount / pageSize));
   const firstItem = (pageNumber - 1) * pageSize + 1;
   const lastItem = Math.min(pageNumber * pageSize, totalCount);
-  const isFirst = pageNumber <= 1;
-  const isLast = pageNumber >= lastPage;
   const rangeLabel =
-    totalCount === 0
-      ? "0 items"
-      : `${firstItem} - ${lastItem} of ${totalCount} items`;
+    totalCount === 0 ? "0 items" : `${firstItem}–${lastItem} of ${totalCount}`;
 
   const changeSize = (key: unknown) => {
     const size = pageSizes.find((item) => String(item) === key);
@@ -58,61 +59,50 @@ const TablePagination = ({
 
   return (
     <div className={tablePagination}>
-      <span className={tablePaginationInfo}>{rangeLabel}</span>
+      <Button
+        variant="outline"
+        size="icon"
+        className={tablePaginationStep}
+        aria-label="Previous page"
+        isDisabled={pageNumber <= 1}
+        onPress={() => onPageChange(pageNumber - 1, pageSize)}
+      >
+        <ChevronLeft />
+      </Button>
 
-      <Pagination>
+      <Pagination className={tablePaginationNav}>
         <PaginationContent className={tablePaginationPages}>
-          <PaginationItem>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="First page"
-              isDisabled={isFirst}
-              onPress={() => onPageChange(1, pageSize)}
-            >
-              <ChevronsLeft />
-            </Button>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationPrevious
-              isDisabled={isFirst}
-              onPress={() => onPageChange(pageNumber - 1, pageSize)}
-            />
-          </PaginationItem>
-          <PaginationItem>
-            <span className={tablePaginationPage}>
-              Page {pageNumber} of {lastPage}
-            </span>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext
-              isDisabled={isLast}
-              onPress={() => onPageChange(pageNumber + 1, pageSize)}
-            />
-          </PaginationItem>
-          <PaginationItem>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Last page"
-              isDisabled={isLast}
-              onPress={() => onPageChange(lastPage, pageSize)}
-            >
-              <ChevronsRight />
-            </Button>
-          </PaginationItem>
+          {pageItems(pageNumber, lastPage).map((item) => (
+            <PaginationItem key={item}>
+              {typeof item === "number" ? (
+                <Button
+                  variant={item === pageNumber ? "default" : "ghost"}
+                  size="icon-sm"
+                  className={tablePaginationPage({ active: item === pageNumber })}
+                  aria-label={`Page ${item}`}
+                  aria-current={item === pageNumber ? "page" : undefined}
+                  onPress={() => onPageChange(item, pageSize)}
+                >
+                  {item}
+                </Button>
+              ) : (
+                <PaginationEllipsis className={tablePaginationEllipsis} />
+              )}
+            </PaginationItem>
+          ))}
         </PaginationContent>
       </Pagination>
 
-      {showSizeChanger ? (
-        <div className={tablePaginationSize}>
+      <div className={tablePaginationSize}>
+        {rangeLabel}
+        {showSizeChanger ? (
           <Select
             aria-label="Items per page"
             value={String(pageSize)}
             onChange={changeSize}
             className={tablePaginationSelect}
           >
-            <SelectTrigger>
+            <SelectTrigger size="sm" className={tablePaginationSelectTrigger}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -125,9 +115,19 @@ const TablePagination = ({
               </SelectGroup>
             </SelectContent>
           </Select>
-          items per page
-        </div>
-      ) : null}
+        ) : null}
+      </div>
+
+      <Button
+        variant="outline"
+        size="icon"
+        className={tablePaginationStep}
+        aria-label="Next page"
+        isDisabled={pageNumber >= lastPage}
+        onPress={() => onPageChange(pageNumber + 1, pageSize)}
+      >
+        <ChevronRight />
+      </Button>
     </div>
   );
 };

@@ -17,7 +17,9 @@ import type {
   ILedgerFilterScope,
 } from "../../../models/common/filter.model";
 import { filterBar } from "../../../styles/filter/filter.styles";
+import { activeFilterCount } from "../../../utils/filter.utils";
 import DateRangeFilter from "./DateRangeFilter";
+import FilterPopover from "./FilterPopover";
 import FilterSelect from "./FilterSelect";
 import SearchInput from "./SearchInput";
 
@@ -36,6 +38,7 @@ type IProps = {
   showType?: boolean;
   paymentKind?: PaymentKind;
   scope?: ILedgerFilterScope;
+  layout?: "inline" | "popover";
 };
 
 const LedgerFilterBar = ({
@@ -45,6 +48,7 @@ const LedgerFilterBar = ({
   showType = false,
   paymentKind,
   scope = "page",
+  layout = "inline",
 }: IProps) => {
   const { filters, setFilters, resetFilters } = useLedgerFilters(scope);
 
@@ -52,8 +56,10 @@ const LedgerFilterBar = ({
     ? ["unpaid", ...ledgerStatusValues, "overdue"]
     : ["unpaid", ...ledgerStatusValues];
 
-  return (
-    <div className={filterBar}>
+  const isPopover = layout === "popover";
+
+  const fields = (
+    <div className={filterBar({ layout: isPopover ? "stack" : "inline" })}>
       {showSearch ? (
         <SearchInput
           placeholder="Search name"
@@ -104,11 +110,24 @@ const LedgerFilterBar = ({
         onChange={(referenceNumber) => setFilters({ referenceNumber })}
       />
 
-      <Button variant="outline" onPress={resetFilters}>
-        <Eraser />
-        Clear
-      </Button>
+      {isPopover ? null : (
+        <Button variant="outline" onPress={resetFilters}>
+          <Eraser />
+          Clear
+        </Button>
+      )}
     </div>
+  );
+
+  if (!isPopover) return fields;
+
+  return (
+    <FilterPopover
+      activeCount={activeFilterCount(filters)}
+      onReset={resetFilters}
+    >
+      {fields}
+    </FilterPopover>
   );
 };
 

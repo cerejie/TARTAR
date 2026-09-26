@@ -7,15 +7,21 @@ import {
 
 type IProps = {
   actions?: ReactNode;
+  sort?: ReactNode;
   children: ReactNode;
 };
 
-const FilterToolbar = ({ actions, children }: IProps) => {
+const FilterToolbar = ({ actions, sort, children }: IProps) => {
   return (
     <div className={filterToolbar}>
       <div className={filterToolbarStart}>{children}</div>
 
-      {actions ? <div className={filterToolbarActions}>{actions}</div> : null}
+      {actions || sort ? (
+        <div className={filterToolbarActions}>
+          {sort}
+          {actions}
+        </div>
+      ) : null}
     </div>
   );
 };

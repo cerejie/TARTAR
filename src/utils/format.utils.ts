@@ -51,3 +51,11 @@ export const addDaysIso = (days: number): string =>
 
 export const daysBetween = (from: string, to: string): number =>
   dayjs(to).diff(from, "day");
+
+export const formatInitials = (name: string): string =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join("");

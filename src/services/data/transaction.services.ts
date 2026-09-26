@@ -8,6 +8,7 @@ import {
   type IPaginationRequest,
   type IPaginationResponse,
 } from "../../models/common/pagination.model";
+import type { ISortState } from "../../models/common/table.model";
 import type {
   IDisbursementInput,
   ITransactionInput,
@@ -25,6 +26,8 @@ import { supabase, toError } from "../../utils/supabase.utils";
 const table = "transactions";
 const auditTable = "transaction_audit";
 const voucherTable = "vouchers";
+
+const defaultSort: ISortState = { column: "txn_date", direction: "descending" };
 
 const columns = `
   id, type, branch, farm_section, txn_date, amount, reference_number, description,
@@ -88,9 +91,11 @@ const transactionServices = {
     const base = supabase.from(table).select(columns, { count: "exact" });
     const query = applyLedgerFilters(base, filters, transactionColumns);
     const { from, to } = pageRange(pagination);
+    const sort = pagination.sort ?? defaultSort;
 
     const { data, error, count } = await query
-      .order("txn_date", { ascending: false })
+      .order(sort.column, { ascending: sort.direction === "ascending" })
+      .order("created_at", { ascending: false })
       .range(from, to);
     if (error) throw toError(error);
 

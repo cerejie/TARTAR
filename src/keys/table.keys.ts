@@ -1,4 +1,5 @@
 export const transactionPaginationKey = "transactions-table";
+export const transactionSortKey = "transactions-sort";
 export const voucherPaginationKey = "vouchers-table";
 export const userPaginationKey = "users-table";
 export const paymentPaginationKey = (kind: string) => `${kind}-payments-table`;

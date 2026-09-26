@@ -25,3 +25,8 @@ export interface IDataTableSelection<T> {
   onChange: (keys: string[]) => void;
   getCheckboxProps?: (row: T) => { disabled?: boolean };
 }
+
+export interface ISortOption extends ISortState {
+  key: string;
+  label: string;
+}
