@@ -38,3 +38,13 @@ export const bentoCell = cva("min-w-0", {
   },
   defaultVariants: { span: "quarter" },
 });
+
+export const pageSkeletonTitle = "h-8 w-48 flex-1 md:max-w-64";
+
+export const pageSkeletonAction = "ml-auto h-10 w-32 rounded-pill";
+
+export const pageSkeletonFilter = "h-10 w-28 rounded-pill";
+
+export const pageSkeletonRows = "flex flex-col gap-3";
+
+export const pageSkeletonRow = "h-12 w-full";

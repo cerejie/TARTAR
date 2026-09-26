@@ -9,6 +9,7 @@ import {
   EmptyMedia,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -39,19 +40,25 @@ import {
   dataTableHead,
   dataTableHeader,
   dataTableLoadingAnnounce,
+  dataTableBodyRefreshing,
+  dataTableRefreshSpinner,
   dataTableRoot,
   dataTableRow,
   dataTableRowClickable,
   dataTableRowExpanded,
   dataTableRowStatic,
   dataTableSelectionCell,
+  dataTableSkeletonAvatar,
   dataTableSkeletonBar,
+  dataTableSkeletonCircle,
+  dataTableSkeletonName,
   dataTableSortIcon,
   dataTableSortLabel,
   dataTableStateCell,
   expandTrigger,
   leadCell,
 } from "../../../styles/table/table.styles";
+import ErrorState from "../status/ErrorState";
 import RowDetailPanel from "./RowDetailPanel";
 import TablePagination from "./TablePagination";
 
@@ -62,6 +69,9 @@ type IProps<T> = {
   data: readonly T[];
   label?: string;
   loading?: boolean;
+  refreshing?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   rowKey?: keyof T | ((row: T) => string);
   pageSize?: number;
   pagination?: IPaginationRequest;
@@ -88,11 +98,24 @@ const sortIcon = (direction: ISortDirection | undefined) => {
   return <ChevronsUpDown className={dataTableSortIcon} />;
 };
 
+const skeletonCell = <T,>(column: IDataTableColumn<T>) =>
+  column.skeleton === "avatar" ? (
+    <span className={dataTableSkeletonAvatar}>
+      <Skeleton className={dataTableSkeletonCircle} />
+      <Skeleton className={dataTableSkeletonName} />
+    </span>
+  ) : (
+    <Skeleton className={dataTableSkeletonBar({ align: column.align })} />
+  );
+
 const DataTable = <T extends object>({
   columns,
   data,
   label = "Records",
   loading,
+  refreshing = false,
+  error,
+  onRetry,
   rowKey = "id" as keyof T,
   pageSize = 15,
   pagination,
@@ -238,13 +261,35 @@ const DataTable = <T extends object>({
           id={`skeleton-${rowIndex}`}
           className={cn(dataTableRow, dataTableRowStatic)}
         >
-          {Array.from({ length: columnCount }, (__, cellIndex) => (
-            <TableCell key={cellIndex} className={dataTableCell()}>
-              <Skeleton className={dataTableSkeletonBar} />
+          {rowSelection ? (
+            <TableCell className={cn(dataTableCell(), dataTableSelectionCell)}>
+              <Skeleton className={dataTableSkeletonCircle} />
+            </TableCell>
+          ) : null}
+          {columns.map((column, cellIndex) => (
+            <TableCell
+              key={columnId(column, cellIndex)}
+              className={dataTableCell({ align: column.align })}
+            >
+              {skeletonCell(column)}
             </TableCell>
           ))}
         </TableRow>
       ));
+    }
+
+    if (error && rows.length === 0) {
+      return (
+        <TableRow id="error" className={cn(dataTableRow, dataTableRowStatic)}>
+          <TableCell colSpan={columnCount} className={dataTableStateCell}>
+            <ErrorState
+              title={`Could not load ${label.toLowerCase()}`}
+              description={error}
+              onAction={onRetry}
+            />
+          </TableCell>
+        </TableRow>
+      );
     }
 
     if (rows.length === 0) {
@@ -300,26 +345,36 @@ const DataTable = <T extends object>({
               })}
               style={column.width === undefined ? undefined : { width: column.width }}
             >
-              {({ sortDirection }) =>
-                column.sorter ? (
-                  <span className={dataTableSortLabel}>
-                    {column.title}
-                    {sortIcon(sortDirection)}
-                  </span>
-                ) : (
-                  column.title
-                )
-              }
+              {({ sortDirection }) => (
+                <>
+                  {column.sorter ? (
+                    <span className={dataTableSortLabel}>
+                      {column.title}
+                      {sortIcon(sortDirection)}
+                    </span>
+                  ) : (
+                    column.title
+                  )}
+                  {refreshing && index === columns.length - 1 ? (
+                    <Spinner className={dataTableRefreshSpinner} />
+                  ) : null}
+                </>
+              )}
             </TableHead>
           ))}
         </TableHeader>
 
-        <TableBody aria-busy={loading}>{renderBody()}</TableBody>
+        <TableBody
+          aria-busy={loading || refreshing}
+          className={refreshing ? dataTableBodyRefreshing : undefined}
+        >
+          {renderBody()}
+        </TableBody>
       </Table>
 
-      {loading ? (
+      {loading || refreshing ? (
         <p role="status" className={dataTableLoadingAnnounce}>
-          Loading
+          {loading ? "Loading" : "Refreshing"}
         </p>
       ) : null}
 

@@ -43,6 +43,8 @@ const ProtectedMenu = ({ pinned = false }: IProps) => {
                       tooltip={route.label}
                       aria-current={active ? "page" : undefined}
                       className={sidebarMenuButton}
+                      onHoverStart={() => void route.preload?.()}
+                      onFocus={() => void route.preload?.()}
                     >
                       {Icon ? <Icon aria-hidden="true" /> : null}
                       <span>{route.label}</span>

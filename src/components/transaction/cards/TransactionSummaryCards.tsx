@@ -5,7 +5,8 @@ import BentoGrid from "../../common/view/BentoGrid";
 import { useTransactionListHook } from "../../../hook/data/transaction/transaction.list.hook";
 
 const TransactionSummaryCards = () => {
-  const { summary, summaryLoading, summaryPeriod } = useTransactionListHook();
+  const { summary, summaryLoading, summaryError, retrySummary, summaryPeriod } =
+    useTransactionListHook();
 
   return (
     <BentoGrid>
@@ -14,6 +15,8 @@ const TransactionSummaryCards = () => {
           title="Cash In"
           value={summary.cashIn}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="positive"
           icon={<TrendingUp />}
           caption={summaryPeriod}
@@ -25,6 +28,8 @@ const TransactionSummaryCards = () => {
           title="Cash Out"
           value={summary.cashOut}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="negative"
           icon={<TrendingDown />}
           caption={summaryPeriod}
@@ -36,6 +41,8 @@ const TransactionSummaryCards = () => {
           title="Net Cash Flow"
           value={summary.net}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant={summary.net < 0 ? "negative" : "positive"}
           icon={<ArrowLeftRight />}
           caption="Cash in less cash out"
@@ -47,6 +54,8 @@ const TransactionSummaryCards = () => {
           title="Sales"
           value={summary.sales}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="brand"
           icon={<ShoppingBag />}
           caption="Sales transactions only"

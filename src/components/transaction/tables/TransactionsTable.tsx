@@ -43,6 +43,9 @@ const TransactionsTable = () => {
     sortOptions,
     changeSort,
     loading,
+    refreshing,
+    error,
+    retry,
     branchName,
     userById,
     formModal,
@@ -115,6 +118,7 @@ const TransactionsTable = () => {
           {
             title: "Recorded by",
             key: "user",
+            skeleton: "avatar" as const,
             render: (_: unknown, row: ITransaction) => (
               <AvatarCell name={userNameOf(row)} hint={userRoleOf(row)} />
             ),
@@ -254,6 +258,9 @@ const TransactionsTable = () => {
           columns={columns}
           data={transactions}
           loading={loading}
+          refreshing={refreshing}
+          error={error}
+          onRetry={retry}
           pagination={pagination}
           detachedPagination
           expansionKey={transactionExpansionKey}

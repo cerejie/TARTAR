@@ -179,6 +179,16 @@
   --shadow-auth-submit-hover: 0 16px 34px rgba(11, 107, 245, 0.34);
 
   --animate-drift: drift 14s ease-in-out infinite alternate;
+  --animate-route-progress: route-progress 1.1s ease-in-out infinite;
+
+  @keyframes route-progress {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
 
   @keyframes drift {
     from {

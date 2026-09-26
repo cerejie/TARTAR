@@ -35,3 +35,5 @@ export const sectionCardFlushBody = "px-0";
 export const sectionCardInset = "py-4";
 
 export const sectionCardFooter = "flex-wrap gap-2 border-t";
+
+export const sectionCardSkeleton = "h-56 w-full";

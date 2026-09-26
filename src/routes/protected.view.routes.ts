@@ -12,18 +12,8 @@ import {
   Wallet,
 } from "lucide-react";
 import type { IRoute } from "../models/common/route.model";
-import BranchesView from "../pages/Branches/BranchesView";
-import DashboardView from "../pages/Dashboard/DashboardView";
-import ExpensesView from "../pages/Expenses/ExpensesView";
-import MasterDataView from "../pages/MasterData/MasterDataView";
-import PayablesView from "../pages/Payables/PayablesView";
-import PurchasesView from "../pages/Purchases/PurchasesView";
-import ReceivablesView from "../pages/Receivables/ReceivablesView";
-import ReportsView from "../pages/Reports/ReportsView";
-import TransactionsView from "../pages/Transactions/TransactionsView";
-import UsersView from "../pages/Users/UsersView";
-import VouchersView from "../pages/Vouchers/VouchersView";
 import { permissionLoader } from "./route.guard";
+import { lazyView } from "./route.lazy";
 
 export const protectedViewsRoutes: IRoute[] = [
   {
@@ -35,7 +25,7 @@ export const protectedViewsRoutes: IRoute[] = [
     group: "Main",
     can: "viewDashboard",
     loader: permissionLoader("viewDashboard", "/transactions"),
-    Component: DashboardView,
+    ...lazyView(() => import("../pages/Dashboard/DashboardView")),
   },
   {
     key: "transactions",
@@ -45,7 +35,7 @@ export const protectedViewsRoutes: IRoute[] = [
     icon: ArrowLeftRight,
     group: "Operations",
     can: "viewReminders",
-    Component: TransactionsView,
+    ...lazyView(() => import("../pages/Transactions/TransactionsView")),
   },
   {
     key: "purchases",
@@ -55,7 +45,7 @@ export const protectedViewsRoutes: IRoute[] = [
     icon: ShoppingCart,
     group: "Operations",
     can: "viewReminders",
-    Component: PurchasesView,
+    ...lazyView(() => import("../pages/Purchases/PurchasesView")),
   },
   {
     key: "expenses",
@@ -65,7 +55,7 @@ export const protectedViewsRoutes: IRoute[] = [
     icon: Wallet,
     group: "Operations",
     can: "viewReminders",
-    Component: ExpensesView,
+    ...lazyView(() => import("../pages/Expenses/ExpensesView")),
   },
   {
     key: "vouchers",
@@ -75,7 +65,7 @@ export const protectedViewsRoutes: IRoute[] = [
     icon: FileText,
     group: "Operations",
     can: "createVouchers",
-    Component: VouchersView,
+    ...lazyView(() => import("../pages/Vouchers/VouchersView")),
   },
   {
     key: "receivables",
@@ -85,7 +75,7 @@ export const protectedViewsRoutes: IRoute[] = [
     icon: ClipboardList,
     group: "Accounting",
     can: "viewReminders",
-    Component: ReceivablesView,
+    ...lazyView(() => import("../pages/Receivables/ReceivablesView")),
   },
   {
     key: "payables",
@@ -95,7 +85,7 @@ export const protectedViewsRoutes: IRoute[] = [
     icon: FileCheck,
     group: "Accounting",
     can: "viewReminders",
-    Component: PayablesView,
+    ...lazyView(() => import("../pages/Payables/PayablesView")),
   },
   {
     key: "reports",
@@ -106,7 +96,7 @@ export const protectedViewsRoutes: IRoute[] = [
     group: "Monitoring",
     can: "viewIncomeExpenses",
     loader: permissionLoader("viewIncomeExpenses", "/transactions"),
-    Component: ReportsView,
+    ...lazyView(() => import("../pages/Reports/ReportsView")),
   },
   {
     key: "branches",
@@ -117,7 +107,7 @@ export const protectedViewsRoutes: IRoute[] = [
     group: "Monitoring",
     can: "viewBranchMonitoring",
     loader: permissionLoader("viewBranchMonitoring", "/"),
-    Component: BranchesView,
+    ...lazyView(() => import("../pages/Branches/BranchesView")),
   },
   {
     key: "master-data",
@@ -128,7 +118,7 @@ export const protectedViewsRoutes: IRoute[] = [
     group: "System",
     can: "manageMasterData",
     loader: permissionLoader("manageMasterData", "/"),
-    Component: MasterDataView,
+    ...lazyView(() => import("../pages/MasterData/MasterDataView")),
   },
   {
     key: "users",
@@ -139,6 +129,6 @@ export const protectedViewsRoutes: IRoute[] = [
     group: "System",
     can: "manageUsers",
     loader: permissionLoader("manageUsers", "/"),
-    Component: UsersView,
+    ...lazyView(() => import("../pages/Users/UsersView")),
   },
 ];

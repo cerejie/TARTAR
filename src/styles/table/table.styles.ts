@@ -45,7 +45,23 @@ export const dataTableExpansionCell = "bg-muted/40 p-0 whitespace-normal";
 
 export const dataTableStateCell = "whitespace-normal";
 
-export const dataTableSkeletonBar = "h-4 w-full";
+export const dataTableSkeletonBar = cva("h-4", {
+  variants: {
+    align: { left: "w-4/5", center: "mx-auto w-3/5", right: "ml-auto w-3/5" },
+  },
+  defaultVariants: { align: "left" },
+});
+
+export const dataTableSkeletonAvatar = "flex items-center gap-3";
+
+export const dataTableSkeletonCircle = "size-8 shrink-0 rounded-full";
+
+export const dataTableSkeletonName = "h-4 w-24";
+
+export const dataTableBodyRefreshing =
+  "opacity-60 transition-opacity motion-reduce:transition-none";
+
+export const dataTableRefreshSpinner = "ml-2 inline-flex size-3.5 align-middle text-brand";
 
 export const dataTableEmpty = "py-8";
 

@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import ProtectedHeader from "../components/common/layout/ProtectedHeader";
 import ProtectedSider from "../components/common/layout/ProtectedSider";
+import RouteProgress from "../components/common/layout/RouteProgress";
 import { useProtectedLayoutHook } from "../hook/layout/protected.hook";
 import {
   shellBody,
@@ -15,6 +16,7 @@ const ProtectedLayout = () => {
 
   return (
     <SidebarProvider className={shellRoot}>
+      <RouteProgress />
       <ProtectedHeader />
 
       <div className={shellBody}>

@@ -42,3 +42,12 @@ export const syncSpin = "animate-spin";
 export const permissionDenied = "border";
 
 export const emptyState = "min-h-56 p-6";
+
+export const errorState = cva("", {
+  variants: {
+    compact: { true: "gap-3 p-4", false: "min-h-56 p-6" },
+  },
+  defaultVariants: { compact: false },
+});
+
+export const errorStateMedia = "bg-danger-bg text-danger";

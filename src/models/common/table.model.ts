@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 export type IColumnAlign = "left" | "center" | "right";
 
+export type IColumnSkeleton = "text" | "avatar";
+
 export type ISortDirection = "ascending" | "descending";
 
 export interface ISortState {
@@ -16,6 +18,7 @@ export interface IDataTableColumn<T> {
   align?: IColumnAlign;
   width?: number | string;
   className?: string;
+  skeleton?: IColumnSkeleton;
   sorter?: (left: T, right: T) => number;
   render?(value: unknown, row: T, index: number): ReactNode;
 }

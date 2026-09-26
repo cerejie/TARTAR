@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn.utils";
 import type { CardTone } from "../../../models/common/view.model";
 import {
@@ -16,9 +17,11 @@ import {
   sectionCardFooter,
   sectionCardInset,
   sectionCardRoot,
+  sectionCardSkeleton,
   sectionCardSubtitle,
   sectionCardTitle,
 } from "../../../styles/card/card.styles";
+import ErrorState from "../status/ErrorState";
 
 type IProps = {
   title?: string;
@@ -28,6 +31,9 @@ type IProps = {
   flush?: boolean;
   dense?: boolean;
   footer?: ReactNode;
+  loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   children: ReactNode;
 };
 
@@ -39,9 +45,27 @@ const SectionCard = ({
   flush = false,
   dense = false,
   footer,
+  loading = false,
+  error,
+  onRetry,
   children,
 }: IProps) => {
   const inset = flush ? sectionCardInset : undefined;
+
+  const renderBody = () => {
+    if (loading) return <Skeleton className={sectionCardSkeleton} />;
+    if (error) {
+      return (
+        <ErrorState
+          compact
+          title={title ? `${title} unavailable` : undefined}
+          description={error}
+          onAction={onRetry}
+        />
+      );
+    }
+    return children;
+  };
 
   return (
     <Card
@@ -64,8 +88,11 @@ const SectionCard = ({
         </CardHeader>
       ) : null}
 
-      <CardContent className={flush ? sectionCardFlushBody : undefined}>
-        {children}
+      <CardContent
+        className={flush ? sectionCardFlushBody : undefined}
+        aria-busy={loading}
+      >
+        {renderBody()}
       </CardContent>
 
       {footer ? (

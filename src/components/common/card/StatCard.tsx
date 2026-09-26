@@ -18,11 +18,14 @@ import {
   statValue,
 } from "../../../styles/stat/stat.styles";
 import { formatMoney } from "../../../utils/format.utils";
+import ErrorState from "../status/ErrorState";
 
 type IProps = {
   title: string;
   value: number | string | null | undefined;
   loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   raw?: boolean;
   prefix?: ReactNode;
   unit?: string;
@@ -37,6 +40,8 @@ const StatCard = ({
   title,
   value,
   loading,
+  error,
+  onRetry,
   raw,
   prefix,
   unit,
@@ -52,6 +57,21 @@ const StatCard = ({
         <CardContent className={statBody}>
           <Skeleton className={statSkeletonTitle} />
           <Skeleton className={statSkeletonValue} />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card size="sm" className={statCard}>
+        <CardContent className={statBody}>
+          <ErrorState
+            compact
+            title={`${title} unavailable`}
+            description={error}
+            onAction={onRetry}
+          />
         </CardContent>
       </Card>
     );

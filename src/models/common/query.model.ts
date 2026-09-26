@@ -5,6 +5,12 @@ export interface IQueryEntry<T = unknown> {
   updatedAt: number;
 }
 
+export interface IQueryState<T> extends IQueryEntry<T> {
+  isInitialLoading: boolean;
+  isRefreshing: boolean;
+  refetch: () => void;
+}
+
 export interface IQueryOptions {
   enabled?: boolean;
 }

@@ -10,5 +10,6 @@ export type IRoute = {
   group?: string;
   can?: keyof IPermissions;
   isNotNav?: boolean;
+  preload?: () => Promise<unknown>;
   children?: IRoute[];
 } & RouteObject;
