@@ -1,14 +1,16 @@
-import { CircleDollarSign, FileText, Plus, Trash2, User } from "lucide-react";
+import { CircleDollarSign, FileText, Plus, Trash2 } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
+import SortSelect from "../../common/filter/SortSelect";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
 import StatusTag from "../../common/status/StatusTag";
+import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
+import ProgressCell from "../../common/table/ProgressCell";
 import RowActionMenu from "../../common/table/RowActionMenu";
-import { NameCell } from "../../common/table/TableDecor";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
 import {
@@ -29,7 +31,10 @@ import {
   isLedgerOverdue,
   ledgerBalance,
 } from "../../../models/data/ledger/ledger.response";
-import { nowrapCell } from "../../../styles/table/table.styles";
+import {
+  dataTableRowOverdue,
+  nowrapCell,
+} from "../../../styles/table/table.styles";
 import {
   formatDate,
   formatDateTime,
@@ -49,7 +54,13 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     totalCount,
     pagination,
     goToPage,
+    sortKey,
+    sortOptions,
+    changeSort,
     loading,
+    refreshing,
+    error,
+    retry,
     branchName,
     userNameOf,
     formModal,
@@ -104,11 +115,22 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     {
       title: partyLabel,
       key: "party",
-      render: (_, row) => (
-        <NameCell icon={<User />}>{partyNameOf(row)}</NameCell>
-      ),
+      skeleton: "avatar",
+      render: (_, row) => <AvatarCell name={partyNameOf(row)} />,
     },
     { title: "Branch", dataIndex: "branch", render: branchName },
+    {
+      title: "Paid",
+      key: "paid",
+      render: (_, row) => (
+        <ProgressCell
+          value={row.paid_amount}
+          total={row.amount}
+          label={`Paid of ${formatMoney(row.amount)}`}
+          format={formatMoney}
+        />
+      ),
+    },
     {
       title: "Balance",
       key: "balance",
@@ -179,6 +201,13 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       <TablePanel
         toolbar={
           <FilterToolbar
+            sort={
+              <SortSelect
+                value={sortKey}
+                options={sortOptions}
+                onChange={changeSort}
+              />
+            }
             actions={
               <RequirePermission can="encodeTransactions" fallback={null}>
                 <AppButton onPress={() => formModal.openModal()}>
@@ -188,7 +217,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
               </RequirePermission>
             }
           >
-            <LedgerFilterBar scope="ledger" showSearch showStatus showOverdue />
+            <LedgerFilterBar scope="ledger" showSearch layout="popover" />
           </FilterToolbar>
         }
         footer={
@@ -203,11 +232,17 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
           columns={columns}
           data={rows}
           loading={loading}
+          refreshing={refreshing}
+          error={error}
+          onRetry={retry}
           pagination={pagination}
           detachedPagination
           expansionKey={ledgerExpansionKey(scope)}
           detailSections={detailSections}
           emptyText={`No ${noun}s match the current filters`}
+          rowClassName={(row) =>
+            isLedgerOverdue(row) ? dataTableRowOverdue : ""
+          }
         />
       </TablePanel>
 

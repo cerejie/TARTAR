@@ -1,5 +1,5 @@
 # ROADMAP — "Airy blue" redesign (EduMate mockup) on shadcn + Tailwind
-Updated: 2026-09-26 (T4 closed)
+Updated: 2026-09-26 (T5a closed)
 
 ## Goal
 Every screen matches the design spec below: pastel backdrop, floating top bar + floating
@@ -91,6 +91,8 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
 - Query state: src/hook/common/query.hook.ts returns IQueryState (models/common/query.model.ts) = entry + isInitialLoading + isRefreshing + refetch
 - Screen wiring shape (per T4, Transactions): hook returns loading = isInitialLoading, refreshing, error, retry (+ summaryError / retrySummary); DataTable refreshing/error/onRetry; StatCard + SectionCard error/onRetry (SectionCard also loading); avatar column `skeleton: "avatar" as const"
 - Public pages: styles/layout/public.styles.ts, components/auth/*, pages/Error/ErrorView.tsx ; theme.css @utility bg-auth-* / bg-error-page
+- Sort / status (T5a): hook/common/sort.hook.ts `useSortOption(key, options, onChange)` ; hook/common/filter.hook.ts `useFilterField(scope, field, paginationKey)` (resets page 1) ; common/filter/StatusFilterTabs.tsx (ViewSwitch + "All") ; common/table/{ProgressCell,TablePanel (title)}.tsx ; enums/ledger.enum.ts ledgerStatusFilter* / ledgerSortOptions / paymentSortOptions ; keys/table.keys.ts *SortKey ; ILedgerFilters.voucherStatus (transaction.services disbursementQuery `vouchers!inner`)
+- Screens (T5a): pages/{Purchases,Expenses} tabs = components/disbursement/menus/VoucherStatusTabs ; pages/{Receivables,Payables} = components/ledger/{cards/LedgerSummaryCards, menus/{LedgerStatusTabs,CustomerLedgerButton}, tables/{LedgerRecordsTable,LedgerPaymentsTable}, modal/RecordPaymentModal} ; hooks disbursement.list / ledger.list / payment.list
 - Reference screen: components/transaction/tables/TransactionsTable.tsx + hook/data/transaction/transaction.list.hook.ts
 
 ## Done
@@ -148,21 +150,28 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
   spinner, skeleton cells follow column align / `skeleton: "avatar"`. StatCard/SectionCard
   error + onRetry, SectionCard loading skeleton. EmptyState icon + action. Transactions wired.
 
+- T5a transaction family + ledger (v1.17): user approved switching Receivables/Payables to the
+  migrated ledger set (LedgerManager + ledger.manage.hook + ledgerSettleModalKey deleted;
+  PaymentsPanel kept for CustomerLedgerView). Title-row pills: Purchases/Expenses = voucher status
+  (All/Pending/Approved/Rejected, server filter via vouchers!inner, stripped from summary);
+  Receivables/Payables = All/Unpaid/Overdue/Paid (filters.status, scope "ledger"). Status no longer
+  counts in the Filters badge. Filters popover + Sort by on Purchases, Expenses, ledger records,
+  payments (server .order + created_at tie-break). AvatarCell: Recorded by (disbursements), party
+  (ledger, payments). ProgressCell = ledger "Paid" column. Overdue row tint on ledger records.
+  Loading/refreshing/error/retry + summary error wired on all four screens. Transactions hook now
+  uses useSortOption.
+
 ## Next
-1. **T5a screen sweep — transaction family + ledger** — Purchases, Expenses, Receivables,
-   Payables (LedgerManager), Payments: status pills in the title row, LedgerFilterBar
-   layout="popover" + FilterToolbar `sort` (server sort per the Transactions shape: sort
-   options enum + sort key + getList .order), AvatarCell where a person shows, NEW
-   `ProgressCell` (paid/total, deferred from T2 — no consumer yet), loading/refreshing/error/retry
-   wired per the T4 Transactions shape (hooks still pass `.loading` -> switch to isInitialLoading).
-2. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
+1. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
    white cards, blue charts, the "Recommended" card style for list cards), Reports, Auth +
    Error pages (backdrop gradient, blue submit, retire bg-auth-* lime/lilac utilities).
-3. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
+2. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
    updated to the new token names, new primitives, lazy routes and state rules; delete this file.
 
 ## Open
-- none
+- LedgerPartiesTable (per-party multi-record payment) is migrated but not mounted — mount on
+  Receivables/Payables? Ask in T5b.
+- vouchers!inner filter is untested against the live DB — confirm the Purchases/Expenses pills.
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (T4, suggest v1.16) · Last check: yarn build + yarn lint clean
+Branch: development-overhaul · Uncommitted: yes (T5a, suggest v1.17) · Last check: yarn build + yarn lint clean

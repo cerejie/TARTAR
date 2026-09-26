@@ -5,6 +5,7 @@ import {
   type IPaginationRequest,
   type IPaginationResponse,
 } from "../../models/common/pagination.model";
+import type { ISortState } from "../../models/common/table.model";
 import type { IRecordPaymentInput } from "../../models/data/payment/payment.request";
 import type {
   ILedgerPayment,
@@ -15,6 +16,8 @@ import { supabase, toError } from "../../utils/supabase.utils";
 
 const table = "payments";
 const reportLimit = 5000;
+
+const defaultSort: ISortState = { column: "paid_at", direction: "descending" };
 
 const partyColumn = (kind: PaymentKind) =>
   kind === "receivable" ? "customer_id" : "supplier_id";
@@ -52,9 +55,11 @@ const paymentServices = {
     if (filters.dateTo) query = query.lte("paid_at", filters.dateTo);
 
     const { from, to } = pageRange(pagination);
+    const sort = pagination.sort ?? defaultSort;
 
     const { data, error, count } = await query
-      .order("paid_at", { ascending: false })
+      .order(sort.column, { ascending: sort.direction === "ascending" })
+      .order("created_at", { ascending: false })
       .range(from, to);
     if (error) throw toError(error);
 

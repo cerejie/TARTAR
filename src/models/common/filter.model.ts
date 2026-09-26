@@ -1,5 +1,6 @@
 import type { LedgerStatus, PaymentStatus } from "../../enums/ledger.enum";
 import type { TransactionType } from "../../enums/transaction.enum";
+import type { VoucherStatus } from "../../enums/voucher.enum";
 
 export type ILedgerFilterScope =
   | "page"
@@ -20,6 +21,7 @@ export interface ILedgerFilters {
   supplierId?: string;
   status?: LedgerStatus | "overdue" | "unpaid";
   paymentStatus?: PaymentStatus;
+  voucherStatus?: VoucherStatus;
   type?: TransactionType;
 }
 

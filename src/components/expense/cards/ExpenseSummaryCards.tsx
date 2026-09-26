@@ -5,7 +5,13 @@ import BentoGrid from "../../common/view/BentoGrid";
 import { useExpenseListHook } from "../../../hook/data/expense/expense.list.hook";
 
 const ExpenseSummaryCards = () => {
-  const { summary, summaryLoading, summaryPeriod } = useExpenseListHook();
+  const {
+    summary,
+    summaryLoading,
+    summaryError,
+    retrySummary,
+    summaryPeriod,
+  } = useExpenseListHook();
 
   return (
     <BentoGrid>
@@ -14,6 +20,8 @@ const ExpenseSummaryCards = () => {
           title="Total Expenses"
           value={summary.total}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="negative"
           icon={<TrendingDown />}
           caption={summaryPeriod}
@@ -25,6 +33,8 @@ const ExpenseSummaryCards = () => {
           title="Top Category"
           value={summary.topCategory?.amount ?? 0}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="brand"
           icon={<ChartPie />}
           caption={summary.topCategory?.label ?? "No expenses yet"}
@@ -36,6 +46,8 @@ const ExpenseSummaryCards = () => {
           title="Records"
           value={summary.records}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           raw
           variant="default"
           icon={<ReceiptText />}
@@ -48,6 +60,8 @@ const ExpenseSummaryCards = () => {
           title="Pending Vouchers"
           value={summary.pendingVouchers}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           raw
           variant="default"
           icon={<FileCheck />}

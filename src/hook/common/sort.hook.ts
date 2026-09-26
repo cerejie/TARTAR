@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { ISortState } from "../../models/common/table.model";
+import type { ISortOption, ISortState } from "../../models/common/table.model";
 import { selectSort, useSortStore } from "../../store/common/sort.store";
 
 export const useSort = (key: string) => {
@@ -13,4 +13,32 @@ export const useSort = (key: string) => {
     }),
     [sort, key, setSortAt]
   );
+};
+
+export const useSortOption = (
+  key: string,
+  options: readonly ISortOption[],
+  onChange: () => void
+) => {
+  const { sort, setSort } = useSort(key);
+
+  const sortOption =
+    options.find(
+      (option) =>
+        option.column === sort?.column && option.direction === sort.direction
+    ) ?? options.at(0);
+
+  const changeSort = (optionKey: string) => {
+    const option = options.find((item) => item.key === optionKey);
+    if (!option) return;
+    setSort({ column: option.column, direction: option.direction });
+    onChange();
+  };
+
+  return {
+    sortOption,
+    sortKey: sortOption?.key ?? "",
+    sortOptions: options,
+    changeSort,
+  };
 };

@@ -5,6 +5,7 @@ import {
   type IPaginationRequest,
   type IPaginationResponse,
 } from "../../models/common/pagination.model";
+import type { ISortState } from "../../models/common/table.model";
 import type {
   IPayableInput,
   IReceivableInput,
@@ -33,6 +34,8 @@ interface ILedgerConfig<Input> {
 
 const ledgerColumns = { date: "due_date", amount: "amount" };
 
+const defaultSort: ISortState = { column: "due_date", direction: "ascending" };
+
 type IPartySummaryRow = {
   amount: number;
   paid_amount: number;
@@ -59,12 +62,14 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
         columns
       );
       const { from, to } = pageRange(pagination);
+      const sort = pagination.sort ?? defaultSort;
 
       const { data, error, count } = await applyStatusFilter(
         filtered,
         filters.status
       )
-        .order("due_date", { ascending: true })
+        .order(sort.column, { ascending: sort.direction === "ascending" })
+        .order("created_at", { ascending: false })
         .range(from, to);
       if (error) throw toError(error);
 

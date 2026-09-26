@@ -12,7 +12,13 @@ type IProps = {
 };
 
 const LedgerSummaryCards = ({ scope }: IProps) => {
-  const { summary, summaryLoading, summaryPeriod } = useLedgerScopeHook(scope);
+  const {
+    summary,
+    summaryLoading,
+    summaryError,
+    retrySummary,
+    summaryPeriod,
+  } = useLedgerScopeHook(scope);
 
   const overdueCaption =
     summary.overdueCount === 1
@@ -26,6 +32,8 @@ const LedgerSummaryCards = ({ scope }: IProps) => {
           title="Outstanding balance"
           value={summary.outstanding}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="brand"
           icon={<Wallet />}
           caption={summaryPeriod}
@@ -37,6 +45,8 @@ const LedgerSummaryCards = ({ scope }: IProps) => {
           title="Overdue balance"
           value={summary.overdue}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="negative"
           icon={<CircleAlert />}
           caption={overdueCaption}
@@ -48,6 +58,8 @@ const LedgerSummaryCards = ({ scope }: IProps) => {
           title="Due in 7 days"
           value={summary.dueSoon}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant={scope === "payables" ? "warning" : "default"}
           icon={<CalendarDays />}
           caption="Unpaid records due within the week"

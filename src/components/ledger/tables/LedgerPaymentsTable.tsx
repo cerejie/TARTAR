@@ -1,11 +1,12 @@
-import { Check, User, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
+import SortSelect from "../../common/filter/SortSelect";
 import StatusTag from "../../common/status/StatusTag";
+import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
-import { NameCell } from "../../common/table/TableDecor";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
 import {
@@ -30,7 +31,13 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
     totalCount,
     pagination,
     goToPage,
+    sortKey,
+    sortOptions,
+    changeSort,
     loading,
+    refreshing,
+    error,
+    retry,
     statusLabels,
     verb,
     userNameOf,
@@ -102,9 +109,8 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
     {
       title: partyLabel,
       dataIndex: "party_name",
-      render: (name: string) => (
-        <NameCell icon={<User />}>{name}</NameCell>
-      ),
+      skeleton: "avatar",
+      render: (name: string) => <AvatarCell name={name} />,
     },
     {
       title: "Amount",
@@ -153,9 +159,18 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
 
   return (
     <TablePanel
+      title="Payments"
       toolbar={
-        <FilterToolbar>
-          <LedgerFilterBar scope="payments" paymentKind={kind} />
+        <FilterToolbar
+          sort={
+            <SortSelect
+              value={sortKey}
+              options={sortOptions}
+              onChange={changeSort}
+            />
+          }
+        >
+          <LedgerFilterBar scope="payments" paymentKind={kind} layout="popover" />
         </FilterToolbar>
       }
       footer={
@@ -170,6 +185,9 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
         columns={columns}
         data={payments}
         loading={loading}
+        refreshing={refreshing}
+        error={error}
+        onRetry={retry}
         pagination={pagination}
         detachedPagination
         emptyText="No payments match the current filters"

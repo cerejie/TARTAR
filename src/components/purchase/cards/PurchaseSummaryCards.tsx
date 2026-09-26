@@ -5,7 +5,13 @@ import BentoGrid from "../../common/view/BentoGrid";
 import { usePurchaseListHook } from "../../../hook/data/purchase/purchase.list.hook";
 
 const PurchaseSummaryCards = () => {
-  const { summary, summaryLoading, summaryPeriod } = usePurchaseListHook();
+  const {
+    summary,
+    summaryLoading,
+    summaryError,
+    retrySummary,
+    summaryPeriod,
+  } = usePurchaseListHook();
 
   return (
     <BentoGrid>
@@ -14,6 +20,8 @@ const PurchaseSummaryCards = () => {
           title="Total Purchases"
           value={summary.total}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="brand"
           icon={<ShoppingCart />}
           caption={summaryPeriod}
@@ -25,6 +33,8 @@ const PurchaseSummaryCards = () => {
           title="Outstanding"
           value={summary.outstanding}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="negative"
           icon={<Clock />}
           caption="Purchases with a due date"
@@ -36,6 +46,8 @@ const PurchaseSummaryCards = () => {
           title="Paid"
           value={summary.paid}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="positive"
           icon={<CircleCheck />}
           caption="Settled on record"
@@ -47,6 +59,8 @@ const PurchaseSummaryCards = () => {
           title="Pending Vouchers"
           value={summary.pendingVouchers}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           raw
           variant="default"
           icon={<FileCheck />}

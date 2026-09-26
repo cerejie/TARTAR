@@ -77,11 +77,21 @@ const withVouchers = async (
   }));
 };
 
-const disbursementQuery = (kind: DisbursementKind, filters: ILedgerFilters) =>
-  applyLedgerFilters(
-    supabase.from(table).select(columns, { count: "exact" }).eq("type", kind),
-    filters
-  );
+const voucherStatusColumns = `${columns}, vouchers!inner(status)`;
+
+const disbursementQuery = (kind: DisbursementKind, filters: ILedgerFilters) => {
+  const base = supabase
+    .from(table)
+    .select(filters.voucherStatus ? voucherStatusColumns : columns, {
+      count: "exact",
+    })
+    .eq("type", kind);
+  const byVoucher = filters.voucherStatus
+    ? base.eq("vouchers.status", filters.voucherStatus)
+    : base;
+
+  return applyLedgerFilters(byVoucher, filters);
+};
 
 const transactionServices = {
   getList: async (
@@ -155,9 +165,11 @@ const transactionServices = {
     pagination: IPaginationRequest
   ): Promise<IPaginationResponse<IDisbursement>> => {
     const { from, to } = pageRange(pagination);
+    const sort = pagination.sort ?? defaultSort;
 
     const { data, error, count } = await disbursementQuery(kind, filters)
-      .order("txn_date", { ascending: false })
+      .order(sort.column, { ascending: sort.direction === "ascending" })
+      .order("created_at", { ascending: false })
       .range(from, to);
     if (error) throw toError(error);
 

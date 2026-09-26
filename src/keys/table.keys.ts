@@ -9,3 +9,7 @@ export const disbursementPaginationKey = (scope: string) => `${scope}-table`;
 export const transactionExpansionKey = "transactions-table-rows";
 export const disbursementExpansionKey = (scope: string) => `${scope}-table-rows`;
 export const ledgerExpansionKey = (scope: string) => `${scope}-table-rows`;
+
+export const disbursementSortKey = (scope: string) => `${scope}-sort`;
+export const ledgerSortKey = (scope: string) => `${scope}-sort`;
+export const paymentSortKey = (kind: string) => `${kind}-payments-sort`;

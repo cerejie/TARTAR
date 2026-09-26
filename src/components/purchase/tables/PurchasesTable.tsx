@@ -3,8 +3,10 @@ import type { IDataTableColumn } from "../../../models/common/table.model";
 import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
+import SortSelect from "../../common/filter/SortSelect";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
+import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
@@ -40,7 +42,13 @@ const PurchasesTable = () => {
     totalCount,
     pagination,
     goToPage,
+    sortKey,
+    sortOptions,
+    changeSort,
     loading,
+    refreshing,
+    error,
+    retry,
     branchName,
     userById,
     userNameOf,
@@ -156,10 +164,15 @@ const PurchasesTable = () => {
     ...(permissions.isManager
       ? [
           {
-            title: "User",
+            title: "Recorded by",
             key: "user",
-            render: (_: unknown, row: IDisbursement) =>
-              userNameOf(row.created_by),
+            skeleton: "avatar" as const,
+            render: (_: unknown, row: IDisbursement) => (
+              <AvatarCell
+                name={userNameOf(row.created_by)}
+                hint={userRoleOf(row)}
+              />
+            ),
           },
         ]
       : []),
@@ -259,6 +272,13 @@ const PurchasesTable = () => {
       <TablePanel
         toolbar={
           <FilterToolbar
+            sort={
+              <SortSelect
+                value={sortKey}
+                options={sortOptions}
+                onChange={changeSort}
+              />
+            }
             actions={
               <RequirePermission can="encodeTransactions" fallback={null}>
                 <AppButton onPress={() => formModal.openModal()}>
@@ -268,7 +288,7 @@ const PurchasesTable = () => {
               </RequirePermission>
             }
           >
-            <LedgerFilterBar />
+            <LedgerFilterBar layout="popover" />
           </FilterToolbar>
         }
         footer={
@@ -283,6 +303,9 @@ const PurchasesTable = () => {
           columns={columns}
           data={rows}
           loading={loading}
+          refreshing={refreshing}
+          error={error}
+          onRetry={retry}
           pagination={pagination}
           detachedPagination
           expansionKey={disbursementExpansionKey(purchaseListKey)}

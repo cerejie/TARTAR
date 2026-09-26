@@ -6,6 +6,7 @@ type IProps<T extends string> = {
   values: readonly T[];
   labels: Record<T, string>;
   onChange: (value: T) => void;
+  label?: string;
 };
 
 const ViewSwitch = <T extends string>({
@@ -13,6 +14,7 @@ const ViewSwitch = <T extends string>({
   values,
   labels,
   onChange,
+  label = "View",
 }: IProps<T>) => {
   const selectView = (key: unknown) => {
     const next = values.find((item) => item === key);
@@ -27,7 +29,7 @@ const ViewSwitch = <T extends string>({
       disallowEmptySelection
       selectedKeys={[value]}
       onSelectionChange={(keys) => selectView([...keys][0])}
-      aria-label="View"
+      aria-label={label}
     >
       {values.map((item) => (
         <ToggleGroupItem key={item} id={item} className={viewSwitchItem}>

@@ -1,4 +1,5 @@
 import {
+  paymentSortOptions,
   paymentStatusLabels,
   type PaymentKind,
 } from "../../../enums/ledger.enum";
@@ -10,7 +11,10 @@ import {
   receivableListKey,
   scopedKey,
 } from "../../../keys/query.keys";
-import { paymentPaginationKey } from "../../../keys/table.keys";
+import {
+  paymentPaginationKey,
+  paymentSortKey,
+} from "../../../keys/table.keys";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type {
   ILedgerPayment,
@@ -26,6 +30,7 @@ import { useLedgerFilters } from "../../common/filter.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
+import { useSortOption } from "../../common/sort.hook";
 import { useUserListHook } from "../user/user.list.hook";
 
 export const usePaymentListHook = (
@@ -36,7 +41,14 @@ export const usePaymentListHook = (
   const verifierId = useAccountStore(selectUserId);
   const { userNameOf } = useUserListHook();
   const { filters } = useLedgerFilters("payments");
-  const { pagination, goToPage } = usePagination(paymentPaginationKey(kind));
+  const { pagination, setPagination, goToPage } = usePagination(
+    paymentPaginationKey(kind)
+  );
+  const { sortOption, sortKey, sortOptions, changeSort } = useSortOption(
+    paymentSortKey(kind),
+    paymentSortOptions,
+    () => setPagination({ pageNumber: 1 })
+  );
 
   const ledgerKey = kind === "receivable" ? receivableListKey : payableListKey;
   const invalidate = [paymentListKey, ledgerKey, ledgerSummaryKey, ledgerPartyKey];
@@ -47,9 +59,11 @@ export const usePaymentListHook = (
       kind,
       JSON.stringify(filters),
       pagination.pageNumber,
-      pagination.pageSize
+      pagination.pageSize,
+      sortKey
     ),
-    () => paymentServices.getList(kind, filters, pagination),
+    () =>
+      paymentServices.getList(kind, filters, { ...pagination, sort: sortOption }),
     { enabled: !party }
   );
 
@@ -87,7 +101,13 @@ export const usePaymentListHook = (
     totalCount: listQuery.data?.totalCount ?? 0,
     pagination,
     goToPage,
-    loading: party ? partyQuery.loading : listQuery.loading,
+    sortKey,
+    sortOptions,
+    changeSort,
+    loading: party ? partyQuery.isInitialLoading : listQuery.isInitialLoading,
+    refreshing: party ? partyQuery.isRefreshing : listQuery.isRefreshing,
+    error: party ? partyQuery.error : listQuery.error,
+    retry: party ? partyQuery.refetch : listQuery.refetch,
     statusLabels: paymentStatusLabels(kind),
     verb: kind === "receivable" ? "Verify" : "Approve",
     userNameOf,

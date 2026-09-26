@@ -391,7 +391,7 @@ it; do not convert them wholesale unprompted.
   prop, so unconverted tables keep working.
 - **Thin pages**: `pages/{Branches,Users,Vouchers}` still declare their own columns;
   move them into a feature table when you touch one.
-- **Ledger tables**: `components/ledger/tables/*`, `cards/LedgerSummaryCards` and
-  `modal/RecordPaymentModal` are migrated but unused — Receivables and Payables still
-  render `LedgerManager`. Switching them over needs the user's approval.
+- **Ledger tables**: Receivables and Payables render `LedgerSummaryCards`,
+  `LedgerRecordsTable`, `LedgerPaymentsTable` and `RecordPaymentModal`; `LedgerManager` is
+  gone. `LedgerPartiesTable` is migrated but not mounted yet.
 - **Comments** are fully stripped. Keep it that way.

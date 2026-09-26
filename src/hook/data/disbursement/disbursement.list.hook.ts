@@ -1,4 +1,7 @@
-import type { DisbursementKind } from "../../../enums/transaction.enum";
+import {
+  transactionSortOptions,
+  type DisbursementKind,
+} from "../../../enums/transaction.enum";
 import {
   disbursementEditModalKey,
   disbursementFormModalKey,
@@ -12,7 +15,11 @@ import {
   scopedKey,
   voucherListKey,
 } from "../../../keys/query.keys";
-import { disbursementPaginationKey } from "../../../keys/table.keys";
+import {
+  disbursementPaginationKey,
+  disbursementSortKey,
+} from "../../../keys/table.keys";
+import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
 import type {
@@ -31,13 +38,14 @@ import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
+import { useSortOption } from "../../common/sort.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useFarmSectionListHook } from "../farm-section/farm.section.list.hook";
 import { useSupplierListHook } from "../party/supplier.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
 
-const listKeyOf = (kind: DisbursementKind) =>
+export const disbursementScopeOf = (kind: DisbursementKind) =>
   kind === "purchase" ? purchaseListKey : expenseListKey;
 
 const summaryKeyOf = (kind: DisbursementKind) =>
@@ -56,7 +64,7 @@ export const useDisbursementListHook = (
   kind: DisbursementKind,
   title: string
 ) => {
-  const scope = listKeyOf(kind);
+  const scope = disbursementScopeOf(kind);
   const summaryScope = summaryKeyOf(kind);
 
   const formModal = useModal(disbursementFormModalKey(scope));
@@ -67,6 +75,11 @@ export const useDisbursementListHook = (
 
   const { pagination, setPagination, goToPage } = usePagination(
     disbursementPaginationKey(scope)
+  );
+  const { sortOption, sortKey, sortOptions, changeSort } = useSortOption(
+    disbursementSortKey(scope),
+    transactionSortOptions,
+    () => setPagination({ pageNumber: 1 })
   );
   const permissions = usePermissions();
   const createdBy = useAccountStore(selectUserId);
@@ -79,21 +92,27 @@ export const useDisbursementListHook = (
   const { branch: scopeBranch } = useBranchScopeHook();
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
+  const summaryFilters: ILedgerFilters = {
+    ...effectiveFilters,
+    voucherStatus: undefined,
+  };
+  const pageRequest = { ...pagination, sort: sortOption };
 
   const listQuery = useQuery<IPaginationResponse<IDisbursement>>(
     scopedKey(
       scope,
       JSON.stringify(effectiveFilters),
       pagination.pageNumber,
-      pagination.pageSize
+      pagination.pageSize,
+      sortKey
     ),
     () =>
-      transactionServices.getDisbursementList(kind, effectiveFilters, pagination)
+      transactionServices.getDisbursementList(kind, effectiveFilters, pageRequest)
   );
 
   const summaryQuery = useQuery<IDisbursement[]>(
-    scopedKey(summaryScope, JSON.stringify(effectiveFilters)),
-    () => transactionServices.getDisbursementAll(kind, effectiveFilters)
+    scopedKey(summaryScope, JSON.stringify(summaryFilters)),
+    () => transactionServices.getDisbursementAll(kind, summaryFilters)
   );
 
   const editRow = editModal.modal.data;
@@ -141,9 +160,17 @@ export const useDisbursementListHook = (
     totalCount: listQuery.data?.totalCount ?? 0,
     pagination,
     goToPage,
-    loading: listQuery.loading,
+    sortKey,
+    sortOptions,
+    changeSort,
+    loading: listQuery.isInitialLoading,
+    refreshing: listQuery.isRefreshing,
+    error: listQuery.error,
+    retry: listQuery.refetch,
     summaryRows: summaryQuery.data ?? [],
-    summaryLoading: summaryQuery.loading,
+    summaryLoading: summaryQuery.isInitialLoading,
+    summaryError: summaryQuery.error,
+    retrySummary: summaryQuery.refetch,
     summaryPeriod: filterPeriodLabel(effectiveFilters),
     branchOptions,
     branchName,
@@ -158,7 +185,7 @@ export const useDisbursementListHook = (
     editRow,
     historyRow,
     audit: auditQuery.data ?? [],
-    auditLoading: auditQuery.loading,
+    auditLoading: auditQuery.isInitialLoading,
     createMutation,
     updateMutation,
     removeMutation,

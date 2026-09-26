@@ -1,7 +1,10 @@
 import dayjs from "dayjs";
 import type { DefaultValues, FieldValues } from "react-hook-form";
 import type { ZodType } from "zod";
-import type { PaymentKind } from "../../../enums/ledger.enum";
+import {
+  ledgerSortOptions,
+  type PaymentKind,
+} from "../../../enums/ledger.enum";
 import {
   ledgerFormModalKey,
   ledgerPaymentModalKey,
@@ -12,7 +15,10 @@ import {
   paymentListKey,
   scopedKey,
 } from "../../../keys/query.keys";
-import { ledgerPaginationKey } from "../../../keys/table.keys";
+import {
+  ledgerPaginationKey,
+  ledgerSortKey,
+} from "../../../keys/table.keys";
 import type { IFieldSection } from "../../../models/common/field.model";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type {
@@ -43,6 +49,7 @@ import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
+import { useSortOption } from "../../common/sort.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useUserListHook } from "../user/user.list.hook";
@@ -119,6 +126,11 @@ export const useLedgerListHook = <
   const { pagination, setPagination, goToPage } = usePagination(
     ledgerPaginationKey(config.scope)
   );
+  const { sortOption, sortKey, sortOptions, changeSort } = useSortOption(
+    ledgerSortKey(config.scope),
+    ledgerSortOptions,
+    () => setPagination({ pageNumber: 1 })
+  );
   const permissions = usePermissions();
   const createdBy = useAccountStore(selectUserId);
 
@@ -144,9 +156,14 @@ export const useLedgerListHook = <
       config.scope,
       JSON.stringify(effectiveFilters),
       pagination.pageNumber,
-      pagination.pageSize
+      pagination.pageSize,
+      sortKey
     ),
-    () => config.services.getList(effectiveFilters, pagination)
+    () =>
+      config.services.getList(effectiveFilters, {
+        ...pagination,
+        sort: sortOption,
+      })
   );
 
   const summaryQuery = useQuery<Row[]>(
@@ -282,12 +299,20 @@ export const useLedgerListHook = <
     totalCount: listQuery.data?.totalCount ?? 0,
     pagination,
     goToPage,
-    loading: listQuery.loading,
+    sortKey,
+    sortOptions,
+    changeSort,
+    loading: listQuery.isInitialLoading,
+    refreshing: listQuery.isRefreshing,
+    error: listQuery.error,
+    retry: listQuery.refetch,
     summary: summarize(summaryQuery.data ?? []),
-    summaryLoading: summaryQuery.loading,
+    summaryLoading: summaryQuery.isInitialLoading,
+    summaryError: summaryQuery.error,
+    retrySummary: summaryQuery.refetch,
     summaryPeriod: filterPeriodLabel(effectiveFilters),
     parties,
-    partiesLoading: partyQuery.loading,
+    partiesLoading: partyQuery.isInitialLoading,
     branchName,
     userNameOf,
     formModal,
@@ -299,7 +324,7 @@ export const useLedgerListHook = <
     paymentModal,
     paymentTarget,
     paymentRows,
-    paymentRowsLoading: partyLedgerQuery.loading,
+    paymentRowsLoading: partyLedgerQuery.isInitialLoading,
     paymentSections,
     paymentDefaults,
     paymentMutation,

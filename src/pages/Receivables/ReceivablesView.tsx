@@ -1,105 +1,24 @@
-import { BookOpen } from "lucide-react";
-import type { DefaultValues } from "react-hook-form";
-import AppButton from "../../components/common/button/AppButton";
+import ContentView from "../../components/common/view/ContentView";
 import CustomerLedgerModal from "../../components/ledger/CustomerLedgerModal";
-import LedgerManager from "../../components/ledger/LedgerManager";
-import { useModal } from "../../hook/common/modal.hook";
-import { useBranchListHook } from "../../hook/data/branch/branch.list.hook";
-import { useCustomerListHook } from "../../hook/data/party/customer.list.hook";
-import { customerLedgerModalKey } from "../../keys/modal.keys";
-import type { IFieldConfig } from "../../models/common/field.model";
-import type { BranchSlug } from "../../models/data/branch/branch.response";
-import {
-  receivableSchema,
-  type IReceivableInput,
-} from "../../models/data/ledger/ledger.request";
-import type { IReceivable } from "../../models/data/ledger/ledger.response";
-import { receivableServices } from "../../services/data/ledger.services";
-import paymentServices from "../../services/data/payment.services";
-import { todayIso } from "../../utils/format.utils";
+import LedgerSummaryCards from "../../components/ledger/cards/LedgerSummaryCards";
+import CustomerLedgerButton from "../../components/ledger/menus/CustomerLedgerButton";
+import LedgerStatusTabs from "../../components/ledger/menus/LedgerStatusTabs";
+import RecordPaymentModal from "../../components/ledger/modal/RecordPaymentModal";
+import LedgerPaymentsTable from "../../components/ledger/tables/LedgerPaymentsTable";
+import LedgerRecordsTable from "../../components/ledger/tables/LedgerRecordsTable";
 
 const ReceivablesView = () => {
-  const { branchOptions, defaultBranch } = useBranchListHook();
-  const { customers, customerOptions } = useCustomerListHook();
-  const ledgerModal = useModal(customerLedgerModalKey);
-
-  const fields: IFieldConfig<IReceivableInput>[] = [
-    { name: "branch", label: "Branch", type: "select", options: branchOptions },
-    {
-      name: "customer_id",
-      label: "Customer",
-      type: "select",
-      allowClear: true,
-      options: customerOptions,
-    },
-    {
-      name: "customer_name",
-      label: "Customer name (if not in the list)",
-      type: "text",
-      hidden: (values) => !!values.customer_id,
-    },
-    { name: "amount", label: "Amount", type: "amount", prefix: "₱" },
-    { name: "due_date", label: "Due date", type: "date" },
-    { name: "reference_number", label: "Reference no.", type: "text" },
-  ];
-
-  const defaults: DefaultValues<IReceivableInput> = {
-    branch: defaultBranch as BranchSlug,
-    customer_name: "",
-    customer_id: null,
-    due_date: todayIso(),
-    reference_number: "",
-  };
-
-  const resolveCustomerName = (values: IReceivableInput): string => {
-    const picked = values.customer_id
-      ? customers.find((customer) => customer.id === values.customer_id)
-      : undefined;
-    const name = picked?.name ?? values.customer_name?.trim() ?? "";
-    if (!name) throw new Error("Select a customer or enter a name");
-    return name;
-  };
-
   return (
-    <>
-      <LedgerManager<IReceivable, IReceivableInput>
-        scope="receivables"
-        title="Receivables"
-        partyLabel="Customer"
-        nameOf={(row) => row.customer_name}
-        getList={receivableServices.getAll}
-        create={(values, createdBy) =>
-          receivableServices.create(
-            { ...values, customer_name: resolveCustomerName(values) },
-            createdBy
-          )
-        }
-        settle={(row, amount, createdBy) =>
-          paymentServices.record(
-            "receivable",
-            {
-              partyId: row.customer_id,
-              partyName: row.customer_name,
-              paidAt: todayIso(),
-              referenceNumber: null,
-              allocations: [{ ledgerId: row.id, amount }],
-            },
-            createdBy
-          )
-        }
-        remove={receivableServices.remove}
-        schema={receivableSchema}
-        fields={fields}
-        defaults={defaults}
-        headerActions={
-          <AppButton variant="outline" onPress={() => ledgerModal.openModal()}>
-            <BookOpen />
-            Customer Ledger
-          </AppButton>
-        }
-      />
+    <ContentView
+      tabs={<LedgerStatusTabs scope="receivables" />}
+      actions={<CustomerLedgerButton />}
+    >
+      <LedgerSummaryCards scope="receivables" />
+      <LedgerRecordsTable scope="receivables" />
+      <LedgerPaymentsTable kind="receivable" />
+      <RecordPaymentModal scope="receivables" />
       <CustomerLedgerModal />
-    </>
+    </ContentView>
   );
 };
 

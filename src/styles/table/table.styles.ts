@@ -116,6 +116,8 @@ export const tablePanel = "flex min-w-0 flex-col gap-3";
 
 export const tablePanelBody = "min-w-0";
 
+export const tablePanelTitle = "font-heading text-base font-semibold text-foreground";
+
 export const tablePagination = "flex items-center gap-2 pt-2";
 
 export const tablePaginationStep = "rounded-full";
@@ -155,3 +157,15 @@ export const tagRow = "inline-flex items-center gap-2";
 export const stackedCell = "flex flex-col";
 
 export const cellHint = "text-xs text-muted-foreground";
+
+export const progressCell = "w-full min-w-40 flex-col gap-1.5";
+
+export const progressCellHead = "flex w-full items-baseline justify-between gap-2 tabular-nums";
+
+export const progressCellValue = "font-semibold text-foreground";
+
+export const progressCellTotal = "text-muted-foreground";
+
+export const progressCellPercent = "text-xs text-muted-foreground";
+
+export const progressCellTrack = "h-0.75 bg-track";
