@@ -96,19 +96,106 @@ practical flow (primary action placement, destructive actions separated).
   pins on-brand text on selected hover/focus/dark (root cause: toggle hover:text-foreground).
   V2 capture must confirm all three.
 
+- [x] V2 — capture + findings (2026-09-26): 36 route shots (desktop light/dark/phone) + 36
+  modal/popover/menu shots, all read. V1 confirmed visually: modal header title-only ✓, footer
+  fits at 1440/1280/phone ✓, selected pill text white at rest ✓ (loading-state flash not
+  capturable statically — user to confirm). Findings below. Specs saved in
+  .claude/state/audit/{routes,modals}.json (selectors `text=<button label>`, `tbody tr:first-child td:last-child
+  button` for row action, `td:first-child button` for expand, `[role=menuitem]:has-text('Edit')`).
+
+## Findings (desktop; mobile deferred by user)
+
+### V3 — tokens + dark mode
+- F1 high · all dark pages: `--color-danger-bg`/`--color-danger-border` (theme.css:165-166) have
+  no dark value -> Overdue/Expense chips, danger StatCard icon tiles (Cash Out, Net Cash Flow,
+  Today's Expenses, Overdue balance) and the confirm-delete badge render WHITE in dark; overdue
+  row tint (`dataTableRowOverdue`) nearly invisible in dark. Fix: dark overrides for the danger
+  soft tokens (and audit positive/warning soft fills the same way).
+- F2 high · Sort select (all pages): selected option = pale text on brand-soft fill, unreadable
+  ("Newest first" in m-tx-sort). Fix: selected item text = foreground/brand, not on-brand.
+- F3 med · ConfirmationModal delete: primary is a soft-red "Yes" beside "No" — low emphasis and
+  vague. Fix: solid danger button; default okText "Delete"/"Confirm", cancelText "Cancel".
+- F4 low · 404 / error card has a dashed border; should be the plain panel surface.
+
+### V4 — tables + row UI
+- F5 high · Vouchers table overflows at 1440: "Created" clipped mid-datetime, no Status/Action
+  column visible. Payables Records: "Reference" clipped ("Refe"). Fix: tighten column set /
+  truncate Branch, keep all columns inside the card at 1280+.
+- F6 med · "Recorded by" empty person renders an avatar with "—" plus a two-line "—/—". Fix:
+  AvatarCell with no person -> single muted "—".
+- F7 med · Row actions inconsistent: Transactions = bare red trash button per row; others =
+  RowActionMenu kebab; Payables by-supplier = unlabeled "$" icon; Customer ledger = id-card
+  icon. Fix: RowActionMenu everywhere (destructive item last, separated).
+- F8 med · RowActionMenu too narrow: "Archive branch", "Reset password", "Locked — voucher
+  approved or printed" wrap to 2-4 lines. Fix: min-width + nowrap; locked state = disabled
+  "Edit" with a short hint, not a 4-line item. Add separator before destructive items.
+- F9 med · Expanded row panels: label left / value flush far right across a wide column (values
+  detached); redundant "Recorded by: Recorded by"; duplicates visible columns (Time);
+  Receivables panel is one half-width section. Fix: compact label/value grid, values next to
+  labels, drop fields already shown in the row.
+- F10 low · Pager: prev at far left, page pills centred, range+size+next far right. Fix: group
+  controls right (or range left, controls right).
+- F11 low · Receivables "By customer": Outstanding money left-aligned under header (Payables
+  by-supplier right-aligns). Money right-aligned everywhere.
+- F12 low · Type/voucher-code tags: Branches prefix plain text vs categories code chip. Pick one.
+
+### V5 — page composition + filters
+- F13 med · Branches, Master Data, Users: primary action sits alone in a row under a redundant
+  section heading ("Branches", "Suppliers", "Expense Categories"), not in ContentView `actions`.
+  Fix: title-row action like Transactions; drop the heading that repeats the title/pill.
+- F14 med · Filters popover header: "Filters" centred with "Reset" stacked under it; fields have
+  no labels. Fix: header row (title left, Reset right); labelled fields.
+- F15 med · Dashboard: date "Sep 26, 2026" sits alone on a right-aligned row, leaving a gap under
+  the h1. Fix: date in the title row (`meta`/actions).
+- F16 low · Reports: StatCards have no icons (every other page has); "Print report" styled as
+  one of the 7 pills — separate it as the action.
+- F17 low · Receivables has a "Customer ledger" button; Payables has no counterpart; Customer
+  ledger modal duplicates the "By customer" view. Question for user: keep both?
+- F18 low · Desktop top bar has no notifications bell (phone shows one with badge 10).
+  Question: intentional (dashboard alerts cover it)?
+- F19 low · Vouchers page has no StatCards while Purchases/Expenses do (consistency; optional).
+
+### V6 — modals + forms
+- F20 med · Record payment (ledger): per-record labels are "· due Jul 22… · balance …" (leading
+  "·" when no reference), amounts prefilled raw ("60000"). Fix: label = ref or "Record n",
+  formatted amounts, balance as hint.
+- F21 med · Empty selects / multi-selects show no placeholder (Cash account, Customer, Supplier,
+  Branch access looks like a text input). Fix: "Select …" placeholders in FormField.
+- F22 low · Required markers missing on Manual voucher, Branch, Supplier, Category, User forms
+  while transaction forms have them. Fix: mark from the zod schema consistently.
+- F23 low · Number inputs show native spinners (Amount). Hide them.
+- F24 low · Receivable/Payable form: "Customer" select + "Customer name (if not in the list)"
+  text — two fields for one thing. Question: combobox allowing a new name?
+- F25 low · Purchase "Paid from" select shows a clear ✕ instead of the chevron other selects use.
+
+### V7 — dashboard charts
+- F26 med · Sales Overview x-axis: raw "08-29 08-31" labels crowd/overlap; use formatted short
+  dates with tick thinning.
+- F27 low · Cash Flow donut: legend shows a blue "Net Cash Flow" dot with no blue arc.
+- F28 low · Chart cards unequal height (Sales Overview shorter than Cash Flow) — align.
+
+### Mobile — deferred (user: separate roadmap after desktop)
+- M1 critical · `ProtectedSider` `collapsible="none"` -> sidebar always inline at 390px, content
+  column ~100px wide on every page. Needs offcanvas sheet on mobile.
+- M2 · Phone form sheet footer stacks full-width (ok); amount spinners visible (F23).
+
+### Not captured (cover during fix batches)
+Disbursement modals, customer info/payment modals, supplier/category edit, DetailModal,
+loading/error states, long-name/large-money stress, validation errors (never press Save live).
+
 ## Next
 
-1. **V2 — full capture + findings**: run the harness over the whole Scope, read every shot,
-   write a `## Findings` section here (id, screen, issue, fix, severity high/med/low), grouped
-   into fix batches V3..Vn by area (shell/nav, tables+filters, modals+forms, cards+dashboard,
-   reports, auth/error, mobile). No code changes in V2. Show the user the findings; they pick
-   the order.
-2. **V3..Vn — fix batches**, one per conversation, re-screenshot each fixed screen.
+1. **V3 — tokens + dark mode** (F1-F4). Re-screenshot dark pages + confirm modal + sort.
+2. **V4 — tables + row UI** (F5-F12).
+3. **V5 — page composition + filters** (F13-F19; ask user F17/F18 first).
+4. **V6 — modals + forms** (F20-F25; ask user F24 first).
+5. **V7 — dashboard charts** (F26-F28).
+Order may be changed by the user. Mobile (M*) goes to a new roadmap after V7.
 
 ## Open
 - Migration 20260926000009_accountant_voucher_read.sql (and possibly 20260718000004..
   20260722000008) not yet applied to Supabase — accountant voucher views stay empty until then.
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (V1 src + .claude/state) · Last check: yarn build +
-yarn lint clean (after V1)
+Branch: development-overhaul · Uncommitted: .claude/state only (V1 committed as v1.24) · Last
+check: yarn build + yarn lint clean (after V1); V2 made no src changes.
