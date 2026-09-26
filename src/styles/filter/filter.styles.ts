@@ -30,9 +30,11 @@ export const filterPill = "rounded-full";
 
 export const filterPopover = "w-80";
 
-export const filterPopoverHead = "flex items-center justify-between gap-2";
+export const filterPopoverHead = "flex-row items-center justify-between gap-2";
 
 export const filterPopoverTitle = "text-sm font-semibold";
+
+export const filterField = "gap-1.5 *:w-full!";
 
 export const filterSort = "flex items-center gap-2";
 

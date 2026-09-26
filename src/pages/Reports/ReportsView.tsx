@@ -62,7 +62,7 @@ const ReportsView = () => {
   return (
     <ContentView
       actions={
-        <AppButton variant="outline" onPress={print} disabled={loading}>
+        <AppButton onPress={print} disabled={loading}>
           <Printer />
           Print report
         </AppButton>

@@ -1,7 +1,5 @@
-import { Check, KeyRound, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, KeyRound, Pencil, Trash2, X } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
-import AppButton from "../../common/button/AppButton";
-import FilterToolbar from "../../common/filter/FilterToolbar";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
 import AvatarCell from "../../common/table/AvatarCell";
@@ -150,18 +148,7 @@ const UsersTable = () => {
 
   return (
     <>
-      <TablePanel
-        toolbar={
-          <FilterToolbar
-            actions={
-              <AppButton onPress={() => createModal.openModal()}>
-                <Plus />
-                Add user
-              </AppButton>
-            }
-          />
-        }
-      >
+      <TablePanel>
         <DataTable<IUser>
           columns={columns}
           data={users}

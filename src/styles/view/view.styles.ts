@@ -9,11 +9,9 @@ export const viewTitle =
 
 export const viewHeadActions = "flex flex-wrap items-center gap-2";
 
-export const viewToolbar = "flex flex-wrap items-center gap-2";
+export const viewHeadDivider = "mx-1 h-6 self-center!";
 
-export const viewToolbarStart = "flex min-w-0 flex-1 flex-wrap items-center gap-2";
-
-export const viewToolbarActions = "ml-auto flex flex-wrap items-center gap-2";
+export const viewToolbar = "flex min-w-0 flex-wrap items-center gap-2";
 
 export const viewMeta = "text-sm text-muted-foreground";
 

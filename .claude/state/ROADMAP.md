@@ -134,6 +134,17 @@ practical flow (primary action placement, destructive actions separated).
   prev/pages/next/size right. F11 no code divergence found (both scopes share
   LedgerPartiesTable, align right) — nowrap added on CustomerLedgerModal Outstanding; re-check
   in capture. F12 branch voucher prefix -> StatusTag like category codes.
+- [x] V5 — page composition + filters (compiled, not screenshot-verified, 2026-09-27): F13 new
+  components/{branch,user}/menus/{Branch,User}CreateButton.tsx +
+  master-data/menus/{Supplier,ExpenseCategory}CreateButton.tsx in ContentView `actions`;
+  TablePanel title + toolbar dropped from Branches/Users/Suppliers/ExpenseCategories tables
+  (Branch monitoring keeps its title). ContentView: `meta` now renders in the title row (F15,
+  Dashboard date), toolbar row = toolbar only, vertical Separator between tabs and actions
+  (viewHeadDivider; also Receivables). F14 filter.styles filterPopoverHead flex-row (root cause:
+  ui PopoverHeader flex-col); new common/filter/FilterField.tsx (Field + FieldTitle) labels
+  every popover field in LedgerFilterBar. F16 icons on Period/CashFlow/Ledger report StatCards;
+  Print report = solid primary, divided from pills. F19 skipped — needs new voucher aggregates
+  (metric meaning = business decision); raise with user if wanted.
 
 ## Findings (desktop; mobile deferred by user)
 
@@ -217,11 +228,11 @@ loading/error states, long-name/large-money stress, validation errors (never pre
 
 ## Next
 
-1. **V5 — page composition + filters** (F13-F16, F19; F17/F18 decided: no change). Optionally
-   first a capture of V3 + V4 (dark chips, row menus, expanded rows, pager, Vouchers at 1440,
-   Receivables "By customer" Outstanding alignment).
-2. **V6 — modals + forms** (F20-F25; F24 decided, see Decisions locked).
-3. **V7 — dashboard charts** (F26-F28).
+1. **V6 — modals + forms** (F20-F25; F24 decided, see Decisions locked). Optionally first a
+   capture of V3-V5 (dark chips, row menus, expanded rows, pager, Vouchers at 1440, title-row
+   actions on Branches/Users/Master Data, Filters popover header + labels, Dashboard date,
+   Reports print divider).
+2. **V7 — dashboard charts** (F26-F28).
 Order may be changed by the user. Mobile (M*) goes to a new roadmap after V7.
 
 ## Open
@@ -229,5 +240,5 @@ Order may be changed by the user. Mobile (M*) goes to a new roadmap after V7.
   20260722000008) not yet applied to Supabase — accountant voucher views stay empty until then.
 
 ## State
-Branch: development-overhaul · Uncommitted: V4 src changes + .claude/state · Last check:
-yarn build + yarn lint clean (after V4).
+Branch: development-overhaul · Uncommitted: V5 src changes + .claude/state · Last check:
+yarn build + yarn lint clean (after V5).

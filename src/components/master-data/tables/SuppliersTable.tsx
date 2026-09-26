@@ -1,7 +1,5 @@
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
-import AppButton from "../../common/button/AppButton";
-import FilterToolbar from "../../common/filter/FilterToolbar";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
@@ -83,19 +81,7 @@ const SuppliersTable = () => {
 
   return (
     <>
-      <TablePanel
-        title="Suppliers"
-        toolbar={
-          <FilterToolbar
-            actions={
-              <AppButton onPress={() => createModal.openModal()}>
-                <Plus />
-                Add supplier
-              </AppButton>
-            }
-          />
-        }
-      >
+      <TablePanel>
         <DataTable<ISupplier>
           columns={columns}
           data={suppliers}

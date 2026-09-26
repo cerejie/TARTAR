@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ import type {
 import { filterBar } from "../../../styles/filter/filter.styles";
 import { activeFilterCount } from "../../../utils/filter.utils";
 import DateRangeFilter from "./DateRangeFilter";
+import FilterField from "./FilterField";
 import FilterPopover from "./FilterPopover";
 import FilterSelect from "./FilterSelect";
 import SearchInput from "./SearchInput";
@@ -60,58 +62,79 @@ const LedgerFilterBar = ({
 
   const isPopover = layout === "popover";
 
+  const labelled = (label: string, control: ReactNode) =>
+    isPopover ? <FilterField label={label}>{control}</FilterField> : control;
+
   const fields = (
     <div className={filterBar({ layout: isPopover ? "stack" : "inline" })}>
       {showSearch ? (
-        <SearchInput
-          placeholder="Search name"
-          value={filters.search}
-          onChange={(search) => setFilters({ search })}
-        />
+        labelled(
+          "Name",
+          <SearchInput
+            placeholder="Search name"
+            value={filters.search}
+            onChange={(search) => setFilters({ search })}
+          />
+        )
       ) : null}
 
-      <DateRangeFilter
-        from={filters.dateFrom}
-        to={filters.dateTo}
-        onChange={(dateFrom, dateTo) => setFilters({ dateFrom, dateTo })}
-      />
+      {labelled(
+        "Date",
+        <DateRangeFilter
+          from={filters.dateFrom}
+          to={filters.dateTo}
+          onChange={(dateFrom, dateTo) => setFilters({ dateFrom, dateTo })}
+        />
+      )}
 
       {showStatus ? (
-        <FilterSelect
-          placeholder="Any status"
-          value={filters.status}
-          values={statusFilterValues}
-          labels={statusFilterLabels}
-          onChange={(status) => setFilters({ status })}
-        />
+        labelled(
+          "Status",
+          <FilterSelect
+            placeholder="Any status"
+            value={filters.status}
+            values={statusFilterValues}
+            labels={statusFilterLabels}
+            onChange={(status) => setFilters({ status })}
+          />
+        )
       ) : null}
 
       {paymentKind ? (
-        <FilterSelect
-          placeholder="Any status"
-          value={filters.paymentStatus}
-          values={paymentStatusValues}
-          labels={paymentStatusLabels(paymentKind)}
-          onChange={(paymentStatus) => setFilters({ paymentStatus })}
-        />
+        labelled(
+          "Payment status",
+          <FilterSelect
+            placeholder="Any status"
+            value={filters.paymentStatus}
+            values={paymentStatusValues}
+            labels={paymentStatusLabels(paymentKind)}
+            onChange={(paymentStatus) => setFilters({ paymentStatus })}
+          />
+        )
       ) : null}
 
       {showType ? (
-        <FilterSelect
-          placeholder="Any type"
-          value={filters.type}
-          values={transactionTypeValues}
-          labels={transactionTypeLabels}
-          onChange={(type) => setFilters({ type })}
-        />
+        labelled(
+          "Type",
+          <FilterSelect
+            placeholder="Any type"
+            value={filters.type}
+            values={transactionTypeValues}
+            labels={transactionTypeLabels}
+            onChange={(type) => setFilters({ type })}
+          />
+        )
       ) : null}
 
       {showReference ? (
-        <SearchInput
-          placeholder="Reference no."
-          value={filters.referenceNumber}
-          onChange={(referenceNumber) => setFilters({ referenceNumber })}
-        />
+        labelled(
+          "Reference no.",
+          <SearchInput
+            placeholder="Reference no."
+            value={filters.referenceNumber}
+            onChange={(referenceNumber) => setFilters({ referenceNumber })}
+          />
+        )
       ) : null}
 
       {isPopover ? null : (

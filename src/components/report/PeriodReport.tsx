@@ -1,3 +1,4 @@
+import { ArrowLeftRight, TrendingDown, TrendingUp } from "lucide-react";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   transactionTypeLabels,
@@ -63,6 +64,7 @@ const PeriodReport = ({
             error={error}
             onRetry={onRetry}
             variant="positive"
+            icon={<TrendingUp />}
           />
         </BentoCell>
         <BentoCell span="third">
@@ -73,6 +75,7 @@ const PeriodReport = ({
             error={error}
             onRetry={onRetry}
             variant="negative"
+            icon={<TrendingDown />}
           />
         </BentoCell>
         <BentoCell span="third">
@@ -83,6 +86,7 @@ const PeriodReport = ({
             error={error}
             onRetry={onRetry}
             variant="brand"
+            icon={<ArrowLeftRight />}
           />
         </BentoCell>
       </BentoGrid>

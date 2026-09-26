@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Separator } from "@/components/ui/separator";
 import { useProtectedTitleHook } from "../../../hook/layout/protected.hook";
 import type { ViewLayout } from "../../../models/common/view.model";
 import {
@@ -7,11 +8,10 @@ import {
   viewFooter,
   viewHead,
   viewHeadActions,
+  viewHeadDivider,
   viewMeta,
   viewTitle,
   viewToolbar,
-  viewToolbarActions,
-  viewToolbarStart,
 } from "../../../styles/view/view.styles";
 import BentoGrid from "./BentoGrid";
 
@@ -40,24 +40,19 @@ const ContentView = ({
     <div className={contentView}>
       <div className={viewHead}>
         <h1 className={viewTitle}>{title}</h1>
-        {tabs || actions ? (
+        {meta || tabs || actions ? (
           <div className={viewHeadActions}>
+            {meta ? <span className={viewMeta}>{meta}</span> : null}
             {tabs}
+            {tabs && actions ? (
+              <Separator orientation="vertical" className={viewHeadDivider} />
+            ) : null}
             {actions}
           </div>
         ) : null}
       </div>
 
-      {toolbar || meta ? (
-        <div className={viewToolbar}>
-          {toolbar ? <div className={viewToolbarStart}>{toolbar}</div> : null}
-          {meta ? (
-            <div className={viewToolbarActions}>
-              <span className={viewMeta}>{meta}</span>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+      {toolbar ? <div className={viewToolbar}>{toolbar}</div> : null}
 
       {layout === "bento" ? (
         <BentoGrid>{children}</BentoGrid>

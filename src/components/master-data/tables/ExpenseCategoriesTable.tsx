@@ -1,7 +1,5 @@
-import { Archive, Pencil, Plus, Trash2, Undo2 } from "lucide-react";
+import { Archive, Pencil, Trash2, Undo2 } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
-import AppButton from "../../common/button/AppButton";
-import FilterToolbar from "../../common/filter/FilterToolbar";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
 import AvatarCell from "../../common/table/AvatarCell";
@@ -104,19 +102,7 @@ const ExpenseCategoriesTable = () => {
 
   return (
     <>
-      <TablePanel
-        title="Expense Categories"
-        toolbar={
-          <FilterToolbar
-            actions={
-              <AppButton onPress={() => createModal.openModal()}>
-                <Plus />
-                Add category
-              </AppButton>
-            }
-          />
-        }
-      >
+      <TablePanel>
         <DataTable<IExpenseCategory>
           columns={columns}
           data={expenseCategories}

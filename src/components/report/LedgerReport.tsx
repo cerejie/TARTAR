@@ -1,3 +1,4 @@
+import { CircleAlert, FileWarning, Wallet } from "lucide-react";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   ledgerStatusColors,
@@ -89,6 +90,7 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
             error={error}
             onRetry={onRetry}
             variant="brand"
+            icon={<Wallet />}
           />
         </BentoCell>
         <BentoCell span="third">
@@ -99,6 +101,7 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
             error={error}
             onRetry={onRetry}
             variant="negative"
+            icon={<CircleAlert />}
           />
         </BentoCell>
         <BentoCell span="third">
@@ -109,6 +112,7 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
             error={error}
             onRetry={onRetry}
             raw
+            icon={<FileWarning />}
           />
         </BentoCell>
       </BentoGrid>

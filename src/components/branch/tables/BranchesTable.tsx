@@ -1,7 +1,5 @@
-import { Pencil, Plus, Trash2, Undo2 } from "lucide-react";
+import { Pencil, Trash2, Undo2 } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
-import AppButton from "../../common/button/AppButton";
-import FilterToolbar from "../../common/filter/FilterToolbar";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
 import AvatarCell from "../../common/table/AvatarCell";
@@ -99,19 +97,7 @@ const BranchesTable = () => {
 
   return (
     <>
-      <TablePanel
-        title="Branches"
-        toolbar={
-          <FilterToolbar
-            actions={
-              <AppButton onPress={() => createModal.openModal()}>
-                <Plus />
-                Add branch
-              </AppButton>
-            }
-          />
-        }
-      >
+      <TablePanel>
         <DataTable<IBranch>
           columns={columns}
           data={allBranches}
