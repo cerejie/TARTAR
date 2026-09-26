@@ -9,8 +9,11 @@ description: "Write a commit message in this repo's house style — title `Devel
 
 - **Suggest** — after **every** response that changed files in this repo, end the reply with a
   suggested commit message in a fenced `txt` block, ready to copy. Always suggest; never run
-  `git add` or `git commit` for it. Write it from the changes made this turn — no extra git
-  commands. If the change is not yet commit-worthy (build or lint failing), say so instead.
+  `git add` or `git commit` for it. Before every suggestion run
+  `git log --oneline --grep="^Development v" -1` — the user may have committed since the last
+  one — and title it that version +0.1. Never reuse a version that is already committed. The
+  description covers every uncommitted change, not only this turn's. If the change is not yet
+  commit-worthy (build or lint failing), say so instead.
 - **Commit** — only when the user types `/commit` or asks to commit. Follow the Rules below.
 
 ## Format

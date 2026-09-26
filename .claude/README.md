@@ -27,10 +27,13 @@ project without that `CLAUDE.md` section, nothing fires until you type it.
 | Skill | When it runs |
 |---|---|
 | **build** | You type `/build`. |
-| **commit** | You type `/commit`, or `/build` reaches its commit step because you asked for one. |
+| **commit** | Suggest mode after every change (message only, no git); commit mode when you type `/commit` or ask. |
+| **tartar-shadcn** | Automatically, for any UI work — component decision table, styles-in-`src/styles/` rule, token contract, registry workflow. |
+| **shadcn** | Automatically, alongside `tartar-shadcn` — the official shadcn/ui skill (CLI, docs, registry). Pinned in `skills-lock.json`. |
+| **tartar-migration-next** | Automatically on "continue" / "next phase", or a session opening with `.claude/state/ROADMAP.md` — runs one migration phase per conversation. |
 | **checkpoint** | You type `/checkpoint`. Also read automatically at session start *if* `.claude/state/ROADMAP.md` exists with unfinished work, so a cleared session resumes cold. |
 
-Nothing else appears in the skill list, so nothing else can fire by accident.
+`build` also fires automatically for implementation prompts through `CLAUDE.md`.
 
 ## References — loaded by /build, never typed
 

@@ -1,65 +1,47 @@
-# ROADMAP — Apply Transactions design language to Receivables, Payables, Reports, Branch Monitoring, Master Data, Users
-Updated: 2026-09-16
+# ROADMAP — Migrate TARTAR from antd + vanilla-extract to Tailwind v4 + shadcn (aria-vega)
+Updated: 2026-09-26
 
 ## Goal
-Every target screen composes ContentView → (StatCard bento) → TablePanel (FilterToolbar + DataTable + TablePagination) → EntityFormModal, with RowActionMenu + useConfirm, StatusTag pills, one primary CTA on the toolbar trailing edge, and thin pages. Full plan: `.claude/state/DESIGN-PLAN.md` — read the section for the phase being worked, not the whole file.
+No `antd`, `@ant-design/*` or `@vanilla-extract/*` left in package.json or src; every screen on
+shadcn aria-vega components + Tailwind; `yarn build` and `yarn lint` clean; CLAUDE.md and
+`.claude/skills/build/references/` describe the new stack. Stop after each phase for user review.
+
+## Session protocol — one phase per conversation
+1. New conversation (skill `tartar-migration-next` auto-loads): read this file, `git status --short`, then start `Next` item 1. The user may just say "continue".
+2. Do only that phase. Stop at its end even if context remains.
+3. Close the phase: yarn build + yarn lint clean; update Done / Next / State here (add any new paths to Path map); suggest the commit (`Development v<X.Y>`, +0.1 per phase); tell the user to open a new conversation.
+4. When P5 is done, delete this file.
 
 ## Decisions locked
-- Reference shape -> Transactions (per CLAUDE.md); Purchases/Expenses are the same shape.
-- Primary CTA -> last element of FilterToolbar `actions`, RequirePermission-wrapped, "Verb noun".
-- Row actions -> RowActionMenu only; no icon clusters, no `type="link"` cell buttons.
-- Status -> new `StatusTag` (typeTag + outlined) everywhere; `Badge` and raw `Tag color=` retired; red overdue row background retired.
-- Table shell -> TablePanel; `SectionCard title="All X"` around tables removed (header already shows the title).
-- Stack rhythm -> `viewBody { gap: md }`; per-component marginBottom removed from card/tablePanel/statGrid/filterBar.
-- Toolbar control size -> `middle` across a toolbar.
-- Multi-view screens -> `ViewSwitch` (Segmented + useSearchParam) in ContentView toolbar; views stay mounted.
-- No drawer introduced. Customer Ledger modal becomes the "Customers" view of Receivables.
-- One payment form (merges settle modal + PaymentAllocationModal) with an `intro` context block; EntityFormModal gets optional `intro?: ReactNode`.
-- Reports period -> editable date range; presets fill it.
-- Phase order -> 0 Foundation, 1 Receivables/Payables, 2 Users/Master Data, 3 Branch Monitoring, 4 Reports, 5 Polish.
+- Design -> shadcn default design, TARTAR colours only (tokens in theme.css)
+- Primitives -> React Aria, shadcn style `aria-vega` (same as reference)
+- Imports -> adopt `@/` alias (update CLAUDE.md in P5 to allow it)
+- Commit format -> title `Development v<X.Y>`, description `<Prefix>: <Title>` lines; migration series starts at v1.0 (see .claude/skills/commit/SKILL.md). Suggest after every change, never commit unless asked.
+- Kept from TARTAR conventions: no comments (components/ui/ exempt, generated), no useState/useReducer, zustand, rhf+zod, useConfirm, pagination, runWrite offline queue, one default export per file
+- Charts -> recharts via shadcn `chart`; icons -> lucide-react
+- Styles -> cn/cva class constants in `src/styles/<area>/<area>.styles.ts` (reference pattern), replacing each `*.css.ts`; no Tailwind class strings in JSX
 
 ## Path map
-Reference (copy these):
-- page: src/pages/Transactions/TransactionsView.tsx
-- cards: src/components/transaction/cards/TransactionSummaryCards.tsx
-- table: src/components/transaction/tables/TransactionsTable.tsx · src/components/purchase/tables/PurchasesTable.tsx (edit/history variant)
-- hook: src/hook/data/transaction/transaction.list.hook.ts (sections/defaults at L137-256)
-Common primitives:
-- src/components/common/view/ContentView.tsx · BentoGrid.tsx · BentoCell.tsx
-- src/components/common/table/TablePanel.tsx · DataTable.tsx · TablePagination.tsx · RowActionMenu.tsx · RowDetailPanel.tsx · TableDecor.tsx (NameCell/RowActions/ColumnLabel)
-- src/components/common/filter/FilterToolbar.tsx · LedgerFilterBar.tsx
-- src/components/common/form/EntityFormModal.tsx · FormFieldGrid.tsx · FormSection.tsx · FormField.tsx (types: text,textarea,password,number,amount,select,multiselect,date)
-- src/components/common/modal/AppModal.tsx · ConfirmationModal.tsx · DetailModal.tsx
-- src/components/common/card/StatCard.tsx · SectionCard.tsx
-- src/models/common/view.model.ts (ModalSize/modalWidths, BentoSpan)
-Styles:
-- tokens: src/styles/common/vars.css.ts · tone: src/styles/common/tone.css.ts · global: src/styles/common/global.css.ts
-- src/styles/view/content/content.view.css.ts (viewBody, bentoSpan) · src/styles/table/table.css.ts (tablePanel* at end, typeTag, iconButton, rowOverdue, nowrapCell) · src/styles/filter/filter.css.ts · src/styles/modal/modal.css.ts · src/styles/form/form.css.ts (formGrid, fieldSpan) · src/styles/stat/stat.css.ts (statGrid) · src/styles/card/card.css.ts (card marginBottom) · src/styles/status/status.css.ts
-- layout content padding: src/styles/layout/protected.layout.css.ts (`content` ~L342)
-Targets (current state):
-- Receivables: src/pages/Receivables/ReceivablesView.tsx (fields/defaults live here — move to hook) · src/components/ledger/LedgerManager.tsx · CustomerLedgerModal.tsx · CustomerLedgerView.tsx · PaymentAllocationModal.tsx · CustomerDetailsModal.tsx · CustomerInfoModal.tsx · src/components/payment/PaymentsPanel.tsx
-- Payables: src/pages/Payables/PayablesView.tsx (same as Receivables)
-- ledger hooks: src/hook/data/ledger/ledger.manage.hook.ts · customer.ledger.hook.ts · customer.detail.hook.ts · src/hook/data/payment/payment.list.hook.ts · src/hook/data/party/customer.record.hook.ts
-- ledger services/models/enums: src/services/data/ledger.services.ts · payment.services.ts · src/models/data/ledger/ledger.request.ts · ledger.response.ts (ledgerBalance, isLedgerOverdue) · src/enums/ledger.enum.ts
-- Reports: src/pages/Reports/ReportsView.tsx · src/components/report/{PeriodReport,LedgerReport,CashFlowReport,ExpensesReport}.tsx · src/hook/data/report/report.hook.ts · src/styles/view/report/report.view.css.ts
-- Branch Monitoring: src/pages/Branches/BranchesView.tsx (columns/handlers live here) · src/hook/data/branch/branch.manage.hook.ts · src/models/data/dashboard/dashboard.response.ts (IBranchMonitorRow L47)
-- Master Data: src/pages/MasterData/MasterDataView.tsx · src/components/master-data/SuppliersPanel.tsx · ExpenseCategoriesPanel.tsx · src/hook/data/party/supplier.manage.hook.ts · src/hook/data/expense-category/expense.category.manage.hook.ts
-- Users: src/pages/Users/UsersView.tsx (columns/handlers live here) · src/hook/data/user/user.manage.hook.ts (fields ~L95-134) · src/enums/role.enum.ts
-- Routes/keys: src/routes/protected.view.routes.ts · src/keys/{query,modal,table,storage}.keys.ts · src/hook/common/{filter,modal,pagination,search.param,confirmation}.hook.ts · src/store/common/filter.store.ts
+- Reference repo: D:/EJIE BUSINESS/EJIE WORK DCWD/dcwd_apps-crm-customer2 (its `src/components/common/*`, `src/styles/*/*.styles.ts`, `src/styles/common/theme.css`, `docs/tailwind-shadcn-migration-plan.md`)
+- Tokens: src/styles/common/theme.css (new) ; old: src/styles/common/vars.css.ts, tone.css.ts, global.css.ts
+- cn: src/utils/cn.utils.ts ; shadcn config: components.json ; ui: src/components/ui/ (43 files) ; src/hook/use-mobile.ts
+- Old style areas: src/styles/{card,filter,form,layout,modal,scene,stat,status,table,view}/ (17 *.css.ts total; scene/farm.scene.ts uses `palette`)
+- Common primitives (P1): src/components/common/card/{SectionCard,StatCard}, filter/{FilterToolbar,LedgerFilterBar,SearchInput}, form/{EntityFormModal,FormField,FormFieldGrid,FormSection}, guard/RequirePermission, modal/{AppModal,ConfirmationModal,DetailModal}, status/{ProgressRow,StatDelta,StatusTag,SyncIndicator}, table/{DataTable,RowActionMenu,RowDetailPanel,TableDecor,TablePagination,TablePanel}, view/{BentoCell,BentoGrid,ContentView,ViewSwitch}
+- Shell (P2): src/components/common/layout/{ProtectedBranchScope,ProtectedFooter,ProtectedHeader,ProtectedMenu,ProtectedSider,ProtectedSiderUser}, src/layouts/, src/hook/layout/, src/store/common/theme.store.ts (antd theme object)
+- Features (P3), antd importers: components/{transaction/tables, ledger(5)+ledger/tables(3), payment, disbursement/modal, purchase/tables, expense/tables, master-data(2), report(4), dashboard(2), auth}; charts: components/dashboard/CashFlowDonut.tsx + pages/Dashboard/DashboardView.tsx (@ant-design/charts); pages importing antd: Auth(2), Branches, Dashboard, Error, Receivables, Reports, Users, Vouchers; also src/App.tsx, hook/common (1), store/common (1)
+- Config: vite.config.ts (tailwindcss plugin + alias added; still has vanillaExtractPlugin + antd/charts manualChunks), tsconfig.app.json + tsconfig.json (paths), src/main.tsx (imports global.css then theme.css)
 
 ## Done
-- [x] Analysis + full design plan written to `.claude/state/DESIGN-PLAN.md` (no code touched).
+- [x] P0 setup — deps added (tailwindcss, @tailwindcss/vite, react-aria-components, cva, clsx, tailwind-merge, lucide-react, recharts; dev shadcn, tw-animate-css); theme.css token bridge (preflight OFF: split theme/utilities import so antd is untouched until P4); components.json; cn.utils.ts; 43 aria-vega ui files copied from reference (no carousel/input-otp); use-mobile.ts. yarn build + lint clean.
+- [x] Commit skill: suggest mode + `Development vX.Y` format (.claude/skills/commit/SKILL.md, build/SKILL.md step 7, CLAUDE.md section)
 
 ## Next
-1. Phase 0 step 1 — present a numbered plan for: `viewBody` gap + remove marginBottom in card.css.ts / table.css.ts (tablePanel) / stat.css.ts (statGrid) / filter.css.ts (filterBar); wait for approval; implement; `yarn build && yarn lint`.
-2. Phase 0 step 2 — toolbar control size `middle` (LedgerFilterBar + filter.css.ts); FormFieldGrid half→full ≤575px (form.css.ts fieldSpan).
-3. Phase 0 step 3 — create `components/common/status/StatusTag.tsx`, `components/common/filter/SearchInput.tsx`, `components/common/view/ViewSwitch.tsx`; `StatusColor` union in enums; apply StatusTag to Transactions/Purchases/Expenses tables.
-4. Phase 0 step 4 — `search` in filter.store.ts; `LedgerFilterBar showSearch/showOverdue`.
-5. Then Phase 1 (DESIGN-PLAN §9–10, §20 steps 6–9).
+1. If P0 is still uncommitted, remind the user once (`Development v1.0` / `Refactor: Tailwind And Shadcn Foundation`), then start P1 regardless.
+2. P1 — rewrite the 22 common primitives on components/ui, keeping their public props; add `src/styles/<area>/<area>.styles.ts` per area. Read the reference's matching `components/common/<kind>/*` + `styles/*` first. Read `.claude/skills/build/references/reference-module.md` + `stack.md` once.
+3. P2 shell (aria `sidebar`, theme.store -> `.dark` class toggle) · P3 features, Transactions first · P4 remove antd/@ant-design/vanilla-extract, delete *.css.ts, switch theme.css to full `@import "tailwindcss"` (preflight on), drop vanillaExtractPlugin + manualChunks, add oxlint restricted-imports guard · P5 rewrite CLAUDE.md + build references.
 
 ## Open
-- Branch CRUD → Master Data section (recommended) vs ViewSwitch [Monitoring][Branches] on /branches. Decide before Phase 2/3.
-- Whether Reports Export CSV lands in Phase 4 or Phase 5.
+- Toasts: antd `message` in src/hook/common/mutation.hook.ts needs a replacement — `sonner` (shadcn registry) is a new dependency; ask the user when P1/P3 reaches it.
 
 ## State
-Branch: development-v2.3 · Uncommitted: yes (pre-existing edits in LedgerManager, PaymentsPanel, PeriodReport, BranchesView, DashboardView, UsersView, VouchersView — not from this session) · Last check: none run this session (analysis only)
+Branch: development · Uncommitted: yes (P0 + skill/CLAUDE.md edits) · Last check: yarn build + yarn lint clean after P0

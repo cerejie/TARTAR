@@ -26,6 +26,31 @@ yarn lint               # oxlint
 Gate every change on `yarn build` and `yarn lint` both clean. This repo has no
 pre-existing type errors and must not acquire any.
 
+## Skills — use these first, every time
+
+`.claude/skills/` exists so the codebase is never re-explored. They load automatically — the
+user never has to type them:
+
+1. **`build`** — every implementation prompt, however small. It carries the path map and the
+   token discipline (`references/pathfind.md`, `references/lean.md`); locating by exploration
+   is the most expensive mistake available here.
+2. **`tartar-shadcn`** — any UI work: a page, table, filter, form, modal, card, chart, or
+   anything under `src/styles/` or `src/components/ui/`.
+3. **`shadcn`** — alongside `tartar-shadcn`: run `npx shadcn@latest docs <component>` and read
+   the **React Aria** tab before composing. Restore it with `npx skills experimental_install`
+   (pinned in `skills-lock.json`) if it is missing.
+4. **`tartar-migration-next`** — "continue", "next phase", "resume", or any session opening
+   with `.claude/state/ROADMAP.md` on disk.
+5. **`commit`** — suggest mode after every change; commit mode only on request.
+
+## Resuming multi-session work
+
+If `.claude/state/ROADMAP.md` exists, read it before anything else in a new conversation, run
+`git status --short`, and continue at its `Next` item 1 without re-exploring or re-asking its
+locked decisions. If the roadmap sets a per-session scope (e.g. one phase per conversation),
+finish that scope, update the roadmap's Done / Next / State, suggest the commit, and tell the
+user to open a new conversation for the next one.
+
 ## Every session — `.claude/` first
 
 `.claude/` is this repo's operating manual, and it applies to every prompt, not only the ones
@@ -314,7 +339,8 @@ is `RequirePermission`.
 
 After **every** response that changes files, end with a suggested commit message in a fenced
 `txt` block, in the house style of `.claude/skills/commit/SKILL.md` — title
-`Development v<X.Y>` (latest `Development v` commit plus 0.1), description one
+`Development v<X.Y>` — re-check `git log --oneline --grep="^Development v" -1` before
+every suggestion and add 0.1 (v1.0 committed -> v1.1) — description one
 `<Prefix>: <Title>` line per change. Always suggest; never commit unless asked.
 
 ## Do not
