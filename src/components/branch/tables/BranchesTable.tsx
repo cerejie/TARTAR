@@ -74,7 +74,7 @@ const BranchesTable = () => {
       title: "Voucher prefix",
       dataIndex: "voucher_prefix",
       className: nowrapCell,
-      render: (value: string) => value || "—",
+      render: (value: string) => (value ? <StatusTag label={value} /> : "—"),
     },
     { title: "Order", dataIndex: "sort", align: "center" },
     {

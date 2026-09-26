@@ -1,4 +1,4 @@
-import { FileText, Plus, Tag, Trash2, User } from "lucide-react";
+import { FileText, Plus, Tag, Trash2 } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
@@ -6,13 +6,12 @@ import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
 import StatusTag from "../../common/status/StatusTag";
-import { userRoleLabels } from "../../../enums/role.enum";
+import UserCell from "../../user/table/cells/UserCell";
 import {
   cashAccountLabels,
   incomeSourceLabels,
@@ -56,19 +55,6 @@ const TransactionsTable = () => {
   } = useTransactionListHook();
 
   const openConfirm = useConfirm();
-
-  const userOf = (row: ITransaction) =>
-    row.created_by ? userById.get(row.created_by) : undefined;
-
-  const userNameOf = (row: ITransaction) => {
-    const user = userOf(row);
-    return user ? user.full_name || user.username : "—";
-  };
-
-  const userRoleOf = (row: ITransaction) => {
-    const user = userOf(row);
-    return user ? userRoleLabels[user.role] : "—";
-  };
 
   const actionsOf = (row: ITransaction): IRowAction[] => [
     {
@@ -120,7 +106,9 @@ const TransactionsTable = () => {
             key: "user",
             skeleton: "avatar" as const,
             render: (_: unknown, row: ITransaction) => (
-              <AvatarCell name={userNameOf(row)} hint={userRoleOf(row)} />
+              <UserCell
+                user={row.created_by ? userById.get(row.created_by) : undefined}
+              />
             ),
           },
         ]
@@ -153,11 +141,6 @@ const TransactionsTable = () => {
       title: "Transaction",
       icon: <FileText />,
       items: [
-        {
-          key: "time",
-          label: "Time",
-          render: (row) => formatTime(row.created_at),
-        },
         {
           key: "reference",
           label: "Reference",
@@ -199,27 +182,6 @@ const TransactionsTable = () => {
         },
       ],
     },
-    ...(permissions.isManager
-      ? [
-          {
-            key: "record",
-            title: "Recorded by",
-            icon: <User />,
-            items: [
-              {
-                key: "recorded_by",
-                label: "Recorded by",
-                render: (row: ITransaction) => userNameOf(row),
-              },
-              {
-                key: "role",
-                label: "Role",
-                render: (row: ITransaction) => userRoleOf(row),
-              },
-            ],
-          },
-        ]
-      : []),
   ];
 
   return (

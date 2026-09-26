@@ -1,4 +1,5 @@
 import { IdCard } from "lucide-react";
+import type { IRowAction } from "../../models/common/action.model";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import { useCustomerLedgerHook } from "../../hook/data/ledger/customer.ledger.hook";
 import type { ICustomerReceivableSummary } from "../../models/data/ledger/ledger.response";
@@ -8,13 +9,14 @@ import {
   slidePanes,
   slideTrack,
 } from "../../styles/ledger/ledger.styles";
+import { nowrapCell } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
-import AppButton from "../common/button/AppButton";
 import SearchInput from "../common/filter/SearchInput";
 import RequirePermission from "../common/guard/RequirePermission";
 import AppModal from "../common/modal/AppModal";
 import AvatarCell from "../common/table/AvatarCell";
 import DataTable from "../common/table/DataTable";
+import RowActionMenu from "../common/table/RowActionMenu";
 import CustomerDetailsModal from "./CustomerDetailsModal";
 import CustomerInfoTag from "./CustomerInfoTag";
 import CustomerLedgerView from "./CustomerLedgerView";
@@ -34,6 +36,17 @@ const CustomerLedgerModal = () => {
     close,
   } = useCustomerLedgerHook();
 
+  const actionsOf = (customer: ICustomerReceivableSummary): IRowAction[] => [
+    {
+      key: "details",
+      label: recordFor(customer)
+        ? "Edit customer details"
+        : "Fill in customer details",
+      icon: <IdCard />,
+      onSelect: () => detailsModal.openModal(customer),
+    },
+  ];
+
   const columns: IDataTableColumn<ICustomerReceivableSummary>[] = [
     {
       title: "Customer",
@@ -48,6 +61,7 @@ const CustomerLedgerModal = () => {
       title: "Outstanding balance",
       dataIndex: "outstanding",
       align: "right",
+      className: nowrapCell,
       sorter: (a, b) => a.outstanding - b.outstanding,
       render: (value: number) => formatMoney(value),
     },
@@ -73,25 +87,13 @@ const CustomerLedgerModal = () => {
       ),
     },
     {
-      title: "Actions",
+      title: "Action",
       key: "actions",
-      width: 90,
       align: "center",
+      className: nowrapCell,
       render: (_, customer) => (
         <RequirePermission can="encodeTransactions" fallback={null}>
-          <AppButton
-            variant="outline"
-            size="icon-sm"
-            aria-label={`Customer details for ${customer.customerName}`}
-            tooltip={
-              recordFor(customer)
-                ? "Edit customer details"
-                : "Fill in customer details"
-            }
-            onPress={() => detailsModal.openModal(customer)}
-          >
-            <IdCard />
-          </AppButton>
+          <RowActionMenu actions={actionsOf(customer)} />
         </RequirePermission>
       ),
     },

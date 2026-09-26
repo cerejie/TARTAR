@@ -1,4 +1,4 @@
-import { FileCheck, FileText, History, Pencil, Plus, Trash2, User } from "lucide-react";
+import { FileCheck, FileText, History, Pencil, Plus, Trash2 } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
@@ -6,14 +6,13 @@ import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
 import DisbursementHistoryModal from "../../disbursement/modal/DisbursementHistoryModal";
 import StatusTag from "../../common/status/StatusTag";
-import { userRoleLabels } from "../../../enums/role.enum";
+import UserCell from "../../user/table/cells/UserCell";
 import { cashAccountLabels } from "../../../enums/transaction.enum";
 import {
   voucherStatusColors,
@@ -33,7 +32,7 @@ import {
 } from "../../../models/data/transaction/transaction.request";
 import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
 import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
-import { formatDate, formatMoney, formatTime } from "../../../utils/format.utils";
+import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
 
 const PurchasesTable = () => {
   const {
@@ -72,11 +71,6 @@ const PurchasesTable = () => {
   const payeeOf = (row: IDisbursement) =>
     row.voucher?.payee ?? row.supplier?.name ?? "—";
 
-  const userRoleOf = (row: IDisbursement) => {
-    const user = row.created_by ? userById.get(row.created_by) : undefined;
-    return user ? userRoleLabels[user.role] : "—";
-  };
-
   const actionsOf = (row: IDisbursement): IRowAction[] => {
     const locked = isDisbursementLocked(row);
 
@@ -85,9 +79,8 @@ const PurchasesTable = () => {
         ? [
             {
               key: "edit",
-              label: locked
-                ? "Locked — voucher approved or printed"
-                : "Edit purchase",
+              label: "Edit purchase",
+              hint: locked ? "Locked" : undefined,
               icon: <Pencil />,
               disabled: locked,
               onSelect: () => editModal.openModal(row),
@@ -168,9 +161,8 @@ const PurchasesTable = () => {
             key: "user",
             skeleton: "avatar" as const,
             render: (_: unknown, row: IDisbursement) => (
-              <AvatarCell
-                name={userNameOf(row.created_by)}
-                hint={userRoleOf(row)}
+              <UserCell
+                user={row.created_by ? userById.get(row.created_by) : undefined}
               />
             ),
           },
@@ -214,6 +206,11 @@ const PurchasesTable = () => {
           label: "Description",
           render: (row) => row.description || "—",
         },
+        {
+          key: "recorded_at",
+          label: "Recorded at",
+          render: (row) => formatDateTime(row.created_at),
+        },
       ],
     },
     {
@@ -232,39 +229,8 @@ const PurchasesTable = () => {
           render: (row) =>
             row.voucher ? voucherTypeLabels[row.voucher.type] : "—",
         },
-        {
-          key: "printed",
-          label: "Printed",
-          render: (row) => (row.voucher?.printed ? "Yes" : "No"),
-        },
       ],
     },
-    ...(permissions.isManager
-      ? [
-          {
-            key: "record",
-            title: "Recorded by",
-            icon: <User />,
-            items: [
-              {
-                key: "recorded_by",
-                label: "Recorded by",
-                render: (row: IDisbursement) => userNameOf(row.created_by),
-              },
-              {
-                key: "role",
-                label: "Role",
-                render: (row: IDisbursement) => userRoleOf(row),
-              },
-              {
-                key: "recorded_at",
-                label: "Recorded at",
-                render: (row: IDisbursement) => formatTime(row.created_at),
-              },
-            ],
-          },
-        ]
-      : []),
   ];
 
   return (

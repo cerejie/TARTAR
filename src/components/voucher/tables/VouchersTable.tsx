@@ -29,11 +29,17 @@ import {
   voucherPurpose,
   type IVoucher,
 } from "../../../models/data/voucher/voucher.response";
-import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
+import {
+  cellHint,
+  nowrapCell,
+  stackedCell,
+  tagRow,
+} from "../../../styles/table/table.styles";
 import {
   formatDate,
   formatDateTime,
   formatMoney,
+  formatTime,
 } from "../../../utils/format.utils";
 
 const VouchersTable = () => {
@@ -83,7 +89,8 @@ const VouchersTable = () => {
         : []),
       {
         key: "print",
-        label: isApproved ? "Print voucher" : "Approve to print",
+        label: "Print voucher",
+        hint: isApproved ? undefined : "Needs approval",
         icon: <Printer />,
         disabled: !isApproved,
         onSelect: () => print(voucher),
@@ -121,7 +128,12 @@ const VouchersTable = () => {
       title: "Created",
       dataIndex: "created_at",
       className: nowrapCell,
-      render: (value: string) => formatDateTime(value),
+      render: (value: string) => (
+        <span className={stackedCell}>
+          {formatDate(value)}
+          <span className={cellHint}>{formatTime(value)}</span>
+        </span>
+      ),
     },
     {
       title: "Status",

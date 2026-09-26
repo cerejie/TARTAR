@@ -173,16 +173,6 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       icon: <FileText />,
       items: [
         {
-          key: "amount",
-          label: "Amount",
-          render: (row) => formatMoney(row.amount),
-        },
-        {
-          key: "paid",
-          label: "Paid",
-          render: (row) => formatMoney(row.paid_amount),
-        },
-        {
           key: "created",
           label: "Created",
           render: (row) => formatDateTime(row.created_at),

@@ -39,10 +39,8 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
   const actionsOf = (party: ILedgerPartySummary): IRowAction[] => [
     {
       key: "payment",
-      label:
-        party.unpaidCount === 0
-          ? "Record payment — nothing unpaid"
-          : "Record payment",
+      label: "Record payment",
+      hint: party.unpaidCount === 0 ? "Nothing unpaid" : undefined,
       icon: <CircleDollarSign />,
       disabled: party.unpaidCount === 0,
       onSelect: () => openPaymentForParty(party),

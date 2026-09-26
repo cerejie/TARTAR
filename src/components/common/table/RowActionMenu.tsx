@@ -1,11 +1,14 @@
+import { Fragment } from "react";
 import { EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import { rowActionItem, rowActionMenu } from "../../../styles/table/table.styles";
 import type { IRowAction } from "../../../models/common/action.model";
 
 type IProps = {
@@ -15,42 +18,38 @@ type IProps = {
 const RowActionMenu = ({ actions }: IProps) => {
   if (actions.length === 0) return null;
 
-  if (actions.length === 1) {
-    const [action] = actions;
-    return (
-      <TooltipTrigger>
-        <Button
-          variant={action.danger ? "destructive" : "outline"}
-          size="icon-sm"
-          isDisabled={action.disabled}
-          aria-label={action.label}
-          onPress={action.onSelect}
-        >
-          {action.icon}
-        </Button>
-        <Tooltip>{action.label}</Tooltip>
-      </TooltipTrigger>
-    );
-  }
+  const firstDangerIndex = actions.findIndex((action) => action.danger);
 
   return (
     <DropdownMenuTrigger>
       <Button variant="outline" size="icon-sm" aria-label="Row actions">
         <EllipsisVertical />
       </Button>
-      <DropdownMenu placement="bottom end" aria-label="Row actions">
-        {actions.map((action) => (
-          <DropdownMenuItem
-            key={action.key}
-            id={action.key}
-            textValue={action.label}
-            variant={action.danger ? "destructive" : "default"}
-            isDisabled={action.disabled}
-            onAction={action.onSelect}
-          >
-            {action.icon}
-            {action.label}
-          </DropdownMenuItem>
+      <DropdownMenu
+        placement="bottom end"
+        aria-label="Row actions"
+        className={rowActionMenu}
+      >
+        {actions.map((action, index) => (
+          <Fragment key={action.key}>
+            {index > 0 && index === firstDangerIndex ? (
+              <DropdownMenuSeparator />
+            ) : null}
+            <DropdownMenuItem
+              id={action.key}
+              textValue={action.label}
+              variant={action.danger ? "destructive" : "default"}
+              isDisabled={action.disabled}
+              onAction={action.onSelect}
+              className={rowActionItem}
+            >
+              {action.icon}
+              {action.label}
+              {action.hint ? (
+                <DropdownMenuShortcut>{action.hint}</DropdownMenuShortcut>
+              ) : null}
+            </DropdownMenuItem>
+          </Fragment>
         ))}
       </DropdownMenu>
     </DropdownMenuTrigger>

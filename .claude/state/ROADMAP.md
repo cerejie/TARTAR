@@ -1,5 +1,5 @@
 # ROADMAP — Visual UI/UX audit + polish (every page and modal)
-Updated: 2026-09-26
+Updated: 2026-09-27
 
 ## Goal
 Every screen and modal is checked visually (desktop + phone, light + dark) with a senior
@@ -121,6 +121,19 @@ practical flow (primary action placement, destructive actions separated).
   scoped to `not-data-selected` in ui/select.tsx + ui/combobox.tsx. F3 modal.styles
   confirmAction cva (solid destructive for delete), ConfirmationModal defaults
   Confirm/Delete + Cancel. F4 public.styles errorCard border removed (Empty adds border-dashed).
+- [x] V4 — tables + row UI (compiled, not screenshot-verified, 2026-09-27): F5 root cause =
+  ui TableCell whitespace-nowrap on every cell -> dataTableCell whitespace-normal (nowrapCell
+  columns still win); Vouchers "Created" stacked date/time. F6 new
+  components/user/table/cells/UserCell.tsx (muted "—" when no user) in Transactions/Purchases/
+  Expenses. F7/F8 RowActionMenu always a kebab menu (w-auto min-w-48, nowrap items, separator
+  before first danger item, IRowAction.hint -> DropdownMenuShortcut); locked/disabled labels
+  shortened to label + hint ("Locked", "Nothing unpaid", "Needs approval"); CustomerLedgerModal
+  id-card button -> RowActionMenu. F9 rowDetail* = 8rem label grid, values left, auto-fill
+  sections; dropped duplicate fields (Tx Time + Recorded-by section; disbursement Recorded-by
+  section -> "Recorded at", Printed; ledger Amount/Paid). F10 TablePagination = range left,
+  prev/pages/next/size right. F11 no code divergence found (both scopes share
+  LedgerPartiesTable, align right) — nowrap added on CustomerLedgerModal Outstanding; re-check
+  in capture. F12 branch voucher prefix -> StatusTag like category codes.
 
 ## Findings (desktop; mobile deferred by user)
 
@@ -204,11 +217,11 @@ loading/error states, long-name/large-money stress, validation errors (never pre
 
 ## Next
 
-1. **V4 — tables + row UI** (F5-F12). Start with a quick dark-mode capture of V3 (Overdue chips,
-   danger StatCards, delete confirm, Sort select open, 404) if the user wants it verified.
-2. **V5 — page composition + filters** (F13-F16, F19; F17/F18 decided: no change).
-3. **V6 — modals + forms** (F20-F25; F24 decided, see Decisions locked).
-4. **V7 — dashboard charts** (F26-F28).
+1. **V5 — page composition + filters** (F13-F16, F19; F17/F18 decided: no change). Optionally
+   first a capture of V3 + V4 (dark chips, row menus, expanded rows, pager, Vouchers at 1440,
+   Receivables "By customer" Outstanding alignment).
+2. **V6 — modals + forms** (F20-F25; F24 decided, see Decisions locked).
+3. **V7 — dashboard charts** (F26-F28).
 Order may be changed by the user. Mobile (M*) goes to a new roadmap after V7.
 
 ## Open
@@ -216,5 +229,5 @@ Order may be changed by the user. Mobile (M*) goes to a new roadmap after V7.
   20260722000008) not yet applied to Supabase — accountant voucher views stay empty until then.
 
 ## State
-Branch: development-overhaul · Uncommitted: V3 src changes + .claude/state · Last check:
-yarn build + yarn lint clean (after V3).
+Branch: development-overhaul · Uncommitted: V4 src changes + .claude/state · Last check:
+yarn build + yarn lint clean (after V4).

@@ -20,10 +20,12 @@ import {
 } from "../../../models/common/pagination.model";
 import {
   tablePagination,
+  tablePaginationControls,
   tablePaginationEllipsis,
   tablePaginationNav,
   tablePaginationPage,
   tablePaginationPages,
+  tablePaginationRange,
   tablePaginationSelect,
   tablePaginationSelectTrigger,
   tablePaginationSize,
@@ -59,75 +61,78 @@ const TablePagination = ({
 
   return (
     <div className={tablePagination}>
-      <Button
-        variant="outline"
-        size="icon"
-        className={tablePaginationStep}
-        aria-label="Previous page"
-        isDisabled={pageNumber <= 1}
-        onPress={() => onPageChange(pageNumber - 1, pageSize)}
-      >
-        <ChevronLeft />
-      </Button>
+      <span className={tablePaginationRange}>{rangeLabel}</span>
 
-      <Pagination className={tablePaginationNav}>
-        <PaginationContent className={tablePaginationPages}>
-          {pageItems(pageNumber, lastPage).map((item) => (
-            <PaginationItem key={item}>
-              {typeof item === "number" ? (
-                <Button
-                  variant={item === pageNumber ? "default" : "ghost"}
-                  size="icon-sm"
-                  className={tablePaginationPage({ active: item === pageNumber })}
-                  aria-label={`Page ${item}`}
-                  aria-current={item === pageNumber ? "page" : undefined}
-                  onPress={() => onPageChange(item, pageSize)}
-                >
-                  {item}
-                </Button>
-              ) : (
-                <PaginationEllipsis className={tablePaginationEllipsis} />
-              )}
-            </PaginationItem>
-          ))}
-        </PaginationContent>
-      </Pagination>
+      <div className={tablePaginationControls}>
+        <Button
+          variant="outline"
+          size="icon"
+          className={tablePaginationStep}
+          aria-label="Previous page"
+          isDisabled={pageNumber <= 1}
+          onPress={() => onPageChange(pageNumber - 1, pageSize)}
+        >
+          <ChevronLeft />
+        </Button>
 
-      <div className={tablePaginationSize}>
-        {rangeLabel}
+        <Pagination className={tablePaginationNav}>
+          <PaginationContent className={tablePaginationPages}>
+            {pageItems(pageNumber, lastPage).map((item) => (
+              <PaginationItem key={item}>
+                {typeof item === "number" ? (
+                  <Button
+                    variant={item === pageNumber ? "default" : "ghost"}
+                    size="icon-sm"
+                    className={tablePaginationPage({ active: item === pageNumber })}
+                    aria-label={`Page ${item}`}
+                    aria-current={item === pageNumber ? "page" : undefined}
+                    onPress={() => onPageChange(item, pageSize)}
+                  >
+                    {item}
+                  </Button>
+                ) : (
+                  <PaginationEllipsis className={tablePaginationEllipsis} />
+                )}
+              </PaginationItem>
+            ))}
+          </PaginationContent>
+        </Pagination>
+
+        <Button
+          variant="outline"
+          size="icon"
+          className={tablePaginationStep}
+          aria-label="Next page"
+          isDisabled={pageNumber >= lastPage}
+          onPress={() => onPageChange(pageNumber + 1, pageSize)}
+        >
+          <ChevronRight />
+        </Button>
+
         {showSizeChanger ? (
-          <Select
-            aria-label="Items per page"
-            value={String(pageSize)}
-            onChange={changeSize}
-            className={tablePaginationSelect}
-          >
-            <SelectTrigger size="sm" className={tablePaginationSelectTrigger}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {pageSizes.map((size) => (
-                  <SelectItem key={size} id={String(size)}>
-                    {String(size)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <div className={tablePaginationSize}>
+            <Select
+              aria-label="Items per page"
+              value={String(pageSize)}
+              onChange={changeSize}
+              className={tablePaginationSelect}
+            >
+              <SelectTrigger size="sm" className={tablePaginationSelectTrigger}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {pageSizes.map((size) => (
+                    <SelectItem key={size} id={String(size)}>
+                      {String(size)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         ) : null}
       </div>
-
-      <Button
-        variant="outline"
-        size="icon"
-        className={tablePaginationStep}
-        aria-label="Next page"
-        isDisabled={pageNumber >= lastPage}
-        onPress={() => onPageChange(pageNumber + 1, pageSize)}
-      >
-        <ChevronRight />
-      </Button>
     </div>
   );
 };

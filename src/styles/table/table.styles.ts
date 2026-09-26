@@ -32,7 +32,7 @@ export const dataTableRowClickable = "cursor-pointer";
 
 export const dataTableRowOverdue = "bg-danger-bg/60 hover:bg-danger-bg";
 
-export const dataTableCell = cva("h-14 px-4 py-2 text-sm text-foreground", {
+export const dataTableCell = cva("h-14 px-4 py-2 text-sm whitespace-normal text-foreground", {
   variants: {
     align: { left: "", center: "text-center", right: "text-right tabular-nums" },
   },
@@ -86,20 +86,21 @@ export const rowDetailReveal = cva("overflow-hidden duration-200", {
   defaultVariants: { closing: false },
 });
 
-export const rowDetailContent = "grid gap-6 px-4 py-4 md:grid-cols-2 xl:grid-cols-3";
+export const rowDetailContent =
+  "grid gap-x-10 gap-y-5 px-4 py-4 md:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))]";
 
-export const rowDetailSection = "flex min-w-0 flex-col gap-2";
+export const rowDetailSection = "flex min-w-0 max-w-md flex-col gap-2";
 
 export const rowDetailSectionTitle =
   "flex items-center gap-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase";
 
 export const rowDetailSectionIcon = "inline-flex [&_svg]:size-3.5";
 
-export const rowDetailField = "flex items-baseline justify-between gap-4 text-sm";
+export const rowDetailField = "grid grid-cols-[8rem_minmax(0,1fr)] items-baseline gap-3 text-sm";
 
 export const rowDetailLabel = "text-muted-foreground";
 
-export const rowDetailValue = "min-w-0 text-right font-medium";
+export const rowDetailValue = "min-w-0 font-medium break-words";
 
 export const tablePanel = "flex min-w-0 flex-col gap-3";
 
@@ -107,11 +108,15 @@ export const tablePanelBody = "min-w-0";
 
 export const tablePanelTitle = "font-heading text-base font-semibold text-foreground";
 
-export const tablePagination = "flex items-center gap-2 pt-2";
+export const tablePagination = "flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-2";
+
+export const tablePaginationRange = "text-sm whitespace-nowrap text-muted-foreground tabular-nums";
+
+export const tablePaginationControls = "flex items-center gap-2";
 
 export const tablePaginationStep = "rounded-full";
 
-export const tablePaginationNav = "flex-1";
+export const tablePaginationNav = "mx-0 w-auto";
 
 export const tablePaginationPages = "flex items-center gap-1";
 
@@ -124,8 +129,7 @@ export const tablePaginationPage = cva("size-8 rounded-full tabular-nums", {
 
 export const tablePaginationEllipsis = "size-8 text-muted-foreground";
 
-export const tablePaginationSize =
-  "hidden items-center gap-2 text-sm whitespace-nowrap text-muted-foreground tabular-nums md:flex";
+export const tablePaginationSize = "hidden md:flex";
 
 export const tablePaginationSelect = "w-18";
 
@@ -140,6 +144,12 @@ export const avatarCellText = "flex min-w-0 flex-col";
 export const avatarCellName = "truncate font-medium";
 
 export const nowrapCell = "whitespace-nowrap";
+
+export const emptyCell = "text-muted-foreground";
+
+export const rowActionMenu = "w-auto min-w-48";
+
+export const rowActionItem = "whitespace-nowrap";
 
 export const tagRow = "inline-flex items-center gap-2";
 
