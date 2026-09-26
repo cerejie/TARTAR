@@ -4,17 +4,43 @@ import {
   expenseCategoryEditModalKey,
 } from "../../../keys/modal.keys";
 import { expenseCategoryListKey } from "../../../keys/query.keys";
+import type { IFieldConfig } from "../../../models/common/field.model";
 import type { IExpenseCategoryInput } from "../../../models/data/expense-category/expense.category.request";
 import type { IExpenseCategory } from "../../../models/data/expense-category/expense.category.response";
 import referenceServices from "../../../services/data/reference.services";
+import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { useExpenseCategoryListHook } from "./expense.category.list.hook";
 
+export const expenseCategoryFormFields: IFieldConfig<IExpenseCategoryInput>[] =
+  [
+    {
+      name: "name",
+      label: "Category name",
+      type: "text",
+      placeholder: "e.g. Fuel",
+    },
+    {
+      name: "code",
+      label: "Voucher code (3 letters)",
+      type: "text",
+      placeholder: "e.g. FUE",
+    },
+    { name: "sort", label: "Sort order", type: "number" },
+  ];
+
 export const useExpenseCategoryManageHook = () => {
   const createModal = useModal(expenseCategoryCreateModalKey);
   const editModal = useModal<IExpenseCategory>(expenseCategoryEditModalKey);
-  const { expenseCategories, loading } = useExpenseCategoryListHook();
+  const openConfirm = useConfirm();
+  const {
+    expenseCategories,
+    isInitialLoading,
+    isRefreshing,
+    error,
+    refetch,
+  } = useExpenseCategoryListHook();
 
   const invalidate = [expenseCategoryListKey];
   const editing = editModal.modal.data;
@@ -53,6 +79,33 @@ export const useExpenseCategoryManageHook = () => {
     { successMessage: "Category deleted", invalidate }
   );
 
+  const confirmArchive = (category: IExpenseCategory) =>
+    openConfirm({
+      title: `Archive ${category.name}?`,
+      message:
+        "It stops appearing on the expense form but past expenses keep it.",
+      okText: "Archive",
+      onConfirm: () =>
+        setActiveMutation.mutate({ slug: category.slug, active: false }),
+    });
+
+  const confirmRestore = (category: IExpenseCategory) =>
+    openConfirm({
+      title: `Restore ${category.name}?`,
+      message: "It appears on the expense form again.",
+      okText: "Restore",
+      onConfirm: () =>
+        setActiveMutation.mutate({ slug: category.slug, active: true }),
+    });
+
+  const confirmRemove = (category: IExpenseCategory) =>
+    openConfirm({
+      kind: "delete",
+      title: `Delete ${category.name}?`,
+      message: "Only possible while no expense uses it — otherwise archive it.",
+      onConfirm: () => removeMutation.mutate(category.slug),
+    });
+
   const createDefaults: DefaultValues<IExpenseCategoryInput> = {
     name: "",
     code: "",
@@ -67,7 +120,10 @@ export const useExpenseCategoryManageHook = () => {
 
   return {
     expenseCategories,
-    loading,
+    loading: isInitialLoading,
+    refreshing: isRefreshing,
+    error,
+    retry: refetch,
     editing,
     createModal,
     editModal,
@@ -75,7 +131,8 @@ export const useExpenseCategoryManageHook = () => {
     editDefaults,
     createMutation,
     updateMutation,
-    setActiveMutation,
-    removeMutation,
+    confirmArchive,
+    confirmRestore,
+    confirmRemove,
   };
 };

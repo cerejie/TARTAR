@@ -1,11 +1,14 @@
 import type { IDataTableColumn } from "../../models/common/table.model";
 import type { IExpenseCategory } from "../../models/data/expense-category/expense.category.response";
-import type { IExpenseRow } from "../../models/data/report/report.response";
+import type {
+  IExpenseRow,
+  IReportState,
+} from "../../models/data/report/report.response";
 import type { ITransaction } from "../../models/data/transaction/transaction.response";
 import { formatMoney } from "../../utils/format.utils";
 import { expenseRows } from "../../utils/report.utils";
-import SectionCard from "../common/card/SectionCard";
 import DataTable from "../common/table/DataTable";
+import TablePanel from "../common/table/TablePanel";
 
 const columns: IDataTableColumn<IExpenseRow>[] = [
   { title: "Expense type", dataIndex: "label" },
@@ -17,26 +20,31 @@ const columns: IDataTableColumn<IExpenseRow>[] = [
   },
 ];
 
-type IProps = {
+type IProps = IReportState & {
   transactions: ITransaction[];
   categories: IExpenseCategory[];
-  loading: boolean;
 };
 
-const ExpensesReport = ({ transactions, categories, loading }: IProps) => {
+const ExpensesReport = ({
+  transactions,
+  categories,
+  loading,
+  refreshing,
+  error,
+  onRetry,
+}: IProps) => {
   return (
-    <SectionCard
-      title="Expenses by Type"
-      subtitle="Totals for the selected period"
-      flush
-    >
+    <TablePanel title="Expenses by Type">
       <DataTable<IExpenseRow>
         columns={columns}
         data={expenseRows(transactions, categories)}
         loading={loading}
+        refreshing={refreshing}
+        error={error}
+        onRetry={onRetry}
         rowKey="key"
       />
-    </SectionCard>
+    </TablePanel>
   );
 };
 

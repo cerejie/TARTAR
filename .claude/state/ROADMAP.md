@@ -1,5 +1,5 @@
 # ROADMAP — "Airy blue" redesign (EduMate mockup) on shadcn + Tailwind
-Updated: 2026-09-26 (T5b closed)
+Updated: 2026-09-26 (T5c closed)
 
 ## Goal
 Every screen matches the design spec below: pastel backdrop, floating top bar + floating
@@ -94,6 +94,7 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
 - Sort / status (T5a): hook/common/sort.hook.ts `useSortOption(key, options, onChange)` ; hook/common/filter.hook.ts `useFilterField(scope, field, paginationKey)` (resets page 1) ; common/filter/StatusFilterTabs.tsx (ViewSwitch + "All") ; common/table/{ProgressCell,TablePanel (title)}.tsx ; enums/ledger.enum.ts ledgerStatusFilter* / ledgerSortOptions / paymentSortOptions ; keys/table.keys.ts *SortKey ; ILedgerFilters.voucherStatus (transaction.services disbursementQuery `vouchers!inner`)
 - Screens (T5a): pages/{Purchases,Expenses} tabs = components/disbursement/menus/VoucherStatusTabs ; pages/{Receivables,Payables} = components/ledger/{cards/LedgerSummaryCards, menus/{LedgerStatusTabs,CustomerLedgerButton}, tables/{LedgerRecordsTable,LedgerPaymentsTable}, modal/RecordPaymentModal} ; hooks disbursement.list / ledger.list / payment.list
 - Screens (T5b): pages/Vouchers = components/voucher/{menus/VouchersStatusTabs, tables/VouchersTable} + hook/data/voucher/voucher.list.hook (paged, filter scope "vouchers", confirmDecision) ; pages/Branches = components/branch/tables/{BranchesTable,BranchMonitorTable} + branch.manage.hook (confirmArchive/confirmRestore) ; pages/Users = components/user/tables/UsersTable + user.manage.hook (confirmApproval/confirmRemove, displayName)
+- Screens (T5c): Dashboard = components/dashboard/{DueAlertCards,SalesOverviewCard,CashFlowDonut,NotificationsFeed} + dashboard.hook (summary/sales/alerts error+retry) ; alert grouping utils/notification.utils.ts `notificationGroups` (types + notificationKindLabels/Paths in models/data/dashboard/dashboard.response.ts) ; common/card/InfoCard.tsx ("Recommended" card) + common/view/SectionHeading.tsx ; Reports = report/{Period,Expenses,CashFlow,Ledger}Report in TablePanel, IReportState (models/data/report/report.response.ts) ; Master data = components/master-data/tables/{SuppliersTable,ExpenseCategoriesTable} + supplier.manage / expense.category.manage hooks (formFields, confirm*) ; ledger By-party = ledger/{menus/LedgerViewTabs, views/LedgerRecordsSection} + hook/data/ledger/ledger.view.hook.ts (?view=records|parties, enums ledgerViewValues)
 - Reference screen: components/transaction/tables/TransactionsTable.tsx + hook/data/transaction/transaction.list.hook.ts
 
 ## Done
@@ -175,23 +176,28 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
   (lookup list). FilterToolbar children optional. TableDecor ColumnLabel + columnLabel/columnIcon
   styles deleted; RowIcon no longer exported.
 
+- T5c Dashboard + Reports + Master data (v1.19): CardTone + SectionCard `tone` deleted (all cards
+  white); ChartTone renamed brand/sky/violet/positive/warning/negative (chart-1..6). Dashboard:
+  DueAlertCards (SectionHeading + up to 4 InfoCards, overdue first, open-ledger button;
+  loading/error/empty) above the stats, NotificationsPanel deleted, cash-flow card white (donut
+  text = foreground), error/retry on every tile + sales + cash flow. Reports: type pills in the
+  title row, tables in titled TablePanel, loading/refreshing/error/retry. Master data: pills in the
+  title row; Panels -> tables (AvatarCell, RowActionMenu; category restore now confirms; supplier
+  contact person merged into the avatar hint). Receivables/Payables: "Records | By customer/
+  supplier" pills in the toolbar row; status pills hide in the party view (party totals ignore
+  status). TableDecor kept — PaymentsPanel + CustomerLedgerModal still use NameCell/RowActions.
+
 ## Next
-1. **T5c Dashboard + Reports + Master data** — Dashboard (bento white cards, blue charts,
-   notifications above stats, the "Recommended" card style for list cards), Reports (ViewSwitch
-   pills in the title row, report tables in TablePanel), Master data (SuppliersPanel +
-   ExpenseCategoriesPanel -> components/master-data/tables/*Table with RowActionMenu + useConfirm,
-   AvatarCell; retire NameCell/RowActions where the last consumer goes). Also mount
-   LedgerPartiesTable as a "By party" view on Receivables/Payables (decided: it is the only
-   per-supplier outstanding total; payments by allocation already exist via RecordPaymentModal,
-   so no legacy feature was lost).
-2. **T5d Auth + Error pages** — backdrop gradient, blue submit, retire bg-auth-hero/-submit
+1. **T5d Auth + Error pages** — backdrop gradient, blue submit, retire bg-auth-hero/-submit
    lime/lilac remnants in theme.css + styles/layout/public.styles.ts.
-3. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
-   updated to the new token names, new primitives, lazy routes and state rules; delete this file.
+2. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
+   updated to the new token names, new primitives, lazy routes and state rules (CardTone is gone from the view vocabulary; InfoCard,
+   SectionHeading added); delete this file.
 
 ## Open
 - vouchers!inner filter is untested against the live DB — confirm the Purchases/Expenses pills.
 - Vouchers paging/filters untested against the live DB — confirm pills, search and sort.
+- PaymentsPanel (CustomerLedgerView) still uses NameCell/RowActions — convert when touched.
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (T5b, suggest v1.18) · Last check: yarn build + yarn lint clean
+Branch: development-overhaul · Uncommitted: yes (T5c, suggest v1.19) · Last check: yarn build + yarn lint clean

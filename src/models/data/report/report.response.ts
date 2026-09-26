@@ -53,3 +53,10 @@ export interface IReportData {
   payables: IPayable[];
   categories: IExpenseCategory[];
 }
+
+export interface IReportState {
+  loading: boolean;
+  refreshing: boolean;
+  error: string | null;
+  onRetry: () => void;
+}

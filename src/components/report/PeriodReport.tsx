@@ -3,12 +3,13 @@ import {
   transactionTypeLabels,
   type TransactionType,
 } from "../../enums/transaction.enum";
+import type { IReportState } from "../../models/data/report/report.response";
 import type { ITransaction } from "../../models/data/transaction/transaction.response";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { sumBy } from "../../utils/report.utils";
-import SectionCard from "../common/card/SectionCard";
 import StatCard from "../common/card/StatCard";
 import DataTable from "../common/table/DataTable";
+import TablePanel from "../common/table/TablePanel";
 import BentoCell from "../common/view/BentoCell";
 import BentoGrid from "../common/view/BentoGrid";
 
@@ -37,12 +38,17 @@ const columns: IDataTableColumn<ITransaction>[] = [
   },
 ];
 
-type IProps = {
+type IProps = IReportState & {
   transactions: ITransaction[];
-  loading: boolean;
 };
 
-const PeriodReport = ({ transactions, loading }: IProps) => {
+const PeriodReport = ({
+  transactions,
+  loading,
+  refreshing,
+  error,
+  onRetry,
+}: IProps) => {
   const sales = sumBy(transactions, (row) => row.type === "sale");
   const expenses = sumBy(transactions, (row) => row.type === "expense");
 
@@ -54,6 +60,8 @@ const PeriodReport = ({ transactions, loading }: IProps) => {
             title="Sales"
             value={sales}
             loading={loading}
+            error={error}
+            onRetry={onRetry}
             variant="positive"
           />
         </BentoCell>
@@ -62,6 +70,8 @@ const PeriodReport = ({ transactions, loading }: IProps) => {
             title="Expenses"
             value={expenses}
             loading={loading}
+            error={error}
+            onRetry={onRetry}
             variant="negative"
           />
         </BentoCell>
@@ -70,22 +80,24 @@ const PeriodReport = ({ transactions, loading }: IProps) => {
             title="Net"
             value={sales - expenses}
             loading={loading}
+            error={error}
+            onRetry={onRetry}
             variant="brand"
           />
         </BentoCell>
       </BentoGrid>
 
-      <SectionCard
-        title="Transactions"
-        flush
-      >
+      <TablePanel title="Transactions">
         <DataTable<ITransaction>
           columns={columns}
           data={transactions}
           loading={loading}
+          refreshing={refreshing}
+          error={error}
+          onRetry={onRetry}
           emptyText="No transactions in this period"
         />
-      </SectionCard>
+      </TablePanel>
     </>
   );
 };

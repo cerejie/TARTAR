@@ -48,3 +48,9 @@ export const pageSkeletonFilter = "h-10 w-28 rounded-pill";
 export const pageSkeletonRows = "flex flex-col gap-3";
 
 export const pageSkeletonRow = "h-12 w-full";
+
+export const sectionHeading = "flex flex-wrap items-center gap-3";
+
+export const sectionHeadingTitle = "font-heading text-lg font-semibold";
+
+export const sectionHeadingExtra = "ml-auto flex flex-wrap items-center gap-1";

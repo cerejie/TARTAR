@@ -73,3 +73,33 @@ export const dueAlertCount = (alerts: IDueAlerts): number =>
   alerts.overduePayables.length +
   alerts.nearDueReceivables.length +
   alerts.nearDuePayables.length;
+
+export type NotificationKind = "receivable" | "payable";
+
+export type NotificationTone = "negative" | "warning";
+
+export interface INotificationRow {
+  id: string;
+  name: string;
+  amount: number;
+  dueDate: string;
+  kind: NotificationKind;
+}
+
+export interface INotificationGroup {
+  key: string;
+  label: string;
+  variant: NotificationTone;
+  rows: INotificationRow[];
+  describe: (row: INotificationRow) => string;
+}
+
+export const notificationKindLabels: Record<NotificationKind, string> = {
+  receivable: "Receivable",
+  payable: "Payable",
+};
+
+export const notificationKindPaths: Record<NotificationKind, string> = {
+  receivable: "/receivables",
+  payable: "/payables",
+};

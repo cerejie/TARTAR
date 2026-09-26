@@ -1,10 +1,10 @@
-import { CircleDollarSign, IdCard, User } from "lucide-react";
+import { CircleDollarSign, IdCard } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import SearchInput from "../../common/filter/SearchInput";
+import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
-import { NameCell } from "../../common/table/TableDecor";
 import TablePanel from "../../common/table/TablePanel";
 import CustomerDetailsModal from "../CustomerDetailsModal";
 import { useLedgerFilters } from "../../../hook/common/filter.hook";
@@ -24,8 +24,15 @@ type IProps = {
 };
 
 const LedgerPartiesTable = ({ scope }: IProps) => {
-  const { partyLabel, parties, partiesLoading, openPaymentForParty } =
-    useLedgerScopeHook(scope);
+  const {
+    partyLabel,
+    parties,
+    partiesLoading,
+    partiesRefreshing,
+    partiesError,
+    retryParties,
+    openPaymentForParty,
+  } = useLedgerScopeHook(scope);
   const { filters, setFilters } = useLedgerFilters("ledger");
   const detailsModal = useModal<ILedgerPartySummary>(customerDetailsModalKey);
 
@@ -56,9 +63,8 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
     {
       title: partyLabel,
       dataIndex: "partyName",
-      render: (name: string) => (
-        <NameCell icon={<User />}>{name}</NameCell>
-      ),
+      skeleton: "avatar",
+      render: (name: string) => <AvatarCell name={name} />,
     },
     {
       title: "Outstanding",
@@ -107,6 +113,9 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
           columns={columns}
           data={parties}
           loading={partiesLoading}
+          refreshing={partiesRefreshing}
+          error={partiesError}
+          onRetry={retryParties}
           rowKey={(party) => party.partyId ?? `name:${party.partyName}`}
           emptyText={`No ${partyLabel.toLowerCase()}s match the current search`}
         />

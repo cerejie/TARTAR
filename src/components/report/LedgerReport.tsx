@@ -10,19 +10,19 @@ import {
   type IPayable,
   type IReceivable,
 } from "../../models/data/ledger/ledger.response";
+import type { IReportState } from "../../models/data/report/report.response";
 import StatusTag from "../common/status/StatusTag";
 import { dataTableRowOverdue } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { orderedLedger } from "../../utils/report.utils";
-import SectionCard from "../common/card/SectionCard";
 import StatCard from "../common/card/StatCard";
 import DataTable from "../common/table/DataTable";
+import TablePanel from "../common/table/TablePanel";
 import BentoCell from "../common/view/BentoCell";
 import BentoGrid from "../common/view/BentoGrid";
 
-type IProps<Row extends IReceivable | IPayable> = {
+type IProps<Row extends IReceivable | IPayable> = IReportState & {
   rows: Row[];
-  loading: boolean;
   nameOf: (row: Row) => string;
   label: string;
 };
@@ -30,6 +30,9 @@ type IProps<Row extends IReceivable | IPayable> = {
 const LedgerReport = <Row extends IReceivable | IPayable>({
   rows,
   loading,
+  refreshing,
+  error,
+  onRetry,
   nameOf,
   label,
 }: IProps<Row>) => {
@@ -83,6 +86,8 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
             title="Total outstanding"
             value={outstanding}
             loading={loading}
+            error={error}
+            onRetry={onRetry}
             variant="brand"
           />
         </BentoCell>
@@ -91,6 +96,8 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
             title="Overdue balance"
             value={overdueTotal}
             loading={loading}
+            error={error}
+            onRetry={onRetry}
             variant="negative"
           />
         </BentoCell>
@@ -99,24 +106,25 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
             title="Overdue records"
             value={overdueRows.length}
             loading={loading}
+            error={error}
+            onRetry={onRetry}
             raw
           />
         </BentoCell>
       </BentoGrid>
 
-      <SectionCard
-        title={`Outstanding ${label}s`}
-        subtitle="Overdue items first, highlighted in red"
-        flush
-      >
+      <TablePanel title={`Outstanding ${label}s`}>
         <DataTable<Row>
           columns={columns}
           data={orderedLedger(rows)}
           loading={loading}
+          refreshing={refreshing}
+          error={error}
+          onRetry={onRetry}
           emptyText="Nothing outstanding"
           rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
         />
-      </SectionCard>
+      </TablePanel>
     </>
   );
 };

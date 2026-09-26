@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn.utils";
-import type { CardTone } from "../../../models/common/view.model";
 import {
   sectionCardExtra,
   sectionCardFlushBody,
@@ -18,7 +17,6 @@ import {
   sectionCardInset,
   sectionCardRoot,
   sectionCardSkeleton,
-  sectionCardSubtitle,
   sectionCardTitle,
 } from "../../../styles/card/card.styles";
 import ErrorState from "../status/ErrorState";
@@ -27,7 +25,6 @@ type IProps = {
   title?: string;
   subtitle?: string;
   extra?: ReactNode;
-  tone?: CardTone;
   flush?: boolean;
   dense?: boolean;
   footer?: ReactNode;
@@ -41,7 +38,6 @@ const SectionCard = ({
   title,
   subtitle,
   extra,
-  tone = "surface",
   flush = false,
   dense = false,
   footer,
@@ -70,7 +66,7 @@ const SectionCard = ({
   return (
     <Card
       size={dense ? "sm" : "default"}
-      className={sectionCardRoot({ tone, flush })}
+      className={sectionCardRoot({ flush })}
     >
       {title || subtitle || extra ? (
         <CardHeader className={inset}>
@@ -78,9 +74,7 @@ const SectionCard = ({
             <CardTitle className={sectionCardTitle}>{title}</CardTitle>
           ) : null}
           {subtitle ? (
-            <CardDescription className={sectionCardSubtitle({ tone })}>
-              {subtitle}
-            </CardDescription>
+            <CardDescription>{subtitle}</CardDescription>
           ) : null}
           {extra ? (
             <CardAction className={sectionCardExtra}>{extra}</CardAction>

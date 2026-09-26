@@ -73,3 +73,6 @@ export const paymentSortOptions: readonly ISortOption[] = [
   { key: "amount-high", label: "Amount: high to low", column: "amount", direction: "descending" },
   { key: "amount-low", label: "Amount: low to high", column: "amount", direction: "ascending" },
 ];
+
+export const ledgerViewValues = ["records", "parties"] as const;
+export type LedgerView = (typeof ledgerViewValues)[number];

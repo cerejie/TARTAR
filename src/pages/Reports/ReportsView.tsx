@@ -11,6 +11,7 @@ import { useReportHook } from "../../hook/data/report/report.hook";
 import {
   reportTypeLabels,
   reportTypeValues,
+  type IReportState,
   type ReportType,
 } from "../../models/data/report/report.response";
 
@@ -23,14 +24,19 @@ const ReportsView = () => {
     payables,
     expenseCategories,
     loading,
+    refreshing,
+    error,
+    retry,
     print,
   } = useReportHook();
+
+  const state: IReportState = { loading, refreshing, error, onRetry: retry };
 
   const body = {
     receivables: (
       <LedgerReport
         rows={receivables}
-        loading={loading}
+        {...state}
         nameOf={(row) => row.customer_name}
         label="Customer"
       />
@@ -38,7 +44,7 @@ const ReportsView = () => {
     payables: (
       <LedgerReport
         rows={payables}
-        loading={loading}
+        {...state}
         nameOf={(row) => row.supplier_name}
         label="Supplier"
       />
@@ -47,10 +53,10 @@ const ReportsView = () => {
       <ExpensesReport
         transactions={transactions}
         categories={expenseCategories}
-        loading={loading}
+        {...state}
       />
     ),
-    cashflow: <CashFlowReport transactions={transactions} loading={loading} />,
+    cashflow: <CashFlowReport transactions={transactions} {...state} />,
   } as Partial<Record<ReportType, ReactNode>>;
 
   return (
@@ -61,7 +67,7 @@ const ReportsView = () => {
           Print report
         </AppButton>
       }
-      toolbar={
+      tabs={
         <ViewSwitch
           value={type}
           values={reportTypeValues}
@@ -71,7 +77,7 @@ const ReportsView = () => {
       }
     >
       {body[type] ?? (
-        <PeriodReport transactions={transactions} loading={loading} />
+        <PeriodReport transactions={transactions} {...state} />
       )}
     </ContentView>
   );

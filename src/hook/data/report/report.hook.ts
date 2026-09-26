@@ -69,12 +69,12 @@ export const useReportHook = () => {
   const receivables = receivableQuery.data ?? [];
   const payables = payableQuery.data ?? [];
 
-  const loading =
+  const activeQuery =
     type === "receivables"
-      ? receivableQuery.loading
+      ? receivableQuery
       : type === "payables"
-        ? payableQuery.loading
-        : transactionQuery.loading;
+        ? payableQuery
+        : transactionQuery;
 
   const print = () =>
     printReport({
@@ -97,7 +97,10 @@ export const useReportHook = () => {
     receivables,
     payables,
     expenseCategories,
-    loading,
+    loading: activeQuery.isInitialLoading,
+    refreshing: activeQuery.isRefreshing,
+    error: activeQuery.error,
+    retry: activeQuery.refetch,
     print,
   };
 };

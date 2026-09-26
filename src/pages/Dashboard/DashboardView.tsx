@@ -10,12 +10,11 @@ import {
 } from "lucide-react";
 import SectionCard from "../../components/common/card/SectionCard";
 import StatCard from "../../components/common/card/StatCard";
-import EmptyState from "../../components/common/status/EmptyState";
 import StatDelta from "../../components/common/status/StatDelta";
 import BentoCell from "../../components/common/view/BentoCell";
 import ContentView from "../../components/common/view/ContentView";
 import CashFlowDonut from "../../components/dashboard/CashFlowDonut";
-import NotificationsPanel from "../../components/dashboard/NotificationsPanel";
+import DueAlertCards from "../../components/dashboard/DueAlertCards";
 import SalesOverviewCard from "../../components/dashboard/SalesOverviewCard";
 import { useDashboardHook } from "../../hook/data/dashboard/dashboard.hook";
 import { formatDate, todayIso } from "../../utils/format.utils";
@@ -26,10 +25,16 @@ const DashboardView = () => {
     setSalesPeriod,
     summary,
     summaryLoading,
+    summaryError,
+    retrySummary,
     series,
     salesLoading,
+    salesError,
+    retrySales,
     alerts,
     alertsLoading,
+    alertsError,
+    retryAlerts,
     netProfit,
     lastMonthNetProfit,
     cashIn,
@@ -42,11 +47,22 @@ const DashboardView = () => {
       meta={formatDate(todayIso())}
       layout="bento"
     >
+      <BentoCell span="full">
+        <DueAlertCards
+          data={alerts}
+          loading={alertsLoading}
+          error={alertsError}
+          onRetry={retryAlerts}
+        />
+      </BentoCell>
+
       <BentoCell span="quarter">
         <StatCard
           title="Current Cash"
           value={summary?.currentCash}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="brand"
           icon={<Wallet />}
           caption="Available cash on hand"
@@ -57,6 +73,8 @@ const DashboardView = () => {
           title="Bank Balance"
           value={summary?.bankBalance}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           icon={<Landmark />}
           caption="Total in bank accounts"
         />
@@ -66,6 +84,8 @@ const DashboardView = () => {
           title="Today's Sales"
           value={summary?.todaysSales}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="positive"
           icon={<TrendingUp />}
           chip={
@@ -84,6 +104,8 @@ const DashboardView = () => {
           title="Today's Expenses"
           value={summary?.todaysExpenses}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="negative"
           icon={<FileText />}
           chip={
@@ -103,6 +125,8 @@ const DashboardView = () => {
           title="Accounts Receivable"
           value={summary?.accountsReceivable}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           icon={<User />}
           caption="Total outstanding"
         />
@@ -112,6 +136,8 @@ const DashboardView = () => {
           title="Accounts Payable"
           value={summary?.accountsPayable}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           icon={<FileCheck />}
           caption="Total outstanding"
         />
@@ -121,6 +147,8 @@ const DashboardView = () => {
           title="Monthly Sales"
           value={summary?.monthlySales}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="positive"
           icon={<ChartLine />}
           caption="Month to date"
@@ -131,6 +159,8 @@ const DashboardView = () => {
           title="Net Profit (MTD)"
           value={netProfit}
           loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
           variant="accent"
           icon={<ChartPie />}
           chip={
@@ -151,6 +181,8 @@ const DashboardView = () => {
           onSalesPeriodChange={setSalesPeriod}
           series={series}
           loading={salesLoading}
+          error={salesError}
+          onRetry={retrySales}
         />
       </BentoCell>
 
@@ -158,22 +190,16 @@ const DashboardView = () => {
         <SectionCard
           title="Cash Flow (MTD)"
           subtitle="Cash in vs. cash out this month"
-          tone="ink"
+          loading={summaryLoading}
+          error={summaryError}
+          onRetry={retrySummary}
         >
-          {summaryLoading ? (
-            <EmptyState description="Loading cash flow" loading />
-          ) : (
-            <CashFlowDonut
-              cashIn={cashIn}
-              cashOut={cashOut}
-              netCashFlow={netCashFlow}
-            />
-          )}
+          <CashFlowDonut
+            cashIn={cashIn}
+            cashOut={cashOut}
+            netCashFlow={netCashFlow}
+          />
         </SectionCard>
-      </BentoCell>
-
-      <BentoCell span="full">
-        <NotificationsPanel data={alerts} loading={alertsLoading} />
       </BentoCell>
     </ContentView>
   );

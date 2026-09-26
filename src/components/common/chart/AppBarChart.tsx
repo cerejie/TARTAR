@@ -37,7 +37,7 @@ const AppBarChart = <T,>({
   highlight,
 }: IProps<T>) => {
   const config = {
-    [yKey]: { label, color: chartColor.ink },
+    [yKey]: { label, color: chartColor.brand },
   } satisfies ChartConfig;
   const seriesFill = `var(--color-${yKey})`;
 
@@ -73,7 +73,7 @@ const AppBarChart = <T,>({
           {data.map((row) => (
             <Cell
               key={String(row[xKey])}
-              fill={highlight?.(row) ? chartColor.brand : seriesFill}
+              fill={highlight?.(row) ? chartColor.violet : seriesFill}
             />
           ))}
         </Bar>

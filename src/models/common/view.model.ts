@@ -7,8 +7,6 @@ export type BentoSpan =
   | "twoThirds"
   | "full";
 
-export type CardTone = "surface" | "ink" | "accent";
-
 export type StatusColor =
   | "default"
   | "positive"
@@ -18,9 +16,9 @@ export type StatusColor =
   | "brand";
 
 export type ChartTone =
-  | "ink"
-  | "accent"
   | "brand"
+  | "sky"
+  | "violet"
   | "positive"
   | "warning"
   | "negative";

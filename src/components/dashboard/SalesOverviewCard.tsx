@@ -20,6 +20,8 @@ type IProps = {
   onSalesPeriodChange: (period: SalesPeriod) => void;
   series: IDailySalesPoint[];
   loading: boolean;
+  error?: string | null;
+  onRetry: () => void;
 };
 
 const SalesOverviewCard = ({
@@ -27,6 +29,8 @@ const SalesOverviewCard = ({
   onSalesPeriodChange,
   series,
   loading,
+  error,
+  onRetry,
 }: IProps) => {
   const latestDate = series.length ? series[series.length - 1].date : null;
   const hasSales = series.length > 0;
@@ -34,6 +38,8 @@ const SalesOverviewCard = ({
   return (
     <SectionCard
       title="Sales Overview"
+      error={error}
+      onRetry={onRetry}
       extra={
         <ViewSwitch
           value={salesPeriod}

@@ -1,9 +1,9 @@
 import type { ChartTone } from "../../models/common/view.model";
 
 export const chartColor: Record<ChartTone, string> = {
-  ink: "var(--chart-1)",
-  accent: "var(--chart-2)",
-  brand: "var(--chart-3)",
+  brand: "var(--chart-1)",
+  sky: "var(--chart-2)",
+  violet: "var(--chart-3)",
   positive: "var(--chart-4)",
   warning: "var(--chart-5)",
   negative: "var(--chart-6)",

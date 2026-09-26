@@ -1,7 +1,7 @@
-import ExpenseCategoriesPanel from "../../components/master-data/ExpenseCategoriesPanel";
-import SuppliersPanel from "../../components/master-data/SuppliersPanel";
 import ContentView from "../../components/common/view/ContentView";
 import ViewSwitch from "../../components/common/view/ViewSwitch";
+import ExpenseCategoriesTable from "../../components/master-data/tables/ExpenseCategoriesTable";
+import SuppliersTable from "../../components/master-data/tables/SuppliersTable";
 import { useSearchParam } from "../../hook/common/search.param.hook";
 
 const sections = ["suppliers", "expense-categories"] as const;
@@ -21,7 +21,7 @@ const MasterDataView = () => {
 
   return (
     <ContentView
-      toolbar={
+      tabs={
         <ViewSwitch
           value={section}
           values={sections}
@@ -31,9 +31,9 @@ const MasterDataView = () => {
       }
     >
       {section === "suppliers" ? (
-        <SuppliersPanel />
+        <SuppliersTable />
       ) : (
-        <ExpenseCategoriesPanel />
+        <ExpenseCategoriesTable />
       )}
     </ContentView>
   );
