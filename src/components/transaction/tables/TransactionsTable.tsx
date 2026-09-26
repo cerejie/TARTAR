@@ -272,7 +272,6 @@ const TransactionsTable = () => {
       <EntityFormModal<ITransactionInput>
         open={formModal.modal.visible}
         title="Record transaction"
-        subtitle="Enter the details of the transaction."
         size="lg"
         sections={sections}
         schema={transactionSchema}

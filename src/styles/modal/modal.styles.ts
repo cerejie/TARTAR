@@ -23,7 +23,7 @@ export const modalBody = "-mx-6 max-h-[70dvh] overflow-y-auto px-6";
 export const modalActionSize =
   "[&_[data-slot=button]]:h-11 [&_[data-slot=button]]:px-6";
 
-export const modalFooter = `-mx-6 -mb-6 rounded-b-panel border-t border-border bg-muted/50 px-6 py-4 ${modalActionSize}`;
+export const modalFooter = `flex-wrap -mx-6 -mb-6 rounded-b-panel border-t border-border bg-muted/50 px-6 py-4 ${modalActionSize}`;
 
 export const drawerContent = "max-h-[92dvh] rounded-t-panel bg-panel";
 
@@ -36,7 +36,7 @@ export const drawerFooter = `border-t border-border bg-muted/50 pb-safe ${modalA
 
 export const confirmContent = "rounded-panel bg-panel ring-border shadow-panel";
 
-export const confirmFooter = `-mx-6 -mb-6 rounded-b-panel border-t border-border bg-muted/50 px-6 py-4 ${modalActionSize} [&_[data-slot=alert-dialog-cancel]]:h-11 [&_[data-slot=alert-dialog-cancel]]:px-6`;
+export const confirmFooter = `sm:flex-wrap -mx-6 -mb-6 rounded-b-panel border-t border-border bg-muted/50 px-6 py-4 ${modalActionSize} [&_[data-slot=alert-dialog-cancel]]:h-11 [&_[data-slot=alert-dialog-cancel]]:px-6`;
 
 export const confirmMedia = cva("", {
   variants: {

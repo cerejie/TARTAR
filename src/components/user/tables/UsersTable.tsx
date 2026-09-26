@@ -200,11 +200,10 @@ const UsersTable = () => {
 
       <EntityFormModal<IResetPasswordInput>
         open={resetModal.modal.visible}
-        title="Reset password"
-        subtitle={
+        title={
           resetModal.modal.data
-            ? `Set a new password for ${resetModal.modal.data.username}.`
-            : undefined
+            ? `Reset password · ${resetModal.modal.data.username}`
+            : "Reset password"
         }
         fields={resetFields}
         schema={resetPasswordSchema}

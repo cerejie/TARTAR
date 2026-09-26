@@ -60,7 +60,6 @@ const RecordPaymentModal = ({ scope }: IProps) => {
     <EntityFormModal<IPaymentFormInput>
       open={paymentModal.modal.visible && !paymentRowsLoading}
       title="Record payment"
-      subtitle="Amounts are applied per record and wait for verification."
       intro={intro}
       size="lg"
       sections={paymentSections}

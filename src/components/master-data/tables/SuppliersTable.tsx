@@ -110,7 +110,6 @@ const SuppliersTable = () => {
       <EntityFormModal<IPartyInput>
         open={createModal.modal.visible}
         title="Add supplier"
-        subtitle="Suppliers appear in every supplier selector in the app."
         fields={supplierFormFields}
         schema={partySchema}
         defaultValues={createDefaults}

@@ -249,7 +249,6 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       <EntityFormModal<ILedgerInput>
         open={formModal.modal.visible}
         title={`Record ${noun}`}
-        subtitle={`Enter the ${noun} details.`}
         size="lg"
         sections={sections}
         schema={schema}

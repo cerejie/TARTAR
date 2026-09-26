@@ -127,7 +127,6 @@ const BranchesTable = () => {
       <EntityFormModal<IBranchInput>
         open={createModal.modal.visible}
         title="Add branch"
-        subtitle="The voucher prefix starts every voucher number issued by this branch."
         fields={branchFormFields}
         schema={branchSchema}
         defaultValues={createDefaults}
@@ -140,7 +139,6 @@ const BranchesTable = () => {
       <EntityFormModal<IBranchInput>
         open={editModal.modal.visible}
         title={`Edit ${editing?.name ?? "branch"}`}
-        subtitle="A new voucher prefix applies to new vouchers only."
         fields={branchFormFields}
         schema={branchSchema}
         defaultValues={editDefaults}

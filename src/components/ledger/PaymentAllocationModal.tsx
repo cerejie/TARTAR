@@ -129,8 +129,7 @@ const PaymentAllocationModal = ({
 
   return (
     <AppModal
-      title="Record payment"
-      subtitle={customer.customerName}
+      title={`Record payment · ${customer.customerName}`}
       open={open}
       size="lg"
       onClose={onClose}

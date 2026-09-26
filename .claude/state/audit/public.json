@@ -1,0 +1,9 @@
+[
+ {"name":"p01-login","path":"/login"},
+ {"name":"p02-login-dark","path":"/login","dark":true},
+ {"name":"p03-login-phone","path":"/login","w":390,"h":844},
+ {"name":"p04-register","path":"/register"},
+ {"name":"p05-register-phone","path":"/register","w":390,"h":844},
+ {"name":"p06-login-errors","path":"/login","actions":[{"click":"button[type=submit]"}]},
+ {"name":"p07-404","path":"/nope-xyz"}
+]

@@ -1,14 +1,12 @@
 import type { ReactNode } from "react";
 import {
   Dialog,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Sheet,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -32,7 +30,6 @@ import {
 type IProps = {
   open: boolean;
   title: string;
-  subtitle?: string;
   size?: ModalSize;
   footer?: ReactNode;
   onClose: () => void;
@@ -42,7 +39,6 @@ type IProps = {
 const AppModal = ({
   open,
   title,
-  subtitle,
   size = "md",
   footer,
   onClose,
@@ -70,7 +66,6 @@ const AppModal = ({
       >
         <SheetHeader className={drawerHeaderRuled}>
           <SheetTitle>{title}</SheetTitle>
-          {subtitle ? <SheetDescription>{subtitle}</SheetDescription> : null}
         </SheetHeader>
 
         <div className={drawerBody}>{children}</div>
@@ -89,7 +84,6 @@ const AppModal = ({
     >
       <DialogHeader className={modalHeaderRuled}>
         <DialogTitle>{title}</DialogTitle>
-        {subtitle ? <DialogDescription>{subtitle}</DialogDescription> : null}
       </DialogHeader>
 
       <div className={modalBody}>{children}</div>

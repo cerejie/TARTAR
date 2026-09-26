@@ -38,13 +38,12 @@ const DisbursementHistoryModal = ({
 }: IProps) => {
   return (
     <AppModal
-      title="Edit history"
-      subtitle={
+      title={
         row
-          ? `${transactionTypeLabels[row.type]} · ${formatMoney(
+          ? `Edit history · ${transactionTypeLabels[row.type]} · ${formatMoney(
               row.amount
             )} · ${formatDate(row.txn_date)}`
-          : undefined
+          : "Edit history"
       }
       open={open}
       size="lg"

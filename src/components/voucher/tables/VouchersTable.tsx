@@ -251,7 +251,6 @@ const VouchersTable = () => {
       <EntityFormModal<IVoucherInput>
         open={formModal.modal.visible}
         title="Manual voucher"
-        subtitle="The voucher is submitted for approval before it can be printed."
         fields={fields}
         schema={voucherSchema}
         defaultValues={defaults}

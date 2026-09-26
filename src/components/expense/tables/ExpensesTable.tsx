@@ -313,7 +313,6 @@ const ExpensesTable = () => {
       <EntityFormModal<IDisbursementInput>
         open={formModal.modal.visible}
         title="Record expense"
-        subtitle="Enter the details of the expense. A voucher is generated automatically."
         size="lg"
         sections={sections}
         schema={expenseSchema}
@@ -328,7 +327,6 @@ const ExpensesTable = () => {
         <EntityFormModal<IDisbursementInput>
           open={editModal.modal.visible}
           title="Edit expense"
-          subtitle="Update the details of this expense."
           size="lg"
           sections={sections}
           schema={expenseSchema}

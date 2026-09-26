@@ -18,7 +18,7 @@ export const viewToolbarActions = "ml-auto flex flex-wrap items-center gap-2";
 export const viewMeta = "text-sm text-muted-foreground";
 
 export const viewSwitchItem =
-  "rounded-full px-4 data-selected:border-brand data-selected:bg-brand data-selected:text-on-brand data-selected:hover:bg-brand-deep";
+  "rounded-full px-4 data-selected:border-brand data-selected:bg-brand data-selected:text-on-brand data-selected:hover:bg-brand-deep data-selected:hover:text-on-brand data-selected:focus-visible:text-on-brand dark:data-selected:text-on-brand";
 
 export const viewBody = "flex min-w-0 flex-col gap-4";
 

@@ -100,7 +100,6 @@ const CustomerLedgerModal = () => {
   return (
     <AppModal
       title="Customer Ledger"
-      subtitle="Outstanding receivables by customer"
       open={ledgerModal.modal.visible}
       size="xl"
       onClose={close}

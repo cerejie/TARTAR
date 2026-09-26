@@ -55,8 +55,7 @@ const CustomerInfoModal = ({ open, customer, onClose, onEdit }: IProps) => {
   return (
     <DetailModal<ICustomerInfo>
       open={open}
-      title="Customer information"
-      subtitle={customer?.customerName}
+      title={customer ? `Customer information · ${customer.customerName}` : "Customer information"}
       record={info}
       items={infoItems}
       loading={loading}

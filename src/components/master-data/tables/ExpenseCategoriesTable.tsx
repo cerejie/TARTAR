@@ -132,7 +132,6 @@ const ExpenseCategoriesTable = () => {
       <EntityFormModal<IExpenseCategoryInput>
         open={createModal.modal.visible}
         title="Add expense category"
-        subtitle="Each category owns its voucher numbering code."
         fields={expenseCategoryFormFields}
         schema={expenseCategorySchema}
         defaultValues={createDefaults}

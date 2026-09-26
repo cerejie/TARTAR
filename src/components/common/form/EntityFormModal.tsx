@@ -22,7 +22,6 @@ import FormSection from "./FormSection";
 type IBaseProps<TValues extends FieldValues> = {
   open: boolean;
   title: string;
-  subtitle?: string;
   intro?: ReactNode;
   size?: ModalSize;
   schema: ZodType<TValues>;
@@ -42,7 +41,6 @@ type IProps<TValues extends FieldValues> = IBaseProps<TValues> &
 const EntityFormModal = <TValues extends FieldValues>({
   open,
   title,
-  subtitle,
   intro,
   size = "md",
   fields,
@@ -71,7 +69,6 @@ const EntityFormModal = <TValues extends FieldValues>({
     <AppModal
       open={open}
       title={title}
-      subtitle={subtitle}
       size={size}
       onClose={onClose}
       footer={

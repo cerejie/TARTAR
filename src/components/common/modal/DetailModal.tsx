@@ -22,7 +22,6 @@ import AppModal from "./AppModal";
 type IProps<TRecord> = {
   open: boolean;
   title: string;
-  subtitle?: string;
   size?: ModalSize;
   record: TRecord | null;
   items: IDetailItem<TRecord>[];
@@ -35,7 +34,6 @@ type IProps<TRecord> = {
 const DetailModal = <TRecord,>({
   open,
   title,
-  subtitle,
   size = "md",
   record,
   items,
@@ -87,7 +85,6 @@ const DetailModal = <TRecord,>({
     <AppModal
       open={open}
       title={title}
-      subtitle={subtitle}
       size={size}
       footer={footer}
       onClose={onClose}

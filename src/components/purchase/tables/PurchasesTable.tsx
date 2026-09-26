@@ -317,7 +317,6 @@ const PurchasesTable = () => {
       <EntityFormModal<IDisbursementInput>
         open={formModal.modal.visible}
         title="Record purchase"
-        subtitle="Enter the details of the purchase. A voucher is generated automatically."
         size="lg"
         sections={sections}
         schema={purchaseSchema}
@@ -332,7 +331,6 @@ const PurchasesTable = () => {
         <EntityFormModal<IDisbursementInput>
           open={editModal.modal.visible}
           title="Edit purchase"
-          subtitle="Update the details of this purchase."
           size="lg"
           sections={sections}
           schema={purchaseSchema}
