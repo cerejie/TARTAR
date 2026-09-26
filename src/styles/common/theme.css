@@ -212,8 +212,13 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-track) transparent;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-primary) transparent;
+    }
   }
 
   html,
@@ -245,8 +250,8 @@
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track,
@@ -254,15 +259,23 @@
     background: transparent;
   }
 
+  ::-webkit-scrollbar-track:vertical {
+    margin-block: var(--radius-panel);
+  }
+
+  ::-webkit-scrollbar-track:horizontal {
+    margin-inline: var(--radius-panel);
+  }
+
   ::-webkit-scrollbar-thumb {
-    background: var(--color-track);
+    background: var(--color-primary);
     border-radius: var(--radius-pill);
-    border: 3px solid transparent;
+    border: 2px solid transparent;
     background-clip: content-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-muted-foreground);
+    background: var(--color-brand-deep);
     background-clip: content-box;
   }
 }
