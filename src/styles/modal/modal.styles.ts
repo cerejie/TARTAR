@@ -48,6 +48,16 @@ export const confirmMedia = cva("", {
   defaultVariants: { kind: "confirm" },
 });
 
+export const confirmAction = cva("", {
+  variants: {
+    kind: {
+      confirm: "",
+      delete: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+    },
+  },
+  defaultVariants: { kind: "confirm" },
+});
+
 export const detailGrid = "grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2";
 
 export const detailItem = cva("flex min-w-0 flex-col gap-1", {

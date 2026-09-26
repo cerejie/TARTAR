@@ -65,4 +65,4 @@ export const authAltLink = "h-auto p-0 font-semibold";
 
 export const errorPage = "flex min-h-dvh items-center justify-center bg-app p-6 font-sans text-foreground";
 
-export const errorCard = "w-full max-w-[560px] rounded-panel border border-border bg-panel py-12 shadow-panel";
+export const errorCard = "w-full max-w-[560px] rounded-panel bg-panel py-12 shadow-panel";

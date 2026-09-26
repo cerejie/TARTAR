@@ -52,6 +52,9 @@
     --track: #e5e7eb;
     --info: #7c3aed;
     --info-soft: #efe9fe;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --danger-border: #fecaca;
     --backdrop: #eef2fb;
     --backdrop-periwinkle: #dfe6fb;
     --backdrop-blush: #f4e3f3;
@@ -95,6 +98,9 @@
     --track: #24304a;
     --info: #a78bfa;
     --info-soft: rgba(167, 139, 250, 0.16);
+    --danger: #f87171;
+    --danger-bg: rgba(248, 113, 113, 0.14);
+    --danger-border: rgba(248, 113, 113, 0.32);
     --backdrop: #0b1220;
     --backdrop-periwinkle: #13203d;
     --backdrop-blush: #1f1733;
@@ -147,6 +153,9 @@
   --color-track: var(--track);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
   --color-overlay: var(--overlay);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -161,9 +170,6 @@
   --color-positive: #16a34a;
   --color-positive-bright: #22c55e;
   --color-warning: #d97706;
-  --color-danger: #dc2626;
-  --color-danger-bg: #fef2f2;
-  --color-danger-border: #fecaca;
 
   --radius-panel: 1.25rem;
   --radius-pill: 999px;

@@ -30,7 +30,7 @@ export const dataTableRowStatic = "hover:bg-transparent";
 
 export const dataTableRowClickable = "cursor-pointer";
 
-export const dataTableRowOverdue = "bg-danger/5 hover:bg-danger/10";
+export const dataTableRowOverdue = "bg-danger-bg/60 hover:bg-danger-bg";
 
 export const dataTableCell = cva("h-14 px-4 py-2 text-sm text-foreground", {
   variants: {

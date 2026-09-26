@@ -17,6 +17,7 @@ import {
   useConfirmStore,
 } from "../../../store/common/confirm.store";
 import {
+  confirmAction,
   confirmContent,
   confirmFooter,
   confirmMedia,
@@ -25,6 +26,11 @@ import {
 const defaultTitles: Record<ConfirmKind, string> = {
   confirm: "Confirm action?",
   delete: "Delete record?",
+};
+
+const defaultOkTexts: Record<ConfirmKind, string> = {
+  confirm: "Confirm",
+  delete: "Delete",
 };
 
 const defaultMessage = (kind: ConfirmKind, itemName?: string) => {
@@ -65,15 +71,15 @@ const ConfirmationModal = () => {
 
       <AlertDialogFooter className={confirmFooter}>
         <AlertDialogCancel isDisabled={running}>
-          {confirm.cancelText ?? "No"}
+          {confirm.cancelText ?? "Cancel"}
         </AlertDialogCancel>
         <Button
-          variant={kind === "delete" ? "destructive" : "default"}
+          className={confirmAction({ kind })}
           isDisabled={running}
           onPress={() => void runConfirm()}
         >
           {running ? <Spinner /> : null}
-          {confirm.okText ?? "Yes"}
+          {confirm.okText ?? defaultOkTexts[kind]}
         </Button>
       </AlertDialogFooter>
     </AlertDialog>

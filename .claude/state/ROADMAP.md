@@ -113,6 +113,15 @@ practical flow (primary action placement, destructive actions separated).
   .claude/state/audit/{routes,modals}.json (selectors `text=<button label>`, `tbody tr:first-child td:last-child
   button` for row action, `td:first-child button` for expand, `[role=menuitem]:has-text('Edit')`).
 
+- [x] V3 — tokens + dark mode (compiled, not screenshot-verified): F1 theme.css danger /
+  danger-bg / danger-border moved into :root/.dark vars (dark = #f87171 + rgba soft fills),
+  exposed via @theme inline; table.styles dataTableRowOverdue -> bg-danger-bg. positive/warning
+  already use /10 alpha fills (fine in dark). F2 root cause: SelectContent/ComboboxContent
+  descendant rule `data-focused:bg-foreground/10` outranked item `data-selected:bg-primary`;
+  scoped to `not-data-selected` in ui/select.tsx + ui/combobox.tsx. F3 modal.styles
+  confirmAction cva (solid destructive for delete), ConfirmationModal defaults
+  Confirm/Delete + Cancel. F4 public.styles errorCard border removed (Empty adds border-dashed).
+
 ## Findings (desktop; mobile deferred by user)
 
 ### V3 — tokens + dark mode
@@ -195,11 +204,11 @@ loading/error states, long-name/large-money stress, validation errors (never pre
 
 ## Next
 
-1. **V3 — tokens + dark mode** (F1-F4). Re-screenshot dark pages + confirm modal + sort.
-2. **V4 — tables + row UI** (F5-F12).
-3. **V5 — page composition + filters** (F13-F16, F19; F17/F18 decided: no change).
-4. **V6 — modals + forms** (F20-F25; F24 decided, see Decisions locked).
-5. **V7 — dashboard charts** (F26-F28).
+1. **V4 — tables + row UI** (F5-F12). Start with a quick dark-mode capture of V3 (Overdue chips,
+   danger StatCards, delete confirm, Sort select open, 404) if the user wants it verified.
+2. **V5 — page composition + filters** (F13-F16, F19; F17/F18 decided: no change).
+3. **V6 — modals + forms** (F20-F25; F24 decided, see Decisions locked).
+4. **V7 — dashboard charts** (F26-F28).
 Order may be changed by the user. Mobile (M*) goes to a new roadmap after V7.
 
 ## Open
@@ -207,5 +216,5 @@ Order may be changed by the user. Mobile (M*) goes to a new roadmap after V7.
   20260722000008) not yet applied to Supabase — accountant voucher views stay empty until then.
 
 ## State
-Branch: development-overhaul · Uncommitted: .claude/state only (V1 committed as v1.24) · Last
-check: yarn build + yarn lint clean (after V1); V2 made no src changes.
+Branch: development-overhaul · Uncommitted: V3 src changes + .claude/state · Last check:
+yarn build + yarn lint clean (after V3).
