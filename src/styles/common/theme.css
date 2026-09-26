@@ -165,20 +165,13 @@
   --color-danger-bg: #fef2f2;
   --color-danger-border: #fecaca;
 
-  --radius-shell: 2rem;
   --radius-panel: 1.25rem;
   --radius-pill: 999px;
 
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 30px rgba(15, 23, 42, 0.05);
   --shadow-panel: 0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 24px rgba(15, 23, 42, 0.05);
   --shadow-raised: 0 8px 30px rgba(15, 23, 42, 0.12);
   --shadow-pop: 0 12px 40px rgba(15, 23, 42, 0.16);
 
-  --shadow-auth: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(15, 23, 42, 0.08), 0 32px 80px rgba(15, 23, 42, 0.1);
-  --shadow-auth-submit: 0 12px 28px rgba(11, 107, 245, 0.28);
-  --shadow-auth-submit-hover: 0 16px 34px rgba(11, 107, 245, 0.34);
-
-  --animate-drift: drift 14s ease-in-out infinite alternate;
   --animate-route-progress: route-progress 1.1s ease-in-out infinite;
 
   @keyframes route-progress {
@@ -187,15 +180,6 @@
     }
     to {
       transform: translateX(300%);
-    }
-  }
-
-  @keyframes drift {
-    from {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    to {
-      transform: translate3d(26px, -20px, 0) scale(1.07);
     }
   }
 }
@@ -217,11 +201,6 @@
     radial-gradient(120% 90% at 110% -10%, color-mix(in oklab, var(--color-info) 38%, transparent), transparent 55%),
     radial-gradient(110% 90% at -25% 110%, color-mix(in oklab, var(--color-chart-2) 30%, transparent), transparent 60%),
     linear-gradient(160deg, var(--color-brand) 0%, var(--color-brand-deep) 100%);
-}
-
-@utility bg-auth-submit {
-  background-image: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-deep) 100%);
-  background-size: 160% 160%;
 }
 
 @layer base {

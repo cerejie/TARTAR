@@ -1,5 +1,5 @@
 # ROADMAP — "Airy blue" redesign (EduMate mockup) on shadcn + Tailwind
-Updated: 2026-09-26 (T5c closed)
+Updated: 2026-09-26 (T5d closed)
 
 ## Goal
 Every screen matches the design spec below: pastel backdrop, floating top bar + floating
@@ -187,12 +187,17 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
   supplier" pills in the toolbar row; status pills hide in the party view (party totals ignore
   status). TableDecor kept — PaymentsPanel + CustomerLedgerModal still use NameCell/RowActions.
 
+- T5d Auth + Error pages (v1.20): colours were already blue since T0 (no lime/lilac left). Auth hero
+  floats (my-4 ml-4 rounded-panel shadow-panel, bg-auth-hero kept), auth card + error card =
+  rounded-panel bg-panel shadow-panel, no backdrop-blur; drift blobs deleted (bg-app already
+  supplies the pastel backdrop); submit = solid default AppButton (authSubmit is size only).
+  theme.css tokens deleted: --radius-shell, --shadow-card, --shadow-auth*, --animate-drift +
+  keyframes drift, @utility bg-auth-submit.
+
 ## Next
-1. **T5d Auth + Error pages** — backdrop gradient, blue submit, retire bg-auth-hero/-submit
-   lime/lilac remnants in theme.css + styles/layout/public.styles.ts.
-2. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
+1. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
    updated to the new token names, new primitives, lazy routes and state rules (CardTone is gone from the view vocabulary; InfoCard,
-   SectionHeading added); delete this file.
+   SectionHeading added; shadow-card / radius-shell / bg-auth-submit gone); delete this file.
 
 ## Open
 - vouchers!inner filter is untested against the live DB — confirm the Purchases/Expenses pills.
@@ -200,4 +205,4 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
 - PaymentsPanel (CustomerLedgerView) still uses NameCell/RowActions — convert when touched.
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (T5c, suggest v1.19) · Last check: yarn build + yarn lint clean
+Branch: development-overhaul · Uncommitted: yes (T5d, suggest v1.20) · Last check: yarn build + yarn lint clean

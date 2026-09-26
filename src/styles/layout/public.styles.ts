@@ -1,9 +1,7 @@
-import { cva } from "class-variance-authority";
-
 export const authPage = "flex min-h-dvh flex-1 bg-app font-sans text-foreground";
 
 export const authHero =
-  "relative hidden w-[clamp(360px,42vw,560px)] flex-col overflow-hidden bg-auth-hero p-12 text-on-brand min-[960px]:flex";
+  "relative my-4 ml-4 hidden w-[clamp(360px,42vw,560px)] flex-col overflow-hidden rounded-panel bg-auth-hero p-12 text-on-brand shadow-panel min-[960px]:flex";
 
 export const authHeroBrand =
   "flex items-center gap-3 font-heading text-[19px] font-bold tracking-[0.18em] text-on-brand";
@@ -29,23 +27,10 @@ export const authHeroArt =
 export const authHeroArtSvg = "h-auto w-[520px] max-w-none shrink-0";
 
 export const authMain =
-  "relative flex flex-1 items-center justify-center overflow-hidden px-4 py-6 min-[480px]:px-6 min-[480px]:py-8";
-
-export const authBlob = cva(
-  "pointer-events-none absolute rounded-full blur-[80px] animate-drift motion-reduce:animate-none",
-  {
-    variants: {
-      position: {
-        a: "-top-30 -right-22 size-[420px] bg-brand/25",
-        b: "-bottom-35 -left-28 size-[360px] bg-info/20 [animation-delay:-7s]",
-        c: "top-[55%] right-[6%] size-[260px] bg-brand-deep/10 [animation-duration:18s]",
-      },
-    },
-  }
-);
+  "flex flex-1 items-center justify-center px-4 py-6 min-[480px]:px-6 min-[480px]:py-8";
 
 export const authCard =
-  "relative z-10 w-full max-w-[440px] gap-0 rounded-xl border border-border bg-card/90 px-6 py-8 shadow-auth ring-0 backdrop-blur-md animate-in fade-in-0 zoom-in-98 slide-in-from-bottom-4 duration-500 fill-mode-both motion-reduce:animate-none min-[480px]:rounded-shell min-[480px]:px-10 min-[480px]:py-11";
+  "relative w-full max-w-[440px] gap-0 rounded-panel border border-border bg-panel px-6 py-8 shadow-panel ring-0 animate-in fade-in-0 zoom-in-98 slide-in-from-bottom-4 duration-500 fill-mode-both motion-reduce:animate-none min-[480px]:px-10 min-[480px]:py-11";
 
 export const authCardBrand = "mb-6 flex items-center gap-2.5 min-[960px]:hidden";
 
@@ -71,8 +56,7 @@ export const authPopover = "w-64 text-[13px] leading-relaxed";
 
 export const authPopoverDialog = "outline-none";
 
-export const authSubmit =
-  "h-12 w-full rounded-lg bg-auth-submit bg-left-top text-[15px] font-semibold text-primary-foreground shadow-auth-submit transition-[transform,box-shadow,background-position] duration-300 hover:-translate-y-0.5 hover:bg-right-bottom hover:shadow-auth-submit-hover active:translate-y-0 active:scale-[0.985] dark:bg-none dark:bg-primary";
+export const authSubmit = "h-12 w-full rounded-lg text-[15px] font-semibold";
 
 export const authAlt =
   "mt-6.5 flex flex-wrap items-center justify-center gap-1 border-t border-border pt-5 text-sm text-muted-foreground";
@@ -81,4 +65,4 @@ export const authAltLink = "h-auto p-0 font-semibold";
 
 export const errorPage = "flex min-h-dvh items-center justify-center bg-app p-6 font-sans text-foreground";
 
-export const errorCard = "w-full max-w-[560px] rounded-shell border border-border bg-card py-12 shadow-card";
+export const errorCard = "w-full max-w-[560px] rounded-panel border border-border bg-panel py-12 shadow-panel";
