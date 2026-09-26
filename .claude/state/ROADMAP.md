@@ -19,6 +19,16 @@ conversation; the user reviews between phases.
 ## Decisions locked
 - Modal header = title only. No description / subtitle line under the title (user, 2026-09-26).
 - Audit, then fix in batches by area — never all in one conversation (user, 2026-09-26).
+- F17 -> no change. Receivables keeps both "Customer ledger" and "By customer"; no Payables
+  counterpart. Intentional (user, 2026-09-26).
+- F18 -> no change. No bell on desktop is intentional (user, 2026-09-26).
+- F24 -> one Customer field (user, 2026-09-26): remove "Customer name (if not in the list)".
+  The Customer control is a combobox that accepts free text; a name that matches no existing
+  customer is saved as a NEW customer on submit. Suggestions are fuzzy-matched: word order
+  does not matter ("Dela Cruz Juan" == "Juan Dela Cruz"), typos show the nearest customers,
+  but only at >= 80% similarity (no weaker matches listed). The Payable form's Supplier field
+  works the same way (one combobox, new supplier saved on submit, same fuzzy match). Creation
+  goes through the service + runWrite.
 - All CLAUDE.md conventions unchanged (no comments, no useState, class strings in *.styles.ts,
   tokens only in theme.css, useConfirm, runWrite, Transactions is the reference).
 
@@ -187,8 +197,8 @@ loading/error states, long-name/large-money stress, validation errors (never pre
 
 1. **V3 — tokens + dark mode** (F1-F4). Re-screenshot dark pages + confirm modal + sort.
 2. **V4 — tables + row UI** (F5-F12).
-3. **V5 — page composition + filters** (F13-F19; ask user F17/F18 first).
-4. **V6 — modals + forms** (F20-F25; ask user F24 first).
+3. **V5 — page composition + filters** (F13-F16, F19; F17/F18 decided: no change).
+4. **V6 — modals + forms** (F20-F25; F24 decided, see Decisions locked).
 5. **V7 — dashboard charts** (F26-F28).
 Order may be changed by the user. Mobile (M*) goes to a new roadmap after V7.
 
