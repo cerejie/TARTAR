@@ -48,23 +48,29 @@ Derive the paths; do not search for them. This map resolves most tasks with zero
 | Query, mutation, modal, confirm, filter, pagination, sync mechanics | `src/hook/common/`, `src/store/common/` |
 | Shared primitives (`ContentView`, `DataTable`, `SectionCard`, `EntityFormModal`) | `src/components/common/<kind>/` |
 | Formatting, schema fragments, data client | `src/utils/*.utils.ts` |
-| **Look of a thing** | `src/styles/<area>/<area>.css.ts` — see the style map below |
-| Colours, spacing, radii, shadows, fonts | `src/styles/common/vars.css.ts` |
+| **Look of a thing** | `src/styles/<area>/<area>.styles.ts` — see the style map below |
+| Colours, radii, shadows, fonts, dark mode | `src/styles/common/theme.css` |
+| A shadcn primitive (button, dialog, table, select…) | `src/components/ui/<name>.tsx` — generated, read-only |
 
 **Style areas** — the `<area>` folder is the visual concern, not the domain:
 
 | Looking at | File |
 |---|---|
-| Sider, header, nav, app shell | `styles/layout/protected.layout.css.ts` |
-| Content shell, bento, page body | `styles/view/content/content.view.css.ts` |
-| Cards and panels | `styles/card/card.css.ts` |
-| Forms and fields | `styles/form/form.css.ts` |
-| Filter bar | `styles/filter/filter.css.ts` |
-| Tables | `styles/table/table.css.ts` |
-| Modals | `styles/modal/modal.css.ts` |
-| Stat tiles | `styles/stat/stat.css.ts` |
-| Status pills and tags | `styles/status/status.css.ts` |
-| Semantic tones (money, danger, focus) | `styles/common/tone.css.ts` |
+| Sidebar, nav, branch scope, user menu | `styles/layout/sidebar.styles.ts` |
+| Header | `styles/layout/header.styles.ts` |
+| App shell, inset | `styles/layout/shell.styles.ts` |
+| Login, register, error pages | `styles/layout/public.styles.ts` |
+| Content view, bento, page body | `styles/view/view.styles.ts` |
+| Cards and panels | `styles/card/card.styles.ts` |
+| Forms and fields | `styles/form/form.styles.ts` |
+| Filter bar | `styles/filter/filter.styles.ts` |
+| Tables | `styles/table/table.styles.ts` |
+| Modals | `styles/modal/modal.styles.ts` |
+| Stat tiles | `styles/stat/stat.styles.ts` |
+| Status tags, empty state | `styles/status/status.styles.ts` |
+| Charts | `styles/chart/chart.styles.ts` |
+| Semantic tones (money, danger) | `styles/common/tone.styles.ts` |
+| One screen only | `styles/{dashboard,ledger,disbursement,print}/*.styles.ts` |
 
 Multi-word domain: dots in the filename, kebab-case in the folder — `hook/data/expense-category/expense.category.manage.hook.ts`.
 
@@ -98,13 +104,13 @@ Read `references/plan.md`. Produce a plan of at most 15 lines — exact paths, `
 
 Read `references/conventions.md` unless the change is confined to a file you have already
 read in this session, **or** it is a pure restyle of an existing element — editing a
-`styles/<area>/*.css.ts` with no new file and no markup change needs only the token rule,
+`styles/<area>/*.styles.ts` with no new file and no markup change needs only the token rule,
 which `CLAUDE.md` already carries. It is otherwise the authority on folder law, file naming,
 naming inside files, globalization, the layer contract, and the standard code shapes.
 
 Also read, only when it applies:
 
-- `references/stack.md` — touching antd, vanilla-extract, zustand, Supabase, zod, or react-hook-form.
+- `references/stack.md` — touching `components/ui`, Tailwind / `theme.css`, zustand, Supabase, zod, or react-hook-form.
 - `references/module-recipe.md` — creating a whole new domain end to end.
 - `references/architecture.md` — unsure which layer owns the logic.
 - `references/reference-module.md` — building or restyling any screen, table, modal, form,
@@ -132,7 +138,7 @@ Then end with a suggested commit message — `../commit/SKILL.md`, suggest mode.
 
 ## Step 8 — Commit
 
-Only if the user asked. Then follow `../commit/SKILL.md` — prefixed short title, 2–5 dash bullets.
+Only if the user asked. Then follow `../commit/SKILL.md`, commit mode — title `Development v<X.Y>`, one `<Prefix>: <Title>` line per change.
 
 ## If the session runs long
 

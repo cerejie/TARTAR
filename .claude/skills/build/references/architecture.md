@@ -46,7 +46,7 @@ what lets a modal be opened detached from the list that owns it. Do not fetch a 
 to edit it when the caller already holds it.
 
 Feature modals compose `AppModal`, `DetailModal<T>` or `EntityFormModal`; they never reach
-for antd `Modal` directly, and width comes from `ModalSize`.
+for `ui/dialog` directly, and width comes from `ModalSize`.
 
 ## Offline / queued writes
 

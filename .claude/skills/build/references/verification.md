@@ -7,7 +7,7 @@ Verification exists to catch real breakage, not to perform diligence. Every extr
 | Change | Command | Why |
 |---|---|---|
 | Copy, labels, comments | **nothing** | The compiler cannot be wrong about text. |
-| A `*.css.ts` edit | **nothing**, but see *Style changes* below | A build proves the CSS was emitted. It never proves the selector matches anything. |
+| A `*.styles.ts` or `theme.css` edit | **nothing**, but see *Style changes* below | A build proves the CSS was emitted. It never proves the class reaches the element. |
 | One file, no new imports or types | **nothing** | The edit tool already confirmed it applied. |
 | New/changed types, models, schemas, service signatures, or more than one file | `npx tsc -b` | Catches every cross-file break in one pass. |
 | Style-only concerns after a large edit | `yarn lint` | oxlint, seconds. |
@@ -34,13 +34,16 @@ and let the user confirm it renders.
 When the user reports that a style change did not show up, do not guess at caching or
 re-edit the rule. Establish, in order, where the chain breaks:
 
-1. **Is the rule in the compiled output?** `grep` the emitted CSS in `dist/assets/*.css`.
-2. **Is it in what the browser is actually served?** If a dev server is already running,
-   `curl` the module and its `.vanilla.css`. This is cheap and decisive — no browser needed.
-3. **Does the selector match the element?** Compare the class name the module *exports*
-   against the selector the CSS *uses*. They can differ. See the dotted-filename trap in
-   `stack.md`, which broke seven stylesheets in dev while every build passed.
-4. **Is the class on the element you think it is?** Read the component's `className`.
+1. **Is the class on the element?** Read the component's `className` — it must be a
+   constant from `styles/<area>/*.styles.ts`, and `cn()` must not be dropping it
+   (`tailwind-merge` keeps the last of two conflicting utilities).
+2. **Is the class a whole string Tailwind can see?** A class built by concatenation is
+   never generated. `grep` the emitted CSS in `dist/assets/*.css` for it.
+3. **Does the token resolve?** A utility like `bg-lime-mist` exists only if `--color-lime-mist`
+   is in the `@theme` block of `theme.css`; a semantic colour needs both its `:root` and
+   `.dark` values.
+4. **Is a `ui` component's own class winning?** Its variant classes apply first; a layout
+   `className` on it merges through `cn()`, colour does not belong there.
 
 Only after all four does caching or a stale service worker become the likely answer.
 

@@ -11,7 +11,7 @@ writing a new module.
 **The structural reference is DCWD**, at `D:/EJIE BUSINESS/EJIE WORK DCWD/dcwd_apps-csms-bca2`,
 specifically `src/components/jms/`, `src/hook/data/jms/` and `src/models/data/jms/`. Copy its
 *folder and file organisation*. Do **not** copy its code style: DCWD carries comments, calls
-antd `notification` directly, and hand-rolls forms. TARTAR diverges from all three on purpose
+its UI library's notification API directly, and hand-rolls forms. TARTAR diverges from all three on purpose
 (see §10).
 
 ## 1. Folder law
@@ -28,15 +28,16 @@ src/
   routes/       <scope>.routes.ts | <scope>.view.routes.ts | route.guard.ts
   services/     data/<domain>.services.ts       (flat inside data/)
   store/        common/*.store.ts  |  data/<domain>/<domain>.store.ts
-  styles/       <group>/<name>.css.ts
+  styles/       common/theme.css + <area>/<area>.styles.ts
   utils/        <topic>.utils.ts                (flat)
 ```
 
 **The rule that generates it:** shared / cross-domain code is **flat** inside a `common/` folder (or a flat top-level folder); domain code lives under `data/<domain>/`. `services/` is the one exception — `data/` holds flat files, one per domain.
 
 `components/` is grouped by **kind**, twice over. Shared primitives sit in
-`common/<kind>/` — `card`, `filter`, `form`, `guard`, `layout`, `modal`, `status`, `table`,
-`view`. Feature components sit in `<domain>/<kind>/` — `tables/`, `forms/`, `modal/`,
+`common/<kind>/` — `button`, `card`, `chart`, `filter`, `form`, `guard`, `layout`, `modal`,
+`status`, `table`, `view` — each wrapping files from `components/ui/`, the generated shadcn
+layer. Feature components sit in `<domain>/<kind>/` — `tables/`, `forms/`, `modal/`,
 `cards/`, `menus/`, `views/`. `components/transaction/tables/TransactionsTable.tsx` is the
 shape; DCWD's `components/jms/` is the same idea at full size. A feature component never
 sits loose at the root of its domain folder.
@@ -55,7 +56,7 @@ Adding a domain never adds a top-level folder. It adds one subfolder in `hook/da
 | Feature component | `components/<domain>/<kind>/PascalCase.tsx` | `components/transaction/tables/TransactionsTable.tsx` |
 | Reusable cell renderer | `components/<domain>/table/cells/PascalCase.tsx` | only once a second table reuses it |
 
-`<kind>` is one of: `hook`, `services`, `store`, `keys`, `enum`, `utils`, `model`, `request`, `response`, `routes`, `css.ts`.
+`<kind>` is one of: `hook`, `services`, `store`, `keys`, `enum`, `utils`, `model`, `request`, `response`, `routes`, `styles`.
 
 A hook filename also carries its **purpose** before `.hook`: `list`, `manage`, `form`,
 `detail` or `scope` — `transaction.list.hook.ts`, `branch.scope.hook.ts`,
@@ -86,7 +87,8 @@ Any value used in **two or more places** moves to its home. Never inline these:
 | Modal key | `keys/modal.keys.ts` — a function when the modal is per-scope |
 | localStorage key | `keys/storage.keys.ts` |
 | A status/kind literal, its label, and its colour | `enums/<domain>.enum.ts` |
-| Colour, spacing, radius, shadow, font | `styles/common/vars.css.ts`, read as `vars.color.*` |
+| Colour, radius, shadow, font | a token in `styles/common/theme.css`, used as a utility (`bg-ink`, `shadow-card`) |
+| A class string | a named export in `styles/<area>/<area>.styles.ts` |
 | Money / date / time formatting | `utils/format.utils.ts` — `formatMoney`, `formatDate`, `todayIso` |
 | A reusable zod field | `utils/schema.utils.ts` — `amountField`, `isoDateField`, `optionalText(n)` |
 | Any string the user sees in two places | the enum label map, or a module-top `const` |
@@ -192,7 +194,7 @@ that nulls out the fields the chosen type does not use — so the service receiv
 payload.
 
 **Feature component** — `components/<domain>/<kind>/<X>Table.tsx`. This is where a screen is
-actually built. It calls exactly one feature hook, declares the `ColumnsType<T>`, and
+actually built. It calls exactly one feature hook, declares the `IDataTableColumn<T>[]`, and
 composes the shared primitives. Permission-varying columns are spread in conditionally
 (`...(permissions.isManager ? [col] : [])`), never hidden with CSS. Destructive row actions
 call `useConfirm`. `TransactionsTable.tsx` is the model.
@@ -218,7 +220,7 @@ component and its hook.
 `strict`, `noUnusedLocals`, `noUnusedParameters` and `verbatimModuleSyntax` are all on.
 
 - `import type { X } from "..."` for every type-only import. `verbatimModuleSyntax` turns a miss into a build error.
-- Relative imports only — **no path aliases are configured**, so `../../../models/...` is correct here.
+- Imports are relative (`../../../models/...`) except the shadcn layer, which uses the `@/` alias: `@/components/ui/*`, `@/utils/cn.utils`, `@/hook/use-mobile`. Match the file you are in; do not convert existing imports.
 - `as const` for literal tuples and lookup tables; `readonly` where a value must not be mutated.
 - **`useState` and `useReducer` are banned.** Not "avoided" — banned. Every piece of state
   lives in a zustand store under `store/common/` or `store/data/<domain>/`, reached through a
@@ -229,12 +231,14 @@ component and its hook.
 
 ## 8. Style layer
 
-- vanilla-extract only. One `*.css.ts` per visual group under `styles/`. Dotted base names
-  (`content.view.css.ts`) are fine only because `vite.config.ts` sets
-  `identifiers: 'short'` — see the dotted-filename trap in `stack.md` before changing that.
-- Every value comes from `vars`: `vars.color.brand`, `vars.space.md`, `vars.radius.xl`, `vars.shadow.card`, `vars.font.heading`.
-- Component-library internals are reached through a scoped `globalStyle` that starts from your own class, never by styling a library class globally on its own.
-- Classes are applied through a template string on `className`, matching the existing components.
+- Tailwind v4 + shadcn aria-vega. Class strings are named exports in
+  `styles/<area>/<area>.styles.ts` — plain strings, or `cva` when they vary — applied with
+  `cn()` from `utils/cn.utils.ts`. JSX never holds a literal class string.
+- Every colour, radius, shadow and font is a token in `styles/common/theme.css`, used as a
+  utility (`bg-ink`, `text-on-ink-muted`, `shadow-card`, `rounded-shell`, `font-heading`).
+  No hex, no arbitrary values.
+- `components/ui` files are restyled through tokens, never edited; `className` on them is
+  layout only.
 - No inline `style={{}}` except for a genuinely computed value such as a percentage width.
 
 ## 9. UX defaults
@@ -248,11 +252,11 @@ component and its hook.
 - **Never nest a card in a card.** The content shell is already a surface; one card layer on
   top of it is the maximum. The table sits directly on the content surface — its rows are
   the cards.
-- Filters are a bar inside a `SectionCard dense`, above the table, wrapped in
-  `FilterToolbar` when the screen also has a primary action. Filter state lives in
+- Filters are a bare row on the content surface above the table, laid out by
+  `FilterToolbar` with the primary action on the trailing edge — no card. Filter state lives in
   `store/common/filter.store.ts` via `useLedgerFilters(scope)` — never in the component.
-- **Every destructive or committing action goes through `useConfirm`.** Never `Popconfirm`,
-  never `Modal.confirm`. `ConfirmationModal` is mounted once in `App.tsx` and driven by
+- **Every destructive or committing action goes through `useConfirm`.** Never an inline
+  `alert-dialog`, never `window.confirm`. `ConfirmationModal` is mounted once in `App.tsx` and driven by
   `store/common/confirm.store.ts`; never mount a second one, never pass it props.
 
   ```ts
@@ -263,7 +267,7 @@ component and its hook.
   an async `onConfirm` settles.
 - Permission gating in a screen is `RequirePermission can="..."`; route gating is `can` plus
   `permissionLoader`. Never gate by hiding with CSS.
-- Icon-only buttons carry both `aria-label` and a `Tooltip`.
+- Icon-only buttons are `AppButton size="icon-sm"` with `aria-label` and the `tooltip` prop.
 - Tables set `emptyText` to a sentence that tells the user what to do next.
 - Money columns are right-aligned and rendered with `formatMoney`.
 - Modal width comes from `ModalSize`, never a hardcoded percentage.
@@ -276,7 +280,7 @@ Copy DCWD's structure, not these four habits:
 |---|---|
 | Comments throughout | **Zero comments.** No `//`, no JSDoc, no banners, no commented-out code. If a line needs explaining, rename or extract until it does not. The only exception is `/// <reference />` in `src/vite-env.d.ts`. |
 | antd `Form` and bespoke inputs | react-hook-form + zod, rendered declaratively by `EntityFormModal` from an `IFieldConfig[]`. A new field *type* is added to `FormField`, never as a bespoke input in a page. |
-| antd `notification` imported directly | `App.useApp()` so feedback inherits theme and context. |
+| Notifications called ad hoc | `sonner` `toast`, mostly through `useMutation`; `<Toaster>` is mounted once in `App.tsx`. |
 | `useState` for local UI state | zustand only. |
 
 DCWD already uses TanStack Query directly; TARTAR is mid-migration behind

@@ -26,25 +26,25 @@ their own — a restyle needs none of them.
 **Page** — `ContentView` wrapping feature components and nothing else. No props, no state, no
 queries, about fifteen lines.
 
-**Metric tiles** — `statGrid` class → `BentoGrid` → one `BentoCell span="quarter"` per
+**Metric tiles** — `BentoGrid` → one `BentoCell span="quarter"` per
 `StatCard`. Each card takes `title`, `value`, `loading`, `variant`
 (`positive` | `negative` | `brand`), `icon`, `caption`. The values come from the same list
 hook the table uses; a card component never runs its own query.
 
 **Table** — `TablePanel` is the shell:
 
-- `toolbar` → `FilterToolbar` whose `actions` slot holds the primary `Button type="primary"`
-  with an icon, wrapped in `RequirePermission`; its children are the filter bar.
+- `toolbar` → `FilterToolbar` whose `actions` slot holds the primary `AppButton` (`onPress`,
+  a lucide icon child), wrapped in `RequirePermission`; its children are the filter bar.
 - `footer` → `TablePagination` fed `pagination`, `totalCount`, `onPageChange`.
 - children → `DataTable<T>` with `columns`, `data`, `loading`, `pagination`,
   `detachedPagination`, `expansionKey` from `keys/table.keys.ts`, `detailSections`, `emptyText`.
 - sibling → `EntityFormModal<TInput>` with `open`, `title`, `subtitle`, `size`, `sections`,
   `schema`, `defaultValues`, `submitting`, `submitText`, `onSubmit`, `onClose`.
 
-**Columns** — `dataIndex` plus `render`. `nowrapCell` on dates, amounts and actions. Money
+**Columns** — `IDataTableColumn<T>[]`, `dataIndex` plus `render`. `nowrapCell` on dates, amounts and actions. Money
 through `formatMoney`, `align: "right"`. Dates and times through `formatDate` / `formatTime`.
-Type and status through an enum label and colour map from `enums/<x>.enum.ts`, rendered as an
-antd `Tag` with `variant="outlined"` and the `typeTag` class. A permission-gated column is
+Type and status through an enum label and colour map from `enums/<x>.enum.ts`, rendered as
+`StatusTag` (tone from the enum map). A permission-gated column is
 spread in conditionally: `...(permissions.isManager ? [...] : [])`.
 
 **Row actions** — an `actionsOf(row): IRowAction[]` builder rendered by `RowActionMenu` in a
@@ -66,15 +66,15 @@ typed `DefaultValues<TInput>`.
 
 - Page is `ContentView` plus feature components, nothing else.
 - Table sits in `TablePanel` with a `FilterToolbar` toolbar and a `TablePagination` footer.
-- Primary action is a `type="primary"` antd button with an icon, inside `RequirePermission`,
+- Primary action is an `AppButton` with a lucide icon, inside `RequirePermission`,
   on the toolbar's trailing edge.
-- Form is `EntityFormModal` + zod schema + `IFieldSection[]` — never antd `Form`, never a
-  hand-rolled modal, never antd `Modal` directly.
+- Form is `EntityFormModal` + zod schema + `IFieldSection[]` — never hand-built `ui` inputs,
+  never a hand-rolled modal, never `ui/dialog` directly.
 - Every destructive action goes through `useConfirm`.
 - Labels, colours, money and dates come from the enum maps and `utils/format.utils.ts`.
 - Query, modal, storage, table keys come from `keys/*.keys.ts`.
 - Styling reuses the classes Transactions uses; a genuinely new rule goes in the same
-  `styles/<area>/*.css.ts` file, built from `vars` tokens.
+  `styles/<area>/*.styles.ts` file, built from `theme.css` tokens.
 
 ## When Transactions does not cover it
 

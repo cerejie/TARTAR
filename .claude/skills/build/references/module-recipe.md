@@ -14,7 +14,7 @@ Substitute `x` for the domain (`discount`), `X` for its Pascal form (`Discount`)
 | 6 | `src/keys/table.keys.ts` | `xPaginationKey` — only for a transactional, server-paged list |
 | 7 | `src/services/data/x.services.ts` | `columns` const, `toValues()`, `xServices` with `getList`/`create`/`update`/`remove`; paged `getList` returns `IPaginationResponse<T>`, plus `getAll` if a report consumes it |
 | 8 | `src/hook/data/x/x.list.hook.ts` | `useXListHook` — filters, paged query, options, lookup maps, modal handle, `fields`, `defaults`, `normalize`, mutations; returns one flat object |
-| 9 | `src/components/x/tables/XTable.tsx` | the screen: one hook call, `ColumnsType<IX>`, `FilterToolbar`, `DataTable`, `EntityFormModal`, `useConfirm` for delete |
+| 9 | `src/components/x/tables/XTable.tsx` | the screen: one hook call, `IDataTableColumn<IX>[]`, `FilterToolbar`, `DataTable`, `EntityFormModal`, `useConfirm` for delete |
 | 10 | `src/pages/X/XView.tsx` | `<ContentView><XTable /></ContentView>` — nothing else |
 | 11 | `src/routes/protected.view.routes.ts` | register the route: `key`, `path`, `label`, `description`, `icon`, `group`, `can`, `Component` |
 | 12 | `supabase/migrations/<ts>_x.sql` | only when the schema changes — additive, with keys, indexes and RLS |

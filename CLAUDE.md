@@ -8,11 +8,16 @@ The reference implementation for every convention below is the DCWD project at
 and JMS Form modules. When a convention here is ambiguous, read the DCWD equivalent
 and follow it. TARTAR is the same architecture over a different backend.
 
+The UI reference is `D:\EJIE BUSINESS\EJIE WORK DCWD\dcwd_apps-crm-customer2` — its
+`src/components/common/<kind>/`, `src/styles/<area>/<area>.styles.ts` and
+`src/styles/common/theme.css`. When a UI convention here is silent, mirror that repo.
+
 ## Project
 
 `tartar-system` — TARTAR BMS, a branch-scoped bookkeeping web client (transactions,
 vouchers, receivables/payables, disbursements, reports). React 19 + TS + Vite,
-Ant Design v6, vanilla-extract, Zustand, TanStack Query, Supabase, PWA/offline.
+Tailwind v4 + shadcn/ui (`aria-vega`, React Aria Components), lucide-react, recharts,
+sonner, Zustand, react-hook-form + zod, Supabase, PWA/offline.
 Full dependency list: package.json.
 
 ## Commands — yarn only (repo has yarn.lock; never npm)
@@ -39,9 +44,9 @@ user never has to type them:
 3. **`shadcn`** — alongside `tartar-shadcn`: run `npx shadcn@latest docs <component>` and read
    the **React Aria** tab before composing. Restore it with `npx skills experimental_install`
    (pinned in `skills-lock.json`) if it is missing.
-4. **`tartar-migration-next`** — "continue", "next phase", "resume", or any session opening
-   with `.claude/state/ROADMAP.md` on disk.
-5. **`commit`** — suggest mode after every change; commit mode only on request.
+4. **`commit`** — suggest mode after every change; commit mode only on request.
+5. **`checkpoint`** — only on `/checkpoint`, or a session opening with
+   `.claude/state/ROADMAP.md` on disk.
 
 ## Resuming multi-session work
 
@@ -94,12 +99,12 @@ Any prompt that asks for implementation work in this repo runs the `build` skill
 pipeline, whether or not the user typed `/build`. A design revision, a spacing tweak or a
 one-line style change counts: those are exactly the changes that look too small to warrant
 it. Load `.claude/skills/build/references/` as the step calls for it — `conventions.md`
-for folder and naming law, `stack.md` before touching antd or vanilla-extract,
-`verification.md` before claiming a change is done.
+for folder and naming law, `stack.md` before touching `components/ui`, Tailwind tokens,
+zustand, Supabase or forms, `verification.md` before claiming a change is done.
 
 Never report a visual change as working on the strength of `yarn build` alone. A build
-proves the CSS compiled; it cannot prove the selector matches an element. Say it is
-compiled and let the user confirm it renders.
+proves the CSS compiled; it cannot prove the class reaches the element or that a token
+resolves. Say it is compiled and let the user confirm it renders.
 
 ## Structure (src/)
 
@@ -110,7 +115,7 @@ service  ->  hook  ->  component  ->  page  ->  route
 ```
 
 - `services/data/<feature>.services.ts` — the only place Supabase is touched. One
-  default-exported object literal per feature. No React, no state, no antd.
+  default-exported object literal per feature. No React, no state, no UI.
 - `hook/data/<domain>/<feature>.<kind>.hook.ts` — all data and behaviour. Components
   never call a service directly.
 - `hook/common/` — cross-cutting hooks (modal, filter, query, search, pagination).
@@ -119,8 +124,11 @@ service  ->  hook  ->  component  ->  page  ->  route
   subfolder per domain, split `<feature>.request.ts` / `<feature>.response.ts`.
 - `store/common/` — flat registries (modal, filter, query, network, sync, theme, view).
   `store/data/<domain>/<feature>.store.ts` — per-domain UI state.
-- `components/common/<kind>/` — reusable primitives, grouped by kind (card, filter,
-  form, guard, layout, modal, status, table, view).
+- `components/ui/` — shadcn aria-vega registry files, generated; restyle through tokens,
+  not by editing them. Features go through `components/common/` first and import a `ui`
+  file directly only when no common primitive covers the need.
+- `components/common/<kind>/` — TARTAR primitives wrapping `components/ui`, grouped by
+  kind (button, card, chart, filter, form, guard, layout, modal, status, table, view).
 - `components/<domain>/` — feature components, grouped by domain then by kind
   subfolder (`forms/`, `tables/`, `modal/`, `menus/`, `cards/`, `views/`).
 - `pages/<Area>/<Name>View.tsx` — thin. A page composes `ContentView` and feature
@@ -129,8 +137,10 @@ service  ->  hook  ->  component  ->  page  ->  route
   `styles/` as named.
 - `supabase/migrations/` — SQL migrations, timestamp-prefixed.
 
-Rules: no path aliases anywhere — deep relative imports only. No barrel `index.ts`
-files. `common` folders stay flat; `data` folders get one subfolder per domain.
+Rules: the `@/` alias exists for the shadcn layer — `@/components/ui/*`,
+`@/utils/cn.utils`, `@/hook/use-mobile`. Everything else is a relative import, matching
+the file you are in; do not mass-convert either way. No barrel `index.ts` files.
+`common` folders stay flat; `data` folders get one subfolder per domain.
 
 ## Code style — this is the priority
 
@@ -139,9 +149,9 @@ Write code that reads as a plain statement of what it does.
 - **No comments. None.** No `//`, no block comments, no JSDoc, no section banners,
   no `TODO`, no commented-out code. If a line needs explaining, rename the variable,
   extract a named function, or restructure until it does not. This is not negotiable
-  and applies to `.ts`, `.tsx` and `.css.ts` alike. The only exception is the
-  `/// <reference ... />` directives in `src/vite-env.d.ts` — those are compiler
-  input, not prose, and deleting them breaks the build.
+  and applies to `.ts`, `.tsx`, `.styles.ts` and `theme.css` alike. The exceptions are
+  the `/// <reference ... />` directives in `src/vite-env.d.ts` (compiler input) and
+  the generated files in `src/components/ui/`.
 - No dead code. Delete rather than comment out. Delete unused props, exports, styles.
 - Name things for what they are: `customerTypes`, `encodableTypes`, `effectiveFilters`,
   `handleRowDoubleClick`. Never `data2`, `tmp`, `handleThing`.
@@ -153,7 +163,8 @@ Write code that reads as a plain statement of what it does.
 - Early return over nested `if`. Ternaries only when both arms are short.
 - No `any`. Use `unknown` and narrow. No non-null assertions except where the value
   is provably present one line above. `readonly` on arrays that are never mutated.
-- No inline `style={{ }}` objects. No magic numbers in JSX.
+- No inline `style={{ }}` objects. No magic numbers in JSX. No Tailwind class strings
+  in JSX — `className` takes a named constant from `src/styles/`.
 - Derive, do not duplicate: no state that can be computed from other state.
 - **No `useState`, no `useReducer`.** Every piece of state lives in a zustand store
   under `store/common/` or `store/data/<domain>/`, read through a `select*` selector
@@ -168,7 +179,8 @@ Write code that reads as a plain statement of what it does.
 - Stores: `<feature>.store.ts`, exporting `use<Feature>Store` plus `select*` selectors.
 - Models: `<feature>.request.ts` (inputs, `I<Feature>Input`) and
   `<feature>.response.ts` (rows, `I<Feature>`).
-- Components: `PascalCase.tsx`. Styles: `<area>.css.ts` under `src/styles/<area>/`.
+- Components: `PascalCase.tsx`. Styles: `<area>.styles.ts` under `src/styles/<area>/`
+  (`<name>.styles.ts` when an area splits, as in `styles/layout/`).
 - Keys are never inline string literals — they live in `keys/query.keys.ts`,
   `keys/modal.keys.ts`, `keys/storage.keys.ts`.
 - Types: `I` prefix for interfaces and shared type aliases (`IRoute`, `ITransaction`,
@@ -225,16 +237,17 @@ per key — opening one modal must never re-render consumers of another.
 
 Reusable modal components live in `components/common/modal/`:
 
-- `AppModal` — the shell every modal is built on. Owns size, title block, footer.
+- `AppModal` — the shell every modal is built on, over `ui/dialog`. Owns size, title
+  block, footer.
 - `DetailModal<T>` — read-only record view driven by a section/row descriptor.
 - `ConfirmationModal` — mounted **once** in `App.tsx` and driven entirely by
   `store/common/confirm.store.ts`. Never mount a second one, never pass it props.
 
-A feature modal composes these; it never reaches for antd `Modal` directly. Modal
-width comes from `ModalSize`, never a hardcoded percentage.
+A feature modal composes these; it never reaches for `ui/dialog` or `ui/alert-dialog`
+directly. Modal width comes from `ModalSize`, never a hardcoded width.
 
-Every destructive or committing action goes through the confirmation store — never
-`Popconfirm`, never a bare `Modal.confirm`. A component asks for one with `useConfirm`:
+Every destructive or committing action goes through the confirmation store — never an
+inline `alert-dialog`, never `window.confirm`. A component asks for one with `useConfirm`:
 
 ```ts
 const openConfirm = useConfirm();
@@ -252,14 +265,15 @@ store keeps the dialog open with a spinner until an async `onConfirm` settles.
 
 ## Forms
 
-Forms are react-hook-form + zod, driven declaratively — not antd `Form`. This is the
-one deliberate divergence from DCWD, and it is intentional.
+Forms are react-hook-form + zod, driven declaratively — never a hand-built form of
+`ui` inputs. This is a deliberate divergence from DCWD, and it is intentional.
 
 - The schema (zod) lives in `models/data/<domain>/<feature>.request.ts`.
 - The field list is an `IFieldConfig<TValues>[]` built in the feature hook, with
   `hidden: (values) => boolean` for conditional fields.
 - `EntityFormModal<TValues>` renders it. `FormField` is the only place a field type
-  maps to an antd control — add a new `type` there, never a bespoke input in a page.
+  maps to a `components/ui` control — add a new `type` there, never a bespoke input in
+  a page.
 - Values are normalised in the hook before the mutation (see `normalize` in
   `transaction.list.hook.ts`), so the service receives a clean payload.
 
@@ -291,27 +305,31 @@ one deliberate divergence from DCWD, and it is intentional.
 
 ## Styling
 
-- All styling is vanilla-extract `*.css.ts`, centralized under `src/styles/<area>/`,
-  never colocated with the component, never a `.css` file, never inline styles, never
-  Tailwind or styled-components.
-- `vite.config.ts` sets `vanillaExtractPlugin({ identifiers: 'short' })`. That option is
-  load-bearing, not cosmetic: without it, dev class names are prefixed with the source
-  filename and the dot in `protected.layout.css.ts` produces a selector that matches no
-  element, silently killing every rule in the file while every build still passes. Do not
-  remove it. Detail: `.claude/skills/build/references/stack.md`.
-- All colours, spacing, radii, shadows and fonts come from the token contract in
-  `src/styles/common/vars.css.ts` (`vars.color.*`, `vars.space.*`, `vars.radius.*`,
-  `vars.shadow.*`, `vars.font.*`). Hardcoding any of them is a defect. The `palette`
-  export is the only place a hex literal may appear.
-- Semantic tones live in `styles/common/tone.css.ts`; money keeps green/red meaning,
-  lime and lilac are decorative only, focus rings are always `accentAlt`.
-- antd is restyled through `globalStyle` against its class names, scoped under a local
-  class. Never patch an antd class globally without a scoping class.
-- Before writing a custom element, check how the nearest existing screen composes antd
-  and copy that composition. Never hand-roll a table, form, modal, drawer, date picker,
-  select or notification antd already provides.
-- The antd theme object lives in `store/common/theme.store.ts`. `colorPrimary` is ink,
-  never lime.
+Full standard: the `tartar-shadcn` skill. The rules that are never optional:
+
+- Tailwind v4 utility classes, held as named string or `cva` constants in
+  `src/styles/<area>/<area>.styles.ts` and combined with `cn()` from
+  `src/utils/cn.utils.ts`. Never a class string in JSX, never colocated, never a new
+  `.css` file, never inline styles, never styled-components.
+- Tokens live in one file, `src/styles/common/theme.css`: shadcn semantic variables
+  (`--background`, `--primary`, `--ring`, `--sidebar-*`, `--chart-*`) with `.dark`
+  overrides, plus TARTAR's `@theme` palette (`ink`, `on-ink`, `lime`, `lilac`, `cloud`,
+  `positive`, `warning`, `danger`, `shadow-card`, `radius-shell`, `font-heading`). A
+  hex literal anywhere else is a defect; a new colour is a new token. Print windows
+  cannot read CSS variables, so `styles/print/print.styles.ts` (`printPalette`) is the
+  one other place hex may appear.
+- Semantic tones live in `styles/common/tone.styles.ts` (`toneText`, `toneChip`); money
+  keeps green/red meaning, lime and lilac are decorative only, focus rings are `ring`
+  (lilac).
+- shadcn components render as the registry ships them. `className` on a `ui` component
+  is layout only; colour comes from tokens. `primary` is ink in light mode.
+- Never hand-roll a table, form, dialog, sheet, date picker, select, combobox, tooltip
+  or toast the `components/ui` set already provides. Icons are `lucide-react`, charts go
+  through `components/common/chart/` (recharts via `ui/chart`), toasts are `sonner`.
+- Dark mode is the `.dark` class on `<html>`, driven by `mode` in
+  `store/common/theme.store.ts` and synced in `hook/app/app.hook.ts`.
+- `.oxlintrc.json` rejects any import of `antd`, `@ant-design/*`, `@vanilla-extract/*`
+  or a `*.css` file (`src/main.tsx` alone imports `theme.css`). Do not loosen it.
 
 ## Routes
 
@@ -346,11 +364,12 @@ every suggestion and add 0.1 (v1.0 committed -> v1.1) — description one
 ## Do not
 
 - Do not add comments. See Code style.
-- Do not add path aliases, barrel files, or colocated `*.css.ts`.
+- Do not add new path aliases, barrel files, colocated styles, or Tailwind classes in JSX.
 - Do not call a service from a component, or Supabase from a hook.
-- Do not hardcode a colour, spacing value, query key or modal key.
+- Do not hardcode a colour, query key or modal key.
 - Do not use `useState` or `useReducer` — state belongs in a zustand store.
-- Do not use `Popconfirm` or `Modal.confirm` — use `useConfirm`.
+- Do not confirm inline with `alert-dialog` or `window.confirm` — use `useConfirm`.
+- Do not add a Radix or Base UI package — the primitives are React Aria.
 - Do not introduce a new dependency without saying why the existing stack cannot do it.
 - Do not leave `yarn build` or `yarn lint` failing.
 
@@ -365,11 +384,14 @@ it; do not convert them wholesale unprompted.
 - **Pagination** infrastructure is in place and proven on Transactions:
   `models/common/pagination.model.ts`, `store/common/pagination.store.ts`,
   `hook/common/pagination.hook.ts`, `keys/table.keys.ts`, and `DataTable`'s
-  `pagination` / `totalCount` / `onPageChange` props. Still to convert, each the same
-  shape as `transaction.services.getList` + `transaction.list.hook.ts`:
-  `ledger.services.getList` (receivables and payables — also needs the `getAll` split
-  for `report.hook.ts`), `voucher.services.getList`,
-  `transaction.services.getDisbursementList` (purchases and expenses), and
-  `payment.services.getList`. `DataTable` keeps its client-side pager for any table
-  that passes no `pagination` prop, so unconverted tables keep working.
-- **Comments** are fully stripped as of this document. Keep it that way.
+  `pagination` / `totalCount` / `onPageChange` props. Ledger, payments and
+  disbursements are converted. Still to convert, the same shape as
+  `transaction.services.getList` + `transaction.list.hook.ts`: `voucher.services.getList`.
+  `DataTable` keeps its client-side pager for any table that passes no `pagination`
+  prop, so unconverted tables keep working.
+- **Thin pages**: `pages/{Branches,Users,Vouchers}` still declare their own columns;
+  move them into a feature table when you touch one.
+- **Ledger tables**: `components/ledger/tables/*`, `cards/LedgerSummaryCards` and
+  `modal/RecordPaymentModal` are migrated but unused — Receivables and Payables still
+  render `LedgerManager`. Switching them over needs the user's approval.
+- **Comments** are fully stripped. Keep it that way.

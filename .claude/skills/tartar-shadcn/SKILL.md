@@ -10,13 +10,10 @@ recharts. Tokens: `src/styles/common/theme.css`. Ported from the reference repo
 `D:\EJIE BUSINESS\EJIE WORK DCWD\dcwd_apps-crm-customer2` — when this file is silent, read
 that repo's equivalent `src/components/common/<kind>/` and `src/styles/<area>/` and mirror it.
 
-**Migration in progress** while `.claude/state/ROADMAP.md` exists: unmigrated files still
-use antd + vanilla-extract `*.css.ts`. Every file you create or touch follows this skill;
-do not convert untouched files outside the current phase. Preflight is off until P4
-(theme.css imports `tailwindcss/theme.css` + `utilities.css` only), so do not rely on the
-reset yet — and do not rely on UA margins either, because P4 turns it on.
+The migration from antd + vanilla-extract is complete. `theme.css` imports the full
+`tailwindcss` (preflight on), and `.oxlintrc.json` fails the lint on any retired import.
 
-Retired imports (never in new or migrated code): `antd`, `@ant-design/icons`,
+Retired imports (never in any code): `antd`, `@ant-design/icons`,
 `@ant-design/charts`, `@vanilla-extract/*`, `dayjs` in UI code where `@internationalized/date`
 is required, and any Radix / Base UI package (`radix-ui`, `@radix-ui/*`, `@base-ui/react`,
 `vaul`, `cmdk`, `react-day-picker`).
@@ -115,16 +112,18 @@ sed -i '/type DialogProps as AlertDialogPrimitiveProps,/d' src/components/ui/ale
 | Loading (layout known) / inline | `skeleton` / `spinner` | a spinner replacing content |
 | Empty / error / notice | `empty` / `alert` (`destructive`) / `alert` | styled placeholder divs |
 
-**Toasts** — TARTAR has them today (antd `message` in `hook/common/mutation.hook.ts`). The
-replacement (`sonner` is the registry item) is a new dependency: ask before adding it.
+**Toasts** — `sonner` (`components/ui/sonner.tsx`, theme from `theme.store`), `<Toaster>`
+mounted once in `App.tsx`. `hook/common/mutation.hook.ts` toasts success and queued writes;
+call `toast` directly only for feedback that is not a mutation.
 
 ## Styles live in `src/styles/`, never in JSX
 
 A component file holds structure and behaviour only. Every class string is a named export
 in `src/styles/<area>/<area>.styles.ts` (or `<area>/<name>.styles.ts` when an area splits),
 combined with `cn()` from `src/utils/cn.utils.ts`. Areas mirror today's folders: `common`,
-`card`, `filter`, `form`, `layout`, `modal`, `stat`, `status`, `table`, `view`, `scene`, plus
-a domain folder for a style only one screen uses. Never `.css.ts` (that is vanilla-extract),
+`card`, `chart`, `filter`, `form`, `layout`, `modal`, `stat`, `status`, `table`, `view`, plus
+a domain folder for a style only one screen uses (`dashboard`, `ledger`, `disbursement`,
+`print`). Never a `.css` or `.css.ts` file (the oxlint guard rejects both),
 never colocated, never `style={{}}` except a computed value such as a percentage width.
 
 ```ts

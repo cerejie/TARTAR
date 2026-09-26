@@ -2,7 +2,7 @@
 
 **Detect before applying.** Read `package.json` once. Apply only the sections whose library is actually a dependency of the current project. If a section's library is absent, that section does not exist — follow `conventions.md` and the project's own existing code instead, and never introduce one of these libraries just because this file mentions it.
 
-Reference stack: React 19, react-router-dom 7, antd 6, `@ant-design/icons`, `@ant-design/charts`, vanilla-extract, zustand 5, Supabase JS 2, react-hook-form 7 + `@hookform/resolvers`, zod 4, dayjs, vite, oxlint. No test runner is installed.
+Reference stack: React 19, react-router-dom 7, Tailwind v4 (`@tailwindcss/vite`), shadcn/ui `aria-vega` over `react-aria-components`, `class-variance-authority` + `clsx` + `tailwind-merge`, lucide-react, recharts, sonner, `@internationalized/date`, zustand 5, Supabase JS 2, react-hook-form 7 + `@hookform/resolvers`, zod 4, dayjs, vite, oxlint. No test runner is installed.
 
 ---
 
@@ -19,56 +19,45 @@ Reference stack: React 19, react-router-dom 7, antd 6, `@ant-design/icons`, `@an
 - Routes are data objects typed `IRoute`, declared in `routes/`, assembled by scope (public vs protected). Components are referenced as `Component:`, not `element:`.
 - Access control belongs in a `loader`, not in a `useEffect` redirect.
 
-## antd 6
+## shadcn/ui aria-vega (React Aria)
 
-- Use the project's wrappers first: `ContentView`, `DataTable`, `SectionCard`, `StatCard`,
+- Use the project's primitives first: `ContentView`, `DataTable`, `SectionCard`, `StatCard`,
   `BentoGrid` / `BentoCell`, `EntityFormModal`, `FormField`, `AppModal`, `DetailModal`,
-  `FilterToolbar`, `RequirePermission`. Reach for a raw antd component only when no wrapper
-  fits. `PageHeader` no longer exists — `ContentView` owns the title block.
-- Never hand-roll a table, form, modal, drawer, date picker, select or notification that antd
-  already provides. Before writing a custom element, read how the nearest existing screen
-  composes antd and copy that composition.
-- Feedback comes from `App.useApp()` (`message`, `modal`, `notification`) so it inherits theme and context. Never import the static `message` singleton.
-- Confirmations come from `useConfirm` and the confirm store, never `Popconfirm` or
-  `Modal.confirm`. See `conventions.md` §9.
-- Theme is configured once through `ConfigProvider` in `App.tsx`. Do not add a second provider.
-- Table columns are typed `ColumnsType<T>`, declared in the **feature component** rather than
-  the page, and given an explicit `width` or `align` when they hold a number or an action.
-  Columns that depend on a permission are spread in conditionally, not hidden.
-- `colorPrimary` is ink, never lime. The theme object lives in `store/common/theme.store.ts`.
+  `FilterToolbar`, `FilterSelect`, `DateRangeFilter`, `AppButton`, `StatusTag`, `EmptyState`,
+  `AppBarChart` / `AppDonutChart`, `RequirePermission`. Reach for a raw `components/ui` file
+  only when no primitive fits, and prefer extending the primitive.
+- `components/ui/` is registry output. Add with `npx shadcn@latest add <name>` (style comes
+  from `components.json`), never hand-edit to restyle — colour is a token change in
+  `theme.css`. A registry item that pulls in Radix, Base UI, `vaul`, `cmdk` or
+  `react-day-picker` is not added.
+- Events are React Aria: `onPress` not `onClick` on buttons, `onOpenChange`, `isDisabled`,
+  `selectedKey`. Tooltips do not fire on a disabled button — give the disabled state an
+  `aria-label` or visible text that explains it.
+- Links inside the app are aria `href`s, routed by `RouteRoot` (aria `RouterProvider`).
+- Feedback is `toast` from `sonner`; `<Toaster>` is mounted once in `App.tsx`.
+  `useMutation` already toasts success and queued writes — do not toast again.
+- Confirmations come from `useConfirm` and the confirm store. See `conventions.md` §9.
+- Table columns are `IDataTableColumn<T>` from `models/common/table.model.ts`, declared in
+  the **feature component**, with `align` and `className: nowrapCell` on numbers, dates and
+  actions. Columns that depend on a permission are spread in conditionally, not hidden.
+- Charts are recharts through `components/common/chart/`, coloured by `chartColor` tones
+  mapped to `--chart-N`. Icons are `lucide-react`; `IRoute.icon` is a `LucideIcon`.
 
-## vanilla-extract
+## Tailwind v4
 
-- Styles are `*.css.ts` files under `styles/`, imported as values.
-- All literals come from `vars`. Adding a new colour or spacing step means adding a token, not a hex code at the call site.
-- Library internals are targeted with `globalStyle` scoped through your own generated class.
-- Dynamic values that cannot be a token go through inline style or a `createVar`, not a new class per value.
-
-### Generated class names — the dotted-filename trap
-
-`vite.config.ts` passes `vanillaExtractPlugin({ identifiers: 'short' })`. **Do not remove
-that option.** Without it, dev builds prefix every generated class with the source
-filename, and vanilla-extract sanitizes only whitespace in that prefix — never dots.
-
-A file named `protected.layout.css.ts` then produces:
-
-```
-element:  class="protected.layout_menuWrapper__1yh2jv38"   one class token containing "."
-selector: .protected.layout_menuWrapper__1yh2jv38          parsed as .protected AND .layout_menuWrapper__…
-```
-
-The selector cannot match the element — the dot needed escaping and never gets it, so
-**every rule in that file is silently dead in the dev server**. Production is unaffected,
-because release builds emit hash-only identifiers. The failure is invisible to `tsc`,
-`oxlint` and `yarn build` alike.
-
-Seven of this project's stylesheets have a dotted base name and were affected:
-`protected.layout`, `public.layout`, `common.view`, `content.view`, `dashboard.view`,
-`ledger.view`, `report.view`. `identifiers: 'short'` fixes all of them at once and keeps
-the `<area>.<kind>.css.ts` naming convention intact.
-
-If a style edit provably reaches the compiled CSS but does not appear in the browser,
-check this first: fetch the served class name and confirm it contains no dot.
+- `src/styles/common/theme.css` is the whole CSS entry: `@import "tailwindcss"` (preflight
+  on), `tw-animate-css`, `shadcn/tailwind.css`, the `dark` custom variant, `:root` / `.dark`
+  semantic variables, the `@theme` token palette, a small base layer and a few `@utility`
+  gradients. It is imported once, by `src/main.tsx`.
+- Class strings live in `src/styles/<area>/<area>.styles.ts` as named exports — plain
+  strings, or `cva` when something varies so variants are typed. Components combine them
+  with `cn()`. JSX never carries a literal class string.
+- Every colour is a token utility (`bg-ink`, `text-on-ink-muted`, `ring-lime-soft`,
+  `shadow-card`). Arbitrary values (`bg-[#...]`, `p-[13px]`) are a defect; add a token.
+- Dynamic values that cannot be a class (a computed percentage width) are the one case for
+  `style={{}}`.
+- Tailwind only sees classes it can find as whole strings — never build one by
+  concatenation (`"text-" + tone`). Map through `cva` or a lookup of full class names.
 
 ## zustand 5
 
@@ -93,8 +82,10 @@ check this first: fetch the served class name and confirm it contains no dot.
 - `defaultValues` are typed `DefaultValues<TInput>` and supplied by the manage hook — an `emptyX` constant for create, a mapped record for edit.
 - Reset the form when the modal opens, not when the record changes.
 
-## dayjs
+## Dates
 
+- Date pickers speak `@internationalized/date` (`CalendarDate`); convert to and from ISO strings at the primitive, not in a feature.
+- dayjs is non-UI only (`utils/`, services, the ledger hook/model) — never imported by a component.
 - All formatting goes through `utils/format.utils.ts`. Do not call `dayjs().format()` at a call site.
 - Dates crossing the service boundary are ISO `YYYY-MM-DD` strings, produced by `todayIso()` and validated by `isoDateField`.
 
