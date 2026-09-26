@@ -16,7 +16,11 @@ import {
   selectConfirmRunning,
   useConfirmStore,
 } from "../../../store/common/confirm.store";
-import { confirmMedia } from "../../../styles/modal/modal.styles";
+import {
+  confirmContent,
+  confirmFooter,
+  confirmMedia,
+} from "../../../styles/modal/modal.styles";
 
 const defaultTitles: Record<ConfirmKind, string> = {
   confirm: "Confirm action?",
@@ -44,7 +48,11 @@ const ConfirmationModal = () => {
   };
 
   return (
-    <AlertDialog isOpen={confirm.visible} onOpenChange={handleOpenChange}>
+    <AlertDialog
+      isOpen={confirm.visible}
+      onOpenChange={handleOpenChange}
+      className={confirmContent}
+    >
       <AlertDialogHeader>
         <AlertDialogMedia className={confirmMedia({ kind })}>
           {kind === "delete" ? <Trash2 /> : <CircleAlert />}
@@ -55,7 +63,7 @@ const ConfirmationModal = () => {
         </AlertDialogDescription>
       </AlertDialogHeader>
 
-      <AlertDialogFooter>
+      <AlertDialogFooter className={confirmFooter}>
         <AlertDialogCancel isDisabled={running}>
           {confirm.cancelText ?? "No"}
         </AlertDialogCancel>

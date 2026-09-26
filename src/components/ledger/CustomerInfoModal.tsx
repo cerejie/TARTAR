@@ -35,6 +35,7 @@ const infoItems: IDetailItem<ICustomerInfo>[] = [
   {
     key: "address",
     label: "Address",
+    span: 2,
     render: (info) => value(info.party?.address),
   },
   {

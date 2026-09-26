@@ -1,5 +1,5 @@
 # ROADMAP — "Airy blue" redesign (EduMate mockup) on shadcn + Tailwind
-Updated: 2026-09-26 (T2 closed)
+Updated: 2026-09-26 (T3 closed)
 
 ## Goal
 Every screen matches the design spec below: pastel backdrop, floating top bar + floating
@@ -83,7 +83,7 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
 - Content view: src/components/common/view/{ContentView,ViewSwitch,BentoGrid,BentoCell}.tsx ; styles/view/view.styles.ts
 - Table: src/components/common/table/{DataTable (skeleton in renderBody),TablePagination,AvatarCell,TablePanel,RowActionMenu,RowDetailPanel,TableDecor}.tsx ; styles/table/table.styles.ts ; models/common/table.model.ts
 - Filters: src/components/common/filter/{FilterToolbar,LedgerFilterBar,FilterPopover,SortSelect,FilterSelect,DateRangeFilter,SearchInput}.tsx ; styles/filter/filter.styles.ts ; store/common/{filter,sort}.store.ts
-- Modals: src/components/common/modal/{AppModal (isMobile -> Sheet at :53),ConfirmationModal,DetailModal}.tsx ; components/common/form/EntityFormModal.tsx ; styles/modal/modal.styles.ts
+- Modals (T3 done): src/components/common/modal/{AppModal (isMobile -> Sheet),ConfirmationModal,DetailModal}.tsx ; components/common/form/EntityFormModal.tsx ; styles/modal/modal.styles.ts
 - crm2 modal reference: D:/EJIE BUSINESS/EJIE WORK DCWD/dcwd_apps-crm-customer2/src/components/common/modal/AppModal.tsx + src/styles/modal/{modal,confirmation,detail}.styles.ts (modalHeaderRuled, modalFooter `-mx-6 -mb-6 rounded-b-2xl border-t bg-muted/50 px-6 py-4`, modalActionSize h-11 px-6, drawerFooter pb-safe, detailSections/detailGrid)
 - Cards / status: components/common/card/{SectionCard,StatCard}.tsx, components/common/status/{StatusTag,EmptyState,ProgressRow,SyncIndicator}.tsx ; styles/{card,stat,status}/*.styles.ts
 - Routes (all views imported eagerly today, no errorElement): src/routes/protected.view.routes.ts, protected.routes.ts, public*.routes.ts
@@ -126,13 +126,17 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
   sortOptions / changeSort (resets to page 1, sort key in query key), service .order(sort)
   + created_at tie-break. Transactions: Filters popover + Sort by + "Recorded by" AvatarCell
   (name + role hint; Role column merged into it).
+- T3 modals (v1.15): styles/modal/modal.styles.ts = crm2 frame (modalHeaderRuled, modalFooter
+  rounded-b-panel bg-muted/50 + modalActionSize h-11 px-6, drawerHeaderRuled, drawerFooter pb-safe,
+  confirmContent / confirmFooter, detailGrid + detailItem cva `wide`; modalFooterActions, detailList,
+  detailRow deleted). AppModal always renders ruled header + footer (default outline "Close" when no
+  `footer`); dialog + sheet = rounded-panel bg-panel. ConfirmationModal ruled footer. DetailModal =
+  2-col label-over-value grid (IDetailItem.span > 1 = full row; CustomerInfoModal address span 2);
+  sections not added (no consumer). theme.css: --overlay token (navy/20 light, /60 dark) ->
+  `bg-overlay` in components/ui/{dialog,alert-dialog,sheet}.tsx; `@utility pb-safe`.
 
 ## Next
-1. **T3 modals** — port crm2 AppModal header/body/footer rules and mobile sheet (pb-safe);
-   rounded-panel dialog, overlay navy/20. ConfirmationModal gets the same ruled footer +
-   h-11 actions; DetailModal -> crm2 sections + 2-col grid; EntityFormModal submit/cancel in
-   the ruled footer. Check every modal renders header + footer.
-2. **T4 loading / error / lazy** — routes use react-router `lazy` for every view (pages become
+1. **T4 loading / error / lazy** — routes use react-router `lazy` for every view (pages become
    separate chunks; recharts only loads with Dashboard/Reports) + `HydrateFallback`/pending
    `PageSkeleton` inside the content card + thin blue top progress bar on
    `useNavigation().state`; prefetch a route chunk on menu hover/focus. `errorElement` ->
@@ -143,19 +147,19 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
    skeleton rows mirror column shapes (circle for avatar cells). StatCard / SectionCard / chart
    skeleton + error states. EmptyState: icon + sentence + optional action. Respect
    prefers-reduced-motion.
-3. **T5a screen sweep — transaction family + ledger** — Purchases, Expenses, Receivables,
+2. **T5a screen sweep — transaction family + ledger** — Purchases, Expenses, Receivables,
    Payables (LedgerManager), Payments: status pills in the title row, LedgerFilterBar
    layout="popover" + FilterToolbar `sort` (server sort per the Transactions shape: sort
    options enum + sort key + getList .order), AvatarCell where a person shows, NEW
    `ProgressCell` (paid/total, deferred from T2 — no consumer yet), error/empty states wired.
-4. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
+3. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
    white cards, blue charts, the "Recommended" card style for list cards), Reports, Auth +
    Error pages (backdrop gradient, blue submit, retire bg-auth-* lime/lilac utilities).
-5. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
+4. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
    updated to the new token names, new primitives, lazy routes and state rules; delete this file.
 
 ## Open
 - none
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (T2, suggest v1.14) · Last check: yarn build + yarn lint clean
+Branch: development-overhaul · Uncommitted: yes (T3, suggest v1.15) · Last check: yarn build + yarn lint clean

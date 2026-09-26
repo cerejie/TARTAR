@@ -15,13 +15,17 @@ import {
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hook/use-mobile";
 import { cn } from "@/utils/cn.utils";
+import AppButton from "../button/AppButton";
 import type { ModalSize } from "../../../models/common/view.model";
 import {
   drawerBody,
   drawerContent,
   drawerFooter,
+  drawerHeaderRuled,
   modalBody,
   modalContent,
+  modalFooter,
+  modalHeaderRuled,
   modalSize,
 } from "../../../styles/modal/modal.styles";
 
@@ -46,6 +50,12 @@ const AppModal = ({
 }: IProps) => {
   const isMobile = useIsMobile();
 
+  const actions = footer ?? (
+    <AppButton variant="outline" onPress={onClose}>
+      Close
+    </AppButton>
+  );
+
   const handleOpenChange = (next: boolean) => {
     if (!next) onClose();
   };
@@ -58,14 +68,14 @@ const AppModal = ({
         onOpenChange={handleOpenChange}
         className={drawerContent}
       >
-        <SheetHeader>
+        <SheetHeader className={drawerHeaderRuled}>
           <SheetTitle>{title}</SheetTitle>
           {subtitle ? <SheetDescription>{subtitle}</SheetDescription> : null}
         </SheetHeader>
 
         <div className={drawerBody}>{children}</div>
 
-        {footer ? <SheetFooter className={drawerFooter}>{footer}</SheetFooter> : null}
+        <SheetFooter className={drawerFooter}>{actions}</SheetFooter>
       </Sheet>
     );
   }
@@ -77,14 +87,14 @@ const AppModal = ({
       isDismissable={false}
       className={cn(modalContent, modalSize({ size }))}
     >
-      <DialogHeader>
+      <DialogHeader className={modalHeaderRuled}>
         <DialogTitle>{title}</DialogTitle>
         {subtitle ? <DialogDescription>{subtitle}</DialogDescription> : null}
       </DialogHeader>
 
       <div className={modalBody}>{children}</div>
 
-      {footer ? <DialogFooter>{footer}</DialogFooter> : null}
+      <DialogFooter className={modalFooter}>{actions}</DialogFooter>
     </Dialog>
   );
 };

@@ -56,6 +56,7 @@
     --backdrop-periwinkle: #dfe6fb;
     --backdrop-blush: #f4e3f3;
     --backdrop-sky: #d9e8f8;
+    --overlay: rgba(15, 23, 42, 0.2);
   }
 
   .dark {
@@ -98,6 +99,7 @@
     --backdrop-periwinkle: #13203d;
     --backdrop-blush: #1f1733;
     --backdrop-sky: #0e1f36;
+    --overlay: rgba(2, 6, 23, 0.6);
   }
 }
 
@@ -145,6 +147,7 @@
   --color-track: var(--track);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
+  --color-overlay: var(--overlay);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -193,6 +196,10 @@
     radial-gradient(1000px 820px at 108% 38%, var(--backdrop-blush), transparent 60%),
     radial-gradient(900px 700px at -6% 112%, var(--backdrop-sky), transparent 62%),
     var(--backdrop);
+}
+
+@utility pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
 }
 
 @utility bg-auth-hero {
