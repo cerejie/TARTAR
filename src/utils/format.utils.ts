@@ -42,3 +42,12 @@ export const formatTime = (value: string | null | undefined): string =>
   value ? dayjs(value).format("h:mm A") : "—";
 
 export const todayIso = (): string => dayjs().format("YYYY-MM-DD");
+
+export const formatDatePattern = (value: string, pattern: string): string =>
+  dayjs(value).format(pattern);
+
+export const addDaysIso = (days: number): string =>
+  dayjs().add(days, "day").format("YYYY-MM-DD");
+
+export const daysBetween = (from: string, to: string): number =>
+  dayjs(to).diff(from, "day");

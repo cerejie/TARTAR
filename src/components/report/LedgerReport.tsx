@@ -1,4 +1,3 @@
-import { Col, Row } from "antd";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   ledgerStatusColors,
@@ -13,12 +12,13 @@ import {
 } from "../../models/data/ledger/ledger.response";
 import StatusTag from "../common/status/StatusTag";
 import { dataTableRowOverdue } from "../../styles/table/table.styles";
-import { reportStats } from "../../styles/view/report/report.view.css";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { orderedLedger } from "../../utils/report.utils";
 import SectionCard from "../common/card/SectionCard";
 import StatCard from "../common/card/StatCard";
 import DataTable from "../common/table/DataTable";
+import BentoCell from "../common/view/BentoCell";
+import BentoGrid from "../common/view/BentoGrid";
 
 type IProps<Row extends IReceivable | IPayable> = {
   rows: Row[];
@@ -77,32 +77,32 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
 
   return (
     <>
-      <Row gutter={[16, 16]} className={`${reportStats}`}>
-        <Col xs={12} md={8}>
+      <BentoGrid>
+        <BentoCell span="third">
           <StatCard
             title="Total outstanding"
             value={outstanding}
             loading={loading}
             variant="brand"
           />
-        </Col>
-        <Col xs={12} md={8}>
+        </BentoCell>
+        <BentoCell span="third">
           <StatCard
             title="Overdue balance"
             value={overdueTotal}
             loading={loading}
             variant="negative"
           />
-        </Col>
-        <Col xs={12} md={8}>
+        </BentoCell>
+        <BentoCell span="third">
           <StatCard
             title="Overdue records"
             value={overdueRows.length}
             loading={loading}
             raw
           />
-        </Col>
-      </Row>
+        </BentoCell>
+      </BentoGrid>
 
       <SectionCard
         title={`Outstanding ${label}s`}

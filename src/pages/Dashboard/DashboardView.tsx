@@ -1,40 +1,24 @@
-import { Column } from "@ant-design/charts";
 import {
-  BankOutlined,
-  FileDoneOutlined,
-  FileTextOutlined,
-  LineChartOutlined,
-  PieChartOutlined,
-  RiseOutlined,
-  UserOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
-import { Empty, Flex, Segmented, Spin } from "antd";
-import dayjs from "dayjs";
+  ChartLine,
+  ChartPie,
+  FileCheck,
+  FileText,
+  Landmark,
+  TrendingUp,
+  User,
+  Wallet,
+} from "lucide-react";
 import SectionCard from "../../components/common/card/SectionCard";
 import StatCard from "../../components/common/card/StatCard";
+import EmptyState from "../../components/common/status/EmptyState";
 import StatDelta from "../../components/common/status/StatDelta";
 import BentoCell from "../../components/common/view/BentoCell";
 import ContentView from "../../components/common/view/ContentView";
 import CashFlowDonut from "../../components/dashboard/CashFlowDonut";
 import NotificationsPanel from "../../components/dashboard/NotificationsPanel";
+import SalesOverviewCard from "../../components/dashboard/SalesOverviewCard";
 import { useDashboardHook } from "../../hook/data/dashboard/dashboard.hook";
-import {
-  salesPeriodLabels,
-  salesPeriodValues,
-  type SalesPeriod,
-} from "../../models/data/dashboard/dashboard.response";
-import { colors } from "../../styles/common/vars.css";
-import { chartLoading } from "../../styles/view/common/common.view.css";
-import { formatDate, formatMoney, todayIso } from "../../utils/format.utils";
-
-const formatAxisLabel = (iso: string, period: SalesPeriod): string => {
-  const date = dayjs(iso);
-  if (period === "daily") return date.format("MM-DD");
-  if (period === "weekly") return date.format("MMM D");
-  if (period === "monthly") return date.format("MMM");
-  return date.format("YYYY");
-};
+import { formatDate, todayIso } from "../../utils/format.utils";
 
 const DashboardView = () => {
   const {
@@ -53,8 +37,6 @@ const DashboardView = () => {
     netCashFlow,
   } = useDashboardHook();
 
-  const latestDate = series.length ? series[series.length - 1].date : null;
-
   return (
     <ContentView
       meta={formatDate(todayIso())}
@@ -66,7 +48,7 @@ const DashboardView = () => {
           value={summary?.currentCash}
           loading={summaryLoading}
           variant="brand"
-          icon={<WalletOutlined />}
+          icon={<Wallet />}
           caption="Available cash on hand"
         />
       </BentoCell>
@@ -75,7 +57,7 @@ const DashboardView = () => {
           title="Bank Balance"
           value={summary?.bankBalance}
           loading={summaryLoading}
-          icon={<BankOutlined />}
+          icon={<Landmark />}
           caption="Total in bank accounts"
         />
       </BentoCell>
@@ -85,7 +67,7 @@ const DashboardView = () => {
           value={summary?.todaysSales}
           loading={summaryLoading}
           variant="positive"
-          icon={<RiseOutlined />}
+          icon={<TrendingUp />}
           chip={
             <StatDelta
               current={summary?.todaysSales}
@@ -103,7 +85,7 @@ const DashboardView = () => {
           value={summary?.todaysExpenses}
           loading={summaryLoading}
           variant="negative"
-          icon={<FileTextOutlined />}
+          icon={<FileText />}
           chip={
             <StatDelta
               current={summary?.todaysExpenses}
@@ -121,7 +103,7 @@ const DashboardView = () => {
           title="Accounts Receivable"
           value={summary?.accountsReceivable}
           loading={summaryLoading}
-          icon={<UserOutlined />}
+          icon={<User />}
           caption="Total outstanding"
         />
       </BentoCell>
@@ -130,7 +112,7 @@ const DashboardView = () => {
           title="Accounts Payable"
           value={summary?.accountsPayable}
           loading={summaryLoading}
-          icon={<FileDoneOutlined />}
+          icon={<FileCheck />}
           caption="Total outstanding"
         />
       </BentoCell>
@@ -140,7 +122,7 @@ const DashboardView = () => {
           value={summary?.monthlySales}
           loading={summaryLoading}
           variant="positive"
-          icon={<LineChartOutlined />}
+          icon={<ChartLine />}
           caption="Month to date"
         />
       </BentoCell>
@@ -150,7 +132,7 @@ const DashboardView = () => {
           value={netProfit}
           loading={summaryLoading}
           variant="accent"
-          icon={<PieChartOutlined />}
+          icon={<ChartPie />}
           chip={
             <StatDelta
               current={netProfit}
@@ -164,62 +146,12 @@ const DashboardView = () => {
       </BentoCell>
 
       <BentoCell span="twoThirds">
-        <SectionCard
-          title="Sales Overview"
-          extra={
-            <Segmented
-              size="small"
-              value={salesPeriod}
-              onChange={(value) => setSalesPeriod(value as SalesPeriod)}
-              options={salesPeriodValues.map((period) => ({
-                label: salesPeriodLabels[period],
-                value: period,
-              }))}
-            />
-          }
-        >
-          {salesLoading ? (
-            <Flex className={`${chartLoading}`} align="center" justify="center">
-              <Spin />
-            </Flex>
-          ) : series.length ? (
-            <Column
-              data={series}
-              xField="date"
-              yField="total"
-              height={300}
-              style={{
-                fill: (item: { date: string }) =>
-                  item.date === latestDate ? colors.accent : colors.ink,
-                radiusTopLeft: 8,
-                radiusTopRight: 8,
-              }}
-              axis={{
-                x: {
-                  labelFormatter: (value: string) =>
-                    formatAxisLabel(value, salesPeriod),
-                  labelFill: colors.textMuted,
-                  line: false,
-                },
-                y: {
-                  labelFill: colors.textMuted,
-                  gridStroke: colors.border,
-                  gridStrokeOpacity: 0.6,
-                },
-              }}
-              tooltip={{
-                items: [
-                  {
-                    channel: "y",
-                    valueFormatter: (value: number) => formatMoney(value),
-                  },
-                ],
-              }}
-            />
-          ) : (
-            <Empty description="No sales recorded yet" />
-          )}
-        </SectionCard>
+        <SalesOverviewCard
+          salesPeriod={salesPeriod}
+          onSalesPeriodChange={setSalesPeriod}
+          series={series}
+          loading={salesLoading}
+        />
       </BentoCell>
 
       <BentoCell span="third">
@@ -229,9 +161,7 @@ const DashboardView = () => {
           tone="ink"
         >
           {summaryLoading ? (
-            <Flex className={`${chartLoading}`} align="center" justify="center">
-              <Spin />
-            </Flex>
+            <EmptyState description="Loading cash flow" loading />
           ) : (
             <CashFlowDonut
               cashIn={cashIn}

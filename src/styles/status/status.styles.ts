@@ -45,3 +45,5 @@ export const syncOnline = "inline-flex items-center gap-1.5 text-xs text-muted-f
 export const syncOnlineDot = "size-2 rounded-full bg-positive";
 
 export const permissionDenied = "border";
+
+export const emptyState = "min-h-56 p-6";

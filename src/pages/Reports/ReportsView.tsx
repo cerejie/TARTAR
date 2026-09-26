@@ -1,6 +1,6 @@
-import { PrinterOutlined } from "@ant-design/icons";
-import { Button } from "antd";
 import type { ReactNode } from "react";
+import { Printer } from "lucide-react";
+import AppButton from "../../components/common/button/AppButton";
 import ContentView from "../../components/common/view/ContentView";
 import ViewSwitch from "../../components/common/view/ViewSwitch";
 import CashFlowReport from "../../components/report/CashFlowReport";
@@ -56,9 +56,10 @@ const ReportsView = () => {
   return (
     <ContentView
       actions={
-        <Button icon={<PrinterOutlined />} onClick={print} disabled={loading}>
+        <AppButton variant="outline" onPress={print} disabled={loading}>
+          <Printer />
           Print report
-        </Button>
+        </AppButton>
       }
       toolbar={
         <ViewSwitch

@@ -1,16 +1,16 @@
-import { Col, Row } from "antd";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   transactionTypeLabels,
   type TransactionType,
 } from "../../enums/transaction.enum";
 import type { ITransaction } from "../../models/data/transaction/transaction.response";
-import { reportStats } from "../../styles/view/report/report.view.css";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { sumBy } from "../../utils/report.utils";
 import SectionCard from "../common/card/SectionCard";
 import StatCard from "../common/card/StatCard";
 import DataTable from "../common/table/DataTable";
+import BentoCell from "../common/view/BentoCell";
+import BentoGrid from "../common/view/BentoGrid";
 
 const columns: IDataTableColumn<ITransaction>[] = [
   {
@@ -48,32 +48,32 @@ const PeriodReport = ({ transactions, loading }: IProps) => {
 
   return (
     <>
-      <Row gutter={[16, 16]} className={`${reportStats}`}>
-        <Col xs={12} md={8}>
+      <BentoGrid>
+        <BentoCell span="third">
           <StatCard
             title="Sales"
             value={sales}
             loading={loading}
             variant="positive"
           />
-        </Col>
-        <Col xs={12} md={8}>
+        </BentoCell>
+        <BentoCell span="third">
           <StatCard
             title="Expenses"
             value={expenses}
             loading={loading}
             variant="negative"
           />
-        </Col>
-        <Col xs={12} md={8}>
+        </BentoCell>
+        <BentoCell span="third">
           <StatCard
             title="Net"
             value={sales - expenses}
             loading={loading}
             variant="brand"
           />
-        </Col>
-      </Row>
+        </BentoCell>
+      </BentoGrid>
 
       <SectionCard
         title="Transactions"

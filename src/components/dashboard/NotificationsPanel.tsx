@@ -1,20 +1,15 @@
-import { Badge, Empty, Flex, Spin, Typography } from "antd";
-import dayjs from "dayjs";
-import { Link } from "react-router-dom";
+import { cn } from "@/utils/cn.utils";
 import type { IDueAlerts } from "../../models/data/dashboard/dashboard.response";
 import {
   ledgerBalance,
   type IPayable,
   type IReceivable,
 } from "../../models/data/ledger/ledger.response";
-import { tone } from "../../styles/common/tone.css";
-import { colors } from "../../styles/common/vars.css";
+import { toneFill, toneText } from "../../styles/common/tone.styles";
 import {
   notificationAmount,
-  notificationCount,
   notificationDate,
   notificationDot,
-  notificationEmpty,
   notificationFigures,
   notificationFooter,
   notificationGroup,
@@ -25,15 +20,25 @@ import {
   notificationName,
   notificationSub,
   notificationText,
-} from "../../styles/view/dashboard/dashboard.view.css";
-import { formatDate, formatMoney, todayIso } from "../../utils/format.utils";
+} from "../../styles/dashboard/dashboard.styles";
+import {
+  addDaysIso,
+  daysBetween,
+  formatDate,
+  formatMoney,
+  todayIso,
+} from "../../utils/format.utils";
+import AppButton from "../common/button/AppButton";
 import SectionCard from "../common/card/SectionCard";
-
-const { Text } = Typography;
+import EmptyState from "../common/status/EmptyState";
+import StatusTag from "../common/status/StatusTag";
 
 const NOTIFICATION_CAP = 4;
+const PANEL_TITLE = "Notifications & Alerts";
 
 type NotificationKind = "receivable" | "payable";
+
+type NotificationTone = "negative" | "warning";
 
 interface INotificationRow {
   id: string;
@@ -46,7 +51,7 @@ interface INotificationRow {
 interface INotificationGroup {
   key: string;
   label: string;
-  variant: "negative" | "warning";
+  variant: NotificationTone;
   rows: INotificationRow[];
   describe: (row: INotificationRow) => string;
 }
@@ -83,10 +88,8 @@ type IProps = {
 const NotificationsPanel = ({ data, loading }: IProps) => {
   if (loading || !data) {
     return (
-      <SectionCard title="Notifications & Alerts">
-        <Flex className={`${notificationEmpty}`} align="center" justify="center">
-          <Spin />
-        </Flex>
+      <SectionCard title={PANEL_TITLE}>
+        <EmptyState description="Loading alerts" loading />
       </SectionCard>
     );
   }
@@ -95,7 +98,7 @@ const NotificationsPanel = ({ data, loading }: IProps) => {
   const nearDue = toRows(data.nearDueReceivables, data.nearDuePayables);
 
   const today = todayIso();
-  const tomorrow = dayjs().add(1, "day").format("YYYY-MM-DD");
+  const tomorrow = addDaysIso(1);
   const dueToday = nearDue.filter((row) => row.dueDate === today);
   const dueTomorrow = nearDue.filter((row) => row.dueDate === tomorrow);
   const dueLater = nearDue.filter((row) => row.dueDate > tomorrow);
@@ -110,7 +113,7 @@ const NotificationsPanel = ({ data, loading }: IProps) => {
       variant: "negative",
       rows: overdue,
       describe: (row) => {
-        const days = dayjs(today).diff(row.dueDate, "day");
+        const days = daysBetween(row.dueDate, today);
         return `${ledgerLabel(row.kind)} overdue by ${days} day${
           days === 1 ? "" : "s"
         }`;
@@ -144,87 +147,72 @@ const NotificationsPanel = ({ data, loading }: IProps) => {
 
   return (
     <SectionCard
-      title="Notifications & Alerts"
+      title={PANEL_TITLE}
       subtitle="Overdue and near-due items — next 7 days"
       extra={
-        totalCount ? <Badge count={totalCount} color={colors.danger} /> : null
+        totalCount ? <StatusTag color="negative" label={totalCount} /> : null
+      }
+      footer={
+        <div className={notificationFooter}>
+          <AppButton variant="link" size="sm" href="/receivables">
+            Receivables
+          </AppButton>
+          <AppButton variant="link" size="sm" href="/payables">
+            Payables
+          </AppButton>
+        </div>
       }
     >
       {visibleGroups.length ? (
         visibleGroups.map((group) => (
-          <Flex vertical key={group.key} className={`${notificationGroup}`}>
-            <Flex
-              className={`${notificationGroupHead} ${tone[group.variant]}`}
-              align="center"
-              gap={6}
+          <div key={group.key} className={notificationGroup}>
+            <div
+              className={cn(
+                notificationGroupHead,
+                toneText({ tone: group.variant })
+              )}
             >
               <span>{group.label}</span>
-              <Flex
-                component="span"
-                className={`${notificationCount} ${tone[group.variant]}`}
-                align="center"
-                justify="center"
-              >
-                {group.rows.length}
-              </Flex>
-            </Flex>
+              <StatusTag color={group.variant} label={group.rows.length} />
+            </div>
 
             {group.rows.slice(0, NOTIFICATION_CAP).map((row) => (
-              <Flex
-                key={row.id}
-                className={`${notificationItem}`}
-                align="flex-start"
-                justify="space-between"
-                gap={8}
-              >
-                <Flex
-                  className={`${notificationItemMain}`}
-                  align="flex-start"
-                  gap={10}
-                >
+              <div key={row.id} className={notificationItem}>
+                <div className={notificationItemMain}>
                   <span
-                    className={`${notificationDot} ${tone[group.variant]}`}
+                    className={cn(
+                      notificationDot,
+                      toneFill({ tone: group.variant })
+                    )}
                   />
-                  <Flex vertical className={`${notificationText}`}>
-                    <span className={`${notificationName}`}>{row.name}</span>
-                    <span className={`${notificationSub}`}>
+                  <div className={notificationText}>
+                    <span className={notificationName}>{row.name}</span>
+                    <span className={notificationSub}>
                       {group.describe(row)}
                     </span>
-                  </Flex>
-                </Flex>
-                <Flex vertical className={`${notificationFigures}`}>
-                  <span
-                    className={`${notificationAmount} ${tone[group.variant]}`}
-                  >
+                  </div>
+                </div>
+                <div className={notificationFigures}>
+                  <span className={notificationAmount({ tone: group.variant })}>
                     {formatMoney(row.amount)}
                   </span>
-                  <span className={`${notificationDate}`}>
+                  <span className={notificationDate}>
                     {formatDate(row.dueDate)}
                   </span>
-                </Flex>
-              </Flex>
+                </div>
+              </div>
             ))}
 
             {group.rows.length > NOTIFICATION_CAP ? (
-              <Text type="secondary" className={`${notificationMore}`}>
+              <span className={notificationMore}>
                 +{group.rows.length - NOTIFICATION_CAP} more
-              </Text>
+              </span>
             ) : null}
-          </Flex>
+          </div>
         ))
       ) : (
-        <Empty
-          className={`${notificationEmpty}`}
-          description="Nothing overdue or due soon"
-        />
+        <EmptyState description="Nothing overdue or due soon" />
       )}
-
-      <Flex className={`${notificationFooter}`} justify="center">
-        <Text type="secondary">
-          <Link to="/receivables">Receivables</Link> ·{" "}
-          <Link to="/payables">Payables</Link>
-        </Text>
-      </Flex>
     </SectionCard>
   );
 };

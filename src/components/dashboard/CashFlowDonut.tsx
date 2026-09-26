@@ -1,19 +1,17 @@
-import { Pie } from "@ant-design/charts";
-import { Empty, Flex } from "antd";
-import { colors } from "../../styles/common/vars.css";
-import { chartLoading } from "../../styles/view/common/common.view.css";
+import { cn } from "@/utils/cn.utils";
+import { toneFill, type Tone } from "../../styles/common/tone.styles";
 import {
-  donutCenter,
-  donutCenterLabel,
-  donutCenterValue,
+  donutLabel,
   donutLegend,
   donutLegendDot,
   donutLegendKey,
   donutLegendRow,
   donutLegendValue,
-  donutWrap,
-} from "../../styles/view/dashboard/dashboard.view.css";
+  donutValue,
+} from "../../styles/dashboard/dashboard.styles";
 import { formatMoney } from "../../utils/format.utils";
+import AppDonutChart from "../common/chart/AppDonutChart";
+import EmptyState from "../common/status/EmptyState";
 
 type IProps = {
   cashIn: number;
@@ -21,84 +19,53 @@ type IProps = {
   netCashFlow: number;
 };
 
-const sliceColors = [colors.positive, colors.danger] as const;
-const netColor = colors.accent;
+type ILegendItem = {
+  label: string;
+  value: number;
+  tone: Tone;
+};
 
 const CashFlowDonut = ({ cashIn, cashOut, netCashFlow }: IProps) => {
   const hasMovement = cashIn > 0 || cashOut > 0;
 
-  const legend = [
-    { label: "Cash In", value: cashIn, color: sliceColors[0] },
-    { label: "Cash Out", value: cashOut, color: sliceColors[1] },
-    { label: "Net Cash Flow", value: netCashFlow, color: netColor },
+  const legend: readonly ILegendItem[] = [
+    { label: "Cash In", value: cashIn, tone: "positive" },
+    { label: "Cash Out", value: cashOut, tone: "negative" },
+    { label: "Net Cash Flow", value: netCashFlow, tone: "brand" },
   ];
 
   return (
     <>
-      <Flex className={`${donutWrap}`} vertical>
-        {hasMovement ? (
-          <>
-            <Pie
-              data={[
-                { type: "Cash In", value: cashIn },
-                { type: "Cash Out", value: cashOut },
-              ]}
-              angleField="value"
-              colorField="type"
-              innerRadius={0.7}
-              height={220}
-              legend={false}
-              label={false}
-              scale={{ color: { range: [...sliceColors] } }}
-              tooltip={{
-                items: [
-                  {
-                    channel: "y",
-                    valueFormatter: (value: number) => formatMoney(value),
-                  },
-                ],
-              }}
-            />
-            <Flex
-              className={`${donutCenter}`}
-              vertical
-              align="center"
-              justify="center"
-            >
-              <span className={`${donutCenterValue}`}>
-                {formatMoney(netCashFlow)}
-              </span>
-              <span className={`${donutCenterLabel}`}>Net Cash Flow</span>
-            </Flex>
-          </>
-        ) : (
-          <Flex className={`${chartLoading}`} align="center" justify="center">
-            <Empty description="No cash movement this month" />
-          </Flex>
-        )}
-      </Flex>
+      {hasMovement ? (
+        <AppDonutChart
+          label="Cash flow this month"
+          slices={[
+            { key: "cashIn", label: "Cash In", value: cashIn, tone: "positive" },
+            { key: "cashOut", label: "Cash Out", value: cashOut, tone: "negative" },
+          ]}
+          formatValue={formatMoney}
+          center={
+            <>
+              <span className={donutValue}>{formatMoney(netCashFlow)}</span>
+              <span className={donutLabel}>Net Cash Flow</span>
+            </>
+          }
+        />
+      ) : (
+        <EmptyState description="No cash movement this month" />
+      )}
 
-      <Flex vertical className={`${donutLegend}`}>
+      <div className={donutLegend}>
         {legend.map((item) => (
-          <Flex
-            key={item.label}
-            className={`${donutLegendRow}`}
-            align="center"
-            justify="space-between"
-          >
-            <Flex className={`${donutLegendKey}`} align="center" gap={8}>
-              <span
-                className={`${donutLegendDot}`}
-                style={{ background: item.color }}
-              />
+          <div key={item.label} className={donutLegendRow}>
+            <span className={donutLegendKey}>
+              <span className={cn(donutLegendDot, toneFill({ tone: item.tone }))} />
               {item.label}
-            </Flex>
-            <span className={`${donutLegendValue}`}>
-              {formatMoney(item.value)}
             </span>
-          </Flex>
+            <span className={donutLegendValue}>{formatMoney(item.value)}</span>
+          </div>
         ))}
-      </Flex>
+      </div>
     </>
   );
 };

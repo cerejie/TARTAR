@@ -44,6 +44,13 @@ export const salesPeriodSubtitles: Record<SalesPeriod, string> = {
   yearly: "Last 5 years",
 };
 
+export const salesAxisFormats: Record<SalesPeriod, string> = {
+  daily: "MM-DD",
+  weekly: "MMM D",
+  monthly: "MMM",
+  yearly: "YYYY",
+};
+
 export interface IBranchMonitorRow {
   branch: string;
   branchName: string;
