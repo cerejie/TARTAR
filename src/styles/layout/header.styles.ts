@@ -1,7 +1,6 @@
 export const headerRoot =
   "flex h-16 shrink-0 items-center gap-2 rounded-panel border border-border bg-panel px-3 shadow-panel md:gap-3 md:px-4";
 
-export const headerTrigger = "shrink-0 rounded-pill";
 
 export const headerBrand = "flex shrink-0 items-center gap-2.5";
 

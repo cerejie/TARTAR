@@ -4,7 +4,7 @@ export const shellRoot =
 export const shellBody = "flex min-h-0 flex-1 gap-4";
 
 export const shellSidebar =
-  "top-24 bottom-4 h-auto overflow-hidden rounded-panel border border-border shadow-panel data-[side=left]:left-4";
+  "h-auto shrink-0 overflow-hidden rounded-panel border border-border shadow-panel";
 
 export const shellInset =
   "min-h-0 min-w-0 overflow-hidden rounded-panel border border-border bg-panel shadow-panel";

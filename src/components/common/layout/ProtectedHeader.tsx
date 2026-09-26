@@ -1,5 +1,4 @@
 import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useProtectedHeaderHook } from "../../../hook/layout/protected.hook";
 import {
   headerActions,
@@ -7,7 +6,6 @@ import {
   headerDivider,
   headerLogoMark,
   headerRoot,
-  headerTrigger,
   headerWordmark,
 } from "../../../styles/layout/header.styles";
 import SyncIndicator from "../status/SyncIndicator";
@@ -20,7 +18,6 @@ const ProtectedHeader = () => {
 
   return (
     <header className={headerRoot}>
-      <SidebarTrigger variant="outline" size="icon" className={headerTrigger} />
       <div className={headerBrand}>
         <span className={headerLogoMark} aria-hidden="true">
           T
