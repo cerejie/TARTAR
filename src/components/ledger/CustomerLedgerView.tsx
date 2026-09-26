@@ -205,7 +205,7 @@ const CustomerLedgerView = () => {
         columns={columns}
         data={rows}
         loading={listLoading}
-        pageSize={10}
+        pageSize={8}
         emptyText="No receivables match the filters"
         rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
         rowSelection={{

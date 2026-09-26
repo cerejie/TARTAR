@@ -117,7 +117,7 @@ const DataTable = <T extends object>({
   error,
   onRetry,
   rowKey = "id" as keyof T,
-  pageSize = 15,
+  pageSize = 8,
   pagination,
   detachedPagination,
   totalCount = 0,

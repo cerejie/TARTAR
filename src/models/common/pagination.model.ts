@@ -11,7 +11,7 @@ export type IPageItem = number | "gap-start" | "gap-end";
 
 export class IPaginationFormValue implements IPaginationRequest {
   pageNumber: number = 1;
-  pageSize: number = 10;
+  pageSize: number = 8;
   search?: string;
 
   constructor(values?: Partial<IPaginationRequest>) {

@@ -1,4 +1,4 @@
-export const sidebarContent = "gap-1 px-1 py-2";
+export const sidebarContent = "gap-1 px-1 py-1";
 
 export const sidebarGroupLabel =
   "h-6 px-3 text-[11px] font-medium tracking-wide text-muted-foreground/80 uppercase";

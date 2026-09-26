@@ -4,13 +4,13 @@ export const shellRoot =
 export const shellBody = "flex min-h-0 flex-1 gap-4";
 
 export const shellSidebar =
-  "h-auto shrink-0 overflow-hidden rounded-panel border border-border shadow-panel";
+  "h-auto shrink-0 overflow-hidden rounded-panel border border-border py-2 shadow-panel";
 
 export const shellInset =
-  "min-h-0 min-w-0 overflow-hidden rounded-panel border border-border bg-panel shadow-panel";
+  "min-h-0 min-w-0 overflow-hidden rounded-panel border border-border bg-panel py-3 shadow-panel md:py-4";
 
 export const shellContent =
-  "min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4 [scrollbar-gutter:stable] md:p-6";
+  "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-1 [scrollbar-gutter:stable] md:px-6 md:py-2";
 
 export const routeProgress =
   "pointer-events-none fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-brand-soft";

@@ -39,7 +39,7 @@ type IProps = {
   showSizeChanger?: boolean;
 };
 
-const pageSizes = [10, 20, 50, 100] as const;
+const pageSizes = [8, 16, 32, 64] as const;
 
 const TablePagination = ({
   pagination,
