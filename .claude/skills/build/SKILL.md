@@ -128,6 +128,8 @@ If it passes, stop. Do not also run lint. Two failures of the same command means
 
 Under ten lines: what changed (clickable paths), what you assumed, what is left. No code dumps, no step-by-step narration.
 
+Then end with a suggested commit message — `../commit/SKILL.md`, suggest mode. Always, for every change; the fenced block does not count against the ten lines.
+
 ## Step 8 — Commit
 
 Only if the user asked. Then follow `../commit/SKILL.md` — prefixed short title, 2–5 dash bullets.

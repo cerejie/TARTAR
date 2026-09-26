@@ -310,6 +310,13 @@ is `RequirePermission`.
   stays intact. A mutation that bypasses it breaks PWA offline mode.
 - Consider RLS, indexes, foreign keys and constraints on every schema change.
 
+## Commit message suggestion
+
+After **every** response that changes files, end with a suggested commit message in a fenced
+`txt` block, in the house style of `.claude/skills/commit/SKILL.md` — title
+`Development v<X.Y>` (latest `Development v` commit plus 0.1), description one
+`<Prefix>: <Title>` line per change. Always suggest; never commit unless asked.
+
 ## Do not
 
 - Do not add comments. See Code style.

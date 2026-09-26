@@ -1,20 +1,34 @@
 ---
 name: commit
-description: "Write a commit message in this repo's house style — a short prefixed title and a body of 2-5 terse dash bullets. Invoked explicitly when the user types /commit, or loaded by /build at its commit step. Do not auto-invoke on ordinary prompts, and never commit on your own initiative."
+description: "Write a commit message in this repo's house style — title `Development vX.Y`, description one `<Prefix>: <Title>` line per change. Two modes: suggest (after every response that changed files, end with a suggested message — no git commands run) and commit (only when the user types /commit or asks to commit). Never commit on your own initiative."
 ---
 
 # /commit — house-style commit messages
 
+## Two modes
+
+- **Suggest** — after **every** response that changed files in this repo, end the reply with a
+  suggested commit message in a fenced `txt` block, ready to copy. Always suggest; never run
+  `git add` or `git commit` for it. Write it from the changes made this turn — no extra git
+  commands. If the change is not yet commit-worthy (build or lint failing), say so instead.
+- **Commit** — only when the user types `/commit` or asks to commit. Follow the Rules below.
+
 ## Format
 
 ```
-<Prefix>: <Short title>
+Development v<X.Y>
 
-- <what changed>
-- <what changed>
+<Prefix>: <Short title>
 ```
 
-**Title** — prefix, colon, space, then a title in Title Case. ≤60 characters total. No trailing period. No scope parentheses, no ticket numbers unless the user gives one.
+**Title** — always `Development v<X.Y>`, nothing else. The version is the most recent
+`Development v` commit on the current branch plus 0.1 (`v1.0` -> `v1.1`, `v1.9` -> `v1.10`).
+Find it with `git log --oneline --grep="^Development v" -1`. The Tailwind + shadcn migration
+restarts the series at `v1.0`; while that is the latest, count from it, not from older `v2.x`
+commits. If the user names a version, use theirs.
+
+**Description** — one `<Prefix>: <Short title>` line per logical change, usually one. The
+short title is Title Case, ≤60 characters, no trailing period. No bullets, no paragraphs.
 
 **Prefixes used in this repo:**
 
@@ -28,20 +42,12 @@ description: "Write a commit message in this repo's house style — a short pref
 | `Refactor:` | structure changed, behaviour identical |
 | `Milestone N:` | a delivery checkpoint |
 
-If the target repository's history clearly uses a different convention, say so in one line and ask once which to follow — then stick to the answer.
-
-**Body** — 2 to 5 lines, every line starting with `- `. Each bullet is one change, stated in the imperative or as a noun phrase, under ~70 characters. Facts only.
-
-No paragraphs. No "This commit…". No restating the title. No bullet per file. No summary bullet. No emoji. If a change genuinely needs one bullet, use one; if it needs more than five, the commit is too big — say so.
-
 ## Example
 
 ```
-Feature: Customer Ledger Payments
+Development v1.0
 
-- Add payment allocation modal with partial settlement
-- Track allocation history per ledger entry
-- Invalidate receivable list after a verified payment
+Refactor: Tailwind And Shadcn Foundation
 ```
 
 ## Rules
@@ -52,4 +58,4 @@ Feature: Customer Ledger Payments
 - Stage deliberately — the files the task touched, not `git add -A` over a dirty tree.
 - Run `git status --short` and `git diff --stat` before writing the message. One `git log --oneline -10` if the prefix style needs confirming. Nothing else.
 - Do not describe changes you did not make; do not omit changes you did.
-- Keep the `Co-Authored-By` trailer required by the harness as a trailer, separated from the bullets by a blank line. It is not part of the body.
+- Keep the `Co-Authored-By` trailer required by the harness as a trailer, separated from the description by a blank line. It is not part of the description.

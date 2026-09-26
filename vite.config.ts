@@ -1,5 +1,7 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -7,6 +9,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     vanillaExtractPlugin({ identifiers: 'short' }),
     VitePWA({
       registerType: 'autoUpdate',
@@ -25,6 +28,9 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+  },
   build: {
     rollupOptions: {
       output: {
