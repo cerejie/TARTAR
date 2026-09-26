@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ISortOption } from "../models/common/table.model";
 import type { StatusColor } from "../models/common/view.model";
 
 export const voucherTypeValues = ["check", "cash"] as const;
@@ -39,3 +40,10 @@ export const voucherKindCategory = {
   expense: "EXP",
   purchase: "PUR",
 } as const satisfies Record<VoucherKind, string>;
+
+export const voucherSortOptions: readonly ISortOption[] = [
+  { key: "newest", label: "Newest first", column: "created_at", direction: "descending" },
+  { key: "oldest", label: "Oldest first", column: "created_at", direction: "ascending" },
+  { key: "amount-high", label: "Amount: high to low", column: "amount", direction: "descending" },
+  { key: "amount-low", label: "Amount: low to high", column: "amount", direction: "ascending" },
+];

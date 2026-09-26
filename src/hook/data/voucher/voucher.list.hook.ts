@@ -2,6 +2,7 @@ import type { DefaultValues } from "react-hook-form";
 import {
   voucherKindLabels,
   voucherKindValues,
+  voucherSortOptions,
   voucherTypeLabels,
   voucherTypeValues,
 } from "../../../enums/voucher.enum";
@@ -11,7 +12,12 @@ import {
   scopedKey,
   voucherListKey,
 } from "../../../keys/query.keys";
+import {
+  voucherPaginationKey,
+  voucherSortKey,
+} from "../../../keys/table.keys";
 import type { IFieldConfig } from "../../../models/common/field.model";
+import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { IVoucherInput } from "../../../models/data/voucher/voucher.request";
 import type { IVoucher } from "../../../models/data/voucher/voucher.response";
@@ -20,12 +26,18 @@ import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
-import { todayIso } from "../../../utils/format.utils";
+import { scopedFilters } from "../../../utils/filter.utils";
+import { formatMoney, todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
 import { printVoucher } from "../../../utils/print.utils";
+import { usePermissions } from "../../account/account.permission.hook";
+import { useConfirm } from "../../common/confirmation.hook";
+import { useLedgerFilters } from "../../common/filter.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
+import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
+import { useSortOption } from "../../common/sort.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useSupplierListHook } from "../party/supplier.list.hook";
@@ -33,14 +45,34 @@ import { useSupplierListHook } from "../party/supplier.list.hook";
 export const useVoucherListHook = () => {
   const formModal = useModal(voucherFormModalKey);
   const createdBy = useAccountStore(selectUserId);
+  const permissions = usePermissions();
+  const openConfirm = useConfirm();
 
+  const { pagination, setPagination, goToPage } =
+    usePagination(voucherPaginationKey);
+  const { sortOption, sortKey, sortOptions, changeSort } = useSortOption(
+    voucherSortKey,
+    voucherSortOptions,
+    () => setPagination({ pageNumber: 1 })
+  );
+
+  const { filters } = useLedgerFilters("vouchers");
   const { branchOptions, branchName, defaultBranch } = useBranchListHook();
   const { supplierOptions } = useSupplierListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
 
-  const listQuery = useQuery<IVoucher[]>(
-    scopedKey(voucherListKey, scopeBranch),
-    () => voucherServices.getList(scopeBranch ? { branch: scopeBranch } : {})
+  const effectiveFilters = scopedFilters(filters, scopeBranch);
+  const pageRequest = { ...pagination, sort: sortOption };
+
+  const listQuery = useQuery<IPaginationResponse<IVoucher>>(
+    scopedKey(
+      voucherListKey,
+      JSON.stringify(effectiveFilters),
+      pagination.pageNumber,
+      pagination.pageSize,
+      sortKey
+    ),
+    () => voucherServices.getList(effectiveFilters, pageRequest)
   );
 
   const createMutation = useMutation(
@@ -48,7 +80,10 @@ export const useVoucherListHook = () => {
     {
       successMessage: "Voucher submitted for approval",
       invalidate: [voucherListKey],
-      onSuccess: formModal.closeModal,
+      onSuccess: () => {
+        formModal.closeModal();
+        setPagination({ pageNumber: 1 });
+      },
     }
   );
 
@@ -65,6 +100,23 @@ export const useVoucherListHook = () => {
     (id: string) => voucherServices.markPrinted(id),
     { invalidate: [voucherListKey] }
   );
+
+  const confirmDecision = (voucher: IVoucher, approve: boolean) => {
+    const amount = formatMoney(voucher.amount);
+
+    openConfirm({
+      kind: approve ? "confirm" : "delete",
+      title: approve
+        ? `Approve voucher for ${voucher.payee}?`
+        : `Reject voucher for ${voucher.payee}?`,
+      message: approve
+        ? `Once approved, the ${amount} voucher can be printed and can no longer be changed.`
+        : `The ${amount} voucher is marked rejected and cannot be printed.`,
+      okText: approve ? "Approve" : "Reject",
+      onConfirm: () =>
+        decideMutation.mutate({ id: voucher.id, approve }),
+    });
+  };
 
   const print = (voucher: IVoucher) => {
     printVoucher(voucher, branchName(voucher.branch));
@@ -135,14 +187,24 @@ export const useVoucherListHook = () => {
   };
 
   return {
-    vouchers: listQuery.data ?? [],
-    loading: listQuery.loading,
+    permissions,
+    vouchers: listQuery.data?.data ?? [],
+    totalCount: listQuery.data?.totalCount ?? 0,
+    pagination,
+    goToPage,
+    sortKey,
+    sortOptions,
+    changeSort,
+    loading: listQuery.isInitialLoading,
+    refreshing: listQuery.isRefreshing,
+    error: listQuery.error,
+    retry: listQuery.refetch,
     branchName,
     formModal,
     fields,
     defaults,
     createMutation,
-    decideMutation,
+    confirmDecision,
     print,
   };
 };

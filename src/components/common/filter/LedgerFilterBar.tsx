@@ -36,6 +36,7 @@ type IProps = {
   showStatus?: boolean;
   showOverdue?: boolean;
   showType?: boolean;
+  showReference?: boolean;
   paymentKind?: PaymentKind;
   scope?: ILedgerFilterScope;
   layout?: "inline" | "popover";
@@ -46,6 +47,7 @@ const LedgerFilterBar = ({
   showStatus = false,
   showOverdue = false,
   showType = false,
+  showReference = true,
   paymentKind,
   scope = "page",
   layout = "inline",
@@ -104,11 +106,13 @@ const LedgerFilterBar = ({
         />
       ) : null}
 
-      <SearchInput
-        placeholder="Reference no."
-        value={filters.referenceNumber}
-        onChange={(referenceNumber) => setFilters({ referenceNumber })}
-      />
+      {showReference ? (
+        <SearchInput
+          placeholder="Reference no."
+          value={filters.referenceNumber}
+          onChange={(referenceNumber) => setFilters({ referenceNumber })}
+        />
+      ) : null}
 
       {isPopover ? null : (
         <Button variant="outline" onPress={resetFilters}>

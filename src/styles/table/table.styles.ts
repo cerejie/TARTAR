@@ -106,10 +106,6 @@ export const rowIcon =
 
 export const nameCell = "inline-flex items-center gap-2 font-medium";
 
-export const columnLabel = "inline-flex items-center gap-1";
-
-export const columnIcon = "inline-flex text-muted-foreground [&_svg]:size-3.5";
-
 export const rowActions = "inline-flex items-center gap-2";
 
 export const tablePanel = "flex min-w-0 flex-col gap-3";

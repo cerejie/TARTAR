@@ -8,7 +8,7 @@ import {
 type IProps = {
   actions?: ReactNode;
   sort?: ReactNode;
-  children: ReactNode;
+  children?: ReactNode;
 };
 
 const FilterToolbar = ({ actions, sort, children }: IProps) => {

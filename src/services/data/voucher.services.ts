@@ -1,25 +1,52 @@
 import { voucherKindCategory } from "../../enums/voucher.enum";
+import type { IFilterColumns, ILedgerFilters } from "../../models/common/filter.model";
+import {
+  pageRange,
+  type IPaginationRequest,
+  type IPaginationResponse,
+} from "../../models/common/pagination.model";
+import type { ISortState } from "../../models/common/table.model";
 import type { IVoucherInput } from "../../models/data/voucher/voucher.request";
 import type { IVoucher } from "../../models/data/voucher/voucher.response";
 import { runWrite } from "../../store/common/sync.store";
+import { applyLedgerFilters } from "../../utils/filter.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 
 const table = "vouchers";
 
+const voucherColumns: IFilterColumns = {
+  date: "created_at",
+  amount: "amount",
+  search: "payee",
+};
+
+const defaultSort: ISortState = { column: "created_at", direction: "descending" };
+
 const voucherServices = {
   getList: async (
-    filters: { status?: string; branch?: string } = {}
-  ): Promise<IVoucher[]> => {
-    let query = supabase.from(table).select("*");
-    if (filters.status) query = query.eq("status", filters.status);
-    if (filters.branch) query = query.eq("branch", filters.branch);
+    filters: ILedgerFilters = {},
+    pagination: IPaginationRequest
+  ): Promise<IPaginationResponse<IVoucher>> => {
+    const base = supabase.from(table).select("*", { count: "exact" });
+    const filtered = applyLedgerFilters(base, filters, voucherColumns);
+    const query = filters.voucherStatus
+      ? filtered.eq("status", filters.voucherStatus)
+      : filtered;
+    const { from, to } = pageRange(pagination);
+    const sort = pagination.sort ?? defaultSort;
 
-    const { data, error } = await query.order("created_at", {
-      ascending: false,
-    });
+    const { data, error, count } = await query
+      .order(sort.column, { ascending: sort.direction === "ascending" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
     if (error) throw toError(error);
 
-    return (data ?? []) as IVoucher[];
+    return {
+      data: (data ?? []) as IVoucher[],
+      currentPage: pagination.pageNumber,
+      pageSize: pagination.pageSize,
+      totalCount: count ?? 0,
+    };
   },
 
   create: (values: IVoucherInput, createdBy: string | null) => {

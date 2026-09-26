@@ -6,7 +6,8 @@ export type ILedgerFilterScope =
   | "page"
   | "customer-ledger"
   | "ledger"
-  | "payments";
+  | "payments"
+  | "vouchers";
 
 export interface ILedgerFilters {
   branch?: string;

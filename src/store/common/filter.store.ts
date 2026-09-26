@@ -22,6 +22,7 @@ const initialValues: States = {
     "customer-ledger": {},
     ledger: { status: "unpaid" },
     payments: { paymentStatus: "pending" },
+    vouchers: {},
   },
 };
 

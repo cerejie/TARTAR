@@ -28,6 +28,7 @@ import {
 } from "../../../store/data/account/account.store";
 import { toOptions } from "../../../utils/option.utils";
 import { usePermissions } from "../../account/account.permission.hook";
+import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
@@ -41,7 +42,14 @@ export const useUserManageHook = () => {
   const permissions = usePermissions();
   const currentUserId = useAccountStore(selectUserId);
   const { branchOptions } = useBranchListHook();
-  const { users, loading } = useUserListHook();
+  const openConfirm = useConfirm();
+  const {
+    users,
+    isInitialLoading: loading,
+    isRefreshing: refreshing,
+    error,
+    refetch: retry,
+  } = useUserListHook();
 
   const invalidate = [userListKey];
   const editing = editModal.modal.data;
@@ -130,6 +138,32 @@ export const useUserManageHook = () => {
     },
   ];
 
+  const displayName = (user: IUser) => user.full_name || user.username;
+
+  const confirmApproval = (user: IUser, status: ApprovalStatus) => {
+    const approve = status === "approved";
+
+    openConfirm({
+      kind: approve ? "confirm" : "delete",
+      title: approve
+        ? `Approve ${displayName(user)}?`
+        : `Reject ${displayName(user)}?`,
+      message: approve
+        ? "They can sign in and work in the branches they are assigned."
+        : "They cannot sign in until an admin approves them.",
+      okText: approve ? "Approve" : "Reject",
+      onConfirm: () => approvalMutation.mutate({ id: user.id, status }),
+    });
+  };
+
+  const confirmRemove = (user: IUser) =>
+    openConfirm({
+      kind: "delete",
+      title: `Delete ${user.username}?`,
+      message: "The account is removed and can no longer sign in.",
+      onConfirm: () => removeMutation.mutate(user.id),
+    });
+
   const editDefaults: DefaultValues<IUpdateUserInput> = {
     full_name: editing?.full_name ?? "",
     role: editing?.role,
@@ -140,6 +174,10 @@ export const useUserManageHook = () => {
   return {
     users,
     loading,
+    refreshing,
+    error,
+    retry,
+    displayName,
     editing,
     currentUserId,
     createModal,
@@ -151,8 +189,8 @@ export const useUserManageHook = () => {
     editDefaults,
     createMutation,
     updateMutation,
-    approvalMutation,
-    removeMutation,
     resetPasswordMutation,
+    confirmApproval,
+    confirmRemove,
   };
 };

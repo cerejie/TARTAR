@@ -15,6 +15,7 @@ import type { IBranch } from "../../../models/data/branch/branch.response";
 import type { IBranchMonitorRow } from "../../../models/data/dashboard/dashboard.response";
 import dashboardServices from "../../../services/data/dashboard.services";
 import referenceServices from "../../../services/data/reference.services";
+import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { useQuery } from "../../common/query.hook";
@@ -42,6 +43,7 @@ export const branchFormFields: IFieldConfig<IBranchInput>[] = [
 export const useBranchManageHook = () => {
   const createModal = useModal(branchCreateModalKey);
   const editModal = useModal<IBranch>(branchEditModalKey);
+  const openConfirm = useConfirm();
 
   const listQuery = useQuery<IBranch[]>(
     branchAdminListKey,
@@ -78,6 +80,25 @@ export const useBranchManageHook = () => {
     { successMessage: "Branch updated", invalidate }
   );
 
+  const confirmArchive = (branch: IBranch) =>
+    openConfirm({
+      kind: "delete",
+      title: `Archive ${branch.name}?`,
+      message: "It is hidden from selectors but its history is kept.",
+      okText: "Archive",
+      onConfirm: () =>
+        setActiveMutation.mutate({ slug: branch.slug, active: false }),
+    });
+
+  const confirmRestore = (branch: IBranch) =>
+    openConfirm({
+      title: `Restore ${branch.name}?`,
+      message: "It becomes selectable again in every branch picker.",
+      okText: "Restore",
+      onConfirm: () =>
+        setActiveMutation.mutate({ slug: branch.slug, active: true }),
+    });
+
   const { branches } = useBranchListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
   const monitored = scopeBranch
@@ -104,7 +125,10 @@ export const useBranchManageHook = () => {
 
   return {
     allBranches,
-    loading: listQuery.loading,
+    loading: listQuery.isInitialLoading,
+    refreshing: listQuery.isRefreshing,
+    error: listQuery.error,
+    retry: listQuery.refetch,
     editing,
     createModal,
     editModal,
@@ -112,8 +136,12 @@ export const useBranchManageHook = () => {
     editDefaults,
     createMutation,
     updateMutation,
-    setActiveMutation,
+    confirmArchive,
+    confirmRestore,
     monitorRows: monitorQuery.data ?? [],
-    monitorLoading: monitorQuery.loading,
+    monitorLoading: monitorQuery.isInitialLoading,
+    monitorRefreshing: monitorQuery.isRefreshing,
+    monitorError: monitorQuery.error,
+    retryMonitor: monitorQuery.refetch,
   };
 };

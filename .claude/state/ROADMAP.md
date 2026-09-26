@@ -1,5 +1,5 @@
 # ROADMAP — "Airy blue" redesign (EduMate mockup) on shadcn + Tailwind
-Updated: 2026-09-26 (T5a closed)
+Updated: 2026-09-26 (T5b closed)
 
 ## Goal
 Every screen matches the design spec below: pastel backdrop, floating top bar + floating
@@ -93,6 +93,7 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
 - Public pages: styles/layout/public.styles.ts, components/auth/*, pages/Error/ErrorView.tsx ; theme.css @utility bg-auth-* / bg-error-page
 - Sort / status (T5a): hook/common/sort.hook.ts `useSortOption(key, options, onChange)` ; hook/common/filter.hook.ts `useFilterField(scope, field, paginationKey)` (resets page 1) ; common/filter/StatusFilterTabs.tsx (ViewSwitch + "All") ; common/table/{ProgressCell,TablePanel (title)}.tsx ; enums/ledger.enum.ts ledgerStatusFilter* / ledgerSortOptions / paymentSortOptions ; keys/table.keys.ts *SortKey ; ILedgerFilters.voucherStatus (transaction.services disbursementQuery `vouchers!inner`)
 - Screens (T5a): pages/{Purchases,Expenses} tabs = components/disbursement/menus/VoucherStatusTabs ; pages/{Receivables,Payables} = components/ledger/{cards/LedgerSummaryCards, menus/{LedgerStatusTabs,CustomerLedgerButton}, tables/{LedgerRecordsTable,LedgerPaymentsTable}, modal/RecordPaymentModal} ; hooks disbursement.list / ledger.list / payment.list
+- Screens (T5b): pages/Vouchers = components/voucher/{menus/VouchersStatusTabs, tables/VouchersTable} + hook/data/voucher/voucher.list.hook (paged, filter scope "vouchers", confirmDecision) ; pages/Branches = components/branch/tables/{BranchesTable,BranchMonitorTable} + branch.manage.hook (confirmArchive/confirmRestore) ; pages/Users = components/user/tables/UsersTable + user.manage.hook (confirmApproval/confirmRemove, displayName)
 - Reference screen: components/transaction/tables/TransactionsTable.tsx + hook/data/transaction/transaction.list.hook.ts
 
 ## Done
@@ -161,17 +162,36 @@ Palette (chosen in T0 — exact values live in theme.css :root / .dark)
   Loading/refreshing/error/retry + summary error wired on all four screens. Transactions hook now
   uses useSortOption.
 
+- T5b Vouchers + Branches + Users (v1.18): user split the old T5b into T5b/T5c/T5d.
+  voucher.services.getList paged (IPaginationResponse, applyLedgerFilters on created_at/amount/
+  payee, voucherStatus eq, sort + created_at tie-break); no getAll (the hook was the only
+  consumer). voucherSortOptions (enums/voucher.enum.ts), voucherSortKey + voucherExpansionKey
+  (keys/table.keys.ts), filter scope "vouchers" (filter.model + filter.store). Vouchers: status
+  pills in title row, Filters popover (search payee + dates; LedgerFilterBar `showReference`),
+  Sort by, pagination, RowActionMenu (approve/reject behind useConfirm — user-approved, print),
+  check details + category + decided-at in the expanded row. Branches: two titled TablePanels,
+  AvatarCell, voucher prefix column, RowActionMenu (restore now confirms). Users: AvatarCell
+  (name + @username), approve/reject moved into RowActionMenu behind useConfirm, stays unpaged
+  (lookup list). FilterToolbar children optional. TableDecor ColumnLabel + columnLabel/columnIcon
+  styles deleted; RowIcon no longer exported.
+
 ## Next
-1. **T5b screen sweep — the rest** — Vouchers, Branches, Users, Master data, Dashboard (bento
-   white cards, blue charts, the "Recommended" card style for list cards), Reports, Auth +
-   Error pages (backdrop gradient, blue submit, retire bg-auth-* lime/lilac utilities).
-2. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
+1. **T5c Dashboard + Reports + Master data** — Dashboard (bento white cards, blue charts,
+   notifications above stats, the "Recommended" card style for list cards), Reports (ViewSwitch
+   pills in the title row, report tables in TablePanel), Master data (SuppliersPanel +
+   ExpenseCategoriesPanel -> components/master-data/tables/*Table with RowActionMenu + useConfirm,
+   AvatarCell; retire NameCell/RowActions where the last consumer goes). Also mount
+   LedgerPartiesTable as a "By party" view on Receivables/Payables (decided: it is the only
+   per-supplier outstanding total; payments by allocation already exist via RecordPaymentModal,
+   so no legacy feature was lost).
+2. **T5d Auth + Error pages** — backdrop gradient, blue submit, retire bg-auth-hero/-submit
+   lime/lilac remnants in theme.css + styles/layout/public.styles.ts.
+3. **T6 docs** — CLAUDE.md Styling bullets + tartar-shadcn token contract + build style map
    updated to the new token names, new primitives, lazy routes and state rules; delete this file.
 
 ## Open
-- LedgerPartiesTable (per-party multi-record payment) is migrated but not mounted — mount on
-  Receivables/Payables? Ask in T5b.
 - vouchers!inner filter is untested against the live DB — confirm the Purchases/Expenses pills.
+- Vouchers paging/filters untested against the live DB — confirm pills, search and sort.
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (T5a, suggest v1.17) · Last check: yarn build + yarn lint clean
+Branch: development-overhaul · Uncommitted: yes (T5b, suggest v1.18) · Last check: yarn build + yarn lint clean
