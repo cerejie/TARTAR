@@ -55,7 +55,6 @@ const LedgerFilterBar = ({
       ) : null}
 
       <RangePicker
-        size="middle"
         value={
           filters.dateFrom && filters.dateTo
             ? [dayjs(filters.dateFrom), dayjs(filters.dateTo)]
@@ -71,7 +70,6 @@ const LedgerFilterBar = ({
 
       {showStatus ? (
         <Select
-          size="middle"
           className={`${filterStatus}`}
           placeholder="Any status"
           allowClear
@@ -87,7 +85,6 @@ const LedgerFilterBar = ({
 
       {paymentKind ? (
         <Select
-          size="middle"
           className={`${filterStatus}`}
           placeholder="Any status"
           allowClear
@@ -102,7 +99,6 @@ const LedgerFilterBar = ({
 
       {showType ? (
         <Select
-          size="middle"
           className={`${filterType}`}
           placeholder="Any type"
           allowClear
@@ -119,7 +115,6 @@ const LedgerFilterBar = ({
       />
 
       <Button
-        size="middle"
         className={`${filterClear}`}
         icon={<ClearOutlined />}
         onClick={resetFilters}

@@ -10,7 +10,6 @@ type IProps = {
 
 const SearchInput = ({ value, placeholder, onChange }: IProps) => (
   <Input
-    size="middle"
     className={`${filterSearch}`}
     placeholder={placeholder}
     prefix={<SearchOutlined />}
