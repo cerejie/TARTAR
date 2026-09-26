@@ -1,14 +1,6 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  FileProtectOutlined,
-  FileTextOutlined,
-  HistoryOutlined,
-  PlusOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Button, Space } from "antd";
+import { FileCheck, FileText, History, Pencil, Plus, Trash2, User } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
+import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import EntityFormModal from "../../common/form/EntityFormModal";
@@ -38,7 +30,7 @@ import {
   type IDisbursementInput,
 } from "../../../models/data/transaction/transaction.request";
 import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
-import { nowrapCell } from "../../../styles/table/table.css";
+import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
 import { formatDate, formatMoney, formatTime } from "../../../utils/format.utils";
 
 const PurchasesTable = () => {
@@ -88,7 +80,7 @@ const PurchasesTable = () => {
               label: locked
                 ? "Locked — voucher approved or printed"
                 : "Edit purchase",
-              icon: <EditOutlined />,
+              icon: <Pencil />,
               disabled: locked,
               onSelect: () => editModal.openModal(row),
             },
@@ -97,7 +89,7 @@ const PurchasesTable = () => {
       {
         key: "history",
         label: "Edit history",
-        icon: <HistoryOutlined />,
+        icon: <History />,
         onSelect: () => historyModal.openModal(row),
       },
       ...(permissions.isManager && !locked
@@ -105,7 +97,7 @@ const PurchasesTable = () => {
             {
               key: "delete",
               label: "Delete purchase",
-              icon: <DeleteOutlined />,
+              icon: <Trash2 />,
               danger: true,
               onSelect: () =>
                 openConfirm({
@@ -126,7 +118,7 @@ const PurchasesTable = () => {
     {
       title: "Date",
       dataIndex: "txn_date",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     { title: "Payee", key: "payee", render: (_, row) => payeeOf(row) },
@@ -134,16 +126,16 @@ const PurchasesTable = () => {
     {
       title: "Voucher",
       key: "voucher_status",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (_, row) =>
         row.voucher ? (
-          <Space size="small">
+          <span className={tagRow}>
             <StatusTag
               color={voucherStatusColors[row.voucher.status]}
               label={voucherStatusLabels[row.voucher.status]}
             />
             {row.voucher.printed ? <StatusTag label="Printed" /> : null}
-          </Space>
+          </span>
         ) : (
           <StatusTag label="Syncing" />
         ),
@@ -152,13 +144,13 @@ const PurchasesTable = () => {
       title: "Amount",
       dataIndex: "amount",
       align: "right",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: number) => formatMoney(value),
     },
     {
       title: "Due date",
       dataIndex: "due_date",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: string | null) => (value ? formatDate(value) : "Paid"),
     },
     ...(permissions.isManager
@@ -175,7 +167,7 @@ const PurchasesTable = () => {
       title: "Action",
       key: "actions",
       align: "center" as const,
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (_: unknown, row: IDisbursement) => (
         <RowActionMenu actions={actionsOf(row)} />
       ),
@@ -186,7 +178,7 @@ const PurchasesTable = () => {
     {
       key: "purchase",
       title: "Purchase",
-      icon: <FileTextOutlined />,
+      icon: <FileText />,
       items: [
         {
           key: "reference",
@@ -214,7 +206,7 @@ const PurchasesTable = () => {
     {
       key: "voucher",
       title: "Voucher",
-      icon: <FileProtectOutlined />,
+      icon: <FileCheck />,
       items: [
         {
           key: "voucher_no",
@@ -239,7 +231,7 @@ const PurchasesTable = () => {
           {
             key: "record",
             title: "Recorded by",
-            icon: <UserOutlined />,
+            icon: <User />,
             items: [
               {
                 key: "recorded_by",
@@ -269,13 +261,10 @@ const PurchasesTable = () => {
           <FilterToolbar
             actions={
               <RequirePermission can="encodeTransactions" fallback={null}>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => formModal.openModal()}
-                >
+                <AppButton onPress={() => formModal.openModal()}>
+                  <Plus />
                   Record purchase
-                </Button>
+                </AppButton>
               </RequirePermission>
             }
           >

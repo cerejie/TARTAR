@@ -1,14 +1,6 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  FileProtectOutlined,
-  FileTextOutlined,
-  HistoryOutlined,
-  PlusOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Button, Space } from "antd";
+import { FileCheck, FileText, History, Pencil, Plus, Trash2, User } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
+import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import EntityFormModal from "../../common/form/EntityFormModal";
@@ -38,7 +30,7 @@ import {
   type IDisbursementInput,
 } from "../../../models/data/transaction/transaction.request";
 import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
-import { nowrapCell } from "../../../styles/table/table.css";
+import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
 import { formatDate, formatMoney, formatTime } from "../../../utils/format.utils";
 
 const ExpensesTable = () => {
@@ -89,7 +81,7 @@ const ExpensesTable = () => {
               label: locked
                 ? "Locked — voucher approved or printed"
                 : "Edit expense",
-              icon: <EditOutlined />,
+              icon: <Pencil />,
               disabled: locked,
               onSelect: () => editModal.openModal(row),
             },
@@ -98,7 +90,7 @@ const ExpensesTable = () => {
       {
         key: "history",
         label: "Edit history",
-        icon: <HistoryOutlined />,
+        icon: <History />,
         onSelect: () => historyModal.openModal(row),
       },
       ...(permissions.isManager && !locked
@@ -106,7 +98,7 @@ const ExpensesTable = () => {
             {
               key: "delete",
               label: "Delete expense",
-              icon: <DeleteOutlined />,
+              icon: <Trash2 />,
               danger: true,
               onSelect: () =>
                 openConfirm({
@@ -127,7 +119,7 @@ const ExpensesTable = () => {
     {
       title: "Date",
       dataIndex: "txn_date",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     { title: "Payee", key: "payee", render: (_, row) => payeeOf(row) },
@@ -141,16 +133,16 @@ const ExpensesTable = () => {
     {
       title: "Voucher",
       key: "voucher_status",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (_, row) =>
         row.voucher ? (
-          <Space size="small">
+          <span className={tagRow}>
             <StatusTag
               color={voucherStatusColors[row.voucher.status]}
               label={voucherStatusLabels[row.voucher.status]}
             />
             {row.voucher.printed ? <StatusTag label="Printed" /> : null}
-          </Space>
+          </span>
         ) : (
           <StatusTag label="Syncing" />
         ),
@@ -159,7 +151,7 @@ const ExpensesTable = () => {
       title: "Amount",
       dataIndex: "amount",
       align: "right",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: number) => formatMoney(value),
     },
     ...(permissions.isManager
@@ -176,7 +168,7 @@ const ExpensesTable = () => {
       title: "Action",
       key: "actions",
       align: "center" as const,
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (_: unknown, row: IDisbursement) => (
         <RowActionMenu actions={actionsOf(row)} />
       ),
@@ -187,7 +179,7 @@ const ExpensesTable = () => {
     {
       key: "expense",
       title: "Expense",
-      icon: <FileTextOutlined />,
+      icon: <FileText />,
       items: [
         {
           key: "cash_account",
@@ -210,7 +202,7 @@ const ExpensesTable = () => {
     {
       key: "voucher",
       title: "Voucher",
-      icon: <FileProtectOutlined />,
+      icon: <FileCheck />,
       items: [
         {
           key: "voucher_no",
@@ -235,7 +227,7 @@ const ExpensesTable = () => {
           {
             key: "record",
             title: "Recorded by",
-            icon: <UserOutlined />,
+            icon: <User />,
             items: [
               {
                 key: "recorded_by",
@@ -265,13 +257,10 @@ const ExpensesTable = () => {
           <FilterToolbar
             actions={
               <RequirePermission can="encodeTransactions" fallback={null}>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => formModal.openModal()}
-                >
+                <AppButton onPress={() => formModal.openModal()}>
+                  <Plus />
                   Record expense
-                </Button>
+                </AppButton>
               </RequirePermission>
             }
           >

@@ -115,3 +115,7 @@ export const tablePaginationPage = "px-2 text-sm whitespace-nowrap text-muted-fo
 export const tablePaginationSize = "flex items-center gap-2 text-sm text-muted-foreground";
 
 export const tablePaginationSelect = "w-20";
+
+export const nowrapCell = "whitespace-nowrap";
+
+export const tagRow = "inline-flex items-center gap-2";

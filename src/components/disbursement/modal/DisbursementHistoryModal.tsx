@@ -1,4 +1,3 @@
-import { Flex, Typography } from "antd";
 import { transactionTypeLabels } from "../../../enums/transaction.enum";
 import type {
   IDisbursement,
@@ -6,16 +5,19 @@ import type {
 } from "../../../models/data/transaction/transaction.response";
 import {
   auditChanges,
+  auditEmpty,
   auditEntry,
-} from "../../../styles/view/ledger/ledger.view.css";
+  auditField,
+  auditList,
+  auditMeta,
+  auditWhen,
+} from "../../../styles/disbursement/disbursement.styles";
 import {
   formatDate,
   formatDateTime,
   formatMoney,
 } from "../../../utils/format.utils";
 import AppModal from "../../common/modal/AppModal";
-
-const { Text } = Typography;
 
 type IProps = {
   open: boolean;
@@ -49,25 +51,27 @@ const DisbursementHistoryModal = ({
       onClose={onClose}
     >
       {audit.length === 0 && !loading ? (
-        <Text type="secondary">No edits recorded.</Text>
+        <p className={auditEmpty}>No edits recorded.</p>
       ) : null}
 
-      {audit.map((entry) => (
-        <Flex vertical key={entry.id} className={`${auditEntry}`}>
-          <Text>
-            <Text strong>{formatDateTime(entry.edited_at)}</Text>{" "}
-            <Text type="secondary">by {userNameOf(entry.edited_by)}</Text>
-          </Text>
-          <ul className={`${auditChanges}`}>
-            {Object.entries(entry.changes).map(([field, change]) => (
-              <li key={field}>
-                <Text code>{field.replaceAll("_", " ")}</Text>{" "}
-                {String(change.old ?? "—")} → {String(change.new ?? "—")}
-              </li>
-            ))}
-          </ul>
-        </Flex>
-      ))}
+      <div className={auditList}>
+        {audit.map((entry) => (
+          <div key={entry.id} className={auditEntry}>
+            <p className={auditMeta}>
+              <span className={auditWhen}>{formatDateTime(entry.edited_at)}</span>{" "}
+              by {userNameOf(entry.edited_by)}
+            </p>
+            <ul className={auditChanges}>
+              {Object.entries(entry.changes).map(([field, change]) => (
+                <li key={field}>
+                  <code className={auditField}>{field.replaceAll("_", " ")}</code>{" "}
+                  {String(change.old ?? "—")} → {String(change.new ?? "—")}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
     </AppModal>
   );
 };

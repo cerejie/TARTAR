@@ -1,12 +1,6 @@
-import {
-  DeleteOutlined,
-  FileTextOutlined,
-  PlusOutlined,
-  TagOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Button } from "antd";
+import { FileText, Plus, Tag, Trash2, User } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
+import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import EntityFormModal from "../../common/form/EntityFormModal";
@@ -33,7 +27,7 @@ import {
   type ITransactionInput,
 } from "../../../models/data/transaction/transaction.request";
 import type { ITransaction } from "../../../models/data/transaction/transaction.response";
-import { nowrapCell } from "../../../styles/table/table.css";
+import { nowrapCell } from "../../../styles/table/table.styles";
 import { formatDate, formatMoney, formatTime } from "../../../utils/format.utils";
 
 const TransactionsTable = () => {
@@ -72,7 +66,7 @@ const TransactionsTable = () => {
     {
       key: "delete",
       label: "Delete transaction",
-      icon: <DeleteOutlined />,
+      icon: <Trash2 />,
       danger: true,
       onSelect: () =>
         openConfirm({
@@ -90,19 +84,19 @@ const TransactionsTable = () => {
     {
       title: "Date",
       dataIndex: "txn_date",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     {
       title: "Time",
       dataIndex: "created_at",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: string) => formatTime(value),
     },
     {
       title: "Type",
       dataIndex: "type",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (type: ITransaction["type"]) => (
         <StatusTag
           color={transactionTypeColors[type]}
@@ -129,7 +123,7 @@ const TransactionsTable = () => {
       title: "Amount",
       dataIndex: "amount",
       align: "right",
-      className: `${nowrapCell}`,
+      className: nowrapCell,
       render: (value: number) => formatMoney(value),
     },
     ...(permissions.isManager
@@ -138,7 +132,7 @@ const TransactionsTable = () => {
             title: "Action",
             key: "actions",
             align: "center" as const,
-            className: `${nowrapCell}`,
+            className: nowrapCell,
             render: (_: unknown, row: ITransaction) => (
               <RowActionMenu actions={actionsOf(row)} />
             ),
@@ -151,7 +145,7 @@ const TransactionsTable = () => {
     {
       key: "transaction",
       title: "Transaction",
-      icon: <FileTextOutlined />,
+      icon: <FileText />,
       items: [
         {
           key: "time",
@@ -173,7 +167,7 @@ const TransactionsTable = () => {
     {
       key: "classification",
       title: "Classification",
-      icon: <TagOutlined />,
+      icon: <Tag />,
       items: [
         {
           key: "cash_account",
@@ -204,7 +198,7 @@ const TransactionsTable = () => {
           {
             key: "record",
             title: "Recorded by",
-            icon: <UserOutlined />,
+            icon: <User />,
             items: [
               {
                 key: "recorded_by",
@@ -232,13 +226,10 @@ const TransactionsTable = () => {
           <FilterToolbar
             actions={
               <RequirePermission can="encodeTransactions" fallback={null}>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => formModal.openModal()}
-                >
+                <AppButton onPress={() => formModal.openModal()}>
+                  <Plus />
                   Record transaction
-                </Button>
+                </AppButton>
               </RequirePermission>
             }
           >
