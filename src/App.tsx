@@ -7,7 +7,7 @@ const App = () => {
   const { config } = useAppHook();
 
   return (
-    <ConfigProvider theme={config} componentSize="large">
+    <ConfigProvider theme={config} componentSize="medium">
       <AntdApp>
         <View />
         <ConfirmationModal />
