@@ -37,7 +37,8 @@ shadcn aria-vega components + Tailwind; `yarn build` and `yarn lint` clean; CLAU
 - P3c new: table.styles.ts `stackedCell`, `cellHint` ; slug/active chips are StatusTag (active = `positive`) ; table.css `iconButton`/`slugTag` now unused
 - Unused but migrated: components/ledger/tables/{LedgerPartiesTable,LedgerPaymentsTable,LedgerRecordsTable}, cards/LedgerSummaryCards, modal/RecordPaymentModal — pages still render LedgerManager (Receivables + Payables); switching them to the Transactions-style tables is a separate, user-approved change
 - P3d new: components/common/chart/{AppBarChart,AppDonutChart,ChartTooltipRow}.tsx (recharts via ui/chart, accessor dataKeys) ; styles/chart/chart.styles.ts (`chartColor` tone -> --chart-N) ; ChartTone in models/common/view.model.ts ; components/common/status/EmptyState.tsx (+ status.styles `emptyState`) ; components/dashboard/SalesOverviewCard.tsx (chart moved out of the page) ; styles/dashboard/dashboard.styles.ts ; format.utils `formatDatePattern`, `addDaysIso`, `daysBetween` (dayjs out of UI) ; dashboard.response `salesAxisFormats` ; theme.css `.dark --chart-1` ; deleted styles/view/{common,dashboard,report}/*.css.ts ; @ant-design/charts no longer imported in src (only vite manualChunks)
-- Old style areas still live: styles/layout/public.layout.css.ts (AuthShell, LoginView, RegisterView, ErrorView -> P3)
+- P3e new: styles/layout/public.styles.ts (auth + error pages) ; components/auth/{FarmScene (inline SVG, currentColor — replaces styles/scene/farm.scene.ts),ForgotPasswordHint (PopoverTrigger + aria Dialog)} ; theme.css `@utility bg-auth-page|bg-auth-hero|bg-auth-submit|bg-error-page`, `--animate-drift`, `--shadow-auth*` ; styles/print/print.styles.ts (`printPalette`, `printFont` — print windows cannot read CSS vars) ; components/ui/sonner.tsx (theme from theme.store, no next-themes) + `<Toaster position="top-center" />` in App.tsx ; mutation.hook uses sonner `toast` ; AntdApp wrapper removed
+- Remaining antd/vanilla-extract importers outside styles/: App.tsx (ConfigProvider), store/common/theme.store.ts (antd theme), main.tsx (global.css)
 - Config: vite.config.ts (tailwindcss plugin + alias added; still has vanillaExtractPlugin + antd/charts manualChunks), tsconfig.app.json + tsconfig.json (paths), src/main.tsx (imports global.css then theme.css)
 
 ## Done
@@ -48,15 +49,16 @@ shadcn aria-vega components + Tailwind; `yarn build` and `yarn lint` clean; CLAU
 - [x] P3b ledger domain — ledger/{CustomerInfoModal,CustomerLedgerModal,CustomerLedgerView,LedgerManager,PaymentAllocationModal,cards/LedgerSummaryCards,modal/RecordPaymentModal,tables/(3)}, payment/PaymentsPanel, pages/Receivables off antd/@ant-design/icons/*.css.ts. dayjs kept in ledger hook/model (non-UI). Disabled "Record payment" in CustomerLedgerView now says "Tick receivables to pay" (aria tooltips do not fire on disabled buttons). yarn build + lint clean.
 - [x] P3c master-data + admin pages — master-data/{ExpenseCategoriesPanel,SuppliersPanel}, pages/{Branches/BranchesView,Users/UsersView,Vouchers/VouchersView} off antd/@ant-design/icons/table.css (AppButton icon-sm + tooltip, StatusTag, RowActions). Self-delete in Users is a disabled button whose aria-label explains why; disabled Print reads "Approve to print" (aria tooltips skip disabled buttons). Pages still hold their columns (thin-page conversion not in scope). yarn build + lint clean.
 - [x] P3d dashboard + reports — dashboard/{CashFlowDonut,NotificationsPanel,+SalesOverviewCard}, report/{CashFlowReport,LedgerReport,PeriodReport}, pages/{Dashboard/DashboardView,Reports/ReportsView} off antd/@ant-design/charts/@ant-design/icons/*.css.ts. Sales period switch is ViewSwitch (toggle-group); notification counts are StatusTag; footer links are AppButton link variant. yarn build + lint clean.
+- [x] P3e auth + error + utils + toasts — components/auth/{AuthShell,+FarmScene,+ForgotPasswordHint}, pages/Auth/{LoginView,RegisterView} (native form + FormField + AppButton), pages/Error/ErrorView (ui Empty), utils/print.utils (printPalette), hook/common/mutation.hook (sonner, user-approved dep), App.tsx; deleted styles/layout/public.layout.css.ts, styles/scene/farm.scene.ts. report.utils needed nothing. yarn build + lint clean.
 - [x] Commit skill: suggest mode + `Development vX.Y` format (.claude/skills/commit/SKILL.md, build/SKILL.md step 7, CLAUDE.md section)
 
 ## Next
-1. If P3d is still uncommitted, remind the user once (`Development v1.7` / `Refactor: Dashboard And Reports On Shadcn Charts`), then continue.
-2. P3e Auth (components/auth/AuthShell, pages/Auth/{LoginView,RegisterView}), pages/Error/ErrorView, styles/layout/public.layout.css.ts; then utils/{print,report}.utils (vars.css in print.utils) and the toast question (Open) for hook/common/mutation.hook.ts.
-3. P4 remove antd/@ant-design/vanilla-extract, delete *.css.ts, drop antd `theme` object from theme.store + ConfigProvider in App.tsx, switch theme.css to full `@import "tailwindcss"` (preflight on), drop vanillaExtractPlugin + manualChunks, add oxlint restricted-imports guard · P5 rewrite CLAUDE.md + build references.
+1. If P3e is still uncommitted, remind the user once (`Development v1.8` / `Refactor: Auth, Error And Toasts On Shadcn`), then continue.
+2. P4 remove antd/@ant-design/vanilla-extract, delete remaining *.css.ts (vars, tone, global, card, stat, filter, form, table and any left under styles/), drop antd `theme` object from theme.store + ConfigProvider in App.tsx, switch theme.css to full `@import "tailwindcss"` (preflight on) and move anything global.css did into theme.css base layer, drop vanillaExtractPlugin + manualChunks, add oxlint restricted-imports guard.
+3. P5 rewrite CLAUDE.md + build references for the new stack.
 
 ## Open
-- Toasts: antd `message` in src/hook/common/mutation.hook.ts needs a replacement — `sonner` (shadcn registry) is a new dependency; ask the user when P1/P3 reaches it.
+- none
 
 ## State
-Branch: development-overhaul · Uncommitted: yes (P3d) · Last check: yarn build + yarn lint clean after P3d
+Branch: development-overhaul · Uncommitted: yes (P3e) · Last check: yarn build + yarn lint clean after P3e

@@ -1,19 +1,11 @@
-import {
-  CloudSyncOutlined,
-  FileProtectOutlined,
-  ShopOutlined,
-} from "@ant-design/icons";
-import { Card, Flex, Typography } from "antd";
+import { CloudCog, FileCheck2, Store } from "lucide-react";
 import type { ReactNode } from "react";
+import { Card } from "@/components/ui/card";
 import {
   authBlob,
-  authBlobA,
-  authBlobB,
-  authBlobC,
   authCard,
   authCardBrand,
   authHero,
-  authHeroArt,
   authHeroBody,
   authHeroBrand,
   authHeroCopy,
@@ -27,15 +19,14 @@ import {
   authSubtitle,
   authTitle,
   authWordmark,
-} from "../../styles/layout/public.layout.css";
-
-const { Title, Paragraph, Text } = Typography;
+} from "../../styles/layout/public.styles";
+import FarmScene from "./FarmScene";
 
 const features = [
-  { icon: <ShopOutlined />, text: "Every branch on one ledger" },
-  { icon: <FileProtectOutlined />, text: "Vouchers with an approval trail" },
-  { icon: <CloudSyncOutlined />, text: "Works offline, syncs when you return" },
-];
+  { icon: <Store />, text: "Every branch on one ledger" },
+  { icon: <FileCheck2 />, text: "Vouchers with an approval trail" },
+  { icon: <CloudCog />, text: "Works offline, syncs when you return" },
+] as const;
 
 type IProps = {
   title: string;
@@ -45,84 +36,56 @@ type IProps = {
 
 const AuthShell = ({ title, subtitle, children }: IProps) => {
   return (
-    <Flex className={`${authPage}`}>
-      <Flex vertical component="aside" className={`${authHero}`}>
-        <Flex className={`${authHeroBrand}`} align="center" gap={12}>
-          <Flex
-            component="span"
-            className={`${authMark}`}
-            align="center"
-            justify="center"
-            aria-hidden="true"
-          >
+    <div className={authPage}>
+      <aside className={authHero}>
+        <div className={authHeroBrand}>
+          <span className={authMark} aria-hidden="true">
             T
-          </Flex>
+          </span>
           TARTAR
-        </Flex>
+        </div>
 
-        <Flex vertical className={`${authHeroBody}`}>
-          <Title level={1} className={`${authHeroTitle}`}>
-            The calm ledger behind a busy tartar.
-          </Title>
-          <Paragraph className={`${authHeroCopy}`}>
+        <div className={authHeroBody}>
+          <h1 className={authHeroTitle}>The calm ledger behind a busy tartar.</h1>
+          <p className={authHeroCopy}>
             Cash, receivables, payables and vouchers for every branch — kept in
             one quiet, careful place.
-          </Paragraph>
-          <Flex vertical component="ul" className={`${authHeroList}`}>
+          </p>
+          <ul className={authHeroList}>
             {features.map((feature) => (
-              <Flex
-                key={feature.text}
-                component="li"
-                className={`${authHeroItem}`}
-                align="center"
-                gap={12}
-              >
-                <Flex
-                  component="span"
-                  className={`${authHeroIcon}`}
-                  align="center"
-                  justify="center"
-                  aria-hidden="true"
-                >
+              <li key={feature.text} className={authHeroItem}>
+                <span className={authHeroIcon} aria-hidden="true">
                   {feature.icon}
-                </Flex>
+                </span>
                 {feature.text}
-              </Flex>
+              </li>
             ))}
-          </Flex>
-        </Flex>
+          </ul>
+        </div>
 
-        <div className={`${authHeroArt}`} aria-hidden="true" />
-      </Flex>
+        <FarmScene />
+      </aside>
 
-      <Flex component="main" className={`${authMain}`}>
-        <span className={`${authBlob} ${authBlobA}`} aria-hidden="true" />
-        <span className={`${authBlob} ${authBlobB}`} aria-hidden="true" />
-        <span className={`${authBlob} ${authBlobC}`} aria-hidden="true" />
+      <main className={authMain}>
+        <span className={authBlob({ position: "a" })} aria-hidden="true" />
+        <span className={authBlob({ position: "b" })} aria-hidden="true" />
+        <span className={authBlob({ position: "c" })} aria-hidden="true" />
 
-        <Card className={`${authCard}`} variant="borderless">
-          <Flex className={`${authCardBrand}`} align="center" gap={10}>
-            <Flex
-              component="span"
-              className={`${authMark}`}
-              align="center"
-              justify="center"
-              aria-hidden="true"
-            >
+        <Card className={authCard}>
+          <div className={authCardBrand}>
+            <span className={authMark} aria-hidden="true">
               T
-            </Flex>
-            <span className={`${authWordmark}`}>TARTAR</span>
-          </Flex>
+            </span>
+            <span className={authWordmark}>TARTAR</span>
+          </div>
 
-          <Title level={2} className={`${authTitle}`}>
-            {title}
-          </Title>
-          <Text className={`${authSubtitle}`}>{subtitle}</Text>
+          <h2 className={authTitle}>{title}</h2>
+          <p className={authSubtitle}>{subtitle}</p>
 
           {children}
         </Card>
-      </Flex>
-    </Flex>
+      </main>
+    </div>
   );
 };
 

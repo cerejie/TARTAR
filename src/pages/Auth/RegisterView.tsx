@@ -1,18 +1,16 @@
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Form, Typography } from "antd";
-import { Link } from "react-router-dom";
+import { Lock, User } from "lucide-react";
 import AuthShell from "../../components/auth/AuthShell";
+import AppButton from "../../components/common/button/AppButton";
 import FormField from "../../components/common/form/FormField";
 import { useAccountRegisterHook } from "../../hook/account/account.register.hook";
-import type { IFieldConfig } from "../../models/common/field.model";
-import type { IRegisterInput } from "../../models/data/account/account.request";
 import {
   authAlt,
+  authAltLink,
   authForm,
   authSubmit,
-} from "../../styles/layout/public.layout.css";
-
-const { Text } = Typography;
+} from "../../styles/layout/public.styles";
+import type { IFieldConfig } from "../../models/common/field.model";
+import type { IRegisterInput } from "../../models/data/account/account.request";
 
 const fields: IFieldConfig<IRegisterInput>[] = [
   {
@@ -20,7 +18,7 @@ const fields: IFieldConfig<IRegisterInput>[] = [
     label: "Username",
     type: "text",
     placeholder: "letters and numbers only",
-    icon: <UserOutlined />,
+    icon: <User />,
     autoComplete: "username",
   },
   {
@@ -28,7 +26,7 @@ const fields: IFieldConfig<IRegisterInput>[] = [
     label: "Password",
     type: "password",
     placeholder: "Choose a strong password",
-    icon: <LockOutlined />,
+    icon: <Lock />,
   },
 ];
 
@@ -40,25 +38,26 @@ const RegisterView = () => {
       title="Create your account"
       subtitle="An admin approves new registrations before first sign-in."
     >
-      <Form layout="vertical" className={`${authForm}`} onFinish={onSubmit}>
+      <form className={authForm} onSubmit={onSubmit} noValidate>
         {fields.map((field) => (
           <FormField key={field.name} config={field} control={control} />
         ))}
 
-        <Button
-          type="primary"
-          htmlType="submit"
-          block
+        <AppButton
+          type="submit"
           loading={registerMutation.loading}
-          className={`${authSubmit}`}
+          className={authSubmit}
         >
           Create account
-        </Button>
-      </Form>
+        </AppButton>
+      </form>
 
-      <Text className={`${authAlt}`}>
-        Already have an account? <Link to="/login">Sign in</Link>
-      </Text>
+      <p className={authAlt}>
+        Already have an account?
+        <AppButton href="/login" variant="link" className={authAltLink}>
+          Sign in
+        </AppButton>
+      </p>
     </AuthShell>
   );
 };

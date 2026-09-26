@@ -15,7 +15,7 @@ import { ledgerBalance } from "../models/data/ledger/ledger.response";
 import type { ILedgerPayment } from "../models/data/payment/payment.response";
 import type { IVoucher } from "../models/data/voucher/voucher.response";
 import { voucherPurpose } from "../models/data/voucher/voucher.response";
-import { colors, fontFamilyBase } from "../styles/common/vars.css";
+import { printFont, printPalette } from "../styles/print/print.styles";
 import { formatDate, formatDateTime, formatMoney } from "./format.utils";
 
 export interface IPrintStat {
@@ -65,9 +65,9 @@ const openDocument = (
 };
 
 const baseStyles = `
-    body { font-family: ${fontFamilyBase}; color: ${colors.text}; padding: 40px; }
-    h1 { color: ${colors.brandDark}; letter-spacing: .08em; margin: 0 0 4px; }
-    .sub { color: ${colors.textMuted}; }
+    body { font-family: ${printFont}; color: ${printPalette.text}; padding: 40px; }
+    h1 { color: ${printPalette.heading}; letter-spacing: .08em; margin: 0 0 4px; }
+    .sub { color: ${printPalette.muted}; }
     table { width: 100%; border-collapse: collapse; }
     td.num, th.num { text-align: right; }`;
 
@@ -109,12 +109,12 @@ export const printVoucher = (voucher: IVoucher, branchName: string): void => {
   <title>Voucher ${escapeHtml(voucher.voucher_no ?? "")}</title>
   <style>${baseStyles}
     .sub { margin-bottom: 24px; }
-    td { padding: 10px 8px; border-bottom: 1px solid ${colors.border}; vertical-align: top; }
-    td.label { color: ${colors.textMuted}; width: 180px; }
+    td { padding: 10px 8px; border-bottom: 1px solid ${printPalette.border}; vertical-align: top; }
+    td.label { color: ${printPalette.muted}; width: 180px; }
     td.value { font-weight: 600; }
-    .amount { font-size: 20px; color: ${colors.brandDark}; }
+    .amount { font-size: 20px; color: ${printPalette.heading}; }
     .sign { margin-top: 64px; display: flex; justify-content: space-between; }
-    .sign div { border-top: 1px solid ${colors.text}; padding-top: 6px; width: 220px; text-align: center; color: ${colors.textMuted}; }
+    .sign div { border-top: 1px solid ${printPalette.text}; padding-top: 6px; width: 220px; text-align: center; color: ${printPalette.muted}; }
   </style>
 </head>
 <body>
@@ -190,9 +190,9 @@ export const printStatement = (
     .meta { margin-bottom: 8px; }
     .meta strong { font-size: 17px; }
     table { font-size: 13px; }
-    th { text-align: left; color: ${colors.textMuted}; font-weight: 600; }
-    th, td { padding: 7px 8px; border-bottom: 1px solid ${colors.border}; }
-    .outstanding { font-size: 18px; color: ${colors.brandDark}; font-weight: 700; }
+    th { text-align: left; color: ${printPalette.muted}; font-weight: 600; }
+    th, td { padding: 7px 8px; border-bottom: 1px solid ${printPalette.border}; }
+    .outstanding { font-size: 18px; color: ${printPalette.heading}; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -292,16 +292,16 @@ export const printReport = (document_: IPrintReportDocument): void => {
     h2 { margin: 26px 0 8px; font-size: 15px; }
     .small { font-size: 12px; }
     .stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 4px; }
-    .stat { border: 1px solid ${colors.border}; border-radius: 6px; padding: 10px 16px; min-width: 150px; }
-    .stat-label { color: ${colors.textMuted}; font-size: 12px; }
-    .stat-value { color: ${colors.brandDark}; font-size: 18px; font-weight: 700; }
+    .stat { border: 1px solid ${printPalette.border}; border-radius: 6px; padding: 10px 16px; min-width: 150px; }
+    .stat-label { color: ${printPalette.muted}; font-size: 12px; }
+    .stat-value { color: ${printPalette.heading}; font-size: 18px; font-weight: 700; }
     table { font-size: 13px; }
-    th { text-align: left; color: ${colors.textMuted}; font-weight: 600; }
-    th, td { padding: 7px 8px; border-bottom: 1px solid ${colors.border}; }
-    tr.flag td { color: ${colors.danger}; font-weight: 600; }
+    th { text-align: left; color: ${printPalette.muted}; font-weight: 600; }
+    th, td { padding: 7px 8px; border-bottom: 1px solid ${printPalette.border}; }
+    tr.flag td { color: ${printPalette.danger}; font-weight: 600; }
     thead { display: table-header-group; }
     tr { break-inside: avoid; }
-    .foot { margin-top: 28px; color: ${colors.textMuted}; font-size: 11px; }
+    .foot { margin-top: 28px; color: ${printPalette.muted}; font-size: 11px; }
   </style>
 </head>
 <body>

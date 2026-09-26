@@ -1,5 +1,5 @@
-import { App } from "antd";
 import { useCallback, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import type { IMutationOptions } from "../../models/common/query.model";
 import {
   selectEntry,
@@ -15,7 +15,6 @@ export const useMutation = <TArgs extends unknown[], TResult>(
   const keyRef = useRef<string>(`mutation:${(mutationSequence += 1)}`);
   const key = keyRef.current;
 
-  const { message } = App.useApp();
   const setEntry = useQueryStore((state) => state.setEntry);
   const invalidate = useQueryStore((state) => state.invalidate);
   const entry = useQueryStore(selectEntry<never>(key));
@@ -42,12 +41,12 @@ export const useMutation = <TArgs extends unknown[], TResult>(
           !!result.queued;
 
         if (queued) {
-          message.info(
+          toast.info(
             config.queuedMessage ??
               "Saved offline — will sync when back online"
           );
         } else if (config.successMessage) {
-          message.success(config.successMessage);
+          toast.success(config.successMessage);
         }
 
         await config.onSuccess?.(result);
@@ -56,7 +55,7 @@ export const useMutation = <TArgs extends unknown[], TResult>(
         const description =
           error instanceof Error ? error.message : String(error);
         setEntry(key, { loading: false, error: description });
-        message.error(description);
+        toast.error(description);
         return undefined;
       }
     },

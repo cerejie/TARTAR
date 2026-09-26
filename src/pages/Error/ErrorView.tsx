@@ -1,25 +1,36 @@
-import { Button, Flex, Result } from "antd";
+import { SearchX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { errorCard, errorPage } from "../../styles/layout/public.layout.css";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import AppButton from "../../components/common/button/AppButton";
+import { errorCard, errorPage } from "../../styles/layout/public.styles";
 
 const ErrorView = () => {
   const navigate = useNavigate();
 
   return (
-    <Flex className={`${errorPage}`} align="center" justify="center">
-      <Flex className={`${errorCard}`} vertical>
-        <Result
-          status="404"
-          title="Page not found"
-          subTitle="The page you are looking for does not exist or has moved."
-          extra={
-            <Button type="primary" onClick={() => navigate("/")}>
-              Back home
-            </Button>
-          }
-        />
-      </Flex>
-    </Flex>
+    <div className={errorPage}>
+      <Empty className={errorCard}>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <SearchX />
+          </EmptyMedia>
+          <EmptyTitle>Page not found</EmptyTitle>
+          <EmptyDescription>
+            The page you are looking for does not exist or has moved.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <AppButton onPress={() => navigate("/")}>Back home</AppButton>
+        </EmptyContent>
+      </Empty>
+    </div>
   );
 };
 
