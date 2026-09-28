@@ -162,6 +162,15 @@ practical flow (primary action placement, destructive actions separated).
   Card not stretched in the bento cell: sectionCardRoot h-full, new sectionCardBody flex-1,
   barChartFrame h-full min-h-72 so Sales Overview fills the row.
 
+- [x] V8 — capture V3-V7 (2026-09-28, screenshot-verified at 1440 + 1280): F1-F4, F6-F10,
+  F12-F16, F20-F28 confirmed. F24 typo match works ("Camile" -> Camille; no match shows "added
+  as new"); suggestions come from the master list only. F25 chevron + clear X is by design
+  (Paid from is optional). F5 fixed: Vouchers Type under voucher no., Purpose under payee;
+  ledger records Reference -> AvatarCell hint (new avatarCellHint, one line); table.styles
+  branchCell min-w-32, progressCell min-w-32, tagRow flex-wrap (Printed wraps under status).
+  Vouchers + Payables show every column at 1280 (branch wraps to 4 lines there, 2 at 1440).
+  R4: sidebarMenuButton h-9 below 860px height -> all nav items visible at 1280x800.
+
 ## Findings (desktop; mobile deferred by user)
 
 ### V3 — tokens + dark mode
@@ -244,11 +253,12 @@ loading/error states, long-name/large-money stress, validation errors (never pre
 
 ## Next
 
-1. **Capture V3-V7** with the audit harness (dark chips, row menus, expanded rows, pager,
-   Vouchers at 1440, title-row actions, Filters popover, Dashboard date + charts at 1440/1280,
-   Reports print divider, Record payment labels, placeholders, Customer/Supplier combobox —
-   type a new name and a reordered/typo'd one, cancel, never Save). Fix any regressions, then
-   delete this file + .claude/state/audit/ and start the Mobile (M*) roadmap.
+Desktop audit COMPLETE (V8, 2026-09-28). Awaiting user go-ahead to delete this file +
+.claude/state/audit/ — the harness section and M1/M2 above are the seed for the Mobile roadmap,
+so carry them over first.
+
+1. Mobile (M*) roadmap: M1 offcanvas sidebar sheet at phone width, M2 form sheet polish.
+   Parallel work: ROADMAP-SALES-VOUCHER.md and ROADMAP-ADMIN-APP.md (another session).
 
 ## Open
 - Migration 20260926000009_accountant_voucher_read.sql (and possibly 20260718000004..

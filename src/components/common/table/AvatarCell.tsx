@@ -2,9 +2,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   avatarCell,
   avatarCellFallback,
+  avatarCellHint,
   avatarCellName,
   avatarCellText,
-  avatarCellHint,
 } from "../../../styles/table/table.styles";
 import { formatInitials } from "../../../utils/format.utils";
 
