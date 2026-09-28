@@ -1,8 +1,7 @@
-import { Wallet } from "lucide-react";
-import EmptyState from "../../components/common/status/EmptyState";
+import AdminReceivablesOverview from "../../components/admin/receivables/AdminReceivablesOverview";
 
 const AdminReceivablesView = () => {
-  return <EmptyState icon={<Wallet />} description="Due collections arrive in the next update." />;
+  return <AdminReceivablesOverview />;
 };
 
 export default AdminReceivablesView;

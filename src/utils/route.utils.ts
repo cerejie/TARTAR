@@ -41,6 +41,7 @@ export const adminReceivablesPath = `${adminBasePath}/receivables`;
 
 export const vouchersPath = "/vouchers";
 export const payablesPath = "/payables";
+export const receivablesPath = "/receivables";
 
 export const isAdminPath = (pathname: string): boolean =>
   pathname === adminBasePath || pathname.startsWith(`${adminBasePath}/`);

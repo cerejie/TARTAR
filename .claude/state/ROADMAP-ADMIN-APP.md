@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2, A3, A4, A5 done, A6 next
+Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2, A3, A4, A5, A6 done, A7 next
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -216,10 +216,18 @@ stop. No migrations in this roadmap — read-only over existing tables.
   `DetailModal` (used by the sheet); `adminTabStack` moved to `admin.layout.styles.ts`.
   Home attention strip + "Past-dated checks, unpaid" / "Checks due this week". "Open in TARTAR"
   goes to `/vouchers` or `/payables` (no per-record deep link). Visual check pending.
+- [x] A6 — Receivables tab (2026-09-28): segments Overdue · Due today · This week (= due in
+  1–7 days, rolling, same horizon as `getDueAlerts`). `adminReceivableSegment*`,
+  `IAdminReceivableRow`, `daysUntil` in `models/data/admin/admin.response.ts`;
+  `adminReceivableSheetModalKey`, `receivablesPath`; `hook/data/admin/admin.receivables.hook.ts`
+  (customer via `useCustomerListHook`, `tel:` href when `customer.contact` has ≥7 digits);
+  `components/admin/receivables/{AdminReceivablesOverview,ReceivableEntryList,
+  ReceivableEntrySheet}.tsx`. Visual check pending.
 
 ## Next
-1. A6: Receivables tab — reuse `dueStatusOf`, `DetailGrid`, `AppSheet`, the A5 hook shape.
+1. A7: Notifications tab — feed from `notificationGroups` + due checks, persisted read store,
+   `AdminTabBar` badge.
 
 ## State
-Branch: development-overhaul · A1, M1 (v1.39), M2 (v1.40), A2 (v1.41), A3 (v1.42), A4 (v1.43) committed; A5 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
+Branch: development-overhaul · A1…A5 committed (A5 = v1.44); A6 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
 `notificationGroups`, `derivePermissions().isManager`, `permissionLoader`, `lazyView`.

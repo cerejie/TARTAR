@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import type { StatusColor } from "../../common/view.model";
-import type { IPayable } from "../ledger/ledger.response";
+import type { IPayable, IReceivable } from "../ledger/ledger.response";
 import type { IVoucher } from "../voucher/voucher.response";
 
 export const dueHorizonDays = 7;
@@ -38,10 +38,37 @@ export interface IAdminPayableRow {
   entry: IAdminPayableEntry;
 }
 
+export const adminReceivableSegmentValues = ["overdue", "today", "week"] as const;
+export type AdminReceivableSegment = (typeof adminReceivableSegmentValues)[number];
+
+export const adminReceivableSegmentLabels: Record<AdminReceivableSegment, string> = {
+  overdue: "Overdue",
+  today: "Due today",
+  week: "This week",
+};
+
+export const adminReceivableSegmentCaptions: Record<AdminReceivableSegment, string> = {
+  overdue: "Receivables past their due date",
+  today: "Receivables due today",
+  week: `Receivables due within the next ${dueHorizonDays} days`,
+};
+
+export interface IAdminReceivableRow {
+  key: string;
+  name: string;
+  meta: string;
+  amount: number;
+  due: IDueStatus;
+  record: IReceivable;
+}
+
 const dayCountLabel = (days: number) => (days === 1 ? "1 day" : `${days} days`);
 
+export const daysUntil = (dueDate: string): number =>
+  dayjs(dueDate).startOf("day").diff(dayjs().startOf("day"), "day");
+
 export const dueStatusOf = (dueDate: string): IDueStatus => {
-  const days = dayjs(dueDate).startOf("day").diff(dayjs().startOf("day"), "day");
+  const days = daysUntil(dueDate);
   if (days < 0) return { label: `${dayCountLabel(-days)} overdue`, color: "negative" };
   if (days === 0) return { label: "Due today", color: "warning" };
   return { label: `Due in ${dayCountLabel(days)}`, color: "warning" };
