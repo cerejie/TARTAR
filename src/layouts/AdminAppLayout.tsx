@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import AdminAppBar from "../components/common/layout/AdminAppBar";
+import AdminPageTitle from "../components/common/layout/AdminPageTitle";
 import AdminTabBar from "../components/common/layout/AdminTabBar";
 import RouteProgress from "../components/common/layout/RouteProgress";
 import { useAdminLayoutHook } from "../hook/layout/admin.hook";
@@ -28,6 +29,7 @@ const AdminAppLayout = () => {
           className={adminContent}
         >
           <div key={pathname} className={adminColumn}>
+            <AdminPageTitle />
             <Outlet />
           </div>
         </main>

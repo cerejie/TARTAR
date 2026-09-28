@@ -1,23 +1,23 @@
 import { cva } from "class-variance-authority";
 
 export const adminShell =
-  "flex h-dvh flex-col overflow-hidden bg-app font-sans text-foreground lg:flex-row lg:gap-4 lg:p-4";
+  "fixed inset-0 flex flex-col overflow-hidden bg-app font-sans text-foreground lg:flex-row lg:gap-4 lg:p-4";
 
 export const adminMain = "flex min-h-0 min-w-0 flex-1 flex-col lg:gap-4";
 
 export const adminAppBar =
   "flex h-14 shrink-0 items-center gap-2 border-b border-border bg-panel px-3 md:h-16 md:gap-3 md:px-6 lg:rounded-panel lg:border lg:shadow-panel";
 
-export const adminAppBarTitle =
-  "min-w-0 flex-1 truncate font-heading text-lg font-semibold tracking-tight text-foreground md:text-xl";
-
-export const adminAppBarActions = "flex shrink-0 items-center gap-1 md:gap-2";
+export const adminAppBarActions = "ml-auto flex shrink-0 items-center gap-1 md:gap-2";
 
 export const adminContent =
   "min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain";
 
 export const adminColumn =
   "mx-auto flex w-full max-w-6xl flex-col gap-4 p-4 md:p-6 lg:px-0 lg:pt-0 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200";
+
+export const adminPageTitle =
+  "font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl";
 
 export const adminTabBar =
   "order-last shrink-0 px-3 pt-2 pb-safe md:px-6 lg:order-first lg:w-24 lg:rounded-panel lg:bg-panel lg:p-0 lg:py-3 lg:shadow-panel";
