@@ -145,6 +145,8 @@ export const avatarCellName = "truncate font-medium";
 
 export const nowrapCell = "whitespace-nowrap";
 
+export const branchCell = "min-w-44";
+
 export const emptyCell = "text-muted-foreground";
 
 export const rowActionMenu = "w-auto min-w-48";

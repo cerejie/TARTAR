@@ -30,6 +30,7 @@ import {
   type IVoucher,
 } from "../../../models/data/voucher/voucher.response";
 import {
+  branchCell,
   cellHint,
   nowrapCell,
   stackedCell,
@@ -103,20 +104,29 @@ const VouchersTable = () => {
       title: "Voucher no.",
       dataIndex: "voucher_no",
       className: nowrapCell,
-      render: (value: string | null) => value || "Pending sync",
+      render: (value: string | null, voucher) => (
+        <span className={stackedCell}>
+          {value || "Pending sync"}
+          <span className={cellHint}>{voucherTypeLabels[voucher.type]}</span>
+        </span>
+      ),
     },
-    { title: "Payee", dataIndex: "payee" },
     {
-      title: "Purpose",
-      key: "purpose",
-      render: (_, voucher) => voucherPurpose(voucher),
+      title: "Payee",
+      dataIndex: "payee",
+      render: (payee: string, voucher) => (
+        <span className={stackedCell}>
+          {payee}
+          <span className={cellHint}>{voucherPurpose(voucher)}</span>
+        </span>
+      ),
     },
     {
-      title: "Type",
-      dataIndex: "type",
-      render: (type: IVoucher["type"]) => voucherTypeLabels[type],
+      title: "Branch",
+      dataIndex: "branch",
+      className: branchCell,
+      render: branchName,
     },
-    { title: "Branch", dataIndex: "branch", render: branchName },
     {
       title: "Amount",
       dataIndex: "amount",

@@ -32,6 +32,7 @@ import {
   ledgerBalance,
 } from "../../../models/data/ledger/ledger.response";
 import {
+  branchCell,
   dataTableRowOverdue,
   nowrapCell,
 } from "../../../styles/table/table.styles";
@@ -118,7 +119,12 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       skeleton: "avatar",
       render: (_, row) => <AvatarCell name={partyNameOf(row)} />,
     },
-    { title: "Branch", dataIndex: "branch", render: branchName },
+    {
+      title: "Branch",
+      dataIndex: "branch",
+      className: branchCell,
+      render: branchName,
+    },
     {
       title: "Paid",
       key: "paid",
@@ -155,6 +161,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     {
       title: "Reference",
       dataIndex: "reference_number",
+      className: nowrapCell,
       render: (value: string | null) => value || "—",
     },
     {

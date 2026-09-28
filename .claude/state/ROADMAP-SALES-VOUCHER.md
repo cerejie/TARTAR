@@ -13,7 +13,7 @@ Updated: 2026-09-28 · Status: PLANNED — decisions locked, S1 next
 Same as ROADMAP.md: one phase per conversation, `build` + `tartar-shadcn` loaded, `yarn build`
 + `yarn lint` clean, tick Done with paths, suggest commit, stop. Migrations are PROPOSED only —
 never applied or run without explicit approval. Starts after (or in parallel with) the UI-audit
-roadmap's last capture step (user to say which goes first).
+roadmap's last capture step (user, 2026-09-28: UI-audit capture goes first).
 
 ## Source analysis — Check_Voucher_.xlsx (3 sheets, same template)
 Sheets: `LGC ` (LGC Hardware and General Merchandise), `Afc wood` (AFC Wood Industry),
