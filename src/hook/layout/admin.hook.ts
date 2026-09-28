@@ -1,5 +1,7 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hook/use-mobile";
+import { adminBranchSheetModalKey } from "../../keys/modal.keys";
 import { adminViewRoutes } from "../../routes/admin.view.routes";
 import {
   selectScrollPosition,
@@ -11,6 +13,7 @@ import {
   navigableRoutes,
 } from "../../utils/route.utils";
 import { usePermissions } from "../account/account.permission.hook";
+import { useModal } from "../common/modal.hook";
 import { useNetwork } from "../common/network.hook";
 import { useAdminManifestHook } from "./admin.manifest.hook";
 
@@ -62,4 +65,16 @@ export const useAdminTitleHook = () => {
   );
 
   return { title: matched?.label ?? "" };
+};
+
+export const useAdminBranchSheetHook = () => {
+  const isMobile = useIsMobile();
+  const { modal, openModal, closeModal } = useModal(adminBranchSheetModalKey);
+
+  return {
+    showSheet: isMobile,
+    sheetOpen: modal.visible,
+    openSheet: () => openModal(),
+    closeSheet: closeModal,
+  };
 };

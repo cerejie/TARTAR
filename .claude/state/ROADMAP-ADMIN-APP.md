@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2 done, A3 next
+Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2, A3 done, A4 next
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -181,11 +181,25 @@ stop. No migrations in this roadmap — read-only over existing tables.
   `useAdminLayoutHook`. `vite.config.ts` unchanged — generateSW already has a `NavigationRoute`
   fallback and precaches the png/svg icons. Known gap: unauthenticated `/admin` (LoginView) still
   shows the main manifest; install after login. iOS install check pending (user).
+- [x] A3 — mobile primitives (2026-09-28): `components/common/app/{SegmentedTabs,MetricTile,
+  ListCard,ListSection,AppSheet}.tsx`, `styles/app/app.styles.ts`. SegmentedTabs = `ui/toggle-group`
+  + RAC `SelectionIndicator` (sliding thumb, reduced-motion safe), options `ISegmentOption<T>`
+  (`models/common/segment.model.ts`, optional `count`). `store/common/segment.store.ts` +
+  `hook/common/segment.hook.ts` (`useSegment(key, values)` → first value as fallback),
+  `keys/segment.keys.ts` (home period / payables / receivables / notifications). MetricTile =
+  card + RAC `Link href` (money via `formatMoney`, tone chip, sub-line, loading/error).
+  ListSection = sticky header + 1/2/3-col list + skeleton/refreshing/error/empty; ListCard =
+  `ui/item` + avatar initials + stretched press + amount/badge. AppSheet = bottom sheet below
+  `lg`, right side sheet at `lg` (`hook/common/breakpoint.hook.ts` `useIsDesktop`,
+  useSyncExternalStore). Branch picker: list extracted to `layout/BranchScopeList.tsx`;
+  `ProtectedBranchScope` takes optional `onPress` (sheet mode); `AdminAppBar` opens it in an
+  `AppSheet` below `md` (`useAdminBranchSheetHook`, `adminBranchSheetModalKey`).
+  Visual check pending (user).
 
 ## Next
-1. A3: mobile primitives (`SegmentedTabs`, `MetricTile`, `ListCard`/`ListSection`, `AppSheet`,
-   segment store/hook); move the app-bar branch picker onto `AppSheet` on phone.
+1. A4: Home tab (`overviewPeriodValues`, `dashboardServices.getOverview`, `admin.home.hook.ts`,
+   `components/admin/home/*` on MetricTile + SegmentedTabs).
 
 ## State
-Branch: development-overhaul · A1, M1 (v1.39), M2 (v1.40) committed; A2 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
+Branch: development-overhaul · A1, M1 (v1.39), M2 (v1.40), A2 (v1.41) committed; A3 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
 `notificationGroups`, `derivePermissions().isManager`, `permissionLoader`, `lazyView`.
