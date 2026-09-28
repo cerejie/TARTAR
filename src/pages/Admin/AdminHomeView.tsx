@@ -1,8 +1,7 @@
-import { House } from "lucide-react";
-import EmptyState from "../../components/common/status/EmptyState";
+import AdminHomeOverview from "../../components/admin/home/AdminHomeOverview";
 
 const AdminHomeView = () => {
-  return <EmptyState icon={<House />} description="The overview arrives in the next update." />;
+  return <AdminHomeOverview />;
 };
 
 export default AdminHomeView;

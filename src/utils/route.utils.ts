@@ -36,6 +36,8 @@ export const resetLocation = (pathname: string): void => {
 };
 
 export const adminBasePath = "/admin";
+export const adminPayablesPath = `${adminBasePath}/payables`;
+export const adminReceivablesPath = `${adminBasePath}/receivables`;
 
 export const isAdminPath = (pathname: string): boolean =>
   pathname === adminBasePath || pathname.startsWith(`${adminBasePath}/`);

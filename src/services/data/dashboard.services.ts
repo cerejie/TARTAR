@@ -7,8 +7,10 @@ import type { IBranch } from "../../models/data/branch/branch.response";
 import type {
   IBranchMonitorRow,
   IDailySalesPoint,
+  IDashboardOverview,
   IDashboardSummary,
   IDueAlerts,
+  OverviewPeriod,
   SalesPeriod,
 } from "../../models/data/dashboard/dashboard.response";
 import type {
@@ -48,6 +50,44 @@ const salesPeriodConfig: Record<
   weekly: { unit: "week", count: 12 },
   monthly: { unit: "month", count: 12 },
   yearly: { unit: "year", count: 5 },
+};
+
+const overviewPeriodUnits: Record<
+  Exclude<OverviewPeriod, "all">,
+  dayjs.OpUnitType
+> = {
+  daily: "day",
+  weekly: "week",
+  monthly: "month",
+};
+
+const overviewPeriodStart = (period: OverviewPeriod) =>
+  period === "all" ? null : dayjs().startOf(overviewPeriodUnits[period]);
+
+const outstandingOf = async (
+  table: "receivables" | "payables",
+  branch?: string | null
+): Promise<number> => {
+  const { data, error } = await scopeToBranch(
+    supabase.from(table).select("amount, paid_amount").neq("status", "paid"),
+    branch
+  );
+  if (error) throw toError(error);
+  return outstanding((data ?? []) as OutstandingRow[]);
+};
+
+const createdSince = async (
+  table: "receivables" | "payables",
+  start: dayjs.Dayjs | null,
+  branch?: string | null
+): Promise<number> => {
+  if (!start) return 0;
+  const { data, error } = await scopeToBranch(
+    supabase.from(table).select("amount").gte("created_at", start.toISOString()),
+    branch
+  );
+  if (error) throw toError(error);
+  return sum((data ?? []) as AmountRow[]);
 };
 
 const dashboardServices = {
@@ -164,6 +204,44 @@ const dashboardServices = {
       monthlyPendingSales: matching(thisMonthRows, isPendingSale),
       monthlyCashIn: ofDirection(thisMonthRows, cashInflowTypes),
       monthlyCashOut: ofDirection(thisMonthRows, cashOutflowTypes),
+    };
+  },
+
+  getOverview: async (
+    period: OverviewPeriod,
+    branch?: string | null
+  ): Promise<IDashboardOverview> => {
+    const start = overviewPeriodStart(period);
+    const salesAndExpenses = supabase
+      .from("transactions")
+      .select("type, sale_status, amount")
+      .in("type", ["sale", "expense"])
+      .lte("txn_date", todayIso());
+
+    const [transactions, arOutstanding, arNew, apOutstanding, apNew] =
+      await Promise.all([
+        scopeToBranch(
+          start
+            ? salesAndExpenses.gte("txn_date", start.format("YYYY-MM-DD"))
+            : salesAndExpenses,
+          branch
+        ),
+        outstandingOf("receivables", branch),
+        createdSince("receivables", start, branch),
+        outstandingOf("payables", branch),
+        createdSince("payables", start, branch),
+      ]);
+    if (transactions.error) throw toError(transactions.error);
+
+    const rows = (transactions.data ?? []) as TypedAmountRow[];
+
+    return {
+      sales: sum(rows.filter(isVerifiedSale)),
+      expenses: sum(rows.filter((row) => row.type === "expense")),
+      arOutstanding,
+      arNew,
+      apOutstanding,
+      apNew,
     };
   },
 

@@ -23,6 +23,7 @@ export const ledgerPartyKey = "ledger-parties";
 export const dashboardSummaryKey = "dashboard-summary";
 export const dashboardSalesKey = "dashboard-sales";
 export const dashboardAlertsKey = "dashboard-alerts";
+export const dashboardOverviewKey = "dashboard-overview";
 export const reportTransactionKey = "report-transactions";
 export const reportReceivableKey = "report-receivables";
 export const reportPayableKey = "report-payables";

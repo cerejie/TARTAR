@@ -52,6 +52,44 @@ export const salesAxisFormats: Record<SalesPeriod, string> = {
   yearly: "YYYY",
 };
 
+export const overviewPeriodValues = [
+  "all",
+  "daily",
+  "weekly",
+  "monthly",
+] as const;
+export type OverviewPeriod = (typeof overviewPeriodValues)[number];
+
+export const overviewPeriodLabels: Record<OverviewPeriod, string> = {
+  all: "All time",
+  daily: "Daily",
+  weekly: "Weekly",
+  monthly: "Monthly",
+};
+
+export const overviewPeriodCaptions: Record<OverviewPeriod, string> = {
+  all: "all time",
+  daily: "today",
+  weekly: "this week",
+  monthly: "this month",
+};
+
+export const overviewSalesPeriods: Record<OverviewPeriod, SalesPeriod> = {
+  all: "yearly",
+  daily: "daily",
+  weekly: "weekly",
+  monthly: "monthly",
+};
+
+export interface IDashboardOverview {
+  sales: number;
+  expenses: number;
+  arOutstanding: number;
+  arNew: number;
+  apOutstanding: number;
+  apNew: number;
+}
+
 export interface IBranchMonitorRow {
   branch: string;
   branchName: string;
@@ -104,3 +142,12 @@ export const notificationKindPaths: Record<NotificationKind, string> = {
   receivable: "/receivables",
   payable: "/payables",
 };
+
+export interface IAttentionItem {
+  key: string;
+  name: string;
+  count: number;
+  amount: number;
+  tone: NotificationTone;
+  path: string;
+}

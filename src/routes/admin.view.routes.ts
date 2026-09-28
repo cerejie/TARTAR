@@ -1,6 +1,10 @@
 import { Bell, HandCoins, House, Wallet } from "lucide-react";
 import type { IRoute } from "../models/common/route.model";
-import { adminBasePath } from "../utils/route.utils";
+import {
+  adminBasePath,
+  adminPayablesPath,
+  adminReceivablesPath,
+} from "../utils/route.utils";
 import { lazyView } from "./route.lazy";
 
 export const adminViewRoutes: IRoute[] = [
@@ -16,7 +20,7 @@ export const adminViewRoutes: IRoute[] = [
   },
   {
     key: "admin_payables",
-    path: `${adminBasePath}/payables`,
+    path: adminPayablesPath,
     label: "Payables",
     description: "Due checks and near-due or overdue payables",
     icon: HandCoins,
@@ -26,7 +30,7 @@ export const adminViewRoutes: IRoute[] = [
   },
   {
     key: "admin_receivables",
-    path: `${adminBasePath}/receivables`,
+    path: adminReceivablesPath,
     label: "Receivables",
     description: "Overdue collections and those due this week",
     icon: Wallet,

@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2, A3 done, A4 next
+Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2, A3, A4 done, A5 next
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -195,11 +195,21 @@ stop. No migrations in this roadmap — read-only over existing tables.
   `ProtectedBranchScope` takes optional `onPress` (sheet mode); `AdminAppBar` opens it in an
   `AppSheet` below `md` (`useAdminBranchSheetHook`, `adminBranchSheetModalKey`).
   Visual check pending (user).
+- [x] A4 — Home tab (2026-09-28): `overviewPeriodValues` / labels / captions /
+  `overviewSalesPeriods` (all→yearly chart) + `IDashboardOverview` + `IAttentionItem` in
+  `models/data/dashboard/dashboard.response.ts`; `dashboardServices.getOverview` (calendar
+  periods: today / this week / this month via dayjs `startOf`; sales = verified, `txn_date ≤
+  today`; AR/AP new = `created_at ≥ period start`), `dashboardOverviewKey`;
+  `hook/data/admin/admin.home.hook.ts`; `components/admin/home/{AdminHomeOverview,
+  OverviewTiles,AttentionList,SalesTrendCard}.tsx`; `styles/admin/admin.home.styles.ts`;
+  `adminPayablesPath` / `adminReceivablesPath` in `utils/route.utils.ts`. Attention strip =
+  overdue + due-in-7-days AR/AP (checks due join in A5). Known limit: all-time sums are
+  client-side, subject to PostgREST's row cap like `getBranchMonitor`. Visual check pending.
 
 ## Next
-1. A4: Home tab (`overviewPeriodValues`, `dashboardServices.getOverview`, `admin.home.hook.ts`,
-   `components/admin/home/*` on MetricTile + SegmentedTabs).
+1. A5: Payables tab — read voucher model/status values first; ASK before filtering on
+   cleared/cancelled semantics. Add due checks to the Home attention strip too.
 
 ## State
-Branch: development-overhaul · A1, M1 (v1.39), M2 (v1.40), A2 (v1.41) committed; A3 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
+Branch: development-overhaul · A1, M1 (v1.39), M2 (v1.40), A2 (v1.41), A3 (v1.42) committed; A4 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
 `notificationGroups`, `derivePermissions().isManager`, `permissionLoader`, `lazyView`.
