@@ -2,6 +2,7 @@ import { Bell, HandCoins, House, Wallet } from "lucide-react";
 import type { IRoute } from "../models/common/route.model";
 import {
   adminBasePath,
+  adminNotificationsPath,
   adminPayablesPath,
   adminReceivablesPath,
 } from "../utils/route.utils";
@@ -40,7 +41,7 @@ export const adminViewRoutes: IRoute[] = [
   },
   {
     key: "admin_notifications",
-    path: `${adminBasePath}/notifications`,
+    path: adminNotificationsPath,
     label: "Notifications",
     description: "Due alerts grouped by urgency",
     icon: Bell,

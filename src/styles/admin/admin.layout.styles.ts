@@ -39,7 +39,7 @@ export const adminTabItem = cva(
 );
 
 export const adminTabIndicator = cva(
-  "flex h-8 w-14 items-center justify-center rounded-pill transition-colors motion-reduce:transition-none",
+  "relative flex h-8 w-14 items-center justify-center rounded-pill transition-colors motion-reduce:transition-none",
   {
     variants: {
       active: {

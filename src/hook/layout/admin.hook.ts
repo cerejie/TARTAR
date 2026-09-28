@@ -9,12 +9,14 @@ import {
 } from "../../store/common/scroll.store";
 import {
   adminBasePath,
+  adminNotificationsPath,
   filterRoutesByPermission,
   navigableRoutes,
 } from "../../utils/route.utils";
 import { usePermissions } from "../account/account.permission.hook";
 import { useModal } from "../common/modal.hook";
 import { useNetwork } from "../common/network.hook";
+import { useAdminNotificationCountHook } from "../data/admin/admin.notifications.hook";
 import { useAdminManifestHook } from "./admin.manifest.hook";
 
 import type { UIEvent } from "react";
@@ -52,9 +54,12 @@ export const useAdminTabBarHook = () => {
     [permissions.role]
   );
 
-  const isActive = (path: string) => isActiveAdminPath(pathname, path);
+  const { unreadCount } = useAdminNotificationCountHook();
 
-  return { tabs, isActive };
+  const isActive = (path: string) => isActiveAdminPath(pathname, path);
+  const badgeOf = (path: string) => (path === adminNotificationsPath ? unreadCount : 0);
+
+  return { tabs, isActive, badgeOf };
 };
 
 export const useAdminTitleHook = () => {

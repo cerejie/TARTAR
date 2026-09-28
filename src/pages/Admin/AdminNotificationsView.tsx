@@ -1,8 +1,7 @@
-import { Bell } from "lucide-react";
-import EmptyState from "../../components/common/status/EmptyState";
+import AdminNotificationsOverview from "../../components/admin/notifications/AdminNotificationsOverview";
 
 const AdminNotificationsView = () => {
-  return <EmptyState icon={<Bell />} description="Due alerts arrive in the next update." />;
+  return <AdminNotificationsOverview />;
 };
 
 export default AdminNotificationsView;

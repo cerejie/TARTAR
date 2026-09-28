@@ -38,6 +38,7 @@ export const resetLocation = (pathname: string): void => {
 export const adminBasePath = "/admin";
 export const adminPayablesPath = `${adminBasePath}/payables`;
 export const adminReceivablesPath = `${adminBasePath}/receivables`;
+export const adminNotificationsPath = `${adminBasePath}/notifications`;
 
 export const vouchersPath = "/vouchers";
 export const payablesPath = "/payables";

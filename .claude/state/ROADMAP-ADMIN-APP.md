@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2, A3, A4, A5, A6 done, A7 next
+Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2–A7 done, A8 next
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -223,11 +223,22 @@ stop. No migrations in this roadmap — read-only over existing tables.
   (customer via `useCustomerListHook`, `tel:` href when `customer.contact` has ≥7 digits);
   `components/admin/receivables/{AdminReceivablesOverview,ReceivableEntryList,
   ReceivableEntrySheet}.tsx`. Visual check pending.
+- [x] A7 — Notifications tab (2026-09-28): segments All · Unread (counts). Feed =
+  `notificationGroups` (Overdue / Due Today / Due Tomorrow / Due This Week) + "Checks Due" group
+  from `getDueChecks` (shared query keys with Payables). Read id = row id + due date
+  (`r-`/`p-`/`c-` prefix), so a re-dated item is unread again. `store/data/admin/
+  notification.read.store.ts` (persist, `notificationReadStorageKey`, capped at 500 ids);
+  `IAdminNotification`/`Group` + segment values in `admin.response.ts`;
+  `hook/data/admin/admin.notifications.hook.ts` (`useAdminNotificationsHook`,
+  `useAdminNotificationCountHook`); `components/admin/notifications/{AdminNotificationsOverview,
+  NotificationFeed}.tsx`; `styles/admin/admin.notifications.styles.ts`; `adminNotificationsPath`.
+  Tap marks read + navigates to the admin Receivables/Payables tab; "Mark all read" button.
+  `AdminTabBar` badge via `useAdminTabBarHook().badgeOf` + `countBadge`. Visual check pending.
 
 ## Next
-1. A7: Notifications tab — feed from `notificationGroups` + due checks, persisted read store,
-   `AdminTabBar` badge.
+1. A8: Verify + close — captures at 390/768/1280 light+dark, install prompt, non-manager
+   redirect; merge follow-ups into ROADMAP.md, delete this file.
 
 ## State
-Branch: development-overhaul · A1…A5 committed (A5 = v1.44); A6 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
+Branch: development-overhaul · A1…A6 committed (A6 = v1.45); A7 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
 `notificationGroups`, `derivePermissions().isManager`, `permissionLoader`, `lazyView`.

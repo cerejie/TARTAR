@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import type { StatusColor } from "../../common/view.model";
+import type { NotificationTone } from "../dashboard/dashboard.response";
 import type { IPayable, IReceivable } from "../ledger/ledger.response";
 import type { IVoucher } from "../voucher/voucher.response";
 
@@ -76,3 +77,27 @@ export const dueStatusOf = (dueDate: string): IDueStatus => {
 
 export const checkDueDateOf = (check: Pick<IVoucher, "check_due_date">): string =>
   check.check_due_date ?? "";
+
+export const adminNotificationSegmentValues = ["all", "unread"] as const;
+export type AdminNotificationSegment = (typeof adminNotificationSegmentValues)[number];
+
+export const adminNotificationSegmentLabels: Record<AdminNotificationSegment, string> = {
+  all: "All",
+  unread: "Unread",
+};
+
+export interface IAdminNotification {
+  id: string;
+  name: string;
+  description: string;
+  amount: number;
+  path: string;
+  unread: boolean;
+}
+
+export interface IAdminNotificationGroup {
+  key: string;
+  label: string;
+  tone: NotificationTone;
+  items: IAdminNotification[];
+}
