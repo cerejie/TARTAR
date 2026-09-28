@@ -36,6 +36,8 @@ export const bentoCell = cva("min-w-0", {
       half: "md:col-span-6",
       twoThirds: "md:col-span-12 xl:col-span-8",
       full: "md:col-span-12",
+      main: "md:col-span-12 xl:col-span-9",
+      aside: "md:col-span-12 xl:col-span-3",
     },
   },
   defaultVariants: { span: "quarter" },

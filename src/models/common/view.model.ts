@@ -5,7 +5,9 @@ export type BentoSpan =
   | "third"
   | "half"
   | "twoThirds"
-  | "full";
+  | "full"
+  | "main"
+  | "aside";
 
 export type StatusColor =
   | "default"

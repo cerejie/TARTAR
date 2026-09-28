@@ -49,7 +49,3 @@ export const notificationAmount = cva("whitespace-nowrap text-sm font-bold tabul
 export const notificationDate = "whitespace-nowrap text-xs text-muted-foreground";
 
 export const notificationMore = "mt-1 text-xs text-muted-foreground";
-
-export const dueAlertSection = "flex flex-col gap-3";
-
-export const dueAlertGrid = "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4";
