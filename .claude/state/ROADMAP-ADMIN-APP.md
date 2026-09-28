@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1 done, M2 next (before A2)
+Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2 done, A2 next
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -163,11 +163,21 @@ stop. No migrations in this roadmap — read-only over existing tables.
   `ContentView` + `styles/view/view.styles.ts` (`viewTabs` horizontal scroller, head actions
   full width on phone only when tabs present, divider hidden on phone, pills `shrink-0`).
   Visual check at 390/768/1280 still pending (user).
+- [x] M2 — phone tables/filters (2026-09-28): `IColumnMobileRole` + `mobile` on
+  `IDataTableColumn` (title/subtitle/amount/status/meta/actions/hidden; untagged = first column
+  title, `key: "actions"` actions, rest meta). `common/table/DataTableCards.tsx` (below `md`
+  via `useIsMobile`; skeleton/refreshing/error/empty, stretched-press title for `onRowClick`,
+  selection checkbox, "Details" toggle → `RowDetailPanel`, `rowClassName` tint),
+  `common/table/TableEmptyState.tsx` (shared with `DataTable`), `dataCard*` in
+  `styles/table/table.styles.ts`. `FilterPopover` → bottom `Sheet` on phone (Reset + Show
+  results, `filterSheetFooter`). 19 feature tables tagged. Bento/StatCard already 1-col phone /
+  2-col tablet — no change. Phone loses header click-sort (SortSelect remains).
+  Visual check at 390/768/1280 pending (user).
 
 ## Next
-1. M2: normal app phone tables, filters, cards (D9). Then A2.
+1. A2: own PWA identity.
 
 ## State
 Branch: development-overhaul · Uncommitted: this file (+ ROADMAP-SALES-VOUCHER.md, pre-existing)
-· A1 committed; M1 src changes uncommitted (plus unrelated pre-existing sale/* WIP). Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
+· A1, M1 committed (v1.39); M2 uncommitted (plus unrelated pre-existing sale/* WIP). Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
 `notificationGroups`, `derivePermissions().isManager`, `permissionLoader`, `lazyView`.

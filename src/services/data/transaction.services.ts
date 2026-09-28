@@ -2,6 +2,7 @@ import {
   transactionTypeLabels,
   type DisbursementKind,
 } from "../../enums/transaction.enum";
+import { withholdingRates } from "../../enums/voucher.enum";
 import type { ILedgerFilters } from "../../models/common/filter.model";
 import {
   pageRange,
@@ -22,6 +23,7 @@ import type { IVoucher } from "../../models/data/voucher/voucher.response";
 import { runWrite } from "../../store/common/sync.store";
 import { applyLedgerFilters } from "../../utils/filter.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
+import { breakdownTotalsOf } from "../../utils/voucher.utils";
 
 const table = "transactions";
 const auditTable = "transaction_audit";
@@ -49,6 +51,17 @@ const referenceOf = (
   values: IDisbursementInput
 ): string | null =>
   kind === "purchase" ? values.reference_number?.trim() || null : null;
+
+const breakdownArgs = (values: IDisbursementInput) => {
+  const totals = breakdownTotalsOf(values);
+
+  return {
+    p_ewt_rate: withholdingRates[values.withholding],
+    p_ewt_amount: totals.ewt,
+    p_less_return: totals.lessReturn,
+    p_particulars: values.particulars || null,
+  };
+};
 
 const withVouchers = async (
   rows: readonly ITransaction[]
@@ -219,6 +232,7 @@ const transactionServices = {
           : values.voucher_type ?? null,
         p_created_by: createdBy,
         p_due_date: kind === "purchase" ? values.due_date ?? null : null,
+        ...breakdownArgs(values),
       },
     }),
 
@@ -229,21 +243,22 @@ const transactionServices = {
   ) =>
     runWrite({
       label: `Edit ${transactionTypeLabels[kind].toLowerCase()}`,
-      kind: "update",
-      table,
-      values: {
-        branch: values.branch,
-        farm_section: values.farm_section ?? null,
-        txn_date: values.txn_date,
-        amount: values.amount,
-        reference_number: referenceOf(kind, values),
-        description: values.description ?? null,
-        supplier_id: values.supplier_id ?? null,
-        cash_account: values.cash_account ?? null,
-        expense_type: kind === "expense" ? values.expense_type ?? null : null,
-        due_date: kind === "purchase" ? values.due_date ?? null : null,
+      kind: "rpc",
+      fn: "update_transaction_with_voucher",
+      args: {
+        p_transaction_id: id,
+        p_branch: values.branch,
+        p_txn_date: values.txn_date,
+        p_amount: values.amount,
+        p_farm_section: values.farm_section ?? null,
+        p_reference_number: referenceOf(kind, values),
+        p_description: values.description ?? null,
+        p_supplier_id: values.supplier_id ?? null,
+        p_cash_account: values.cash_account ?? null,
+        p_expense_type: kind === "expense" ? values.expense_type ?? null : null,
+        p_due_date: kind === "purchase" ? values.due_date ?? null : null,
+        ...breakdownArgs(values),
       },
-      match: { id },
     }),
 
   getAudit: async (transactionId: string): Promise<ITransactionAudit[]> => {

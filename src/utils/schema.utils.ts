@@ -30,3 +30,10 @@ export const optionalText = (max: number) =>
     .nullable()
     .optional()
     .transform((value) => value || null);
+
+export const optionalAmountField = z.coerce
+  .number({ message: "Enter a valid amount" })
+  .min(0, "Amount cannot be negative")
+  .max(1_000_000_000)
+  .nullable()
+  .optional();

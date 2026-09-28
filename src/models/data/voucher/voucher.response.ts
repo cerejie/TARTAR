@@ -27,6 +27,11 @@ export interface IVoucher {
   check_bank: string | null;
   check_number: string | null;
   check_due_date: string | null;
+  particulars: string | null;
+  gross_amount: number | null;
+  ewt_rate: number;
+  ewt_amount: number;
+  less_return: number;
 }
 
 export const voucherPurpose = (

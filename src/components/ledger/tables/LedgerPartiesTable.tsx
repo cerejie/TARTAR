@@ -66,6 +66,7 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
     },
     {
       title: "Outstanding",
+      mobile: "amount",
       dataIndex: "outstanding",
       align: "right",
       className: nowrapCell,

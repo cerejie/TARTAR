@@ -134,18 +134,21 @@ const SalesTable = () => {
   const columns: IDataTableColumn<ISale>[] = [
     {
       title: "Date",
+      mobile: "subtitle",
       dataIndex: "txn_date",
       className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     {
       title: "Customer",
+      mobile: "title",
       key: "customer",
       render: (_, row) => row.customer?.name ?? "Walk-in",
     },
     { title: "Branch", dataIndex: "branch", render: branchName },
     {
       title: "Status",
+      mobile: "status",
       dataIndex: "sale_status",
       className: nowrapCell,
       render: (_, row) => (
@@ -158,6 +161,7 @@ const SalesTable = () => {
     },
     {
       title: "Amount",
+      mobile: "amount",
       dataIndex: "amount",
       align: "right",
       className: nowrapCell,

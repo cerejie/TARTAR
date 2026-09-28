@@ -19,6 +19,7 @@ import {
   disbursementPaginationKey,
   disbursementSortKey,
 } from "../../../keys/table.keys";
+import type { IFieldSection } from "../../../models/common/field.model";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
@@ -32,6 +33,11 @@ import {
   useAccountStore,
 } from "../../../store/data/account/account.store";
 import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
+import {
+  deriveVoucherValues,
+  voucherBreakdownFields,
+  voucherSummaryLines,
+} from "../../../utils/voucher.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
 import { useModal } from "../../common/modal.hook";
@@ -154,6 +160,14 @@ export const useDisbursementListHook = (
     { successMessage: `${title} deleted`, invalidate }
   );
 
+  const breakdownSection: IFieldSection<IDisbursementInput> = {
+    key: "breakdown",
+    title: "Voucher breakdown",
+    description:
+      "Withholding tax and returns are deducted from what the voucher pays.",
+    fields: voucherBreakdownFields<IDisbursementInput>(),
+  };
+
   return {
     permissions,
     rows: listQuery.data?.data ?? [],
@@ -189,5 +203,8 @@ export const useDisbursementListHook = (
     createMutation,
     updateMutation,
     removeMutation,
+    breakdownSection,
+    formSummary: voucherSummaryLines,
+    deriveFormValues: deriveVoucherValues,
   };
 };

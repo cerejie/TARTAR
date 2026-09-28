@@ -63,12 +63,14 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
     },
     {
       title: "Balance",
+      mobile: "amount",
       key: "balance",
       align: "right",
       render: (_, row) => formatMoney(ledgerBalance(row)),
     },
     {
       title: "Status",
+      mobile: "status",
       dataIndex: "status",
       render: (status: LedgerStatus, row) =>
         isLedgerOverdue(row) ? (

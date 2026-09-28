@@ -4,6 +4,15 @@ export type IColumnAlign = "left" | "center" | "right";
 
 export type IColumnSkeleton = "text" | "avatar";
 
+export type IColumnMobileRole =
+  | "title"
+  | "subtitle"
+  | "amount"
+  | "status"
+  | "meta"
+  | "actions"
+  | "hidden";
+
 export type ISortDirection = "ascending" | "descending";
 
 export interface ISortState {
@@ -19,6 +28,7 @@ export interface IDataTableColumn<T> {
   width?: number | string;
   className?: string;
   skeleton?: IColumnSkeleton;
+  mobile?: IColumnMobileRole;
   sorter?: (left: T, right: T) => number;
   render?(value: unknown, row: T, index: number): ReactNode;
 }

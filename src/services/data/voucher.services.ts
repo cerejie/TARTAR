@@ -1,4 +1,4 @@
-import { voucherKindCategory } from "../../enums/voucher.enum";
+import { voucherKindCategory, withholdingRates } from "../../enums/voucher.enum";
 import type { IFilterColumns, ILedgerFilters } from "../../models/common/filter.model";
 import {
   pageRange,
@@ -11,6 +11,7 @@ import type { IVoucher } from "../../models/data/voucher/voucher.response";
 import { runWrite } from "../../store/common/sync.store";
 import { applyLedgerFilters } from "../../utils/filter.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
+import { breakdownTotalsOf } from "../../utils/voucher.utils";
 
 const table = "vouchers";
 
@@ -52,6 +53,7 @@ const voucherServices = {
   create: (values: IVoucherInput, createdBy: string | null) => {
     const isPurchase = values.kind === "purchase";
     const isCheck = values.type === "check";
+    const totals = breakdownTotalsOf(values);
 
     return runWrite({
       label: `Voucher for ${values.payee} · ${values.amount}`,
@@ -61,7 +63,12 @@ const voucherServices = {
         type: values.type,
         branch: values.branch,
         payee: values.payee,
-        amount: values.amount,
+        amount: totals.amountToPay,
+        gross_amount: totals.invoice,
+        ewt_rate: withholdingRates[values.withholding],
+        ewt_amount: totals.ewt,
+        less_return: totals.lessReturn,
+        particulars: values.particulars || null,
         purpose: null,
         category: voucherKindCategory[values.kind],
         supplier_id: isPurchase ? values.supplier_id ?? null : null,

@@ -33,6 +33,7 @@ import {
 import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
 import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
 import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
+import { voucherBreakdownItems } from "../../../utils/voucher.utils";
 
 const ExpensesTable = () => {
   const {
@@ -61,6 +62,8 @@ const ExpensesTable = () => {
     auditLoading,
     sections,
     defaults,
+    formSummary,
+    deriveFormValues,
     editDefaults,
     createMutation,
     updateMutation,
@@ -119,14 +122,16 @@ const ExpensesTable = () => {
   const columns: IDataTableColumn<IDisbursement>[] = [
     {
       title: "Date",
+      mobile: "subtitle",
       dataIndex: "txn_date",
       className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
-    { title: "Payee", key: "payee", render: (_, row) => payeeOf(row) },
+    { title: "Payee", mobile: "title", key: "payee", render: (_, row) => payeeOf(row) },
     { title: "Branch", dataIndex: "branch", render: branchName },
     {
       title: "Expense type",
+      mobile: "status",
       dataIndex: "expense_type",
       render: (value: IDisbursement["expense_type"]) =>
         expenseCategoryLabelOf(value),
@@ -150,6 +155,7 @@ const ExpensesTable = () => {
     },
     {
       title: "Amount",
+      mobile: "amount",
       dataIndex: "amount",
       align: "right",
       className: nowrapCell,
@@ -225,6 +231,7 @@ const ExpensesTable = () => {
           render: (row) =>
             row.voucher ? voucherTypeLabels[row.voucher.type] : "—",
         },
+        ...voucherBreakdownItems<IDisbursement>((row) => row.voucher),
       ],
     },
   ];
@@ -281,6 +288,8 @@ const ExpensesTable = () => {
         title="Record expense"
         size="lg"
         sections={sections}
+        summary={formSummary}
+        deriveValues={deriveFormValues}
         schema={expenseSchema}
         defaultValues={defaults}
         submitting={createMutation.loading}
@@ -295,6 +304,8 @@ const ExpensesTable = () => {
           title="Edit expense"
           size="lg"
           sections={sections}
+          summary={formSummary}
+          deriveValues={deriveFormValues}
           schema={expenseSchema}
           defaultValues={editDefaults}
           submitting={updateMutation.loading}

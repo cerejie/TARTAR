@@ -30,6 +30,12 @@ import { scopedFilters } from "../../../utils/filter.utils";
 import { formatMoney, todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
 import { printVoucher } from "../../../utils/print.utils";
+import {
+  deriveVoucherValues,
+  voucherBreakdownDefaults,
+  voucherBreakdownFields,
+  voucherSummaryLines,
+} from "../../../utils/voucher.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
@@ -148,11 +154,13 @@ export const useVoucherListHook = () => {
     { name: "payee", label: "Payee", type: "text", required: true },
     {
       name: "amount",
-      label: "Amount",
+      label: "Invoice amount",
       type: "amount",
       required: true,
       prefix: "₱",
+      hint: "VAT inclusive.",
     },
+    ...voucherBreakdownFields<IVoucherInput>(),
     {
       name: "supplier_id",
       label: "Supplier",
@@ -193,6 +201,7 @@ export const useVoucherListHook = () => {
   ];
 
   const defaults: DefaultValues<IVoucherInput> = {
+    ...voucherBreakdownDefaults,
     type: "cash",
     kind: "expense",
     branch: defaultBranch as BranchSlug,
@@ -221,6 +230,8 @@ export const useVoucherListHook = () => {
     formModal,
     fields,
     defaults,
+    formSummary: voucherSummaryLines,
+    deriveFormValues: deriveVoucherValues,
     createMutation,
     confirmDecision,
     print,

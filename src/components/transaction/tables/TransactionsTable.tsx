@@ -78,18 +78,21 @@ const TransactionsTable = () => {
     {
       title: "Date",
       dataIndex: "txn_date",
+      mobile: "title",
       className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     {
       title: "Time",
       dataIndex: "created_at",
+      mobile: "subtitle",
       className: nowrapCell,
       render: (value: string) => formatTime(value),
     },
     {
       title: "Type",
       dataIndex: "type",
+      mobile: "status",
       className: nowrapCell,
       render: (type: ITransaction["type"]) => (
         <StatusTag
@@ -116,6 +119,7 @@ const TransactionsTable = () => {
     {
       title: "Amount",
       dataIndex: "amount",
+      mobile: "amount",
       align: "right",
       className: nowrapCell,
       render: (value: number) => formatMoney(value),

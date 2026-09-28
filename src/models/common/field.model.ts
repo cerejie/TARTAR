@@ -43,3 +43,10 @@ export interface IFieldSection<TValues extends FieldValues = FieldValues> {
   description?: string;
   fields: IFieldConfig<TValues>[];
 }
+
+export interface IFormSummaryLine {
+  key: string;
+  label: string;
+  value: string;
+  emphasis?: boolean;
+}

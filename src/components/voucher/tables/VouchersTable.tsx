@@ -1,4 +1,4 @@
-import { Check, FileCheck, Landmark, Plus, Printer, X } from "lucide-react";
+import { Calculator, Check, FileCheck, Landmark, Plus, Printer, X } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
@@ -42,6 +42,7 @@ import {
   formatMoney,
   formatTime,
 } from "../../../utils/format.utils";
+import { voucherBreakdownItems } from "../../../utils/voucher.utils";
 
 const VouchersTable = () => {
   const {
@@ -61,6 +62,8 @@ const VouchersTable = () => {
     formModal,
     fields,
     defaults,
+    formSummary,
+    deriveFormValues,
     createMutation,
     confirmDecision,
     print,
@@ -102,6 +105,7 @@ const VouchersTable = () => {
   const columns: IDataTableColumn<IVoucher>[] = [
     {
       title: "Voucher no.",
+      mobile: "subtitle",
       dataIndex: "voucher_no",
       className: nowrapCell,
       render: (value: string | null, voucher) => (
@@ -113,6 +117,7 @@ const VouchersTable = () => {
     },
     {
       title: "Payee",
+      mobile: "title",
       dataIndex: "payee",
       render: (payee: string, voucher) => (
         <span className={stackedCell}>
@@ -129,10 +134,21 @@ const VouchersTable = () => {
     },
     {
       title: "Amount",
+      mobile: "amount",
       dataIndex: "amount",
       align: "right",
       className: nowrapCell,
-      render: (value: number) => formatMoney(value),
+      render: (value: number, voucher) =>
+        voucher.gross_amount !== null && voucher.gross_amount !== value ? (
+          <span className={stackedCell}>
+            {formatMoney(value)}
+            <span className={cellHint}>
+              Invoice {formatMoney(voucher.gross_amount)}
+            </span>
+          </span>
+        ) : (
+          formatMoney(value)
+        ),
     },
     {
       title: "Created",
@@ -147,6 +163,7 @@ const VouchersTable = () => {
     },
     {
       title: "Status",
+      mobile: "status",
       dataIndex: "status",
       render: (status: VoucherStatus, voucher) => (
         <span className={tagRow}>
@@ -191,6 +208,12 @@ const VouchersTable = () => {
             voucher.approved_at ? formatDateTime(voucher.approved_at) : "—",
         },
       ],
+    },
+    {
+      key: "breakdown",
+      title: "Breakdown",
+      icon: <Calculator />,
+      items: voucherBreakdownItems<IVoucher>((voucher) => voucher),
     },
     {
       key: "check",
@@ -273,6 +296,8 @@ const VouchersTable = () => {
         open={formModal.modal.visible}
         title="Manual voucher"
         fields={fields}
+        summary={formSummary}
+        deriveValues={deriveFormValues}
         schema={voucherSchema}
         defaultValues={defaults}
         submitting={createMutation.loading}

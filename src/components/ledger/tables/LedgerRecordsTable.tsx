@@ -144,6 +144,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     },
     {
       title: "Balance",
+      mobile: "amount",
       key: "balance",
       align: "right",
       className: nowrapCell,
@@ -151,6 +152,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     },
     {
       title: "Status",
+      mobile: "status",
       dataIndex: "status",
       className: nowrapCell,
       render: (status: ILedgerRecord["status"], row) =>

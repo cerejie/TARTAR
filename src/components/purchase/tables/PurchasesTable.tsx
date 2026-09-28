@@ -33,6 +33,7 @@ import {
 import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
 import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
 import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
+import { voucherBreakdownItems } from "../../../utils/voucher.utils";
 
 const PurchasesTable = () => {
   const {
@@ -60,6 +61,8 @@ const PurchasesTable = () => {
     auditLoading,
     sections,
     defaults,
+    formSummary,
+    deriveFormValues,
     editDefaults,
     createMutation,
     updateMutation,
@@ -118,11 +121,12 @@ const PurchasesTable = () => {
   const columns: IDataTableColumn<IDisbursement>[] = [
     {
       title: "Date",
+      mobile: "subtitle",
       dataIndex: "txn_date",
       className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
-    { title: "Payee", key: "payee", render: (_, row) => payeeOf(row) },
+    { title: "Payee", mobile: "title", key: "payee", render: (_, row) => payeeOf(row) },
     { title: "Branch", dataIndex: "branch", render: branchName },
     {
       title: "Voucher",
@@ -143,6 +147,7 @@ const PurchasesTable = () => {
     },
     {
       title: "Amount",
+      mobile: "amount",
       dataIndex: "amount",
       align: "right",
       className: nowrapCell,
@@ -229,6 +234,7 @@ const PurchasesTable = () => {
           render: (row) =>
             row.voucher ? voucherTypeLabels[row.voucher.type] : "—",
         },
+        ...voucherBreakdownItems<IDisbursement>((row) => row.voucher),
       ],
     },
   ];
@@ -285,6 +291,8 @@ const PurchasesTable = () => {
         title="Record purchase"
         size="lg"
         sections={sections}
+        summary={formSummary}
+        deriveValues={deriveFormValues}
         schema={purchaseSchema}
         defaultValues={defaults}
         submitting={createMutation.loading}
@@ -299,6 +307,8 @@ const PurchasesTable = () => {
           title="Edit purchase"
           size="lg"
           sections={sections}
+          summary={formSummary}
+          deriveValues={deriveFormValues}
           schema={purchaseSchema}
           defaultValues={editDefaults}
           submitting={updateMutation.loading}

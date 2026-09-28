@@ -47,3 +47,42 @@ export const voucherSortOptions: readonly ISortOption[] = [
   { key: "amount-high", label: "Amount: high to low", column: "amount", direction: "descending" },
   { key: "amount-low", label: "Amount: low to high", column: "amount", direction: "ascending" },
 ];
+
+export const withholdingValues = ["none", "goods", "services"] as const;
+export const withholdingSchema = z.enum(withholdingValues);
+export type Withholding = z.infer<typeof withholdingSchema>;
+
+export const withholdingLabels: Record<Withholding, string> = {
+  none: "None",
+  goods: "1% — goods",
+  services: "2% — services",
+};
+
+export const withholdingRates: Record<Withholding, number> = {
+  none: 0,
+  goods: 0.01,
+  services: 0.02,
+};
+
+export const withholdingOfRate = (rate: number | null | undefined): Withholding =>
+  withholdingValues.find((value) => withholdingRates[value] === Number(rate)) ??
+  "none";
+
+export const voucherLineValues = [
+  "invoice",
+  "lessReturn",
+  "amountBeforeVat",
+  "vat",
+  "ewt",
+  "amountToPay",
+] as const;
+export type VoucherLine = (typeof voucherLineValues)[number];
+
+export const voucherLineLabels: Record<VoucherLine, string> = {
+  invoice: "Invoice amount",
+  lessReturn: "Less return",
+  amountBeforeVat: "Amount before VAT",
+  vat: "VAT (12%)",
+  ewt: "Withholding tax",
+  amountToPay: "Amount to pay",
+};

@@ -26,6 +26,7 @@ const columns: IDataTableColumn<ITransaction>[] = [
   },
   {
     title: "Type",
+    mobile: "status",
     dataIndex: "type",
     render: (type: TransactionType) => transactionTypeLabels[type],
   },
@@ -37,6 +38,7 @@ const columns: IDataTableColumn<ITransaction>[] = [
   },
   {
     title: "Amount",
+    mobile: "amount",
     dataIndex: "amount",
     align: "right",
     render: (value: number) => formatMoney(value),

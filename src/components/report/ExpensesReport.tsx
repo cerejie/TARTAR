@@ -14,6 +14,7 @@ const columns: IDataTableColumn<IExpenseRow>[] = [
   { title: "Expense type", dataIndex: "label" },
   {
     title: "Total",
+    mobile: "amount",
     dataIndex: "total",
     align: "right",
     render: (value: number) => formatMoney(value),

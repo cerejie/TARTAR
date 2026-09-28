@@ -1,13 +1,7 @@
 import { Fragment, useId, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, ChevronRight, ChevronsUpDown, Inbox } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronRight, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-} from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -18,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useIsMobile } from "@/hook/use-mobile";
 import { cn } from "@/utils/cn.utils";
 import {
   rowExpansionPersistProps,
@@ -34,7 +29,6 @@ import type {
 } from "../../../models/common/table.model";
 import {
   dataTableCell,
-  dataTableEmpty,
   dataTableExpansionCell,
   dataTableGrid,
   dataTableHead,
@@ -59,7 +53,9 @@ import {
   leadCell,
 } from "../../../styles/table/table.styles";
 import ErrorState from "../status/ErrorState";
+import DataTableCards from "./DataTableCards";
 import RowDetailPanel from "./RowDetailPanel";
+import TableEmptyState from "./TableEmptyState";
 import TablePagination from "./TablePagination";
 
 const skeletonRows = 5;
@@ -130,8 +126,9 @@ const DataTable = <T extends object>({
   rowClassName,
 }: IProps<T>) => {
   const tableId = useId();
-  const { expandedRow, collapsingRow, toggleRow, endCollapse } =
-    useRowExpansion(expansionKey ?? tableId);
+  const isMobile = useIsMobile();
+  const expansion = useRowExpansion(expansionKey ?? tableId);
+  const { expandedRow, collapsingRow, toggleRow, endCollapse } = expansion;
   const { sort, setSort } = useSort(tableId);
   const { pagination: clientPagination, setPagination: setClientPagination } =
     usePagination(tableId);
@@ -173,6 +170,11 @@ const DataTable = <T extends object>({
         ? rows.map(resolveRowKey).filter((key) => !disabledKeys.includes(key))
         : [...keys].map(String);
     rowSelection.onChange(selected);
+  };
+
+  const renderContent = (column: IDataTableColumn<T>, row: T, rowIndex: number) => {
+    const value = column.dataIndex ? row[column.dataIndex] : undefined;
+    return column.render ? column.render(value, row, rowIndex) : toCellContent(value);
   };
 
   const renderLead = (key: string, content: ReactNode) => {
@@ -218,10 +220,7 @@ const DataTable = <T extends object>({
             </TableCell>
           ) : null}
           {columns.map((column, index) => {
-            const value = column.dataIndex ? row[column.dataIndex] : undefined;
-            const content = column.render
-              ? column.render(value, row, rowIndex)
-              : toCellContent(value);
+            const content = renderContent(column, row, rowIndex);
 
             return (
               <TableCell
@@ -296,14 +295,7 @@ const DataTable = <T extends object>({
       return (
         <TableRow id="empty" className={cn(dataTableRow, dataTableRowStatic)}>
           <TableCell colSpan={columnCount} className={dataTableStateCell}>
-            <Empty className={dataTableEmpty}>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Inbox />
-                </EmptyMedia>
-                <EmptyDescription>{emptyText}</EmptyDescription>
-              </EmptyHeader>
-            </Empty>
+            <TableEmptyState text={emptyText} />
           </TableCell>
         </TableRow>
       );
@@ -312,65 +304,90 @@ const DataTable = <T extends object>({
     return rows.map(renderRow);
   };
 
+  const renderTable = () => (
+    <Table
+      aria-label={label}
+      className={dataTableGrid}
+      selectionMode={rowSelection ? "multiple" : "none"}
+      selectedKeys={rowSelection ? rowSelection.selectedRowKeys : undefined}
+      onSelectionChange={selectRows}
+      disabledKeys={disabledKeys}
+      disabledBehavior="selection"
+      sortDescriptor={sort ?? undefined}
+      onSortChange={(descriptor) =>
+        setSort({ column: String(descriptor.column), direction: descriptor.direction })
+      }
+    >
+      <TableHeader className={dataTableHeader}>
+        {rowSelection ? (
+          <TableHead className={cn(dataTableHead(), dataTableSelectionCell)}>
+            <Checkbox slot="selection" />
+          </TableHead>
+        ) : null}
+        {columns.map((column, index) => (
+          <TableHead
+            key={columnId(column, index)}
+            id={columnId(column, index)}
+            isRowHeader={index === 0}
+            allowsSorting={Boolean(column.sorter)}
+            className={dataTableHead({
+              align: column.align,
+              sortable: Boolean(column.sorter),
+            })}
+            style={column.width === undefined ? undefined : { width: column.width }}
+          >
+            {({ sortDirection }) => (
+              <>
+                {column.sorter ? (
+                  <span className={dataTableSortLabel}>
+                    {column.title}
+                    {sortIcon(sortDirection)}
+                  </span>
+                ) : (
+                  column.title
+                )}
+                {refreshing && index === columns.length - 1 ? (
+                  <Spinner className={dataTableRefreshSpinner} />
+                ) : null}
+              </>
+            )}
+          </TableHead>
+        ))}
+      </TableHeader>
+
+      <TableBody
+        aria-busy={loading || refreshing}
+        className={refreshing ? dataTableBodyRefreshing : undefined}
+      >
+        {renderBody()}
+        </TableBody>
+    </Table>
+  );
+
   return (
     <div className={dataTableRoot}>
-      <Table
-        aria-label={label}
-        className={dataTableGrid}
-        selectionMode={rowSelection ? "multiple" : "none"}
-        selectedKeys={rowSelection ? rowSelection.selectedRowKeys : undefined}
-        onSelectionChange={selectRows}
-        disabledKeys={disabledKeys}
-        disabledBehavior="selection"
-        sortDescriptor={sort ?? undefined}
-        onSortChange={(descriptor) =>
-          setSort({ column: String(descriptor.column), direction: descriptor.direction })
-        }
-      >
-        <TableHeader className={dataTableHeader}>
-          {rowSelection ? (
-            <TableHead className={cn(dataTableHead(), dataTableSelectionCell)}>
-              <Checkbox slot="selection" />
-            </TableHead>
-          ) : null}
-          {columns.map((column, index) => (
-            <TableHead
-              key={columnId(column, index)}
-              id={columnId(column, index)}
-              isRowHeader={index === 0}
-              allowsSorting={Boolean(column.sorter)}
-              className={dataTableHead({
-                align: column.align,
-                sortable: Boolean(column.sorter),
-              })}
-              style={column.width === undefined ? undefined : { width: column.width }}
-            >
-              {({ sortDirection }) => (
-                <>
-                  {column.sorter ? (
-                    <span className={dataTableSortLabel}>
-                      {column.title}
-                      {sortIcon(sortDirection)}
-                    </span>
-                  ) : (
-                    column.title
-                  )}
-                  {refreshing && index === columns.length - 1 ? (
-                    <Spinner className={dataTableRefreshSpinner} />
-                  ) : null}
-                </>
-              )}
-            </TableHead>
-          ))}
-        </TableHeader>
-
-        <TableBody
-          aria-busy={loading || refreshing}
-          className={refreshing ? dataTableBodyRefreshing : undefined}
-        >
-          {renderBody()}
-        </TableBody>
-      </Table>
+      {isMobile ? (
+        <DataTableCards<T>
+          columns={columns}
+          rows={rows}
+          label={label}
+          loading={loading}
+          refreshing={refreshing}
+          error={error}
+          onRetry={onRetry}
+          emptyText={emptyText}
+          resolveRowKey={resolveRowKey}
+          renderContent={renderContent}
+          columnId={columnId}
+          onRowClick={onRowClick}
+          rowClassName={rowClassName}
+          rowSelection={rowSelection}
+          expansion={isExpandable ? expansion : undefined}
+          detailSections={detailSections}
+        />
+      ) : (
+        renderTable()
+      )}
 
       {loading || refreshing ? (
         <p role="status" className={dataTableLoadingAnnounce}>

@@ -17,6 +17,10 @@ import type {
 import { todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
 import {
+  voucherBreakdownDefaults,
+  voucherBreakdownOf,
+} from "../../../utils/voucher.utils";
+import {
   pendingVoucherCount,
   sumDisbursements,
   useDisbursementListHook,
@@ -38,6 +42,7 @@ export const usePurchaseListHook = () => {
 
   const {
     branchOptions,
+    breakdownSection,
     defaultBranch,
     editRow,
     farmSectionOptions,
@@ -76,11 +81,12 @@ export const usePurchaseListHook = () => {
         },
         {
           name: "amount",
-          label: "Amount",
+          label: "Invoice amount",
           type: "amount",
           span: "half",
           required: true,
           prefix: "₱",
+          hint: "VAT inclusive.",
         },
         { name: "due_date", label: "Due date", type: "date", span: "half" },
       ],
@@ -124,6 +130,7 @@ export const usePurchaseListHook = () => {
         },
       ],
     },
+    breakdownSection,
     {
       key: "details",
       title: "Additional details",
@@ -136,6 +143,7 @@ export const usePurchaseListHook = () => {
   ];
 
   const defaults: DefaultValues<IDisbursementInput> = {
+    ...voucherBreakdownDefaults,
     branch: defaultBranch as BranchSlug,
     farm_section: null,
     txn_date: todayIso(),
@@ -150,6 +158,7 @@ export const usePurchaseListHook = () => {
 
   const editDefaults: DefaultValues<IDisbursementInput> | null = editRow
     ? {
+        ...voucherBreakdownOf(editRow.voucher),
         branch: editRow.branch as BranchSlug,
         farm_section:
           editRow.farm_section as IDisbursementInput["farm_section"],

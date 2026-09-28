@@ -102,6 +102,7 @@ const PaymentAllocationModal = ({
     },
     {
       title: "Balance",
+      mobile: "amount",
       key: "balance",
       align: "right",
       render: (_, row) => formatMoney(ledgerBalance(row)),

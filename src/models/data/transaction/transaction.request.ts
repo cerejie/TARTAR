@@ -7,6 +7,11 @@ import {
 import { voucherTypeSchema } from "../../../enums/voucher.enum";
 import { amountField, isoDateField } from "../../../utils/schema.utils";
 import {
+  breakdownWithinInvoiceIssue,
+  isBreakdownWithinInvoice,
+  voucherBreakdownShape,
+} from "../voucher/voucher.request";
+import {
   FARM_BRANCH,
   branchSlugSchema,
   farmSectionSlugSchema,
@@ -55,6 +60,7 @@ const disbursementBase = z.object({
   payee: z.string().trim().max(160).nullable().optional(),
   reference_number: z.string().trim().max(80).nullable().optional(),
   description: z.string().trim().max(500).nullable().optional(),
+  ...voucherBreakdownShape,
 });
 
 const withDisbursementRules = <T extends typeof disbursementBase>(schema: T) =>
@@ -70,7 +76,8 @@ const withDisbursementRules = <T extends typeof disbursementBase>(schema: T) =>
     .refine((values) => !!values.cash_account || !!values.voucher_type, {
       path: ["voucher_type"],
       message: "Select check or cash (no payment account chosen)",
-    });
+    })
+    .refine(isBreakdownWithinInvoice, breakdownWithinInvoiceIssue);
 
 export const purchaseSchema = withDisbursementRules(disbursementBase);
 

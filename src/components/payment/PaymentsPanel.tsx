@@ -41,6 +41,7 @@ const PaymentsPanel = ({ kind, party }: IProps) => {
     },
     {
       title: "Amount",
+      mobile: "amount",
       dataIndex: "amount",
       align: "right",
       className: nowrapCell,
@@ -48,11 +49,13 @@ const PaymentsPanel = ({ kind, party }: IProps) => {
     },
     {
       title: "Reference",
+      mobile: "subtitle",
       dataIndex: "reference_number",
       render: (value: string | null) => value || "—",
     },
     {
       title: "Status",
+      mobile: "status",
       dataIndex: "status",
       className: nowrapCell,
       render: (status: ILedgerPayment["status"], payment) => (

@@ -69,6 +69,7 @@ const CustomerLedgerView = () => {
     },
     {
       title: "Due date",
+      mobile: "subtitle",
       dataIndex: "due_date",
       width: 120,
       render: (value: string) => formatDate(value),
@@ -93,12 +94,14 @@ const CustomerLedgerView = () => {
     },
     {
       title: "Balance",
+      mobile: "amount",
       key: "balance",
       align: "right",
       render: (_, row) => formatMoney(ledgerBalance(row)),
     },
     {
       title: "Status",
+      mobile: "status",
       dataIndex: "status",
       render: (status: IReceivable["status"], row) =>
         isLedgerOverdue(row) ? (

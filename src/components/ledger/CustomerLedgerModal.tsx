@@ -59,6 +59,7 @@ const CustomerLedgerModal = () => {
     },
     {
       title: "Outstanding balance",
+      mobile: "amount",
       dataIndex: "outstanding",
       align: "right",
       className: nowrapCell,

@@ -22,6 +22,7 @@ const columns: IDataTableColumn<ICashFlowRow>[] = [
   { title: "Direction", dataIndex: "direction" },
   {
     title: "Total",
+    mobile: "amount",
     dataIndex: "total",
     align: "right",
     render: (value: number) => formatMoney(value),

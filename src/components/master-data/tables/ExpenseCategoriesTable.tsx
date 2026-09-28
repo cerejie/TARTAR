@@ -82,6 +82,7 @@ const ExpenseCategoriesTable = () => {
     { title: "Order", dataIndex: "sort", align: "center" },
     {
       title: "Status",
+      mobile: "status",
       dataIndex: "active",
       className: nowrapCell,
       render: (active: boolean) =>

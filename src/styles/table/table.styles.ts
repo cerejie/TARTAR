@@ -67,6 +67,50 @@ export const dataTableEmpty = "py-8";
 
 export const dataTableLoadingAnnounce = "sr-only";
 
+export const dataCardList = "flex flex-col gap-3";
+
+export const dataCard =
+  "relative flex flex-col gap-3 rounded-xl border border-border bg-card p-4 text-sm has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring";
+
+export const dataCardSelected = "border-brand bg-brand-mist";
+
+export const dataCardHead = "flex items-start gap-3";
+
+export const dataCardHeading = "flex min-w-0 flex-1 flex-col gap-0.5";
+
+export const dataCardTitle = "min-w-0 text-left font-medium break-words text-foreground";
+
+export const dataCardTitlePress =
+  "min-w-0 text-left font-medium break-words text-foreground outline-none after:absolute after:inset-0 after:rounded-xl";
+
+export const dataCardSubtitle = "text-xs text-muted-foreground";
+
+export const dataCardAmount = "flex shrink-0 flex-col items-end gap-0.5 font-semibold tabular-nums";
+
+export const dataCardRaised = "relative z-10";
+
+export const dataCardTags = "flex flex-wrap items-center gap-2";
+
+export const dataCardMeta = "grid grid-cols-2 gap-x-4 gap-y-2";
+
+export const dataCardField = "flex min-w-0 flex-col gap-0.5";
+
+export const dataCardLabel = "text-xs text-muted-foreground";
+
+export const dataCardValue = "min-w-0 break-words text-foreground";
+
+export const dataCardToggle = "relative z-10 self-start";
+
+export const dataCardDetail = "-mx-4 -mb-4 border-t border-border";
+
+export const dataCardSkeletonHead = "flex items-center justify-between gap-3";
+
+export const dataCardSkeletonTitle = "h-4 w-2/5";
+
+export const dataCardSkeletonAmount = "h-4 w-1/4";
+
+export const dataCardSkeletonMeta = "h-3 w-3/5";
+
 export const leadCell = "inline-flex items-center gap-2";
 
 export const expandTrigger = cva("transition-transform", {

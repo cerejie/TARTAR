@@ -116,6 +116,7 @@ const UsersTable = () => {
     },
     {
       title: "Role",
+      mobile: "status",
       dataIndex: "role",
       render: (role: UserRole) => <StatusTag label={userRoleLabels[role]} />,
     },
@@ -127,6 +128,7 @@ const UsersTable = () => {
     },
     {
       title: "Approval",
+      mobile: "status",
       dataIndex: "approval_status",
       className: nowrapCell,
       render: (status: ApprovalStatus) => (

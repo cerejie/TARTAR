@@ -1,5 +1,5 @@
 # ROADMAP — Sales deposit/verification + Voucher computation
-Updated: 2026-09-28 · Status: IN PROGRESS — S1–S3 done, S4 next
+Updated: 2026-09-28 · Status: IN PROGRESS — S1–S4 done, S5 next
 
 ## Goal
 1. A sale is only "actual sales" once an employee has marked it **Deposited** and an admin has
@@ -160,8 +160,20 @@ Observations the build must handle:
   line added. Transactions summary Sales = verified. Cash In unchanged (D3). Pending =
   undeposited + deposited; rejected is neither. Role-specific alerts not built (one pending chip).
 
+- [x] S4 — Voucher computation: `utils/voucher.utils.ts` (`computeVoucherTotals`, `breakdownTotalsOf`,
+  `voucherTotalsOf`, `voucherSummaryLines`, `deriveVoucherValues`, `voucherBreakdownFields<T>()`,
+  defaults, `voucherBreakdownItems`); `withholding*` + `voucherLine*` in `enums/voucher.enum.ts`;
+  `voucherBreakdownShape` + within-invoice refine in `voucher.request.ts`, spread into the
+  disbursement schema; `IVoucher` breakdown columns. `EntityFormModal` gains `summary`
+  (`FormSummary`) and `deriveValues` (recalculates withholding only when invoice / rate / return
+  actually change; a manual edit stands). Purchases/Expenses: "Voucher breakdown" section,
+  amount relabelled "Invoice amount"; edit now goes through `update_transaction_with_voucher`
+  RPC. Manual voucher inserts gross/ewt/return/net. Detail panels show Particulars + six lines;
+  voucher Amount column hints the invoice. Legacy vouchers (gross null) show "—" except amount.
+
 ## Next
-1. S4: Voucher computation — `utils/voucher.utils.ts` `computeVoucherTotals`, form fields, table.
+1. S5: Voucher print in the client layout — rewrite `printVoucher` from `voucherTotalsOf`, branch
+   legal name + address on the Branch Monitoring edit form.
 
 ## State
-Branch: development-overhaul · Uncommitted: S3 src changes + this file.
+Branch: development-overhaul · Uncommitted: S4 src changes + this file (plus unrelated ADMIN-APP work on disk).

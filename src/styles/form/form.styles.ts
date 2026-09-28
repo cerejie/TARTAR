@@ -44,3 +44,17 @@ export const formIntroItem = "flex min-w-30 flex-col gap-0.5";
 export const formIntroLabel = "text-xs font-bold tracking-widest text-muted-foreground uppercase";
 
 export const formIntroValue = "text-sm font-semibold text-foreground";
+
+export const formSummary = "flex flex-col gap-2 rounded-lg bg-muted p-4";
+
+export const formSummaryLine = cva("flex items-center justify-between gap-4 text-sm", {
+  variants: {
+    emphasis: {
+      true: "border-t border-border pt-2 font-semibold text-foreground",
+      false: "text-muted-foreground",
+    },
+  },
+  defaultVariants: { emphasis: false },
+});
+
+export const formSummaryValue = "tabular-nums";

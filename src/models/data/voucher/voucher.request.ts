@@ -2,9 +2,35 @@ import { z } from "zod";
 import {
   voucherKindSchema,
   voucherTypeSchema,
+  withholdingSchema,
 } from "../../../enums/voucher.enum";
-import { amountField, isoDateField } from "../../../utils/schema.utils";
+import {
+  amountField,
+  isoDateField,
+  optionalAmountField,
+} from "../../../utils/schema.utils";
 import { branchSlugSchema } from "../branch/branch.response";
+
+export const voucherBreakdownShape = {
+  withholding: withholdingSchema,
+  ewt_amount: optionalAmountField,
+  less_return: optionalAmountField,
+  particulars: z.string().trim().max(500).nullable().optional(),
+};
+
+const voucherBreakdownSchema = z.object(voucherBreakdownShape);
+
+export type IVoucherBreakdownInput = z.infer<typeof voucherBreakdownSchema> & {
+  amount?: number;
+};
+
+export const isBreakdownWithinInvoice = (values: IVoucherBreakdownInput) =>
+  (values.ewt_amount ?? 0) + (values.less_return ?? 0) <= (values.amount ?? 0);
+
+export const breakdownWithinInvoiceIssue = {
+  path: ["less_return"],
+  message: "Withholding and return cannot exceed the invoice amount",
+};
 
 export const voucherSchema = z
   .object({
@@ -18,8 +44,12 @@ export const voucherSchema = z
     check_bank: z.string().trim().max(120).nullable().optional(),
     check_number: z.string().trim().max(60).nullable().optional(),
     check_due_date: isoDateField.nullable().optional(),
+    ...voucherBreakdownShape,
   })
   .superRefine((values, ctx) => {
+    if (!isBreakdownWithinInvoice(values)) {
+      ctx.addIssue({ code: "custom", ...breakdownWithinInvoiceIssue });
+    }
     if (values.kind === "purchase" && !values.due_date) {
       ctx.addIssue({
         code: "custom",

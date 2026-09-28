@@ -34,6 +34,9 @@ export const filterPopoverHead = "flex-row items-center justify-between gap-2";
 
 export const filterPopoverTitle = "text-sm font-semibold";
 
+export const filterSheetFooter =
+  "grid grid-cols-2 border-t border-border bg-muted/50 pb-safe [&_[data-slot=button]]:h-11";
+
 export const filterField = "gap-1.5 *:w-full!";
 
 export const filterSort = "flex items-center gap-2";
