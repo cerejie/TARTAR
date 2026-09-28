@@ -148,7 +148,6 @@ const VouchersTable = () => {
     {
       title: "Status",
       dataIndex: "status",
-      className: nowrapCell,
       render: (status: VoucherStatus, voucher) => (
         <span className={tagRow}>
           <StatusTag

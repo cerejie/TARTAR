@@ -4,7 +4,7 @@ import {
   avatarCellFallback,
   avatarCellName,
   avatarCellText,
-  cellHint,
+  avatarCellHint,
 } from "../../../styles/table/table.styles";
 import { formatInitials } from "../../../utils/format.utils";
 
@@ -23,7 +23,7 @@ const AvatarCell = ({ name, hint }: IProps) => {
       </Avatar>
       <span className={avatarCellText}>
         <span className={avatarCellName}>{name}</span>
-        {hint ? <span className={cellHint}>{hint}</span> : null}
+        {hint ? <span className={avatarCellHint}>{hint}</span> : null}
       </span>
     </span>
   );

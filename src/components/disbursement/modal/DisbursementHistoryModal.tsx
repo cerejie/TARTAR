@@ -1,6 +1,6 @@
 import { transactionTypeLabels } from "../../../enums/transaction.enum";
 import type {
-  IDisbursement,
+  ITransaction,
   ITransactionAudit,
 } from "../../../models/data/transaction/transaction.response";
 import {
@@ -21,7 +21,7 @@ import AppModal from "../../common/modal/AppModal";
 
 type IProps = {
   open: boolean;
-  row?: IDisbursement;
+  row?: ITransaction;
   audit: ITransactionAudit[];
   loading: boolean;
   userNameOf: (id: string | null) => string;

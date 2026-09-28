@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import type { IRoute } from "../../models/common/route.model";
 import ErrorView from "../../pages/Error/ErrorView";
+import { adminLayoutRoutes } from "../../routes/admin.routes";
 import { protectedLayoutRoutes } from "../../routes/protected.routes";
 import { publicLayoutRoutes } from "../../routes/public.routes";
 import { useAccountStore } from "../../store/data/account/account.store";
@@ -17,7 +18,9 @@ export const useAccountMeHook = () => {
   const user = useAccountStore((state) => state.user);
 
   const router = useMemo(() => {
-    const layoutRoutes = kind ? protectedLayoutRoutes : publicLayoutRoutes;
+    const layoutRoutes = kind
+      ? [...protectedLayoutRoutes, ...adminLayoutRoutes]
+      : publicLayoutRoutes;
     return createBrowserRouter([...layoutRoutes, notFoundRoute]);
   }, [kind]);
 

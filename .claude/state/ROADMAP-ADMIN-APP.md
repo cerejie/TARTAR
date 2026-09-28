@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: PLANNED — decisions locked, A1 next
+Updated: 2026-09-28 · Status: IN PROGRESS — A1 done, A2 next
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -118,11 +118,21 @@ stop. No migrations in this roadmap — read-only over existing tables.
 
 ## Done
 - [x] A0 — PauseCoffee domain pattern read, data sources mapped, D1–D3 locked (2026-09-28).
+- [x] A1 — shell + routes (2026-09-28): `routes/admin.routes.ts` (guard loader on `admin_route`),
+  `routes/admin.view.routes.ts`, `layouts/AdminAppLayout.tsx`,
+  `components/common/layout/{AdminAppBar,AdminTabBar}.tsx`, `hook/layout/admin.hook.ts`
+  (layout/tab bar/title + per-path scroll restore), `store/common/scroll.store.ts`,
+  `styles/admin/admin.layout.styles.ts`, placeholder `pages/Admin/Admin{Home,Payables,
+  Receivables,Notifications}View.tsx` (EmptyState — replaced in A4–A7).
+  `utils/route.utils.ts` + `adminBasePath` / `isAdminPath`; public `/admin/*` → LoginView and
+  login returns to `/admin`; `ProtectedUserMenu` app-switch item (via `useProtectedUserHook`).
+  Deferred: tab-bar badge slot → A7; bottom-sheet branch picker → A3 (`AppSheet`); A1 reuses
+  `ProtectedBranchScope` popover.
 
 ## Next
-1. A1: domain shell + routes. Then A2.
+1. A2: own PWA identity. Then A3.
 
 ## State
 Branch: development-overhaul · Uncommitted: this file (+ ROADMAP-SALES-VOUCHER.md, pre-existing)
-· No src changes. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
+· A1 src changes uncommitted (plus unrelated pre-existing sale/* WIP). Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
 `notificationGroups`, `derivePermissions().isManager`, `permissionLoader`, `lazyView`.

@@ -117,7 +117,12 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       title: partyLabel,
       key: "party",
       skeleton: "avatar",
-      render: (_, row) => <AvatarCell name={partyNameOf(row)} />,
+      render: (_, row) => (
+        <AvatarCell
+          name={partyNameOf(row)}
+          hint={row.reference_number ?? undefined}
+        />
+      ),
     },
     {
       title: "Branch",
@@ -157,12 +162,6 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
             label={ledgerStatusLabels[status]}
           />
         ),
-    },
-    {
-      title: "Reference",
-      dataIndex: "reference_number",
-      className: nowrapCell,
-      render: (value: string | null) => value || "—",
     },
     {
       title: "Action",

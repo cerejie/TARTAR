@@ -13,7 +13,9 @@ import {
 } from "../../store/common/theme.store";
 import { useAccountStore } from "../../store/data/account/account.store";
 import {
+  adminBasePath,
   filterRoutesByPermission,
+  isAdminPath,
   navigableRoutes,
   pinnedRouteGroup,
   routeGroups,
@@ -89,7 +91,18 @@ export const useProtectedTitleHook = () => {
   return { title: matched?.label ?? "" };
 };
 
+const resolveAppSwitch = (pathname: string, isManager: boolean) => {
+  if (isAdminPath(pathname)) {
+    return { href: "/", label: "Open full TARTAR", toAdmin: false };
+  }
+
+  if (!isManager) return null;
+
+  return { href: adminBasePath, label: "Open admin app", toAdmin: true };
+};
+
 export const useProtectedUserHook = () => {
+  const location = useLocation();
   const user = useAccountStore((state) => state.user);
   const online = useNetworkStore((state) => state.online);
   const permissions = usePermissions();
@@ -111,5 +124,6 @@ export const useProtectedUserHook = () => {
     isDark: mode === "dark",
     toggleMode,
     logoutMutation,
+    appSwitch: resolveAppSwitch(location.pathname, permissions.isManager),
   };
 };

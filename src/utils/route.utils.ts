@@ -34,3 +34,8 @@ export const routeGroups = (routes: IRoute[]): string[] => {
 export const resetLocation = (pathname: string): void => {
   window.history.replaceState(null, "", pathname);
 };
+
+export const adminBasePath = "/admin";
+
+export const isAdminPath = (pathname: string): boolean =>
+  pathname === adminBasePath || pathname.startsWith(`${adminBasePath}/`);

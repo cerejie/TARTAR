@@ -1,5 +1,11 @@
 export const transactionFormModalKey = "transaction-form";
 
+export const saleFormModalKey = "sale-form";
+export const saleEditModalKey = "sale-edit";
+export const saleHistoryModalKey = "sale-history";
+export const saleDepositModalKey = "sale-deposit";
+export const saleRejectModalKey = "sale-reject";
+
 export const voucherFormModalKey = "voucher-form";
 
 export const userCreateModalKey = "user-create";

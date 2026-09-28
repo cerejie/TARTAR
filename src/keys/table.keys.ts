@@ -1,5 +1,8 @@
 export const transactionPaginationKey = "transactions-table";
 export const transactionSortKey = "transactions-sort";
+export const salePaginationKey = "sales-table";
+export const saleSortKey = "sales-sort";
+export const saleExpansionKey = "sales-table-rows";
 export const voucherPaginationKey = "vouchers-table";
 export const voucherSortKey = "vouchers-sort";
 export const voucherExpansionKey = "vouchers-table-rows";

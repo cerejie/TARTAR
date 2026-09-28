@@ -4,8 +4,6 @@ import {
   cashAccountValues,
   cashInflowTypes,
   cashOutflowTypes,
-  incomeSourceLabels,
-  incomeSourceValues,
   transactionSortOptions,
   transactionTypeLabels,
   transactionTypeValues,
@@ -146,7 +144,7 @@ export const useTransactionListHook = () => {
   );
 
   const encodableTypes = transactionTypeValues.filter(
-    (type) => type !== "purchase" && type !== "expense"
+    (type) => type !== "sale" && type !== "purchase" && type !== "expense"
   );
 
   const sections: IFieldSection<ITransactionInput>[] = [
@@ -202,15 +200,6 @@ export const useTransactionListHook = () => {
       description: "Specify the accounting details.",
       fields: [
         {
-          name: "income_source",
-          label: "Income source",
-          type: "select",
-          span: "half",
-          required: true,
-          options: toOptions(incomeSourceValues, incomeSourceLabels),
-          hidden: (values) => values.type !== "sale",
-        },
-        {
           name: "cash_account",
           label: "Cash account",
           type: "select",
@@ -248,11 +237,11 @@ export const useTransactionListHook = () => {
   ];
 
   const defaults: DefaultValues<ITransactionInput> = {
-    type: "sale",
+    type: "customer_payment",
     branch: defaultBranch as BranchSlug,
     farm_section: null,
     txn_date: todayIso(),
-    income_source: "product_sales",
+    income_source: null,
     expense_type: null,
     customer_id: null,
     supplier_id: null,

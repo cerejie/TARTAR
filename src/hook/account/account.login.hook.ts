@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useLocation } from "react-router-dom";
 import {
   isEmailIdentifier,
   loginFormSchema,
@@ -7,10 +8,15 @@ import {
 } from "../../models/data/account/account.request";
 import accountServices from "../../services/data/account.services";
 import { useAccountStore } from "../../store/data/account/account.store";
-import { resetLocation } from "../../utils/route.utils";
+import {
+  adminBasePath,
+  isAdminPath,
+  resetLocation,
+} from "../../utils/route.utils";
 import { useMutation } from "../common/mutation.hook";
 
 export const useAccountLoginHook = () => {
+  const { pathname } = useLocation();
   const setCustomSession = useAccountStore((state) => state.setCustomSession);
   const setSuperAdminSession = useAccountStore(
     (state) => state.setSuperAdminSession
@@ -40,7 +46,10 @@ export const useAccountLoginHook = () => {
       });
       setCustomSession(token, user);
     },
-    { onSuccess: () => resetLocation("/") }
+    {
+      onSuccess: () =>
+        resetLocation(isAdminPath(pathname) ? adminBasePath : "/"),
+    }
   );
 
   return {

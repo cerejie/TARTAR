@@ -143,9 +143,11 @@ export const avatarCellText = "flex min-w-0 flex-col";
 
 export const avatarCellName = "truncate font-medium";
 
+export const avatarCellHint = "truncate text-xs text-muted-foreground";
+
 export const nowrapCell = "whitespace-nowrap";
 
-export const branchCell = "min-w-44";
+export const branchCell = "min-w-32";
 
 export const emptyCell = "text-muted-foreground";
 
@@ -153,13 +155,13 @@ export const rowActionMenu = "w-auto min-w-48";
 
 export const rowActionItem = "whitespace-nowrap";
 
-export const tagRow = "inline-flex items-center gap-2";
+export const tagRow = "inline-flex flex-wrap items-center gap-x-2 gap-y-1";
 
 export const stackedCell = "flex flex-col";
 
 export const cellHint = "text-xs text-muted-foreground";
 
-export const progressCell = "w-full min-w-40 flex-col gap-1.5";
+export const progressCell = "w-full min-w-32 flex-col gap-1.5";
 
 export const progressCellHead = "flex w-full items-baseline justify-between gap-2 tabular-nums";
 

@@ -1,5 +1,5 @@
 # ROADMAP — Sales deposit/verification + Voucher computation
-Updated: 2026-09-28 · Status: PLANNED — decisions locked, S1 next
+Updated: 2026-09-28 · Status: IN PROGRESS — S1 + S2 done, S3 next
 
 ## Goal
 1. A sale is only "actual sales" once an employee has marked it **Deposited** and an admin has
@@ -141,9 +141,19 @@ Observations the build must handle:
 
 ## Done
 - [x] S0 — spreadsheet + paper voucher analysed, plan written, D1–D9 locked (2026-09-28).
+- [x] S1 — migration written, committed v1.36:
+  `supabase/migrations/20260928000010_sales_verification_voucher_breakdown.sql`. NOT applied —
+  apply it before testing S2 against the database.
+- [x] S2 — Sales module: `enums/sale.enum.ts`, `models/data/sale/sale.{request,response}.ts`,
+  `services/data/sale.services.ts`, `hook/data/sale/sale.{list,form}.hook.ts`,
+  `components/sale/{tables/SalesTable,cards/SaleSummaryCards,menus/SaleStatusTabs,modal/SaleFormModals}.tsx`,
+  `pages/Sales/SalesView.tsx`, `/sales` route, sale keys, `ILedgerFilters.saleStatus`.
+  `sale` dropped from the Transactions form. Row actions: Mark deposited + Edit (undeposited /
+  rejected, encoders), Verify + Reject (managers, deposited), Edit history, Delete (managers,
+  not verified). History reuses `DisbursementHistoryModal` (row widened to ITransaction).
 
 ## Next
-1. S1: write the migration for review (do not apply). Then S2.
+1. S3: "Actual sales" — dashboard + reports count `sale_status = verified` only; pending line.
 
 ## State
-Branch: development-overhaul · Uncommitted: this file + .claude/docs/ · No src changes.
+Branch: development-overhaul · Uncommitted: S2 src changes + this file.

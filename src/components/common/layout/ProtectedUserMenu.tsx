@@ -1,4 +1,4 @@
-import { LogOut, Moon, Sun } from "lucide-react";
+import { LogOut, Monitor, Moon, Smartphone, Sun } from "lucide-react";
 import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -27,6 +27,7 @@ const ProtectedUserMenu = () => {
     isDark,
     toggleMode,
     logoutMutation,
+    appSwitch,
   } = useProtectedUserHook();
 
   const themeLabel = isDark ? "Light mode" : "Dark mode";
@@ -54,6 +55,16 @@ const ProtectedUserMenu = () => {
         aria-label="Account"
         className={headerUserMenu}
       >
+        {appSwitch ? (
+          <DropdownMenuItem
+            id="app-switch"
+            textValue={appSwitch.label}
+            href={appSwitch.href}
+          >
+            {appSwitch.toAdmin ? <Smartphone /> : <Monitor />}
+            {appSwitch.label}
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem id="theme" textValue={themeLabel} onAction={toggleMode}>
           {isDark ? <Sun /> : <Moon />}
           {themeLabel}
