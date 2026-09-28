@@ -77,7 +77,6 @@ export const useExpenseListHook = () => {
     {
       key: "expense",
       title: "Expense",
-      description: "Basic information about this expense.",
       fields: [
         {
           name: "branch",
@@ -124,7 +123,6 @@ export const useExpenseListHook = () => {
     {
       key: "payment",
       title: "Payment",
-      description: "Who is paid and how.",
       fields: [
         {
           name: "supplier_id",
@@ -163,7 +161,6 @@ export const useExpenseListHook = () => {
     {
       key: "details",
       title: "Additional details",
-      description: "Add notes about this expense (optional).",
       fields: [{ name: "description", label: "Description", type: "textarea" }],
     },
   ];

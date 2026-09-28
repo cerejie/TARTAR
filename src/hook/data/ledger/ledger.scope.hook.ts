@@ -35,7 +35,6 @@ export type ILedgerInput = IReceivableInput | IPayableInput;
 interface ISectionSource {
   key: string;
   title: string;
-  description: string;
   partyNameField: "customer_name" | "supplier_name";
   partyLabel: string;
   branchOptions: IFieldOption[];
@@ -70,7 +69,6 @@ const buildSections = (source: ISectionSource): IFieldSection<ILedgerInput>[] =>
   {
     key: source.key,
     title: source.title,
-    description: source.description,
     fields: [
       {
         name: "branch",
@@ -128,7 +126,6 @@ export const useLedgerScopeHook = (scope: LedgerScope) => {
     sections: buildSections({
       key: "receivable",
       title: "Receivable",
-      description: "Who owes this amount and when it is due.",
       partyNameField: "customer_name",
       partyLabel: "Customer",
       branchOptions,
@@ -167,7 +164,6 @@ export const useLedgerScopeHook = (scope: LedgerScope) => {
     sections: buildSections({
       key: "payable",
       title: "Payable",
-      description: "Who we owe this amount to and when it is due.",
       partyNameField: "supplier_name",
       partyLabel: "Supplier",
       branchOptions,

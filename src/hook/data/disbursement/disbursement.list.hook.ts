@@ -163,8 +163,6 @@ export const useDisbursementListHook = (
   const breakdownSection: IFieldSection<IDisbursementInput> = {
     key: "breakdown",
     title: "Voucher breakdown",
-    description:
-      "Withholding tax and returns are deducted from what the voucher pays.",
     fields: voucherBreakdownFields<IDisbursementInput>(),
   };
 

@@ -27,13 +27,11 @@ export const fieldDatePlaceholder = "text-muted-foreground";
 
 export const fieldDatePopover = "w-auto p-0";
 
-export const formSection = "flex flex-col gap-4";
+export const formSection = "shrink-0 gap-4 [--card-spacing:--spacing(5)]";
 
-export const formSectionHeader = "flex flex-col gap-1";
+export const formSectionHeader = "mx-(--card-spacing) border-b px-0 pb-3";
 
-export const formSectionTitle = "font-heading text-sm font-semibold";
-
-export const formSectionDescription = "text-sm text-muted-foreground";
+export const formSectionTitle = "font-heading text-base font-semibold text-primary";
 
 export const fieldLabelHidden = "sr-only";
 

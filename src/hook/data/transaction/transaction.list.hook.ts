@@ -152,7 +152,6 @@ export const useTransactionListHook = () => {
     {
       key: "transaction",
       title: "Transaction",
-      description: "Basic information about this transaction.",
       fields: [
         {
           name: "type",
@@ -198,7 +197,6 @@ export const useTransactionListHook = () => {
     {
       key: "accounting",
       title: "Accounting",
-      description: "Specify the accounting details.",
       fields: [
         {
           name: "cash_account",
@@ -229,7 +227,6 @@ export const useTransactionListHook = () => {
     {
       key: "details",
       title: "Additional details",
-      description: "Add reference number or notes (optional).",
       fields: [
         { name: "reference_number", label: "Reference no.", type: "text" },
         { name: "description", label: "Description", type: "textarea" },

@@ -39,7 +39,6 @@ const depositSections: IFieldSection<ISaleDepositInput>[] = [
   {
     key: "deposit",
     title: "Deposit",
-    description: "The date this sale's cash was deposited to the bank.",
     fields: [
       { name: "deposit_date", label: "Deposit date", type: "date", required: true },
     ],
@@ -50,7 +49,6 @@ const rejectSections: IFieldSection<ISaleRejectInput>[] = [
   {
     key: "reject",
     title: "Rejection",
-    description: "The sale goes back to the employee to correct and deposit again.",
     fields: [
       { name: "reason", label: "Reason", type: "textarea", required: true },
     ],
@@ -119,7 +117,6 @@ export const useSaleFormHook = () => {
     {
       key: "sale",
       title: "Sale",
-      description: "Basic information about this sale.",
       fields: [
         {
           name: "branch",
@@ -165,7 +162,6 @@ export const useSaleFormHook = () => {
     {
       key: "accounting",
       title: "Accounting",
-      description: "Who bought and where the cash went.",
       fields: [
         {
           name: "customer_id",
@@ -188,7 +184,6 @@ export const useSaleFormHook = () => {
     {
       key: "details",
       title: "Additional details",
-      description: "Add reference number or notes (optional).",
       fields: [
         { name: "reference_number", label: "Reference no.", type: "text" },
         { name: "description", label: "Description", type: "textarea" },

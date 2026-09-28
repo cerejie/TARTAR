@@ -40,7 +40,6 @@ export interface IFieldConfig<TValues extends FieldValues = FieldValues> {
 export interface IFieldSection<TValues extends FieldValues = FieldValues> {
   key: string;
   title: string;
-  description?: string;
   fields: IFieldConfig<TValues>[];
 }
 

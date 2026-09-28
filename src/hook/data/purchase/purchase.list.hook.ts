@@ -54,7 +54,6 @@ export const usePurchaseListHook = () => {
     {
       key: "purchase",
       title: "Purchase",
-      description: "Basic information about this purchase.",
       fields: [
         {
           name: "branch",
@@ -94,8 +93,6 @@ export const usePurchaseListHook = () => {
     {
       key: "payment",
       title: "Payment",
-      description:
-        "Who is paid and how. Leave the due date empty when this purchase is paid in full now.",
       fields: [
         {
           name: "supplier_id",
@@ -134,7 +131,6 @@ export const usePurchaseListHook = () => {
     {
       key: "details",
       title: "Additional details",
-      description: "Add reference number or notes (optional).",
       fields: [
         { name: "reference_number", label: "Reference no.", type: "text" },
         { name: "description", label: "Description", type: "textarea" },

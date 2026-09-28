@@ -1,8 +1,13 @@
 import type { Control, FieldValues } from "react-hook-form";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import type { IFieldSection } from "../../../models/common/field.model";
 import {
   formSection,
-  formSectionDescription,
   formSectionHeader,
   formSectionTitle,
 } from "../../../styles/form/form.styles";
@@ -20,19 +25,18 @@ const FormSection = <TValues extends FieldValues>({
   values,
 }: IProps<TValues>) => {
   return (
-    <section className={formSection}>
-      <div className={formSectionHeader}>
-        <div className={formSectionTitle}>{section.title}</div>
-        {section.description ? (
-          <div className={formSectionDescription}>{section.description}</div>
-        ) : null}
-      </div>
-      <FormFieldGrid
-        fields={section.fields}
-        control={control}
-        values={values}
-      />
-    </section>
+    <Card className={formSection}>
+      <CardHeader className={formSectionHeader}>
+        <CardTitle className={formSectionTitle}>{section.title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <FormFieldGrid
+          fields={section.fields}
+          control={control}
+          values={values}
+        />
+      </CardContent>
+    </Card>
   );
 };
 

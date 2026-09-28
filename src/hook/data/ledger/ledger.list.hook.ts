@@ -251,7 +251,6 @@ export const useLedgerListHook = <
     {
       key: "payment",
       title: "Payment",
-      description: "Date, reference and the amount applied to each record.",
       fields: [
         {
           name: "paid_at",
