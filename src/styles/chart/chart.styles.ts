@@ -9,7 +9,7 @@ export const chartColor: Record<ChartTone, string> = {
   negative: "var(--chart-6)",
 };
 
-export const barChartFrame = "aspect-auto h-full min-h-72 w-full";
+export const barChartFrame = "aspect-auto h-72 min-h-72 w-full grow";
 
 export const donutChartWrap = "relative";
 

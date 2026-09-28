@@ -10,7 +10,7 @@ export const adminPayableSegmentValues = ["checks", "nearDue", "overdue"] as con
 export type AdminPayableSegment = (typeof adminPayableSegmentValues)[number];
 
 export const adminPayableSegmentLabels: Record<AdminPayableSegment, string> = {
-  checks: "Due checks",
+  checks: "Checks",
   nearDue: "Near due",
   overdue: "Overdue",
 };

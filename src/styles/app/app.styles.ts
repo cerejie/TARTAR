@@ -2,7 +2,7 @@ export const segmentedTabs =
   "grid w-full auto-cols-fr grid-flow-col gap-0 rounded-pill bg-muted p-1 lg:w-fit";
 
 export const segmentedTabsItem =
-  "relative h-9 min-w-0 rounded-pill px-3 text-muted-foreground hover:bg-transparent data-selected:bg-transparent data-selected:text-foreground";
+  "relative h-9 min-w-0 rounded-pill px-2 text-muted-foreground sm:px-3 hover:bg-transparent data-selected:bg-transparent data-selected:text-foreground";
 
 export const segmentedTabsThumb =
   "absolute inset-0 rounded-pill bg-panel shadow-sm transition-[translate,width] duration-200 ease-out motion-reduce:transition-none";
@@ -28,7 +28,7 @@ export const metricTileIcon =
   "inline-flex size-9 shrink-0 items-center justify-center rounded-pill [&_svg]:size-4";
 
 export const metricTileValue =
-  "truncate font-heading text-2xl font-semibold tracking-tight tabular-nums md:text-3xl";
+  "truncate font-heading text-xl font-semibold tracking-tight tabular-nums sm:text-2xl md:text-3xl";
 
 export const metricTileSubLine = "truncate text-xs text-muted-foreground";
 
@@ -63,7 +63,7 @@ export const listCardName = "truncate";
 export const listCardNamePress =
   "min-w-0 truncate text-left outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-[3px] focus-visible:after:ring-ring/50";
 
-export const listCardMeta = "truncate";
+export const listCardMeta = "line-clamp-2";
 
 export const listCardAside = "flex flex-col items-end gap-1";
 

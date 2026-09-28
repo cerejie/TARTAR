@@ -263,9 +263,30 @@ Desktop audit COMPLETE (V8, 2026-09-28). Awaiting user go-ahead to delete this f
 .claude/state/audit/ — the harness section and M1/M2 above are the seed for the Mobile roadmap,
 so carry them over first.
 
-1. Mobile (M*) roadmap: M1 offcanvas sidebar sheet at phone width, M2 form sheet polish.
-   Parallel work: ROADMAP-ADMIN-APP.md (another session). Sales/voucher roadmap closed — its
-   follow-ups are SV1-SV5 below.
+1. Mobile M1 (offcanvas sidebar, phone header) and M2 (phone table cards, filter bottom
+   sheet) shipped inside the admin-app roadmap (v1.39-v1.46) — screenshot-verify the normal
+   app at 390/768/1280 light+dark. Admin app closed — follow-ups AD1-AD6 below. Sales/voucher
+   roadmap closed — its follow-ups are SV1-SV5 below.
+
+## Admin app follow-ups (from ROADMAP-ADMIN-APP A8, 2026-09-28)
+`/admin` (Home · Payables · Receivables · Notifications) shipped A1-A7 (v1.39-v1.46). A8
+screenshot-verified all four tabs at 390/768/1280 light+dark, the receivable sheet (bottom on
+phone, side at 1280), the admin manifest swap (manifest, apple-touch-icon, theme-color, title
+on `/admin`; main manifest injected by vite-plugin-pwa in builds only). A8 fixes: Sales trend
+chart rendered 0x0 outside a stretched card (`barChartFrame` h-72 + grow — dashboard still
+fills), phone tile values truncated (`metricTileValue` text-xl below sm), "Due checks" segment
+truncated (label "Checks", item px-2 below sm), list meta clamps to 2 lines. Open:
+- AD1 · Non-manager redirect is code-verified only (`permissionLoader("viewDashboard", "/")`);
+  sign in as accountant/employee and open /admin once.
+- AD2 · Unauthenticated /admin (LoginView) shows the main manifest; install after login.
+  iOS "Add to Home Screen" on /admin not checked on a device.
+- AD3 low · Detail sheet: empty Reference renders blank while empty Contact renders "—".
+- AD4 low · One unidentified 404 in the console during a 24-shot batch; not reproducible on a
+  fresh /admin load.
+- AD5 · Loading / error states of the admin tabs not captured (live data only had loaded +
+  empty); all-time Home sums are client-side, subject to PostgREST's row cap.
+- AD6 · No due checks exist in live data — Checks segment and "Checks Due" notification group
+  seen empty only.
 
 ## Sales / voucher follow-ups (from ROADMAP-SALES-VOUCHER S6, 2026-09-28)
 S1-S5 shipped (v1.36-v1.41). S6 screenshot-verified: Sales list light/dark/1280, status pills
