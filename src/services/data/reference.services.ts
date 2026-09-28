@@ -12,7 +12,7 @@ const branchTable = "branches";
 const farmSectionTable = "farm_sections";
 const expenseCategoryTable = "expense_categories";
 
-const branchColumns = "slug, name, sort, active, voucher_prefix";
+const branchColumns = "slug, name, sort, active, voucher_prefix, legal_name, address";
 const expenseCategoryColumns = "slug, name, code, sort, active, created_at";
 
 const orderedBranches = () =>
@@ -62,6 +62,8 @@ const referenceServices = {
         sort: values.sort,
         active: true,
         voucher_prefix: values.voucher_prefix,
+        legal_name: values.legal_name ?? null,
+        address: values.address ?? null,
       })
       .select(branchColumns)
       .single();
@@ -85,6 +87,8 @@ const referenceServices = {
         name: values.name.trim(),
         sort: values.sort,
         voucher_prefix: values.voucher_prefix,
+        legal_name: values.legal_name ?? null,
+        address: values.address ?? null,
       })
       .eq("slug", slug);
 

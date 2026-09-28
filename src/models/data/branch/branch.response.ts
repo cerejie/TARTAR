@@ -29,6 +29,8 @@ export interface IBranch {
   sort: number;
   active: boolean;
   voucher_prefix: string;
+  legal_name: string | null;
+  address: string | null;
 }
 
 export interface IFarmSection {

@@ -40,6 +40,17 @@ export const branchFormFields: IFieldConfig<IBranchInput>[] = [
     required: true,
     placeholder: "e.g. LGC",
   },
+  {
+    name: "legal_name",
+    label: "Legal name (voucher letterhead)",
+    type: "text",
+    placeholder: "e.g. LGC Hardware and General Merchandise",
+  },
+  {
+    name: "address",
+    label: "Address (voucher letterhead)",
+    type: "textarea",
+  },
 ];
 
 export const useBranchManageHook = () => {
@@ -117,12 +128,16 @@ export const useBranchManageHook = () => {
     name: "",
     sort: nextSort,
     voucher_prefix: "",
+    legal_name: "",
+    address: "",
   };
 
   const editDefaults: DefaultValues<IBranchInput> = {
     name: editing?.name ?? "",
     sort: editing?.sort ?? nextSort,
     voucher_prefix: editing?.voucher_prefix ?? "",
+    legal_name: editing?.legal_name ?? "",
+    address: editing?.address ?? "",
   };
 
   return {

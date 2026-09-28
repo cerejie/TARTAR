@@ -12,6 +12,7 @@ import {
 } from "../../utils/route.utils";
 import { usePermissions } from "../account/account.permission.hook";
 import { useNetwork } from "../common/network.hook";
+import { useAdminManifestHook } from "./admin.manifest.hook";
 
 import type { UIEvent } from "react";
 
@@ -22,6 +23,7 @@ const isActiveAdminPath = (pathname: string, path: string): boolean =>
 
 export const useAdminLayoutHook = () => {
   useNetwork();
+  useAdminManifestHook();
 
   const { pathname } = useLocation();
   const scrollRef = useRef<HTMLElement>(null);

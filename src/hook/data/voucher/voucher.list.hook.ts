@@ -63,7 +63,8 @@ export const useVoucherListHook = () => {
   );
 
   const { filters } = useLedgerFilters("vouchers");
-  const { branchOptions, branchName, defaultBranch } = useBranchListHook();
+  const { branches, branchOptions, branchName, defaultBranch } =
+    useBranchListHook();
   const { supplierOptions } = useSupplierListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
 
@@ -125,7 +126,11 @@ export const useVoucherListHook = () => {
   };
 
   const print = (voucher: IVoucher) => {
-    printVoucher(voucher, branchName(voucher.branch));
+    const branch = branches.find((item) => item.slug === voucher.branch);
+    printVoucher(voucher, {
+      name: branch?.legal_name || branchName(voucher.branch),
+      address: branch?.address ?? null,
+    });
     if (!voucher.printed) void printedMutation.mutate(voucher.id);
   };
 

@@ -1,5 +1,5 @@
 # ROADMAP — Sales deposit/verification + Voucher computation
-Updated: 2026-09-28 · Status: IN PROGRESS — S1–S4 done, S5 next
+Updated: 2026-09-28 · Status: IN PROGRESS — S1–S5 done, S6 next
 
 ## Goal
 1. A sale is only "actual sales" once an employee has marked it **Deposited** and an admin has
@@ -171,9 +171,16 @@ Observations the build must handle:
   RPC. Manual voucher inserts gross/ewt/return/net. Detail panels show Particulars + six lines;
   voucher Amount column hints the invoice. Legacy vouchers (gross null) show "—" except amount.
 
+- [x] S5 — Voucher print: `printVoucher(voucher, IPrintLetterhead)` in `utils/print.utils.ts`
+  (letterhead, CHECK/CASH VOUCHER + No./Date, Payee, Particulars with breakdown lines from
+  `voucherTotalsOf`, Amount to pay total, check block, Received by Name/Signature/Date, Prepared /
+  Approved). Letterhead = branch `legal_name` (falls back to branch name) + `address`, wired in
+  `voucher.list.hook.ts`. `IBranch` / `branchSchema` / `reference.services` / `branchFormFields`
+  gain legal name + address. Branch select now reads the S1 columns — migration must be applied.
+
 ## Next
-1. S5: Voucher print in the client layout — rewrite `printVoucher` from `voucherTotalsOf`, branch
-   legal name + address on the Branch Monitoring edit form.
+1. S6: harness capture (Sales states, deposit/verify modals, voucher form preview, print preview),
+   then merge follow-ups into ROADMAP.md and delete this file.
 
 ## State
-Branch: development-overhaul · Uncommitted: S4 src changes + this file (plus unrelated ADMIN-APP work on disk).
+Branch: development-overhaul · Uncommitted: S5 src changes + this file (plus unrelated ADMIN-APP work on disk).

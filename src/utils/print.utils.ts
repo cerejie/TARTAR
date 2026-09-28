@@ -3,7 +3,8 @@ import {
   paymentStatusLabels,
 } from "../enums/ledger.enum";
 import {
-  voucherStatusLabels,
+  voucherLineLabels,
+  voucherLineValues,
   voucherTypeLabels,
 } from "../enums/voucher.enum";
 import type {
@@ -17,6 +18,7 @@ import type { IVoucher } from "../models/data/voucher/voucher.response";
 import { voucherPurpose } from "../models/data/voucher/voucher.response";
 import { printFont, printPalette } from "../styles/print/print.styles";
 import { formatDate, formatDateTime, formatMoney } from "./format.utils";
+import { voucherTotalsOf } from "./voucher.utils";
 
 export interface IPrintStat {
   label: string;
@@ -73,63 +75,117 @@ const baseStyles = `
 
 const autoPrint = `<script>window.onload = function () { window.print(); };</script>`;
 
-export const printVoucher = (voucher: IVoucher, branchName: string): void => {
-  const checkRows: [string, string][] =
-    voucher.type === "check"
-      ? [
-          ["Bank issuing", voucher.check_bank ?? "—"],
-          ["Check No.", voucher.check_number ?? "—"],
-          [
-            "Check due date",
-            voucher.check_due_date ? formatDate(voucher.check_due_date) : "—",
-          ],
-        ]
-      : [];
+export interface IPrintLetterhead {
+  name: string;
+  address: string | null;
+}
 
-  const rows: [string, string][] = [
-    ["Voucher No.", voucher.voucher_no ?? "—"],
-    ["Type", voucherTypeLabels[voucher.type]],
-    ["Branch", branchName],
-    ["Payee", voucher.payee],
-    ["Amount", formatMoney(voucher.amount)],
-    ["Purpose", voucherPurpose(voucher)],
-    ...checkRows,
-    ["Status", voucherStatusLabels[voucher.status]],
-    ["Created", formatDateTime(voucher.created_at)],
-    ["Approved at", formatDateTime(voucher.approved_at)],
+const voucherBreakdownRows = (voucher: IVoucher): string => {
+  const totals = voucherTotalsOf(voucher);
+  if (!totals) return "";
+
+  return voucherLineValues
+    .filter((line) => line !== "amountToPay")
+    .map(
+      (line) =>
+        `<tr class="line"><td>${escapeHtml(
+          voucherLineLabels[line]
+        )}</td><td class="num">${formatMoney(totals[line])}</td></tr>`
+    )
+    .join("");
+};
+
+const voucherCheckBlock = (voucher: IVoucher): string => {
+  if (voucher.type !== "check") return "";
+
+  const cells: [string, string][] = [
+    ["Bank name", voucher.check_bank ?? ""],
+    ["Check No.", voucher.check_number ?? ""],
+    [
+      "Date of check",
+      voucher.check_due_date ? formatDate(voucher.check_due_date) : "",
+    ],
   ];
 
+  return `<table class="grid"><tr>${cells
+    .map(
+      ([label, value]) =>
+        `<td><div class="cap">${label}</div><div class="val">${escapeHtml(
+          value
+        )}</div></td>`
+    )
+    .join("")}</tr></table>`;
+};
+
+export const printVoucher = (
+  voucher: IVoucher,
+  letterhead: IPrintLetterhead
+): void => {
+  const title = `${voucherTypeLabels[voucher.type]} Voucher`.toUpperCase();
+  const particulars = voucher.particulars || voucherPurpose(voucher);
+  const receiptCaptions = ["Name", "Signature", "Date"] as const;
+
   openDocument(
-    720,
-    900,
+    760,
+    960,
     `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
   <title>Voucher ${escapeHtml(voucher.voucher_no ?? "")}</title>
   <style>${baseStyles}
-    .sub { margin-bottom: 24px; }
-    td { padding: 10px 8px; border-bottom: 1px solid ${printPalette.border}; vertical-align: top; }
-    td.label { color: ${printPalette.muted}; width: 180px; }
-    td.value { font-weight: 600; }
-    .amount { font-size: 20px; color: ${printPalette.heading}; }
-    .sign { margin-top: 64px; display: flex; justify-content: space-between; }
-    .sign div { border-top: 1px solid ${printPalette.text}; padding-top: 6px; width: 220px; text-align: center; color: ${printPalette.muted}; }
+    .head { text-align: center; margin-bottom: 20px; }
+    .head h1 { font-size: 18px; }
+    .title { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid ${printPalette.heading}; padding-bottom: 8px; }
+    .title h2 { margin: 0; color: ${printPalette.heading}; letter-spacing: .12em; font-size: 16px; }
+    .meta { text-align: right; font-size: 13px; }
+    .meta span { color: ${printPalette.muted}; margin-right: 8px; }
+    .payee { padding: 12px 0; border-bottom: 1px solid ${printPalette.border}; }
+    .cap { color: ${printPalette.muted}; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+    .val { font-weight: 600; min-height: 18px; }
+    table.items { margin-top: 16px; }
+    table.items th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: ${printPalette.muted}; border-bottom: 1px solid ${printPalette.border}; padding: 6px 8px; }
+    table.items td { padding: 8px; vertical-align: top; }
+    table.items tr.line td { padding: 4px 8px 4px 24px; color: ${printPalette.muted}; font-size: 13px; }
+    table.items tr.total td { border-top: 2px solid ${printPalette.heading}; font-weight: 700; font-size: 16px; color: ${printPalette.heading}; }
+    table.grid { margin-top: 24px; }
+    table.grid td { border: 1px solid ${printPalette.border}; padding: 8px; width: 33%; vertical-align: top; }
+    .receipt { margin-top: 24px; }
+    .sign { margin-top: 56px; display: flex; justify-content: space-between; }
+    .sign div { border-top: 1px solid ${printPalette.text}; padding-top: 6px; width: 200px; text-align: center; color: ${printPalette.muted}; }
   </style>
 </head>
 <body>
-  <h1>TARTAR</h1>
-  <div class="sub">${voucherTypeLabels[voucher.type]} Voucher</div>
-  <table>
-    ${rows
-      .map(
-        ([label, value]) =>
-          `<tr><td class="label">${escapeHtml(label)}</td><td class="value ${
-            label === "Amount" ? "amount" : ""
-          }">${escapeHtml(value)}</td></tr>`
-      )
-      .join("")}
+  <div class="head">
+    <h1>${escapeHtml(letterhead.name)}</h1>
+    ${letterhead.address ? `<div class="sub">${escapeHtml(letterhead.address)}</div>` : ""}
+  </div>
+  <div class="title">
+    <h2>${title}</h2>
+    <div class="meta">
+      <div><span>Voucher No.</span>${escapeHtml(voucher.voucher_no ?? "—")}</div>
+      <div><span>Date</span>${formatDate(voucher.created_at)}</div>
+    </div>
+  </div>
+  <div class="payee">
+    <div class="cap">Payee</div>
+    <div class="val">${escapeHtml(voucher.payee)}</div>
+  </div>
+  <table class="items">
+    <tr><th>Particulars</th><th class="num">Amount</th></tr>
+    <tr><td>${escapeHtml(particulars)}</td><td></td></tr>
+    ${voucherBreakdownRows(voucher)}
+    <tr class="total"><td>${voucherLineLabels.amountToPay}</td><td class="num">${formatMoney(
+      voucher.amount
+    )}</td></tr>
   </table>
+  ${voucherCheckBlock(voucher)}
+  <div class="receipt">
+    <div class="cap">Received by</div>
+    <table class="grid"><tr>${receiptCaptions
+      .map((caption) => `<td><div class="cap">${caption}</div><div class="val"></div></td>`)
+      .join("")}</tr></table>
+  </div>
   <div class="sign">
     <div>Prepared by</div>
     <div>Approved by</div>

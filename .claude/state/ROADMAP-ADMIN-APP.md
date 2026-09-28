@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2 done, A2 next
+Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2 done, A3 next
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -173,11 +173,19 @@ stop. No migrations in this roadmap — read-only over existing tables.
   results, `filterSheetFooter`). 19 feature tables tagged. Bento/StatCard already 1-col phone /
   2-col tablet — no change. Phone loses header click-sort (SortSelect remains).
   Visual check at 390/768/1280 pending (user).
+- [x] A2 — PWA identity (2026-09-28): `public/admin.webmanifest` (`id`/`scope`/`start_url`
+  `/admin` — no trailing slash so start_url sits inside scope), `public/admin-icon-{192,512,
+  maskable-512}.png`, `admin-icon.svg`, `apple-touch-icon-admin.png` (generated brand-blue "A").
+  `hook/layout/admin.manifest.hook.ts` (swaps manifest, apple-touch-icon, theme-color from
+  `--brand`, apple-mobile-web-app-title, `document.title`; restores on unmount), called from
+  `useAdminLayoutHook`. `vite.config.ts` unchanged — generateSW already has a `NavigationRoute`
+  fallback and precaches the png/svg icons. Known gap: unauthenticated `/admin` (LoginView) still
+  shows the main manifest; install after login. iOS install check pending (user).
 
 ## Next
-1. A2: own PWA identity.
+1. A3: mobile primitives (`SegmentedTabs`, `MetricTile`, `ListCard`/`ListSection`, `AppSheet`,
+   segment store/hook); move the app-bar branch picker onto `AppSheet` on phone.
 
 ## State
-Branch: development-overhaul · Uncommitted: this file (+ ROADMAP-SALES-VOUCHER.md, pre-existing)
-· A1, M1 committed (v1.39); M2 uncommitted (plus unrelated pre-existing sale/* WIP). Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
+Branch: development-overhaul · A1, M1 (v1.39), M2 (v1.40) committed; A2 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
 `notificationGroups`, `derivePermissions().isManager`, `permissionLoader`, `lazyView`.
