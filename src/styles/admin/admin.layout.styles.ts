@@ -50,3 +50,5 @@ export const adminTabIndicator = cva(
     defaultVariants: { active: false },
   }
 );
+
+export const adminTabStack = "flex flex-col gap-4 md:gap-6";

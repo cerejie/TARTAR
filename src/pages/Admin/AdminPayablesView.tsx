@@ -1,8 +1,7 @@
-import { HandCoins } from "lucide-react";
-import EmptyState from "../../components/common/status/EmptyState";
+import AdminPayablesOverview from "../../components/admin/payables/AdminPayablesOverview";
 
 const AdminPayablesView = () => {
-  return <EmptyState icon={<HandCoins />} description="Due checks and payables arrive in the next update." />;
+  return <AdminPayablesOverview />;
 };
 
 export default AdminPayablesView;

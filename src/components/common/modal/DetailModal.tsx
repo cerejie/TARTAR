@@ -10,14 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { IDetailItem } from "../../../models/common/detail.model";
 import type { ModalSize } from "../../../models/common/view.model";
 import {
-  detailGrid,
-  detailItem,
-  detailLabel,
   detailSkeletonBar,
   detailSkeletonList,
-  detailValue,
 } from "../../../styles/modal/modal.styles";
 import AppModal from "./AppModal";
+import DetailGrid from "./DetailGrid";
 
 type IProps<TRecord> = {
   open: boolean;
@@ -66,19 +63,7 @@ const DetailModal = <TRecord,>({
       );
     }
 
-    return (
-      <div className={detailGrid}>
-        {items.map((item) => (
-          <div
-            key={item.key}
-            className={detailItem({ wide: (item.span ?? 1) > 1 })}
-          >
-            <div className={detailLabel}>{item.label}</div>
-            <div className={detailValue}>{item.render(record)}</div>
-          </div>
-        ))}
-      </div>
-    );
+    return <DetailGrid record={record} items={items} />;
   };
 
   return (

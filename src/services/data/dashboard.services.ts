@@ -22,6 +22,7 @@ import {
   isVerifiedSale,
 } from "../../models/data/sale/sale.response";
 import type { ITransaction } from "../../models/data/transaction/transaction.response";
+import type { IVoucher } from "../../models/data/voucher/voucher.response";
 import { scopeToBranch } from "../../utils/filter.utils";
 import { todayIso } from "../../utils/format.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
@@ -383,6 +384,51 @@ const dashboardServices = {
       overduePayables: payableRows.filter((row) => isOverdue(row.due_date)),
       nearDuePayables: payableRows.filter((row) => !isOverdue(row.due_date)),
     };
+  },
+
+  getDueChecks: async (
+    nearDays = 7,
+    branch?: string | null
+  ): Promise<IVoucher[]> => {
+    const today = todayIso();
+    const horizon = dayjs().add(nearDays, "day").format("YYYY-MM-DD");
+
+    const { data, error } = await scopeToBranch(
+      supabase
+        .from("vouchers")
+        .select("*")
+        .eq("type", "check")
+        .eq("status", "approved")
+        .lte("check_due_date", horizon)
+        .or(`check_due_date.gte.${today},payable_id.not.is.null`)
+        .order("check_due_date", { ascending: true }),
+      branch
+    );
+    if (error) throw toError(error);
+
+    const checks = (data ?? []) as IVoucher[];
+    const isUpcoming = (check: IVoucher) => (check.check_due_date ?? "") >= today;
+    const pastPayableIds = checks.flatMap((check) =>
+      !isUpcoming(check) && check.payable_id ? [check.payable_id] : []
+    );
+    if (pastPayableIds.length === 0) return checks.filter(isUpcoming);
+
+    const unpaid = await supabase
+      .from("payables")
+      .select("id")
+      .in("id", pastPayableIds)
+      .neq("status", "paid");
+    if (unpaid.error) throw toError(unpaid.error);
+
+    const unpaidIds = new Set(
+      ((unpaid.data ?? []) as { id: string }[]).map((row) => row.id)
+    );
+
+    return checks.filter(
+      (check) =>
+        isUpcoming(check) ||
+        (check.payable_id !== null && unpaidIds.has(check.payable_id))
+    );
   },
 };
 

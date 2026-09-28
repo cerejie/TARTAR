@@ -1,5 +1,5 @@
 import { useAdminHomeHook } from "../../../hook/data/admin/admin.home.hook";
-import { adminHome } from "../../../styles/admin/admin.home.styles";
+import { adminTabStack } from "../../../styles/admin/admin.layout.styles";
 import SegmentedTabs from "../../common/app/SegmentedTabs";
 import AttentionList from "./AttentionList";
 import OverviewTiles from "./OverviewTiles";
@@ -9,7 +9,7 @@ const AdminHomeOverview = () => {
   const home = useAdminHomeHook();
 
   return (
-    <div className={adminHome}>
+    <div className={adminTabStack}>
       <SegmentedTabs
         label="Overview period"
         value={home.period}

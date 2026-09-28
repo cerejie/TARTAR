@@ -24,6 +24,7 @@ export const dashboardSummaryKey = "dashboard-summary";
 export const dashboardSalesKey = "dashboard-sales";
 export const dashboardAlertsKey = "dashboard-alerts";
 export const dashboardOverviewKey = "dashboard-overview";
+export const dashboardChecksKey = "dashboard-checks";
 export const reportTransactionKey = "report-transactions";
 export const reportReceivableKey = "report-receivables";
 export const reportPayableKey = "report-payables";

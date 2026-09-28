@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2, A3, A4 done, A5 next
+Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1, M2, A2, A3, A4, A5 done, A6 next
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -205,11 +205,21 @@ stop. No migrations in this roadmap — read-only over existing tables.
   `adminPayablesPath` / `adminReceivablesPath` in `utils/route.utils.ts`. Attention strip =
   overdue + due-in-7-days AR/AP (checks due join in A5). Known limit: all-time sums are
   client-side, subject to PostgREST's row cap like `getBranchMonitor`. Visual check pending.
+- [x] A5 — Payables tab (2026-09-28). D10 (user): due check = `type check` + `status approved` +
+  `check_due_date ≤ today+7`; a past-dated check stays while its linked payable (`payable_id`)
+  is unpaid, else drops (no cleared flag exists). Horizon 7 days (`dueHorizonDays`).
+  `dashboardServices.getDueChecks`, `dashboardChecksKey`, `adminPayableSheetModalKey`,
+  `vouchersPath`/`payablesPath` in `utils/route.utils.ts`; `models/data/admin/admin.response.ts`
+  (segments, captions, `IAdminPayableEntry`/`Row`, `dueStatusOf` — reuse in A6);
+  `hook/data/admin/admin.payables.hook.ts`; `components/admin/payables/{AdminPayablesOverview,
+  PayableEntryList,PayableEntrySheet}.tsx`; `common/modal/DetailGrid.tsx` extracted from
+  `DetailModal` (used by the sheet); `adminTabStack` moved to `admin.layout.styles.ts`.
+  Home attention strip + "Past-dated checks, unpaid" / "Checks due this week". "Open in TARTAR"
+  goes to `/vouchers` or `/payables` (no per-record deep link). Visual check pending.
 
 ## Next
-1. A5: Payables tab — read voucher model/status values first; ASK before filtering on
-   cleared/cancelled semantics. Add due checks to the Home attention strip too.
+1. A6: Receivables tab — reuse `dueStatusOf`, `DetailGrid`, `AppSheet`, the A5 hook shape.
 
 ## State
-Branch: development-overhaul · A1, M1 (v1.39), M2 (v1.40), A2 (v1.41), A3 (v1.42) committed; A4 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
+Branch: development-overhaul · A1, M1 (v1.39), M2 (v1.40), A2 (v1.41), A3 (v1.42), A4 (v1.43) committed; A5 uncommitted. Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
 `notificationGroups`, `derivePermissions().isManager`, `permissionLoader`, `lazyView`.

@@ -1,11 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import {
   dashboardAlertsKey,
+  dashboardChecksKey,
   dashboardOverviewKey,
   dashboardSalesKey,
   scopedKey,
 } from "../../../keys/query.keys";
 import { adminHomePeriodSegmentKey } from "../../../keys/segment.keys";
+import {
+  checkDueDateOf,
+  dueHorizonDays,
+} from "../../../models/data/admin/admin.response";
 import {
   overviewPeriodCaptions,
   overviewPeriodLabels,
@@ -14,6 +19,7 @@ import {
 } from "../../../models/data/dashboard/dashboard.response";
 import { ledgerBalance } from "../../../models/data/ledger/ledger.response";
 import dashboardServices from "../../../services/data/dashboard.services";
+import { todayIso } from "../../../utils/format.utils";
 import { adminPayablesPath, adminReceivablesPath } from "../../../utils/route.utils";
 import { useQuery } from "../../common/query.hook";
 import { useSegment } from "../../common/segment.hook";
@@ -28,8 +34,7 @@ import type {
   NotificationTone,
   OverviewPeriod,
 } from "../../../models/data/dashboard/dashboard.response";
-
-const alertHorizonDays = 7;
+import type { IVoucher } from "../../../models/data/voucher/voucher.response";
 
 const periodOptions: readonly ISegmentOption<OverviewPeriod>[] =
   overviewPeriodValues.map((value) => ({
@@ -40,46 +45,71 @@ const periodOptions: readonly ISegmentOption<OverviewPeriod>[] =
 const toAttentionItem = (
   key: string,
   name: string,
-  rows: readonly { amount: number; paid_amount: number }[],
+  amounts: readonly number[],
   tone: NotificationTone,
   path: string
 ): IAttentionItem => ({
   key,
   name,
-  count: rows.length,
-  amount: rows.reduce((total, row) => total + ledgerBalance(row), 0),
+  count: amounts.length,
+  amount: amounts.reduce((total, amount) => total + amount, 0),
   tone,
   path,
 });
 
-const attentionItemsOf = (alerts: IDueAlerts | undefined): IAttentionItem[] => {
-  if (!alerts) return [];
+const balancesOf = (rows: readonly { amount: number; paid_amount: number }[]) =>
+  rows.map(ledgerBalance);
+
+const checkAmountsOf = (checks: readonly IVoucher[], pastDated: boolean) =>
+  checks
+    .filter((check) => (checkDueDateOf(check) < todayIso()) === pastDated)
+    .map((check) => Number(check.amount));
+
+const attentionItemsOf = (
+  alerts: IDueAlerts | undefined,
+  checks: readonly IVoucher[] | undefined
+): IAttentionItem[] => {
+  if (!alerts || !checks) return [];
   return [
     toAttentionItem(
       "overdue-receivables",
       "Overdue receivables",
-      alerts.overdueReceivables,
+      balancesOf(alerts.overdueReceivables),
       "negative",
       adminReceivablesPath
     ),
     toAttentionItem(
       "overdue-payables",
       "Overdue payables",
-      alerts.overduePayables,
+      balancesOf(alerts.overduePayables),
+      "negative",
+      adminPayablesPath
+    ),
+    toAttentionItem(
+      "past-dated-checks",
+      "Past-dated checks, unpaid",
+      checkAmountsOf(checks, true),
       "negative",
       adminPayablesPath
     ),
     toAttentionItem(
       "near-due-receivables",
       "Receivables due this week",
-      alerts.nearDueReceivables,
+      balancesOf(alerts.nearDueReceivables),
       "warning",
       adminReceivablesPath
     ),
     toAttentionItem(
       "near-due-payables",
       "Payables due this week",
-      alerts.nearDuePayables,
+      balancesOf(alerts.nearDuePayables),
+      "warning",
+      adminPayablesPath
+    ),
+    toAttentionItem(
+      "due-checks",
+      "Checks due this week",
+      checkAmountsOf(checks, false),
       "warning",
       adminPayablesPath
     ),
@@ -107,7 +137,12 @@ export const useAdminHomeHook = () => {
 
   const alertsQuery = useQuery<IDueAlerts>(
     scopedKey(dashboardAlertsKey, branch),
-    () => dashboardServices.getDueAlerts(alertHorizonDays, branch)
+    () => dashboardServices.getDueAlerts(dueHorizonDays, branch)
+  );
+
+  const checksQuery = useQuery<IVoucher[]>(
+    scopedKey(dashboardChecksKey, branch),
+    () => dashboardServices.getDueChecks(dueHorizonDays, branch)
   );
 
   const overview = overviewQuery.data;
@@ -134,11 +169,14 @@ export const useAdminHomeHook = () => {
     salesLoading: salesQuery.isInitialLoading,
     salesError: salesQuery.error,
     retrySales: salesQuery.refetch,
-    attentionItems: attentionItemsOf(alertsQuery.data),
-    attentionLoading: alertsQuery.isInitialLoading,
-    attentionRefreshing: alertsQuery.isRefreshing,
-    attentionError: alertsQuery.error,
-    retryAttention: alertsQuery.refetch,
+    attentionItems: attentionItemsOf(alertsQuery.data, checksQuery.data),
+    attentionLoading: alertsQuery.isInitialLoading || checksQuery.isInitialLoading,
+    attentionRefreshing: alertsQuery.isRefreshing || checksQuery.isRefreshing,
+    attentionError: alertsQuery.error ?? checksQuery.error,
+    retryAttention: () => {
+      alertsQuery.refetch();
+      checksQuery.refetch();
+    },
     openAttentionItem: (item: IAttentionItem) => navigate(item.path),
   };
 };

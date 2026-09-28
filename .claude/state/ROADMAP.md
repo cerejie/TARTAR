@@ -53,6 +53,12 @@ conversation; the user reviews between phases.
 - It runs against the LIVE Supabase: open modals and cancel them; never press Save / Approve /
   Reject / Delete / Archive / Record payment.
 - Dark = toggles `.dark` on <html>; phone = 390x844; desktop = 1440x900 (+ 1280x800 spot checks).
+- Prefer `safe-shot.mjs` (same spec format): every Supabase write (non-GET, non-read RPC) is
+  answered with a fake 200, so a click that writes (e.g. Print voucher -> markPrinted) never
+  reaches live data; `popup` action screenshots a window.open page (print preview); spec
+  `rewrite: {table, set}` patches GET rows in the browser only, to reach states the live data
+  lacks (deposited sales, vouchers with a breakdown). RAC combobox selects (Withholding tax)
+  open with click + ArrowDown, then `getByRole("option")`.
 
 ## Scope (what to capture)
 - Routes: / (Dashboard), /transactions, /purchases, /expenses, /vouchers, /receivables,
@@ -258,9 +264,33 @@ Desktop audit COMPLETE (V8, 2026-09-28). Awaiting user go-ahead to delete this f
 so carry them over first.
 
 1. Mobile (M*) roadmap: M1 offcanvas sidebar sheet at phone width, M2 form sheet polish.
-   Parallel work: ROADMAP-SALES-VOUCHER.md and ROADMAP-ADMIN-APP.md (another session).
+   Parallel work: ROADMAP-ADMIN-APP.md (another session). Sales/voucher roadmap closed — its
+   follow-ups are SV1-SV5 below.
+
+## Sales / voucher follow-ups (from ROADMAP-SALES-VOUCHER S6, 2026-09-28)
+S1-S5 shipped (v1.36-v1.41). S6 screenshot-verified: Sales list light/dark/1280, status pills
++ empty state, Record sale form, row menu, expanded row, Mark deposited modal, Verify confirm,
+Reject modal; purchase + manual voucher breakdown preview (214,500 / 1% -> 191,517.86 base,
+1,915.18 EWT, 212,584.82 to pay = client LGC voucher); check-voucher print with letterhead,
+breakdown, bank block; return case (24,399.82 - 388.17 = 24,011.65 = client AFC Wood);
+Dashboard Monthly Sales "Verified, month to date"; Branch edit legal name + address.
+Open items, none blocking:
+- SV1 low · Reject sale modal submit is primary blue; a rejecting action elsewhere is danger.
+  Needs a danger submit tone on EntityFormModal.
+- SV2 low · Sale expanded row label "Marked deposited by" wraps in the 8rem label grid ->
+  "Deposited by".
+- SV3 low · Legacy vouchers (gross null) print Particulars with an empty Amount cell and only
+  the total line — acceptable; revisit if the client reprints old vouchers.
+- SV4 · Role-specific dashboard alerts (admins: pending verification, employees: undeposited)
+  not built; one pending chip on Monthly Sales instead. Build if the client wants them.
+- SV5 data · No branch has legal_name / address yet — print falls back to the branch name
+  until they are entered in Branch Monitoring.
+- Live data has only two sales, both Verified; the deposit -> verify flow is proven only in
+  the UI with rewritten rows, never end to end. Test it once with a throwaway sale.
 
 ## Open
+- Migration 20260928000010_sales_verification_voucher_breakdown.sql is applied (sale_status
+  and branch legal_name/address are read live).
 - Migration 20260926000009_accountant_voucher_read.sql (and possibly 20260718000004..
   20260722000008) not yet applied to Supabase — accountant voucher views stay empty until then.
 
