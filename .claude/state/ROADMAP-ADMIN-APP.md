@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: IN PROGRESS — A1 done, M1 next (inserted before A2)
+Updated: 2026-09-28 · Status: IN PROGRESS — A1, M1 done, M2 next (before A2)
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -156,11 +156,18 @@ stop. No migrations in this roadmap — read-only over existing tables.
   login returns to `/admin`; `ProtectedUserMenu` app-switch item (via `useProtectedUserHook`).
   Deferred: tab-bar badge slot → A7; bottom-sheet branch picker → A3 (`AppSheet`); A1 reuses
   `ProtectedBranchScope` popover.
+- [x] M1 — phone nav (2026-09-28): `hook/layout/protected.hook.ts` (`useProtectedSiderHook` →
+  `collapsible` none/offcanvas via `useSidebar().isMobile`; menu `closeMobileMenu` on press;
+  header `showMenuButton`/`toggleMenu`), `ProtectedSider`, `ProtectedMenu`, `ProtectedHeader`
+  (lucide `Menu` icon button below `md`), `styles/layout/header.styles.ts` (`headerMenuButton`),
+  `ContentView` + `styles/view/view.styles.ts` (`viewTabs` horizontal scroller, head actions
+  full width on phone only when tabs present, divider hidden on phone, pills `shrink-0`).
+  Visual check at 390/768/1280 still pending (user).
 
 ## Next
-1. M1: normal app phone layout + navigation (D9). Then M2, then A2.
+1. M2: normal app phone tables, filters, cards (D9). Then A2.
 
 ## State
 Branch: development-overhaul · Uncommitted: this file (+ ROADMAP-SALES-VOUCHER.md, pre-existing)
-· A1 src changes uncommitted (plus unrelated pre-existing sale/* WIP). Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
+· A1 committed; M1 src changes uncommitted (plus unrelated pre-existing sale/* WIP). Reusable today: `dashboardServices.getSummary` / `getDueAlerts`,
 `notificationGroups`, `derivePermissions().isManager`, `permissionLoader`, `lazyView`.

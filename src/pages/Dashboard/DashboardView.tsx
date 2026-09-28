@@ -11,13 +11,14 @@ import {
 import SectionCard from "../../components/common/card/SectionCard";
 import StatCard from "../../components/common/card/StatCard";
 import StatDelta from "../../components/common/status/StatDelta";
+import StatusTag from "../../components/common/status/StatusTag";
 import BentoCell from "../../components/common/view/BentoCell";
 import ContentView from "../../components/common/view/ContentView";
 import CashFlowDonut from "../../components/dashboard/CashFlowDonut";
 import DueAlertCards from "../../components/dashboard/DueAlertCards";
 import SalesOverviewCard from "../../components/dashboard/SalesOverviewCard";
 import { useDashboardHook } from "../../hook/data/dashboard/dashboard.hook";
-import { formatDate, todayIso } from "../../utils/format.utils";
+import { formatDate, formatMoney, todayIso } from "../../utils/format.utils";
 
 const DashboardView = () => {
   const {
@@ -35,6 +36,7 @@ const DashboardView = () => {
     alertsLoading,
     alertsError,
     retryAlerts,
+    monthlyPendingSales,
     netProfit,
     lastMonthNetProfit,
     cashIn,
@@ -151,7 +153,15 @@ const DashboardView = () => {
           onRetry={retrySummary}
           variant="positive"
           icon={<ChartLine />}
-          caption="Month to date"
+          chip={
+            monthlyPendingSales ? (
+              <StatusTag
+                color="warning"
+                label={`${formatMoney(monthlyPendingSales)} pending`}
+              />
+            ) : null
+          }
+          caption="Verified, month to date"
         />
       </BentoCell>
       <BentoCell span="quarter">

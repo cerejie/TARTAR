@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { useIsMobile } from "@/hook/use-mobile";
+import { useSidebar } from "@/components/ui/sidebar";
 import { effectiveRoleLabels } from "../../enums/role.enum";
 import { dashboardAlertsKey, scopedKey } from "../../keys/query.keys";
 import { dueAlertCount } from "../../models/data/dashboard/dashboard.response";
@@ -31,9 +31,20 @@ export const useProtectedLayoutHook = () => {
   useNetwork();
 };
 
+export const useProtectedSiderHook = () => {
+  const { isMobile } = useSidebar();
+
+  return { collapsible: isMobile ? "offcanvas" : "none" } as const;
+};
+
 export const useProtectedMenuHook = (pinned: boolean) => {
   const location = useLocation();
   const permissions = usePermissions();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const closeMobileMenu = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   const groups = useMemo(() => {
     const allowed = navigableRoutes(
@@ -48,14 +59,18 @@ export const useProtectedMenuHook = (pinned: boolean) => {
       }));
   }, [permissions.role, pinned]);
 
-  return { groups, activePath: location.pathname };
+  return { groups, activePath: location.pathname, closeMobileMenu };
 };
 
 export const useProtectedHeaderHook = () => {
-  const isMobile = useIsMobile();
+  const { isMobile, toggleSidebar } = useSidebar();
   const permissions = usePermissions();
 
-  return { showNotifications: isMobile && permissions.viewDashboard };
+  return {
+    showMenuButton: isMobile,
+    showNotifications: isMobile && permissions.viewDashboard,
+    toggleMenu: toggleSidebar,
+  };
 };
 
 export const useProtectedNotificationsHook = () => {

@@ -54,6 +54,7 @@ export const useDashboardHook = () => {
     alertsLoading: alertsQuery.isInitialLoading,
     alertsError: alertsQuery.error,
     retryAlerts: alertsQuery.refetch,
+    monthlyPendingSales: summary?.monthlyPendingSales ?? 0,
     netProfit: summary
       ? summary.monthlySales - summary.monthlyExpenses
       : undefined,

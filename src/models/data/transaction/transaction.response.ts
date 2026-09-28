@@ -1,3 +1,4 @@
+import type { SaleStatus } from "../../../enums/sale.enum";
 import type {
   CashAccount,
   IncomeSource,
@@ -20,6 +21,7 @@ export interface ITransaction {
   income_source: IncomeSource | null;
   expense_type: string | null;
   due_date: string | null;
+  sale_status?: SaleStatus | null;
   created_by: string | null;
   created_at: string;
   customer?: { name: string } | null;

@@ -1,5 +1,5 @@
 # ROADMAP — Sales deposit/verification + Voucher computation
-Updated: 2026-09-28 · Status: IN PROGRESS — S1 + S2 done, S3 next
+Updated: 2026-09-28 · Status: IN PROGRESS — S1–S3 done, S4 next
 
 ## Goal
 1. A sale is only "actual sales" once an employee has marked it **Deposited** and an admin has
@@ -152,8 +152,16 @@ Observations the build must handle:
   rejected, encoders), Verify + Reject (managers, deposited), Edit history, Delete (managers,
   not verified). History reuses `DisbursementHistoryModal` (row widened to ITransaction).
 
+- [x] S3 — Actual sales: `isVerifiedSale` / `isPendingSale` in `models/data/sale/sale.response.ts`
+  (+ `pendingSaleStatuses` in `enums/sale.enum.ts`); `ITransaction.sale_status` + column in
+  `transaction.services.ts`. `dashboard.services.ts` today/yesterday/monthly/last-month sales,
+  chart and branch monitor = verified only; `monthlyPendingSales` shown as a chip on the Monthly
+  Sales tile (`DashboardView`). `PeriodReport` + `report.utils` print: Sales = verified, pending
+  line added. Transactions summary Sales = verified. Cash In unchanged (D3). Pending =
+  undeposited + deposited; rejected is neither. Role-specific alerts not built (one pending chip).
+
 ## Next
-1. S3: "Actual sales" — dashboard + reports count `sale_status = verified` only; pending line.
+1. S4: Voucher computation — `utils/voucher.utils.ts` `computeVoucherTotals`, form fields, table.
 
 ## State
-Branch: development-overhaul · Uncommitted: S2 src changes + this file.
+Branch: development-overhaul · Uncommitted: S3 src changes + this file.

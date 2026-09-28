@@ -32,7 +32,7 @@ const defaultSort: ISortState = { column: "txn_date", direction: "descending" };
 const columns = `
   id, type, branch, farm_section, txn_date, amount, reference_number, description,
   customer_id, supplier_id, cash_account, income_source, expense_type, due_date,
-  created_by, created_at,
+  sale_status, created_by, created_at,
   customer:customers(name), supplier:suppliers(name)
 `;
 

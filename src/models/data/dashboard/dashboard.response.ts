@@ -13,6 +13,7 @@ export interface IDashboardSummary {
   monthlyExpenses: number;
   lastMonthSales: number;
   lastMonthExpenses: number;
+  monthlyPendingSales: number;
   monthlyCashIn: number;
   monthlyCashOut: number;
 }

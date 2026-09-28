@@ -21,6 +21,7 @@ import {
 import type { IFieldSection } from "../../../models/common/field.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
+import { isVerifiedSale } from "../../../models/data/sale/sale.response";
 import type { ITransactionInput } from "../../../models/data/transaction/transaction.request";
 import type {
   ITransaction,
@@ -70,7 +71,7 @@ const summarize = (
     cashIn,
     cashOut,
     net: cashIn - cashOut,
-    sales: sumAmount(transactions, ["sale"]),
+    sales: sumAmount(transactions.filter(isVerifiedSale), ["sale"]),
   };
 };
 

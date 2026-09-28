@@ -15,12 +15,17 @@ import type {
   IPayable,
   IReceivable,
 } from "../../models/data/ledger/ledger.response";
+import {
+  isPendingSale,
+  isVerifiedSale,
+} from "../../models/data/sale/sale.response";
+import type { ITransaction } from "../../models/data/transaction/transaction.response";
 import { scopeToBranch } from "../../utils/filter.utils";
 import { todayIso } from "../../utils/format.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 
 type AmountRow = { amount: number | string };
-type TypedAmountRow = AmountRow & { type: string };
+type TypedAmountRow = AmountRow & Pick<ITransaction, "type" | "sale_status">;
 type BalanceRow = { branch: string; balance?: number | string };
 type OutstandingRow = { amount: number | string; paid_amount: number | string };
 
@@ -66,7 +71,7 @@ const dashboardServices = {
         scopeToBranch(
           supabase
             .from("transactions")
-            .select("type, txn_date, amount")
+            .select("type, sale_status, txn_date, amount")
             .in("type", ["sale", "expense"])
             .gte("txn_date", yesterday)
             .lte("txn_date", today),
@@ -75,7 +80,7 @@ const dashboardServices = {
         scopeToBranch(
           supabase
             .from("transactions")
-            .select("type, amount")
+            .select("type, sale_status, amount")
             .gte("txn_date", monthStart())
             .lte("txn_date", today),
           branch
@@ -83,7 +88,7 @@ const dashboardServices = {
         scopeToBranch(
           supabase
             .from("transactions")
-            .select("type, amount")
+            .select("type, sale_status, amount")
             .in("type", ["sale", "expense"])
             .gte("txn_date", lastMonthStart)
             .lte("txn_date", lastMonthCutoff),
@@ -127,32 +132,36 @@ const dashboardServices = {
     const recentRows = (recent.data ?? []) as (TypedAmountRow & {
       txn_date: string;
     })[];
-    const onDay = (date: string, type: string) =>
-      sum(recentRows.filter((row) => row.txn_date === date && row.type === type));
+    const isExpense = (row: TypedAmountRow) => row.type === "expense";
+    const onDay = (date: string, predicate: (row: TypedAmountRow) => boolean) =>
+      sum(recentRows.filter((row) => row.txn_date === date && predicate(row)));
 
     const thisMonthRows = (thisMonth.data ?? []) as TypedAmountRow[];
     const lastMonthRows = (lastMonth.data ?? []) as TypedAmountRow[];
 
-    const ofType = (rows: TypedAmountRow[], type: string) =>
-      sum(rows.filter((row) => row.type === type));
+    const matching = (
+      rows: TypedAmountRow[],
+      predicate: (row: TypedAmountRow) => boolean
+    ) => sum(rows.filter(predicate));
     const ofDirection = (rows: TypedAmountRow[], types: string[]) =>
       sum(rows.filter((row) => types.includes(row.type)));
 
     return {
       currentCash: balanceOf("cash_drawer"),
       bankBalance: balanceOf("bank_account"),
-      todaysSales: onDay(today, "sale"),
-      todaysExpenses: onDay(today, "expense"),
-      yesterdaysSales: onDay(yesterday, "sale"),
-      yesterdaysExpenses: onDay(yesterday, "expense"),
+      todaysSales: onDay(today, isVerifiedSale),
+      todaysExpenses: onDay(today, isExpense),
+      yesterdaysSales: onDay(yesterday, isVerifiedSale),
+      yesterdaysExpenses: onDay(yesterday, isExpense),
       accountsReceivable: outstanding(
         (receivables.data ?? []) as OutstandingRow[]
       ),
       accountsPayable: outstanding((payables.data ?? []) as OutstandingRow[]),
-      monthlySales: ofType(thisMonthRows, "sale"),
-      monthlyExpenses: ofType(thisMonthRows, "expense"),
-      lastMonthSales: ofType(lastMonthRows, "sale"),
-      lastMonthExpenses: ofType(lastMonthRows, "expense"),
+      monthlySales: matching(thisMonthRows, isVerifiedSale),
+      monthlyExpenses: matching(thisMonthRows, isExpense),
+      lastMonthSales: matching(lastMonthRows, isVerifiedSale),
+      lastMonthExpenses: matching(lastMonthRows, isExpense),
+      monthlyPendingSales: matching(thisMonthRows, isPendingSale),
       monthlyCashIn: ofDirection(thisMonthRows, cashInflowTypes),
       monthlyCashOut: ofDirection(thisMonthRows, cashOutflowTypes),
     };
@@ -172,6 +181,7 @@ const dashboardServices = {
         .from("transactions")
         .select("txn_date, amount")
         .eq("type", "sale")
+        .eq("sale_status", "verified")
         .gte("txn_date", from.format("YYYY-MM-DD")),
       branch
     );
@@ -197,7 +207,11 @@ const dashboardServices = {
   ): Promise<IBranchMonitorRow[]> => {
     const [cash, sales, expenses, receivables, payables] = await Promise.all([
       supabase.from("cash_accounts").select("branch, balance"),
-      supabase.from("transactions").select("branch, amount").eq("type", "sale"),
+      supabase
+        .from("transactions")
+        .select("branch, amount")
+        .eq("type", "sale")
+        .eq("sale_status", "verified"),
       supabase
         .from("transactions")
         .select("branch, amount")

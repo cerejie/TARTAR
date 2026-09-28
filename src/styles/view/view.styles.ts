@@ -7,16 +7,20 @@ export const viewHead = "flex flex-wrap items-center gap-3";
 export const viewTitle =
   "min-w-0 flex-1 truncate font-heading text-2xl font-semibold tracking-tight text-foreground md:text-[1.625rem]";
 
-export const viewHeadActions = "flex flex-wrap items-center gap-2";
+export const viewHeadActions =
+  "flex min-w-0 flex-wrap items-center gap-2 max-md:has-data-[slot=view-tabs]:w-full";
 
-export const viewHeadDivider = "mx-1 h-6 self-center!";
+export const viewTabs =
+  "-mx-1 min-w-0 basis-full overflow-x-auto overscroll-x-contain px-1 py-0.5 [scrollbar-width:none] md:basis-auto";
+
+export const viewHeadDivider = "mx-1 hidden h-6 self-center! md:block";
 
 export const viewToolbar = "flex min-w-0 flex-wrap items-center gap-2";
 
 export const viewMeta = "text-sm text-muted-foreground";
 
 export const viewSwitchItem =
-  "rounded-full px-4 data-selected:border-brand data-selected:bg-brand data-selected:text-on-brand data-selected:hover:bg-brand-deep data-selected:hover:text-on-brand data-selected:focus-visible:text-on-brand dark:data-selected:text-on-brand";
+  "shrink-0 rounded-full px-4 data-selected:border-brand data-selected:bg-brand data-selected:text-on-brand data-selected:hover:bg-brand-deep data-selected:hover:text-on-brand data-selected:focus-visible:text-on-brand dark:data-selected:text-on-brand";
 
 export const viewBody = "flex min-w-0 flex-col gap-4";
 

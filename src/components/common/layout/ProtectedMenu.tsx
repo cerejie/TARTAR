@@ -17,7 +17,7 @@ type IProps = {
 };
 
 const ProtectedMenu = ({ pinned = false }: IProps) => {
-  const { groups, activePath } = useProtectedMenuHook(pinned);
+  const { groups, activePath, closeMobileMenu } = useProtectedMenuHook(pinned);
 
   if (groups.length === 0) return null;
 
@@ -43,6 +43,7 @@ const ProtectedMenu = ({ pinned = false }: IProps) => {
                       tooltip={route.label}
                       aria-current={active ? "page" : undefined}
                       className={sidebarMenuButton}
+                      onPress={closeMobileMenu}
                       onHoverStart={() => void route.preload?.()}
                       onFocus={() => void route.preload?.()}
                     >

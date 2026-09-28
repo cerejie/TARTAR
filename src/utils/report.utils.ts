@@ -12,6 +12,10 @@ import {
   type IPayable,
   type IReceivable,
 } from "../models/data/ledger/ledger.response";
+import {
+  isPendingSale,
+  isVerifiedSale,
+} from "../models/data/sale/sale.response";
 import type {
   ICashFlowRow,
   IExpenseRow,
@@ -203,10 +207,8 @@ export const reportBody = (
     };
   }
 
-  const sales = sumBy(
-    data.transactions,
-    (transaction) => transaction.type === "sale"
-  );
+  const sales = sumBy(data.transactions, isVerifiedSale);
+  const pendingSales = sumBy(data.transactions, isPendingSale);
   const expenses = sumBy(
     data.transactions,
     (transaction) => transaction.type === "expense"
@@ -215,6 +217,7 @@ export const reportBody = (
   return {
     stats: [
       { label: "Sales", value: formatMoney(sales) },
+      { label: "Pending verification", value: formatMoney(pendingSales) },
       { label: "Expenses", value: formatMoney(expenses) },
       { label: "Net", value: formatMoney(sales - expenses) },
     ],

@@ -10,6 +10,7 @@ import {
   viewHeadActions,
   viewHeadDivider,
   viewMeta,
+  viewTabs,
   viewTitle,
   viewToolbar,
 } from "../../../styles/view/view.styles";
@@ -43,7 +44,11 @@ const ContentView = ({
         {meta || tabs || actions ? (
           <div className={viewHeadActions}>
             {meta ? <span className={viewMeta}>{meta}</span> : null}
-            {tabs}
+            {tabs ? (
+              <div data-slot="view-tabs" className={viewTabs}>
+                {tabs}
+              </div>
+            ) : null}
             {tabs && actions ? (
               <Separator orientation="vertical" className={viewHeadDivider} />
             ) : null}

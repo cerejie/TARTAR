@@ -5,6 +5,10 @@ import {
   type TransactionType,
 } from "../../enums/transaction.enum";
 import type { IReportState } from "../../models/data/report/report.response";
+import {
+  isPendingSale,
+  isVerifiedSale,
+} from "../../models/data/sale/sale.response";
 import type { ITransaction } from "../../models/data/transaction/transaction.response";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { sumBy } from "../../utils/report.utils";
@@ -50,7 +54,8 @@ const PeriodReport = ({
   error,
   onRetry,
 }: IProps) => {
-  const sales = sumBy(transactions, (row) => row.type === "sale");
+  const sales = sumBy(transactions, isVerifiedSale);
+  const pendingSales = sumBy(transactions, isPendingSale);
   const expenses = sumBy(transactions, (row) => row.type === "expense");
 
   return (
@@ -65,6 +70,7 @@ const PeriodReport = ({
             onRetry={onRetry}
             variant="positive"
             icon={<TrendingUp />}
+            caption={`${formatMoney(pendingSales)} pending verification`}
           />
         </BentoCell>
         <BentoCell span="third">
