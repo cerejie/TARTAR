@@ -14,9 +14,12 @@ import {
   resetLocation,
 } from "../../utils/route.utils";
 import { useMutation } from "../common/mutation.hook";
+import { useAdminManifestHook } from "../layout/admin.manifest.hook";
 
 export const useAccountLoginHook = () => {
   const { pathname } = useLocation();
+  const isAdminLogin = isAdminPath(pathname);
+  useAdminManifestHook(isAdminLogin);
   const setCustomSession = useAccountStore((state) => state.setCustomSession);
   const setSuperAdminSession = useAccountStore(
     (state) => state.setSuperAdminSession
@@ -47,8 +50,7 @@ export const useAccountLoginHook = () => {
       setCustomSession(token, user);
     },
     {
-      onSuccess: () =>
-        resetLocation(isAdminPath(pathname) ? adminBasePath : "/"),
+      onSuccess: () => resetLocation(isAdminLogin ? adminBasePath : "/"),
     }
   );
 

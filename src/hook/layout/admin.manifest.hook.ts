@@ -44,8 +44,10 @@ const swapHeadEntry = ({
       : existing.setAttribute(attribute, previous);
 };
 
-export const useAdminManifestHook = () => {
+export const useAdminManifestHook = (enabled = true) => {
   useEffect(() => {
+    if (!enabled) return;
+
     const previousTitle = document.title;
 
     const restorers = [
@@ -85,5 +87,5 @@ export const useAdminManifestHook = () => {
       restorers.forEach((restore) => restore());
       document.title = previousTitle;
     };
-  }, []);
+  }, [enabled]);
 };
