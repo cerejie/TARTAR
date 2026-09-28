@@ -345,8 +345,9 @@ declare
   v_tx_id uuid;
   v_payee text;
   v_vtype app.voucher_type;
+  v_invoice numeric := round(p_amount, 2);
   v_rate numeric := coalesce(p_ewt_rate, 0);
-  v_return numeric := coalesce(p_less_return, 0);
+  v_return numeric := round(coalesce(p_less_return, 0), 2);
   v_ewt numeric;
 begin
   if p_type not in ('purchase', 'expense') then
@@ -372,8 +373,8 @@ begin
     raise exception 'Select check or cash for the voucher (no payment account chosen)';
   end if;
 
-  v_ewt := coalesce(p_ewt_amount, app.voucher_ewt(p_amount, v_return, v_rate));
-  if p_amount - v_ewt - v_return < 0 then
+  v_ewt := round(coalesce(p_ewt_amount, app.voucher_ewt(v_invoice, v_return, v_rate)), 2);
+  if v_invoice - v_ewt - v_return < 0 then
     raise exception 'Withholding and return cannot exceed the invoice amount';
   end if;
 
@@ -381,7 +382,7 @@ begin
     (type, branch, farm_section, txn_date, amount, reference_number, description,
      supplier_id, cash_account, expense_type, due_date, created_by)
   values
-    (p_type, p_branch, p_farm_section, p_txn_date, p_amount, p_reference_number, p_description,
+    (p_type, p_branch, p_farm_section, p_txn_date, v_invoice, p_reference_number, p_description,
      p_supplier_id, p_cash_account, p_expense_type, p_due_date, p_created_by)
   returning id into v_tx_id;
 
@@ -390,10 +391,10 @@ begin
      created_by, transaction_id, supplier_id, category, due_date,
      particulars, gross_amount, ewt_rate, ewt_amount, less_return)
   values
-    (v_vtype, p_branch, v_payee, p_amount - v_ewt - v_return, p_description, 'pending', false,
+    (v_vtype, p_branch, v_payee, v_invoice - v_ewt - v_return, p_description, 'pending', false,
      p_created_by, v_tx_id, p_supplier_id, app.voucher_category(p_type, p_expense_type),
      p_due_date,
-     nullif(trim(p_particulars), ''), p_amount, v_rate, v_ewt, v_return);
+     nullif(trim(p_particulars), ''), v_invoice, v_rate, v_ewt, v_return);
 
   return v_tx_id;
 end;
@@ -476,9 +477,10 @@ create or replace function public.update_transaction_with_voucher(
 ) returns void
 language plpgsql as $$
 declare
+  v_invoice numeric := round(p_amount, 2);
   v_rate numeric := coalesce(p_ewt_rate, 0);
-  v_return numeric := coalesce(p_less_return, 0);
-  v_ewt numeric := coalesce(p_ewt_amount, app.voucher_ewt(p_amount, v_return, v_rate));
+  v_return numeric := round(coalesce(p_less_return, 0), 2);
+  v_ewt numeric := round(coalesce(p_ewt_amount, app.voucher_ewt(v_invoice, v_return, v_rate)), 2);
 begin
   perform 1 from public.transactions
   where id = p_transaction_id and type in ('purchase', 'expense')
@@ -486,19 +488,19 @@ begin
   if not found then
     raise exception 'Transaction not found';
   end if;
-  if p_amount - v_ewt - v_return < 0 then
+  if v_invoice - v_ewt - v_return < 0 then
     raise exception 'Withholding and return cannot exceed the invoice amount';
   end if;
 
   perform app.set_voucher_breakdown(
-    p_transaction_id, p_amount, v_rate, v_ewt, v_return, p_particulars
+    p_transaction_id, v_invoice, v_rate, v_ewt, v_return, p_particulars
   );
 
   update public.transactions
   set branch           = p_branch,
       farm_section     = p_farm_section,
       txn_date         = p_txn_date,
-      amount           = p_amount,
+      amount           = v_invoice,
       reference_number = p_reference_number,
       description      = p_description,
       supplier_id      = p_supplier_id,
