@@ -1,5 +1,5 @@
 # ROADMAP — Admin mobile app (`/admin`)
-Updated: 2026-09-28 · Status: IN PROGRESS — A1 done, A2 next
+Updated: 2026-09-28 · Status: IN PROGRESS — A1 done, M1 next (inserted before A2)
 
 ## Goal
 A separate, admin-only route domain at `/admin` that looks and feels like a modern native mobile
@@ -42,6 +42,12 @@ stop. No migrations in this roadmap — read-only over existing tables.
   - desktop `≥ lg` — bottom bar becomes a left nav rail (icon + label), content centered at a
     max width, lists 2–3 columns, bottom sheets become side sheets/dialogs.
 - D8 Same tokens as TARTAR (`theme.css`), light + dark. Any new colour is a new token.
+- D9 (user) The normal app (`/`, ProtectedLayout) must be fully usable on phones too, not only
+  tablet/desktop — and its phone UI stays distinct from the admin app (no bottom tab bar).
+  Phone nav = hamburger in `ProtectedHeader` + sidebar as off-canvas sheet below `md`
+  (shadcn sidebar `offcanvas` on mobile; today it is `collapsible="none"` always, which
+  squeezes content). Phone tables = stacked row cards below `md`, not horizontal scroll.
+  Order: M1 → M2 before A2.
 
 ## Phases
 
@@ -59,6 +65,28 @@ stop. No migrations in this roadmap — read-only over existing tables.
   "Open full TARTAR" back.
 - Tab-switch transition: CSS view transition / fade-slide via tokens, `prefers-reduced-motion`
   respected. Keep each tab's scroll position.
+
+### M1 — Normal app phone layout + navigation (before A2)
+- `~ components/common/layout/ProtectedSider.tsx` — `collapsible="none"` at `md+`, off-canvas
+  sheet below `md` (sidebar's built-in mobile `Sheet` via `useSidebar().isMobile`/`openMobile`);
+  close on navigate.
+- `~ ProtectedHeader.tsx` — menu button (`SidebarTrigger`-equivalent, `size="icon"` +
+  `aria-label`) shown below `md` only (conditional render, not CSS hide).
+- `~ styles/layout/{shell,header,sidebar}.styles.ts` — phone paddings/gaps, header fits 390px
+  (logo, branch scope, bell, avatar), `shellInset` full width.
+- `~ styles/view/view.styles.ts` + `ContentView` — title row / tabs / actions / toolbar wrap
+  cleanly at 390px (status pills scroll horizontally, primary action stays visible).
+- Verify at 390 / 768 / 1280, light + dark.
+
+### M2 — Normal app phone tables, filters, cards
+- `~ models/common/table.model.ts` — column `mobile` role (`title` | `subtitle` | `amount` |
+  `status` | `meta` | `hidden`); default = `meta`.
+- `~ components/common/table/DataTable.tsx` — below `md` render rows as stacked cards from those
+  roles (row action menu kept, `onAction` / overdue tint kept), all four states, pagination kept.
+  One mobile layout in the primitive; features only tag columns.
+- `~` feature tables (Transactions first, then the rest) — tag columns with `mobile` roles.
+- `~ FilterToolbar` / `FilterPopover` / `SortSelect` — full-width popover → bottom sheet on phone.
+- `BentoGrid` / `StatCard` — 1 column on phone, 2 on tablet (check spans).
 
 ### A2 — Own PWA identity
 - `+ public/admin.webmanifest` (name "TARTAR Admin", short_name "TARTAR Admin", `scope`
@@ -130,7 +158,7 @@ stop. No migrations in this roadmap — read-only over existing tables.
   `ProtectedBranchScope` popover.
 
 ## Next
-1. A2: own PWA identity. Then A3.
+1. M1: normal app phone layout + navigation (D9). Then M2, then A2.
 
 ## State
 Branch: development-overhaul · Uncommitted: this file (+ ROADMAP-SALES-VOUCHER.md, pre-existing)
