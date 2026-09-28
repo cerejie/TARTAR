@@ -1,5 +1,5 @@
 # ROADMAP — Sales deposit/verification + Voucher computation
-Updated: 2026-09-28 · Status: PLANNED — decisions D1–D8 must be confirmed before S1
+Updated: 2026-09-28 · Status: PLANNED — decisions locked, S1 next
 
 ## Goal
 1. A sale is only "actual sales" once an employee has marked it **Deposited** and an admin has
@@ -13,7 +13,7 @@ Updated: 2026-09-28 · Status: PLANNED — decisions D1–D8 must be confirmed b
 Same as ROADMAP.md: one phase per conversation, `build` + `tartar-shadcn` loaded, `yarn build`
 + `yarn lint` clean, tick Done with paths, suggest commit, stop. Migrations are PROPOSED only —
 never applied or run without explicit approval. Starts after (or in parallel with) the UI-audit
-roadmap's last capture step — see D8.
+roadmap's last capture step (user to say which goes first).
 
 ## Source analysis — Check_Voucher_.xlsx (3 sheets, same template)
 Sheets: `LGC ` (LGC Hardware and General Merchandise), `Afc wood` (AFC Wood Industry),
@@ -57,39 +57,48 @@ Observations the build must handle:
 - Purchases/Expenses already left the generic Transactions form so vouchers can't be bypassed;
   Sales follows the same move.
 
-## Decisions (recommended default in **bold**; confirm or change)
-- D1 Sales screen: **new `/sales` module like Purchases/Expenses** (sidebar entry, status pills
-  Undeposited / Deposited / Verified / Rejected, stat cards) and `sale` removed from the generic
-  Transactions form. Alt: a "Sales" pill inside Transactions.
-- D2 Who does what: **employee records + marks Deposited; admin (manager) Verifies or Rejects;
-  admin-recorded sales still need the Deposited step but self-verify**. Accountant read-only.
-- D3 Deposit details captured: **deposit date + deposit slip / reference no. (+ bank account)**.
-- D4 Unverified sales: **excluded from Sales totals, still counted as Cash In** (money was
-  received) and shown as "Pending verification". Alt: excluded from cash-in too.
-- D5 Voucher breakdown: **inputs = Gross, VAT-registered payee (toggle), EWT rate (None / 1% goods
-  / 2% services), Less return; computed = Net of VAT, VAT, EWT, Amount payable**. Payable opened
-  on approval = amount payable (net). Purchase/expense transaction amount = gross.
-- D6 Voucher number: **keep `HAR-PUR-2026-00000187`** (locked 2026-07) vs switch to `2026-187`.
-- D7 Letterhead: **new branch fields legal_name + address in Branch Monitoring**; confirm which
-  branch prints "AFC 818 Gas Station" (or it is a new branch).
-- D8 Particulars: manual vouchers dropped free-text purpose on 2026-07-19; the sheet has a
-  Particulars line -> **re-add optional `particulars` text on every voucher**.
-- Existing data: **all historical sales back-filled as Verified** so past reports don't change.
+## Decisions locked (user, 2026-09-28)
+- D1 Sales = separate `/sales` module like Purchases/Expenses (sidebar entry, status pills,
+  stat cards). `sale` removed from the generic Transactions form.
+- D2 Employee records a sale and marks it Deposited; admin (manager) Verifies or Rejects.
+  A sale recorded by an admin skips the Deposited step and is saved Verified straight away.
+  Accountant read-only.
+- D3 Verify = admin checked the money was credited to the bank. Unverified sales STILL count as
+  Cash In; they are excluded from Sales totals only and shown as "Pending verification".
+- D4 Mark Deposited captures the deposit date only.
+- D5 Voucher amounts (client paper voucher 2026-006 + xlsx checked line by line):
+  - Inputs: Invoice amount (VAT inclusive = "Gross Total"), Withholding tax select
+    None / 1% goods / 2% services (default None), Less return (optional).
+  - Auto: Amount before VAT = (invoice - return) / 1.12, VAT = difference, Withholding =
+    base x rate, Amount to pay = invoice - withholding - return. Centavo rounding per line.
+  - Withholding amount is EDITABLE after auto-calculation (a rate change or invoice/return
+    change recalculates it; a manual edit stands otherwise). DB stores ewt_rate + ewt_amount
+    as entered and enforces only amount = invoice - ewt - return; no trigger overwrites ewt.
+  - Purchase/expense transaction amount = invoice (the cost). Voucher amount, check amount and
+    the payable opened on approval = Amount to pay (net). Withholding kept on the voucher for a
+    monthly "tax withheld" total.
+  - Labels: "Invoice amount", "Amount before VAT", "VAT (12%)", "Withholding tax",
+    "Less return", "Amount to pay" — never "12% vat" for the base.
+- D6 Voucher number stays `HAR-PUR-2026-00000187`.
+- D7 AFC 818 was only a sample — no new branch. Letterhead = branch legal name + address fields
+  on branches (Branch Monitoring edit form).
+- D8 Optional free-text `particulars` returns on every voucher.
+- D9 Existing sales back-filled as Verified so historical reports do not change.
 
 ## Phases
 
 ### S1 — Migration (propose, wait for approval) `supabase/migrations/2026092x000010_sales_verification_voucher_breakdown.sql`
 - `app.sale_status` enum: undeposited, deposited, verified, rejected.
-- `transactions`: sale_status, deposited_by, deposited_at, deposit_date, deposit_reference,
-  verified_by, verified_at, rejection_reason. CHECK: sale_status NOT NULL iff type = 'sale'.
+- `transactions`: sale_status, deposited_by, deposited_at, deposit_date, verified_by,
+  verified_at, rejection_reason. Insert by a manager -> verified (D2). CHECK: sale_status NOT NULL iff type = 'sale'.
   Back-fill existing sales = verified. Index (branch, type, sale_status, txn_date).
 - RPCs (SECURITY DEFINER, row-locked, audited through the existing edit-history table):
   `mark_sale_deposited`, `verify_sale` (managers), `reject_sale` (managers, reason).
 - Lock trigger: verified sale is immutable/undeletable (mirrors approved-voucher lock);
   undeposited/deposited stays editable with audit trail. RLS: employees only own-branch.
-- `vouchers`: particulars, gross_amount, vat_registered, ewt_rate, ewt_amount, less_return
-  (numeric(14,2), defaults 0/false). CHECK amount = round(gross - ewt - less_return, 2) when
-  gross is set; trigger computes ewt_amount so the client can't tamper.
+- `vouchers`: particulars, gross_amount, ewt_rate, ewt_amount, less_return
+  (numeric(14,2), defaults 0/false). CHECK amount = gross - ewt_amount - less_return when
+  gross is set; ewt_amount is user-editable (D5), not recomputed server-side.
 - `branches`: legal_name, address (nullable).
 - `create_transaction_with_voucher` recreated with the breakdown params.
 
@@ -109,11 +118,11 @@ Observations the build must handle:
 - `dashboard.services.ts`: sales metrics + chart + branch totals filter `sale_status = verified`;
   new "Pending verification" tile/alert for admins, "Undeposited" alert for employees.
 - `PeriodReport` / report services: verified sales only; pending shown as a separate line.
-- Cash in/out per D4.
+- Cash In keeps counting every sale regardless of status (D3).
 
 ### S4 — Voucher computation
-- `utils/voucher.utils.ts` `computeVoucherTotals({ gross, vatRegistered, ewtRate, lessReturn })`
-  -> { netOfVat, vat, ewt, amountPayable }, centavo rounding. One source for form preview,
+- `utils/voucher.utils.ts` `computeVoucherTotals({ invoice, ewtRate, lessReturn, ewtOverride })`
+  -> { amountBeforeVat, vat, ewt, amountToPay }, centavo rounding. One source for form preview,
   table, print.
 - `voucher.request.ts` + Purchases/Expenses request schemas: breakdown fields; FormField gets a
   read-only computed "summary" row if none exists.
@@ -131,10 +140,10 @@ Observations the build must handle:
   print preview. Close: merge any follow-ups into ROADMAP.md, delete this file.
 
 ## Done
-- [x] S0 — spreadsheet analysed, plan written (2026-09-28).
+- [x] S0 — spreadsheet + paper voucher analysed, plan written, D1–D9 locked (2026-09-28).
 
 ## Next
-1. User confirms D1–D8. Then S1: write the migration for review (do not apply).
+1. S1: write the migration for review (do not apply). Then S2.
 
 ## State
 Branch: development-overhaul · Uncommitted: this file + .claude/docs/ · No src changes.
