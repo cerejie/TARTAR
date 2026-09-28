@@ -1,7 +1,10 @@
 import { LinkButton } from "@/components/ui/button";
+import { cn } from "@/utils/cn.utils";
 import { useAdminTabBarHook } from "../../../hook/layout/admin.hook";
 import {
+  adminTabBadge,
   adminTabBar,
+  adminTabIcon,
   adminTabIndicator,
   adminTabItem,
   adminTabList,
@@ -31,11 +34,12 @@ const AdminTabBar = () => {
                 onHoverStart={() => void route.preload?.()}
                 onFocus={() => void route.preload?.()}
               >
-                <span className={adminTabIndicator({ active })} aria-hidden="true">
+                <span className={adminTabIcon} aria-hidden="true">
                   {Icon ? <Icon /> : null}
-                  {badge ? <span className={countBadge}>{badge}</span> : null}
+                  {badge ? <span className={cn(countBadge, adminTabBadge)}>{badge}</span> : null}
                 </span>
                 {route.label}
+                {active ? <span className={adminTabIndicator} aria-hidden="true" /> : null}
               </LinkButton>
             </li>
           );

@@ -20,35 +20,29 @@ export const adminColumn =
   "mx-auto flex w-full max-w-6xl flex-col gap-4 p-4 md:p-6 lg:px-0 lg:pt-0 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200";
 
 export const adminTabBar =
-  "order-last shrink-0 border-t border-border bg-panel pb-safe lg:order-first lg:w-24 lg:rounded-panel lg:border lg:py-3 lg:shadow-panel";
+  "order-last shrink-0 px-3 pt-2 pb-safe md:px-6 lg:order-first lg:w-24 lg:rounded-panel lg:bg-panel lg:p-0 lg:py-3 lg:shadow-panel";
 
 export const adminTabList =
-  "mx-auto grid max-w-xl grid-cols-4 lg:flex lg:flex-col lg:gap-1 lg:px-2";
+  "mx-auto grid max-w-xl grid-cols-4 overflow-hidden rounded-panel bg-panel shadow-panel lg:flex lg:flex-col lg:gap-1 lg:overflow-visible lg:rounded-none lg:bg-transparent lg:px-2 lg:shadow-none";
 
 export const adminTabItem = cva(
-  "h-16 w-full flex-col gap-1 rounded-none px-1 text-xs font-medium hover:bg-transparent lg:h-auto lg:rounded-xl lg:py-3 lg:hover:bg-muted",
+  "relative h-16 w-full flex-col gap-1 rounded-none px-1 text-xs hover:bg-transparent lg:h-auto lg:rounded-xl lg:py-3 lg:hover:bg-muted",
   {
     variants: {
       active: {
-        true: "text-brand",
-        false: "text-muted-foreground",
+        true: "font-semibold text-brand [&_svg]:fill-current",
+        false: "font-medium text-muted-foreground",
       },
     },
     defaultVariants: { active: false },
   }
 );
 
-export const adminTabIndicator = cva(
-  "relative flex h-8 w-14 items-center justify-center rounded-pill transition-colors motion-reduce:transition-none",
-  {
-    variants: {
-      active: {
-        true: "bg-brand-soft",
-        false: "bg-transparent",
-      },
-    },
-    defaultVariants: { active: false },
-  }
-);
+export const adminTabIcon = "relative flex h-7 w-10 items-center justify-center [&_svg]:size-5";
+
+export const adminTabBadge = "ring-2 ring-panel";
+
+export const adminTabIndicator =
+  "absolute bottom-0 left-1/2 h-1 w-10 -translate-x-1/2 rounded-t-full bg-brand lg:top-1/2 lg:bottom-auto lg:left-0 lg:h-8 lg:w-1 lg:translate-x-0 lg:-translate-y-1/2 lg:rounded-t-none lg:rounded-r-full";
 
 export const adminTabStack = "flex flex-col gap-4 md:gap-6";
