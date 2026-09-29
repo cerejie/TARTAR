@@ -13,10 +13,11 @@ import {
   selectReadIds,
   useNotificationReadStore,
 } from "../../../store/data/admin/notification.read.store";
-import { notificationGroups } from "../../../utils/notification.utils";
+import { notificationBankOf, notificationGroups } from "../../../utils/notification.utils";
 import { adminPayablesPath, adminReceivablesPath } from "../../../utils/route.utils";
 import { useQuery } from "../../common/query.hook";
 import { useSegment } from "../../common/segment.hook";
+import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 
 import type { ISegmentOption } from "../../../models/common/segment.model";
@@ -25,24 +26,32 @@ import type {
   IAdminNotification,
   IAdminNotificationGroup,
 } from "../../../models/data/admin/admin.response";
-import type { IDueAlerts } from "../../../models/data/dashboard/dashboard.response";
+import type {
+  IDueAlerts,
+  INotificationRow,
+} from "../../../models/data/dashboard/dashboard.response";
 import type { IVoucher } from "../../../models/data/voucher/voucher.response";
 
 const readIdOf = (rowId: string, dueDate: string) => `${rowId}-${dueDate}`;
 
-const alertGroupsOf = (alerts: IDueAlerts, readIds: ReadonlySet<string>): IAdminNotificationGroup[] =>
+const alertGroupsOf = (
+  alerts: IDueAlerts,
+  readIds: ReadonlySet<string>,
+  bankOf: (row: INotificationRow) => string | null
+): IAdminNotificationGroup[] =>
   notificationGroups(alerts).map((group) => ({
     key: group.key,
     label: group.label,
     tone: group.variant,
     items: group.rows.map((row) => {
       const id = readIdOf(row.id, row.dueDate);
+      const bank = bankOf(row);
       return {
         id,
         name: row.name,
-        description: group.describe(row),
+        description: bank ? `${group.describe(row)} · ${bank}` : group.describe(row),
         amount: row.amount,
-        path: row.kind === "receivable" ? adminReceivablesPath : adminPayablesPath,
+        path: row.ledger === "receivable" ? adminReceivablesPath : adminPayablesPath,
         unread: !readIds.has(id),
       };
     }),
@@ -81,6 +90,8 @@ const unreadGroupsOf = (groups: readonly IAdminNotificationGroup[]) =>
 const useAdminNotificationFeed = () => {
   const { branch } = useBranchScopeHook();
   const readIds = useNotificationReadStore(selectReadIds);
+  const { paymentLabelOf } = useBankAccountListHook();
+  const bankOf = (row: INotificationRow) => notificationBankOf(row, paymentLabelOf);
 
   const alertsQuery = useQuery<IDueAlerts>(
     scopedKey(dashboardAlertsKey, branch),
@@ -94,7 +105,7 @@ const useAdminNotificationFeed = () => {
 
   const readSet = new Set(readIds);
   const groups = [
-    ...(alertsQuery.data ? alertGroupsOf(alertsQuery.data, readSet) : []),
+    ...(alertsQuery.data ? alertGroupsOf(alertsQuery.data, readSet, bankOf) : []),
     ...(checksQuery.data ? checkGroupsOf(checksQuery.data, readSet) : []),
   ];
   const unreadGroups = unreadGroupsOf(groups);

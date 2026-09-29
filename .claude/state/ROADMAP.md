@@ -203,9 +203,27 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   only (pending as caption), Expenses/Purchases = amount to pay (voucher net) by txn_date,
   rejected vouchers excluded, only branches with activity get a row. Print = summary only
   (report.utils branchSummaryPrintDocument, totals row); period.utils month helpers.
+- [x] P9 (v1.63) — migration supabase/migrations/20261004000016_accountant_branches_realtime.sql
+  (app.branch_access() NULL only for superadmin/admin -> accountants limited to assigned
+  branches, none assigned = nothing; tx/rcv/pay/vch accountant read policies + can_see_branch;
+  transactions added to supabase_realtime). D16: account.store selectCanScopeBranch +
+  selectBranchAccess, branch.scope.hook (enabled for accountant, canManage, stale stored branch
+  -> All), BranchScopeList hides Manage branches. D15 (user choices: click opens the party
+  ledger; purchases/expenses = approved payables): dashboard.response (IDuePayable source /
+  payment / check_bank, NotificationKind + purchase/expense, NotificationLedger),
+  dashboard.services toDuePayables (vouchers by payable_id -> transactions), notification.utils
+  (rows + notificationBankOf), hook/data/dashboard/notification.list.hook.ts (openItem ->
+  navigate + customer/supplier ledger modal), NotificationsFeed (no cap, pressable rows, "Pay
+  from <bank>"), NotificationsCard scroll wrapper, ProtectedNotifications closes on open, admin
+  notifications description + bank, routes by ledger. D12: supabase.utils setCustomToken ->
+  realtime.setAuth, services/data/realtime.services.ts, keys liveRefreshKeys,
+  hook/app/realtime.hook.ts (managers only, 500 ms debounce) called from app.hook.
 
 ## Next
-1. P9 — Notifications (D15), accountant branch selector (D16), admin realtime (D12).
+1. User applies migration 20261004000016, then P10 — screenshot verification (harness below)
+   of P1-P9 + carried-over items. P9 checks: accountant selector lists only assigned branches;
+   notification click opens the ledger (popover + dashboard card); Purchase/Expense rows show
+   bank; admin live refresh (insert a transaction in another tab, admin Home updates).
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -221,13 +239,15 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
 
 ## Open
-- Every migration through 20261003000015 is applied (user confirmed 2026-09-29).
+- Every migration through 20261003000015 is applied (user confirmed 2026-09-29); 20261004000016
+  pending.
 - P5: payable delete is blocked in the UI only (pay_manager_all still allows it in the DB).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · Uncommitted: P8 (src + ROADMAP) until v1.62 is committed ·
-Migration 20261003000015 applied · Last check: yarn build + yarn lint clean after P8. P8
+Branch: development-overhaul · Uncommitted: P9 (src + migration + ROADMAP) until v1.63 is
+committed · Migration 20261004000016 NOT applied yet · Last check: yarn build + yarn lint clean
+after P9. P9 compiled, not screenshot-verified; realtime with the custom JWT unproven. P8
 compiled, not screenshot-verified (fold into P10: Branch Summary tab, month/custom range,
 print). P7 compiled, not screenshot-verified (fold into P10: voucher
 print vs sample, period print modal, Purchases "Date of" filter; period print scope reads "All

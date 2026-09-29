@@ -35,3 +35,21 @@ export const reportSummaryKey = "report-summary";
 
 export const scopedKey = (...parts: (string | number | null | undefined)[]) =>
   parts.map((part) => part ?? "all").join(":");
+
+export const liveRefreshKeys: readonly string[] = [
+  transactionListKey,
+  transactionSummaryKey,
+  purchaseListKey,
+  purchaseSummaryKey,
+  saleListKey,
+  saleSummaryKey,
+  expenseListKey,
+  expenseSummaryKey,
+  voucherListKey,
+  branchMonitorKey,
+  dashboardSummaryKey,
+  dashboardSalesKey,
+  dashboardOverviewKey,
+  reportTransactionKey,
+  reportSummaryKey,
+];

@@ -1,36 +1,54 @@
 import {
   notificationKindLabels,
   type IDueAlerts,
+  type IDuePayable,
   type INotificationGroup,
   type INotificationRow,
+  type IPaymentAccountRef,
 } from "../models/data/dashboard/dashboard.response";
 import {
   ledgerBalance,
-  type IPayable,
   type IReceivable,
 } from "../models/data/ledger/ledger.response";
 import { addDaysIso, daysBetween, formatDate, todayIso } from "./format.utils";
 
 const toRows = (
   receivables: IReceivable[],
-  payables: IPayable[]
+  payables: IDuePayable[]
 ): INotificationRow[] =>
   [
-    ...receivables.map((row) => ({
-      id: `r-${row.id}`,
-      name: row.customer_name,
-      amount: ledgerBalance(row),
-      dueDate: row.due_date,
-      kind: "receivable" as const,
-    })),
-    ...payables.map((row) => ({
-      id: `p-${row.id}`,
-      name: row.supplier_name,
-      amount: ledgerBalance(row),
-      dueDate: row.due_date,
-      kind: "payable" as const,
-    })),
+    ...receivables.map(
+      (row): INotificationRow => ({
+        id: `r-${row.id}`,
+        name: row.customer_name,
+        amount: ledgerBalance(row),
+        dueDate: row.due_date,
+        kind: "receivable",
+        ledger: "receivable",
+        partyId: row.customer_id,
+        payment: null,
+        checkBank: null,
+      })
+    ),
+    ...payables.map(
+      (row): INotificationRow => ({
+        id: `p-${row.id}`,
+        name: row.supplier_name,
+        amount: ledgerBalance(row),
+        dueDate: row.due_date,
+        kind: row.source ?? "payable",
+        ledger: "payable",
+        partyId: row.supplier_id,
+        payment: row.payment,
+        checkBank: row.check_bank,
+      })
+    ),
   ].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+
+export const notificationBankOf = (
+  row: INotificationRow,
+  paymentLabelOf: (payment: IPaymentAccountRef) => string
+): string | null => (row.payment ? paymentLabelOf(row.payment) : row.checkBank);
 
 export const notificationGroups = (data: IDueAlerts): INotificationGroup[] => {
   const overdue = toRows(data.overdueReceivables, data.overduePayables);

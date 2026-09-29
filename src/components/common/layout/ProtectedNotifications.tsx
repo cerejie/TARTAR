@@ -32,14 +32,18 @@ const ProtectedNotifications = () => {
           aria-label="Notifications and alerts"
           className={headerNotificationsDialog}
         >
-          <div className={headerNotificationsHead}>Notifications & Alerts</div>
-          <div className={headerNotificationsBody}>
-            {alertsLoading || !alerts ? (
-              <EmptyState description="Loading alerts" loading />
-            ) : (
-              <NotificationsFeed data={alerts} />
-            )}
-          </div>
+          {({ close }) => (
+            <>
+              <div className={headerNotificationsHead}>Notifications & Alerts</div>
+              <div className={headerNotificationsBody}>
+                {alertsLoading || !alerts ? (
+                  <EmptyState description="Loading alerts" loading />
+                ) : (
+                  <NotificationsFeed data={alerts} onOpen={close} />
+                )}
+              </div>
+            </>
+          )}
         </Dialog>
       </Popover>
     </PopoverTrigger>

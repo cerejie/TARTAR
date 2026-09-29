@@ -13,6 +13,7 @@ let customToken: string | null = null;
 
 export const setCustomToken = (token: string | null): void => {
   customToken = token;
+  void supabase.realtime.setAuth(token);
 };
 
 const customFetch: typeof fetch = (input, init) => {

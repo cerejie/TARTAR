@@ -3,13 +3,17 @@ import {
   cashInflowTypes,
   cashOutflowTypes,
 } from "../../enums/transaction.enum";
+import type { TransactionType } from "../../enums/transaction.enum";
 import type { IBranch } from "../../models/data/branch/branch.response";
 import type {
+  DuePayableSource,
   IBranchMonitorRow,
   IDailySalesPoint,
   IDashboardOverview,
   IDashboardSummary,
   IDueAlerts,
+  IDuePayable,
+  IPaymentAccountRef,
   OverviewPeriod,
   SalesPeriod,
 } from "../../models/data/dashboard/dashboard.response";
@@ -28,6 +32,86 @@ import { todayIso } from "../../utils/format.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 
 type AmountRow = { amount: number | string };
+
+type PayableVoucherRow = Pick<
+  IVoucher,
+  "payable_id" | "transaction_id" | "category" | "check_bank"
+>;
+
+type PayableTransactionRow = Pick<ITransaction, "id" | "type"> &
+  IPaymentAccountRef;
+
+const duePayableSources: Partial<Record<TransactionType, DuePayableSource>> = {
+  purchase: "purchase",
+  expense: "expense",
+};
+
+const plainDuePayable = (payable: IPayable): IDuePayable => ({
+  ...payable,
+  source: null,
+  payment: null,
+  check_bank: null,
+});
+
+const toDuePayables = async (payables: IPayable[]): Promise<IDuePayable[]> => {
+  if (payables.length === 0) return [];
+
+  const vouchers = await supabase
+    .from("vouchers")
+    .select("payable_id, transaction_id, category, check_bank")
+    .in(
+      "payable_id",
+      payables.map((payable) => payable.id)
+    );
+  if (vouchers.error) throw toError(vouchers.error);
+
+  const voucherRows = (vouchers.data ?? []) as PayableVoucherRow[];
+  const transactionIds = voucherRows.flatMap((voucher) =>
+    voucher.transaction_id ? [voucher.transaction_id] : []
+  );
+
+  const transactions = transactionIds.length
+    ? await supabase
+        .from("transactions")
+        .select("id, type, cash_account, bank_account_id")
+        .in("id", transactionIds)
+    : { data: [], error: null };
+  if (transactions.error) throw toError(transactions.error);
+
+  const transactionById = new Map(
+    ((transactions.data ?? []) as PayableTransactionRow[]).map((row) => [
+      row.id,
+      row,
+    ])
+  );
+  const voucherByPayable = new Map(
+    voucherRows.map((voucher) => [voucher.payable_id, voucher])
+  );
+
+  return payables.map((payable) => {
+    const voucher = voucherByPayable.get(payable.id);
+    if (!voucher) return plainDuePayable(payable);
+
+    const transaction = voucher.transaction_id
+      ? transactionById.get(voucher.transaction_id)
+      : undefined;
+    const manualSource = voucher.category === "PUR" ? "purchase" : null;
+
+    return {
+      ...payable,
+      source: transaction
+        ? duePayableSources[transaction.type] ?? null
+        : manualSource,
+      payment: transaction
+        ? {
+            cash_account: transaction.cash_account,
+            bank_account_id: transaction.bank_account_id,
+          }
+        : null,
+      check_bank: voucher.check_bank,
+    };
+  });
+};
 type TypedAmountRow = AmountRow & Pick<ITransaction, "type" | "sale_status">;
 type BalanceRow = { branch: string; balance?: number | string };
 type OutstandingRow = { amount: number | string; paid_amount: number | string };
@@ -371,7 +455,9 @@ const dashboardServices = {
     if (payables.error) throw toError(payables.error);
 
     const receivableRows = (receivables.data ?? []) as IReceivable[];
-    const payableRows = (payables.data ?? []) as IPayable[];
+    const payableRows = await toDuePayables(
+      (payables.data ?? []) as IPayable[]
+    );
     const isOverdue = (dueDate: string) => dueDate < today;
 
     return {

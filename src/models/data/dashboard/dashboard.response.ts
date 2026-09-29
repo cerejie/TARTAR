@@ -1,3 +1,4 @@
+import type { CashAccount } from "../../../enums/transaction.enum";
 import type { IPayable, IReceivable } from "../ledger/ledger.response";
 
 export interface IDashboardSummary {
@@ -100,11 +101,24 @@ export interface IBranchMonitorRow {
   payables: number;
 }
 
+export type DuePayableSource = "purchase" | "expense";
+
+export interface IPaymentAccountRef {
+  cash_account: CashAccount | null;
+  bank_account_id: string | null;
+}
+
+export interface IDuePayable extends IPayable {
+  source: DuePayableSource | null;
+  payment: IPaymentAccountRef | null;
+  check_bank: string | null;
+}
+
 export interface IDueAlerts {
   overdueReceivables: IReceivable[];
-  overduePayables: IPayable[];
+  overduePayables: IDuePayable[];
   nearDueReceivables: IReceivable[];
-  nearDuePayables: IPayable[];
+  nearDuePayables: IDuePayable[];
 }
 
 export const dueAlertCount = (alerts: IDueAlerts): number =>
@@ -113,7 +127,9 @@ export const dueAlertCount = (alerts: IDueAlerts): number =>
   alerts.nearDueReceivables.length +
   alerts.nearDuePayables.length;
 
-export type NotificationKind = "receivable" | "payable";
+export type NotificationKind = "receivable" | "payable" | DuePayableSource;
+
+export type NotificationLedger = "receivable" | "payable";
 
 export type NotificationTone = "negative" | "warning";
 
@@ -123,6 +139,10 @@ export interface INotificationRow {
   amount: number;
   dueDate: string;
   kind: NotificationKind;
+  ledger: NotificationLedger;
+  partyId: string | null;
+  payment: IPaymentAccountRef | null;
+  checkBank: string | null;
 }
 
 export interface INotificationGroup {
@@ -136,9 +156,11 @@ export interface INotificationGroup {
 export const notificationKindLabels: Record<NotificationKind, string> = {
   receivable: "Receivable",
   payable: "Payable",
+  purchase: "Purchase",
+  expense: "Expense",
 };
 
-export const notificationKindPaths: Record<NotificationKind, string> = {
+export const notificationKindPaths: Record<NotificationLedger, string> = {
   receivable: "/receivables",
   payable: "/payables",
 };

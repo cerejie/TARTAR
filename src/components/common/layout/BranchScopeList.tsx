@@ -24,8 +24,15 @@ const allBranchesKey = "all";
 const manageBranchesKey = "manage";
 
 const BranchScopeList = ({ listClassName, onSelect }: IProps) => {
-  const { branch, setBranch, branches, search, setSearch, goToManageBranches } =
-    useBranchScopeHook();
+  const {
+    branch,
+    canManage,
+    setBranch,
+    branches,
+    search,
+    setSearch,
+    goToManageBranches,
+  } = useBranchScopeHook();
 
   const selectedKey = branch ?? allBranchesKey;
 
@@ -65,11 +72,13 @@ const BranchScopeList = ({ listClassName, onSelect }: IProps) => {
             {renderCheck(item.slug)}
           </CommandItem>
         ))}
-        <CommandSeparator />
-        <CommandItem id={manageBranchesKey} textValue="Manage branches">
-          <Plus />
-          Manage branches
-        </CommandItem>
+        {canManage ? <CommandSeparator /> : null}
+        {canManage ? (
+          <CommandItem id={manageBranchesKey} textValue="Manage branches">
+            <Plus />
+            Manage branches
+          </CommandItem>
+        ) : null}
       </CommandList>
     </Command>
   );

@@ -2,6 +2,7 @@ import {
   dueAlertCount,
   type IDueAlerts,
 } from "../../models/data/dashboard/dashboard.response";
+import { notificationScroll } from "../../styles/dashboard/dashboard.styles";
 import SectionCard from "../common/card/SectionCard";
 import EmptyState from "../common/status/EmptyState";
 import StatusTag from "../common/status/StatusTag";
@@ -28,7 +29,9 @@ const NotificationsCard = ({ data, loading, error, onRetry }: IProps) => {
       onRetry={onRetry}
     >
       {data ? (
-        <NotificationsFeed data={data} />
+        <div className={notificationScroll}>
+          <NotificationsFeed data={data} />
+        </div>
       ) : (
         <EmptyState description="Nothing overdue or due soon" />
       )}

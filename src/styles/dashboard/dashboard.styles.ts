@@ -22,8 +22,10 @@ export const notificationGroup = "mb-4 flex flex-col last:mb-0";
 export const notificationGroupHead =
   "mb-0.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider";
 
+export const notificationScroll = "-mr-2 max-h-96 overflow-y-auto pr-2";
+
 export const notificationItem =
-  "flex items-start justify-between gap-2 border-b border-border py-2 last:border-b-0";
+  "-mx-2 flex cursor-pointer items-start justify-between gap-2 rounded-md border-b border-border px-2 py-2 text-left outline-none transition-colors last:border-b-0 hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export const notificationItemMain = "flex min-w-0 flex-1 items-start gap-2.5";
 
@@ -47,5 +49,3 @@ export const notificationAmount = cva("whitespace-nowrap text-sm font-bold tabul
 });
 
 export const notificationDate = "whitespace-nowrap text-xs text-muted-foreground";
-
-export const notificationMore = "mt-1 text-xs text-muted-foreground";

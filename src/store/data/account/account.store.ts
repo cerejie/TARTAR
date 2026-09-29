@@ -73,12 +73,13 @@ export const selectIsAuthenticated = (state: States): boolean =>
 export const selectIsManager = (state: States): boolean =>
   state.kind === "superadmin" || state.user?.role === "admin";
 
+export const selectCanScopeBranch = (state: States): boolean =>
+  selectIsManager(state) || state.user?.role === "accountant";
+
 export const selectUserId = (state: States): string | null =>
   state.user?.id ?? null;
 
 export const selectBranchAccess = (state: States): string[] | null => {
-  const role = selectRole(state);
-  if (role === "superadmin" || role === "admin" || role === "accountant")
-    return null;
+  if (selectIsManager(state)) return null;
   return state.user?.branch_access ?? noBranches;
 };
