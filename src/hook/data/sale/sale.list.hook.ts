@@ -6,6 +6,7 @@ import {
   saleFormModalKey,
   saleHistoryModalKey,
   saleRejectModalKey,
+  saleResubmitModalKey,
 } from "../../../keys/modal.keys";
 import {
   saleListKey,
@@ -62,6 +63,7 @@ export const useSaleListHook = () => {
   const historyModal = useModal<ISale>(saleHistoryModalKey);
   const depositModal = useModal<ISale>(saleDepositModalKey);
   const rejectModal = useModal<ISale>(saleRejectModalKey);
+  const resubmitModal = useModal<ISale>(saleResubmitModalKey);
 
   const { pagination, setPagination, goToPage } = usePagination(salePaginationKey);
   const { sortOption, sortKey, sortOptions, changeSort } = useSortOption(
@@ -165,6 +167,7 @@ export const useSaleListHook = () => {
     historyModal,
     depositModal,
     rejectModal,
+    resubmitModal,
     historyRow,
     audit: auditQuery.data ?? [],
     auditLoading: auditQuery.isInitialLoading,

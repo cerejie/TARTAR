@@ -6,7 +6,10 @@ import {
 } from "../../models/common/pagination.model";
 import type { ISortState } from "../../models/common/table.model";
 import { bankAccountOf } from "../../models/data/bank/bank.request";
-import type { ISaleInput } from "../../models/data/sale/sale.request";
+import type {
+  ISaleInput,
+  ISaleResubmitInput,
+} from "../../models/data/sale/sale.request";
 import type { ISale } from "../../models/data/sale/sale.response";
 import { runWrite } from "../../store/common/sync.store";
 import { applyLedgerFilters } from "../../utils/filter.utils";
@@ -123,6 +126,11 @@ const saleServices = {
       fn: "reject_sale",
       args: { p_transaction_id: id, p_reason: reason },
     }),
+
+  resubmit: async (id: string, values: ISaleResubmitInput) => {
+    await saleServices.update(id, values);
+    return saleServices.markDeposited(id, values.deposit_date);
+  },
 };
 
 export default saleServices;

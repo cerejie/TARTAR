@@ -4,6 +4,7 @@ import {
   FileText,
   History,
   Landmark,
+  MessageSquareWarning,
   Pencil,
   Plus,
   Trash2,
@@ -22,11 +23,7 @@ import TablePanel from "../../common/table/TablePanel";
 import DisbursementHistoryModal from "../../disbursement/modal/DisbursementHistoryModal";
 import UserCell from "../../user/table/cells/UserCell";
 import SaleFormModals from "../modal/SaleFormModals";
-import {
-  openSaleStatuses,
-  saleStatusColors,
-  saleStatusLabels,
-} from "../../../enums/sale.enum";
+import { saleStatusColors, saleStatusLabels } from "../../../enums/sale.enum";
 import { useSaleListHook } from "../../../hook/data/sale/sale.list.hook";
 import { saleExpansionKey } from "../../../keys/table.keys";
 import type { IRowAction } from "../../../models/common/action.model";
@@ -59,6 +56,7 @@ const SalesTable = () => {
     historyModal,
     depositModal,
     rejectModal,
+    resubmitModal,
     historyRow,
     audit,
     auditLoading,
@@ -72,11 +70,22 @@ const SalesTable = () => {
       : "—";
 
   const actionsOf = (row: ISale): IRowAction[] => {
-    const open = openSaleStatuses.includes(row.sale_status);
+    const undeposited = row.sale_status === "undeposited";
     const deposited = row.sale_status === "deposited";
+    const rejected = row.sale_status === "rejected";
 
     return [
-      ...(permissions.encodeTransactions && open
+      ...(permissions.encodeTransactions && rejected
+        ? [
+            {
+              key: "view-reason",
+              label: "View reason",
+              icon: <MessageSquareWarning />,
+              onSelect: () => resubmitModal.openModal(row),
+            },
+          ]
+        : []),
+      ...(permissions.encodeTransactions && undeposited
         ? [
             {
               key: "deposit",

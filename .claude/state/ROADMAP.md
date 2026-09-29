@@ -174,9 +174,19 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   ledger.store supplier state, printStatement(kind, partyName, ...). LedgerPartiesTable payables
   row -> supplier ledger. Admin PayableEntrySheet drops Balance/Paid. Expense form Due date
   (expense.list.hook.ts) + transaction.services sends due_date for expenses.
+- [x] P6 (v1.60) — no migration (mark_sale_deposited already accepts rejected -> deposited).
+  Rejected rows (encodeTransactions) show only "View reason" (user choice; Mark deposited /
+  Edit stay for undeposited): SalesTable.tsx, openSaleStatuses removed (sale.enum.ts).
+  Resubmit modal SaleFormModals.tsx (formIntro: reason, rejected by, rejected on; sale
+  sections + Deposit date prefilled with the previous one — user choice): sale.form.hook.ts
+  (resubmitModal, rowDefaults, resubmitSections, resubmitMutation), saleResubmitSchema
+  (sale.request.ts, saleShape shared), saleServices.resubmit = update + markDeposited (two
+  runWrites), saleResubmitModalKey.
 
 ## Next
-1. P6 — Sales rejection flow (D10). Confirm 20261002000014 is applied first.
+1. P7 — Printing (D13, D14): voucher breakdown on employee prints + signatories; Print with
+   period picker on Sales, Purchases, Expenses; Purchases "created in month" / "paid in month"
+   filters.
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -192,13 +202,13 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
 
 ## Open
-- Migrations 20261001000013_ensure_expense_category.sql (P4) and
-  20261002000014_payables_mark_paid.sql (P5) must be applied before their code is deployed.
-  20260930000012 confirmed applied; 13 not yet confirmed by the user.
+- Every migration through 20261002000014 is applied (user confirmed 2026-09-29).
 - P5: payable delete is blocked in the UI only (pay_manager_all still allows it in the DB).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · Uncommitted: P5 (migration + src + ROADMAP) until v1.59 is
-committed · Last check: yarn build + yarn lint clean after P5. P5 UI compiled, not
+Branch: development-overhaul · Uncommitted: P6 (src + ROADMAP) until v1.60 is committed ·
+Last check: yarn build + yarn lint clean after P6. P5 UI compiled, not
 screenshot-verified (fold into P10: Mark paid modal stacking over the supplier ledger).
+P6 compiled, not screenshot-verified (fold into P10: View reason -> Resubmit end to end; a
+failed deposit step leaves the sale rejected with the edits saved).

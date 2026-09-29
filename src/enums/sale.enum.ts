@@ -24,11 +24,6 @@ export const saleStatusColors: Record<SaleStatus, StatusColor> = {
   rejected: "negative",
 };
 
-export const openSaleStatuses: readonly SaleStatus[] = [
-  "undeposited",
-  "rejected",
-];
-
 export const pendingSaleStatuses: readonly SaleStatus[] = [
   "undeposited",
   "deposited",

@@ -5,6 +5,7 @@ export const saleEditModalKey = "sale-edit";
 export const saleHistoryModalKey = "sale-history";
 export const saleDepositModalKey = "sale-deposit";
 export const saleRejectModalKey = "sale-reject";
+export const saleResubmitModalKey = "sale-resubmit";
 
 export const voucherFormModalKey = "voucher-form";
 

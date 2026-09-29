@@ -4,6 +4,7 @@ import {
   saleEditModalKey,
   saleFormModalKey,
   saleRejectModalKey,
+  saleResubmitModalKey,
 } from "../../../keys/modal.keys";
 import { salePaginationKey } from "../../../keys/table.keys";
 import type { IFieldSection } from "../../../models/common/field.model";
@@ -12,6 +13,7 @@ import type {
   ISaleDepositInput,
   ISaleInput,
   ISaleRejectInput,
+  ISaleResubmitInput,
 } from "../../../models/data/sale/sale.request";
 import type { ISale } from "../../../models/data/sale/sale.response";
 import saleServices from "../../../services/data/sale.services";
@@ -29,6 +31,7 @@ import { useBranchListHook } from "../branch/branch.list.hook";
 import { useFarmSectionListHook } from "../farm-section/farm.section.list.hook";
 import { useIncomeSourceListHook } from "../income-source/income.source.list.hook";
 import { useCustomerListHook } from "../party/customer.list.hook";
+import { useUserListHook } from "../user/user.list.hook";
 import { saleInvalidateKeys } from "./sale.list.hook";
 
 const depositSections: IFieldSection<ISaleDepositInput>[] = [
@@ -51,11 +54,20 @@ const rejectSections: IFieldSection<ISaleRejectInput>[] = [
   },
 ];
 
+const resubmitDepositSection: IFieldSection<ISaleResubmitInput> = {
+  key: "deposit",
+  title: "Deposit",
+  fields: [
+    { name: "deposit_date", label: "Deposit date", type: "date", required: true },
+  ],
+};
+
 export const useSaleFormHook = () => {
   const formModal = useModal(saleFormModalKey);
   const editModal = useModal<ISale>(saleEditModalKey);
   const depositModal = useModal<ISale>(saleDepositModalKey);
   const rejectModal = useModal<ISale>(saleRejectModalKey);
+  const resubmitModal = useModal<ISale>(saleResubmitModalKey);
   const { setPagination } = usePagination(salePaginationKey);
   const createdBy = useAccountStore(selectUserId);
 
@@ -64,11 +76,13 @@ export const useSaleFormHook = () => {
   const { customerOptions } = useCustomerListHook();
   const { optionsFor: incomeSourceOptionsFor } = useIncomeSourceListHook();
   const { paymentFields, paymentDefaultsOf } = useBankAccountListHook();
+  const { userNameOf } = useUserListHook();
   const defaultIncomeSource = incomeSourceOptionsFor()[0]?.value ?? "";
 
   const editRow = editModal.modal.data;
   const depositRow = depositModal.modal.data;
   const rejectRow = rejectModal.modal.data;
+  const resubmitRow = resubmitModal.modal.data;
 
   const createMutation = useMutation(
     (values: ISaleInput) => saleServices.create(values, createdBy),
@@ -109,6 +123,16 @@ export const useSaleFormHook = () => {
       successMessage: "Sale rejected — returned to the employee",
       invalidate: saleInvalidateKeys,
       onSuccess: rejectModal.closeModal,
+    }
+  );
+
+  const resubmitMutation = useMutation(
+    (payload: { id: string; values: ISaleResubmitInput }) =>
+      saleServices.resubmit(payload.id, payload.values),
+    {
+      successMessage: "Sale resubmitted — awaiting verification",
+      invalidate: saleInvalidateKeys,
+      onSuccess: resubmitModal.closeModal,
     }
   );
 
@@ -154,7 +178,9 @@ export const useSaleFormHook = () => {
           type: "select",
           span: "half",
           required: true,
-          options: incomeSourceOptionsFor(editRow?.income_source),
+          options: incomeSourceOptionsFor(
+            editRow?.income_source ?? resubmitRow?.income_source
+          ),
         },
       ],
     },
@@ -188,17 +214,29 @@ export const useSaleFormHook = () => {
     description: "",
   };
 
-  const editDefaults: DefaultValues<ISaleInput> | null = editRow
+  const rowDefaults = (row: ISale): DefaultValues<ISaleInput> => ({
+    branch: row.branch as BranchSlug,
+    farm_section: row.farm_section as ISaleInput["farm_section"],
+    txn_date: row.txn_date,
+    amount: row.amount,
+    income_source: row.income_source ?? defaultIncomeSource,
+    customer_id: row.customer_id,
+    ...paymentDefaultsOf(row),
+    reference_number: row.reference_number ?? "",
+    description: row.description ?? "",
+  });
+
+  const editDefaults = editRow ? rowDefaults(editRow) : null;
+
+  const resubmitSections: IFieldSection<ISaleResubmitInput>[] = [
+    ...(sections as unknown as IFieldSection<ISaleResubmitInput>[]),
+    resubmitDepositSection,
+  ];
+
+  const resubmitDefaults: DefaultValues<ISaleResubmitInput> | null = resubmitRow
     ? {
-        branch: editRow.branch as BranchSlug,
-        farm_section: editRow.farm_section as ISaleInput["farm_section"],
-        txn_date: editRow.txn_date,
-        amount: editRow.amount,
-        income_source: editRow.income_source ?? defaultIncomeSource,
-        customer_id: editRow.customer_id,
-        ...paymentDefaultsOf(editRow),
-        reference_number: editRow.reference_number ?? "",
-        description: editRow.description ?? "",
+        ...rowDefaults(resubmitRow),
+        deposit_date: resubmitRow.deposit_date ?? todayIso(),
       }
     : null;
 
@@ -207,9 +245,11 @@ export const useSaleFormHook = () => {
     editModal,
     depositModal,
     rejectModal,
+    resubmitModal,
     editRow,
     depositRow,
     rejectRow,
+    resubmitRow,
     sections,
     defaults,
     editDefaults,
@@ -217,10 +257,14 @@ export const useSaleFormHook = () => {
     depositDefaults: { deposit_date: todayIso() },
     rejectSections,
     rejectDefaults: { reason: "" },
+    resubmitSections,
+    resubmitDefaults,
     createMutation,
     updateMutation,
     depositMutation,
     rejectMutation,
+    resubmitMutation,
     deriveFormValues: derivePaymentValues,
+    rejectedByName: userNameOf(resubmitRow?.verified_by ?? null),
   };
 };
