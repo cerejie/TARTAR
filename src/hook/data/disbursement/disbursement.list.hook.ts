@@ -6,6 +6,7 @@ import {
   disbursementEditModalKey,
   disbursementFormModalKey,
   disbursementHistoryModalKey,
+  periodPrintModalKey,
 } from "../../../keys/modal.keys";
 import {
   expenseListKey,
@@ -23,6 +24,7 @@ import type { Path } from "react-hook-form";
 import type { IFieldSection } from "../../../models/common/field.model";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
+import type { IDateRange } from "../../../models/common/period.model";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
 import type {
   IDisbursement,
@@ -35,6 +37,8 @@ import {
 } from "../../../store/data/account/account.store";
 import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
 import { derivePaymentValues } from "../../../utils/payment.utils";
+import { printReport } from "../../../utils/print.utils";
+import { disbursementPrintDocument } from "../../../utils/report.utils";
 import {
   deriveVoucherValues,
   voucherBreakdownFields,
@@ -107,7 +111,9 @@ export const useDisbursementListHook = (
   const { userById, userNameOf } = useUserListHook();
   const { paymentFields, paymentDefaultsOf, paymentLabelOf } =
     useBankAccountListHook();
-  const { branch: scopeBranch } = useBranchScopeHook();
+  const { branch: scopeBranch, branchName: scopeName } = useBranchScopeHook();
+  const printModalKey = periodPrintModalKey(scope);
+  const printModal = useModal(printModalKey);
   const { payeeOptions, prepare } = useDisbursementFormHook(kind);
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
@@ -195,6 +201,16 @@ export const useDisbursementListHook = (
       : field
   );
 
+  const printPeriod = async (range: IDateRange) => {
+    const rows = await transactionServices.getDisbursementAll(
+      kind,
+      scopedFilters({ dateFrom: range.from, dateTo: range.to }, scopeBranch)
+    );
+    printReport(
+      disbursementPrintDocument(kind, rows, range, scopeName ?? "All branches")
+    );
+  };
+
   return {
     permissions,
     rows: listQuery.data?.data ?? [],
@@ -236,5 +252,8 @@ export const useDisbursementListHook = (
     paymentDefaultsOf,
     paymentLabelOf,
     deriveFormValues: deriveDisbursementValues,
+    printModalKey,
+    openPrint: () => printModal.openModal(),
+    printPeriod,
   };
 };

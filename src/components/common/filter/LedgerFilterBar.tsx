@@ -10,6 +10,8 @@ import {
   type PaymentKind,
 } from "../../../enums/ledger.enum";
 import {
+  purchaseDateBasisLabels,
+  purchaseDateBasisValues,
   transactionTypeFilterValues,
   transactionTypeLabels,
 } from "../../../enums/transaction.enum";
@@ -41,6 +43,7 @@ type IProps = {
   showOverdue?: boolean;
   statusValues?: readonly ILedgerStatusFilter[];
   showType?: boolean;
+  showDateBasis?: boolean;
   showReference?: boolean;
   paymentKind?: PaymentKind;
   scope?: ILedgerFilterScope;
@@ -53,6 +56,7 @@ const LedgerFilterBar = ({
   showOverdue = false,
   statusValues,
   showType = false,
+  showDateBasis = false,
   showReference = true,
   paymentKind,
   scope = "page",
@@ -91,6 +95,19 @@ const LedgerFilterBar = ({
           onChange={(dateFrom, dateTo) => setFilters({ dateFrom, dateTo })}
         />
       )}
+
+      {showDateBasis ? (
+        labelled(
+          "Date of",
+          <FilterSelect
+            placeholder="Invoice date"
+            value={filters.dateBasis}
+            values={purchaseDateBasisValues}
+            labels={purchaseDateBasisLabels}
+            onChange={(dateBasis) => setFilters({ dateBasis })}
+          />
+        )
+      ) : null}
 
       {showStatus ? (
         labelled(

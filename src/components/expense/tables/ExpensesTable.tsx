@@ -1,4 +1,12 @@
-import { FileCheck, FileText, History, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  FileCheck,
+  FileText,
+  History,
+  Pencil,
+  Plus,
+  Printer,
+  Trash2,
+} from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import AppButton from "../../common/button/AppButton";
 import FilterToolbar from "../../common/filter/FilterToolbar";
@@ -6,6 +14,7 @@ import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
+import PeriodPrintModal from "../../common/modal/PeriodPrintModal";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
@@ -68,6 +77,9 @@ const ExpensesTable = () => {
     createMutation,
     updateMutation,
     removeMutation,
+    printModalKey,
+    openPrint,
+    printPeriod,
   } = useExpenseListHook();
 
   const openConfirm = useConfirm();
@@ -248,12 +260,18 @@ const ExpensesTable = () => {
               />
             }
             actions={
-              <RequirePermission can="encodeTransactions" fallback={null}>
-                <AppButton onPress={() => formModal.openModal()}>
-                  <Plus />
-                  Record expense
+              <>
+                <AppButton variant="outline" onPress={openPrint}>
+                  <Printer />
+                  Print
                 </AppButton>
-              </RequirePermission>
+                <RequirePermission can="encodeTransactions" fallback={null}>
+                  <AppButton onPress={() => formModal.openModal()}>
+                    <Plus />
+                    Record expense
+                  </AppButton>
+                </RequirePermission>
+              </>
             }
           >
             <LedgerFilterBar layout="popover" />
@@ -322,6 +340,12 @@ const ExpensesTable = () => {
         loading={auditLoading}
         userNameOf={userNameOf}
         onClose={historyModal.closeModal}
+      />
+
+      <PeriodPrintModal
+        modalKey={printModalKey}
+        title="Print expenses"
+        onPrint={printPeriod}
       />
     </>
   );

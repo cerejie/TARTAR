@@ -106,6 +106,7 @@ export const scopeToBranch = <T>(query: T, branch?: string | null): T =>
 export const activeFilterCount = (filters: ILedgerFilters): number =>
   [
     filters.dateFrom || filters.dateTo,
+    filters.dateBasis,
     filters.paymentStatus,
     filters.type,
     filters.referenceNumber,

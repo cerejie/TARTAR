@@ -44,3 +44,6 @@ export const ledgerPaymentModalKey = (scope: string) => `${scope}-payment`;
 export const disbursementFormModalKey = (scope: string) => `${scope}-form`;
 export const disbursementEditModalKey = (scope: string) => `${scope}-edit`;
 export const disbursementHistoryModalKey = (scope: string) => `${scope}-history`;
+
+export const periodPrintModalKey = (scope: string) => `${scope}-print`;
+export const salePrintModalKey = "sale-print";

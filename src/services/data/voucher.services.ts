@@ -7,7 +7,10 @@ import {
 } from "../../models/common/pagination.model";
 import type { ISortState } from "../../models/common/table.model";
 import type { IVoucherInput } from "../../models/data/voucher/voucher.request";
-import type { IVoucher } from "../../models/data/voucher/voucher.response";
+import type {
+  IVoucher,
+  IVoucherSignatories,
+} from "../../models/data/voucher/voucher.response";
 import { runWrite } from "../../store/common/sync.store";
 import { applyLedgerFilters } from "../../utils/filter.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
@@ -22,6 +25,30 @@ const voucherColumns: IFilterColumns = {
 };
 
 const defaultSort: ISortState = { column: "created_at", direction: "descending" };
+
+const withSignatories = async (
+  vouchers: readonly IVoucher[]
+): Promise<IVoucher[]> => {
+  if (vouchers.length === 0) return [];
+
+  const { data, error } = await supabase.rpc("voucher_signatories", {
+    p_voucher_ids: vouchers.map((voucher) => voucher.id),
+  });
+  if (error) throw toError(error);
+
+  const signatoriesById = new Map(
+    ((data ?? []) as IVoucherSignatories[]).map((row) => [row.voucher_id, row])
+  );
+
+  return vouchers.map((voucher) => {
+    const signatories = signatoriesById.get(voucher.id);
+    return {
+      ...voucher,
+      prepared_by_name: signatories?.prepared_by ?? null,
+      approved_by_name: signatories?.approved_by ?? null,
+    };
+  });
+};
 
 const voucherServices = {
   getList: async (
@@ -43,7 +70,7 @@ const voucherServices = {
     if (error) throw toError(error);
 
     return {
-      data: (data ?? []) as IVoucher[],
+      data: await withSignatories((data ?? []) as IVoucher[]),
       currentPage: pagination.pageNumber,
       pageSize: pagination.pageSize,
       totalCount: count ?? 0,

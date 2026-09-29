@@ -1,10 +1,14 @@
 import dayjs from "dayjs";
 import { ledgerStatusLabels } from "../enums/ledger.enum";
+import { saleStatusLabels } from "../enums/sale.enum";
 import {
   cashInflowTypes,
   cashOutflowTypes,
   transactionTypeLabels,
+  type DisbursementKind,
 } from "../enums/transaction.enum";
+import { voucherStatusLabels } from "../enums/voucher.enum";
+import type { IDateRange } from "../models/common/period.model";
 import type { IExpenseCategory } from "../models/data/expense-category/expense.category.response";
 import {
   isLedgerOverdue,
@@ -15,6 +19,7 @@ import {
 import {
   isPendingSale,
   isVerifiedSale,
+  type ISale,
 } from "../models/data/sale/sale.response";
 import type {
   ICashFlowRow,
@@ -22,8 +27,12 @@ import type {
   IReportData,
   ReportType,
 } from "../models/data/report/report.response";
-import type { ITransaction } from "../models/data/transaction/transaction.response";
+import type {
+  IDisbursement,
+  ITransaction,
+} from "../models/data/transaction/transaction.response";
 import { formatDate, formatMoney, todayIso } from "./format.utils";
+import { dateRangeLabel } from "./period.utils";
 import type { IPrintReportDocument, IPrintTable } from "./print.utils";
 
 export const sumBy = (
@@ -244,3 +253,93 @@ export const reportBody = (
     ],
   };
 };
+
+const sumAmounts = <Row>(rows: readonly Row[], amountOf: (row: Row) => number) =>
+  rows.reduce((total, row) => total + Number(amountOf(row)), 0);
+
+export const salesPrintDocument = (
+  sales: readonly ISale[],
+  range: IDateRange,
+  scope: string
+): IPrintReportDocument => ({
+  title: "Sales",
+  period: dateRangeLabel(range),
+  scope,
+  stats: [
+    { label: "Sales recorded", value: String(sales.length) },
+    { label: "Total sales", value: formatMoney(sumAmounts(sales, (sale) => sale.amount)) },
+    {
+      label: "Verified",
+      value: formatMoney(sumAmounts(sales.filter(isVerifiedSale), (sale) => sale.amount)),
+    },
+    {
+      label: "Pending verification",
+      value: formatMoney(sumAmounts(sales.filter(isPendingSale), (sale) => sale.amount)),
+    },
+  ],
+  tables: [
+    {
+      title: "Sales",
+      columns: [
+        { title: "Date" },
+        { title: "Reference" },
+        { title: "Customer" },
+        { title: "Status" },
+        { title: "Amount", numeric: true },
+      ],
+      rows: sales.map((sale) => [
+        formatDate(sale.txn_date),
+        sale.reference_number ?? "—",
+        sale.customer?.name ?? "—",
+        saleStatusLabels[sale.sale_status],
+        formatMoney(sale.amount),
+      ]),
+      emptyText: "No sales in this period",
+    },
+  ],
+});
+
+const disbursementTitles: Record<DisbursementKind, string> = {
+  purchase: "Purchases",
+  expense: "Expenses",
+};
+
+const amountToPayOf = (row: IDisbursement) => row.voucher?.amount ?? row.amount;
+
+export const disbursementPrintDocument = (
+  kind: DisbursementKind,
+  rows: readonly IDisbursement[],
+  range: IDateRange,
+  scope: string
+): IPrintReportDocument => ({
+  title: disbursementTitles[kind],
+  period: dateRangeLabel(range),
+  scope,
+  stats: [
+    { label: "Records", value: String(rows.length) },
+    ...(kind === "purchase"
+      ? [{ label: "Gross total", value: formatMoney(sumAmounts(rows, (row) => row.amount)) }]
+      : []),
+    { label: "Amount to pay", value: formatMoney(sumAmounts(rows, amountToPayOf)) },
+  ],
+  tables: [
+    {
+      title: disbursementTitles[kind],
+      columns: [
+        { title: "Date" },
+        { title: "Voucher No." },
+        { title: kind === "purchase" ? "Supplier" : "Payee" },
+        { title: "Voucher status" },
+        { title: "Amount to pay", numeric: true },
+      ],
+      rows: rows.map((row) => [
+        formatDate(row.txn_date),
+        row.voucher?.voucher_no ?? "—",
+        row.voucher?.payee ?? row.supplier?.name ?? "—",
+        row.voucher ? voucherStatusLabels[row.voucher.status] : "—",
+        formatMoney(amountToPayOf(row)),
+      ]),
+      emptyText: `No ${disbursementTitles[kind].toLowerCase()} in this period`,
+    },
+  ],
+});

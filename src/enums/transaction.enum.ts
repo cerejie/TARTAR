@@ -19,6 +19,14 @@ export const transactionTypeFilterValues = transactionTypeValues.filter(
   (type) => type !== "collection"
 );
 
+export const purchaseDateBasisValues = ["voucher", "paid"] as const;
+export type PurchaseDateBasis = (typeof purchaseDateBasisValues)[number];
+
+export const purchaseDateBasisLabels: Record<PurchaseDateBasis, string> = {
+  voucher: "Voucher created",
+  paid: "Paid",
+};
+
 export const transactionTypeLabels: Record<TransactionType, string> = {
   sale: "Sale",
   expense: "Expense",

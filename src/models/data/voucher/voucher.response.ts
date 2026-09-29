@@ -32,6 +32,14 @@ export interface IVoucher {
   ewt_rate: number;
   ewt_amount: number;
   less_return: number;
+  prepared_by_name?: string | null;
+  approved_by_name?: string | null;
+}
+
+export interface IVoucherSignatories {
+  voucher_id: string;
+  prepared_by: string | null;
+  approved_by: string | null;
 }
 
 export const voucherPurpose = (

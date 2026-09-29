@@ -5,6 +5,7 @@ import {
   saleEditModalKey,
   saleFormModalKey,
   saleHistoryModalKey,
+  salePrintModalKey,
   saleRejectModalKey,
   saleResubmitModalKey,
 } from "../../../keys/modal.keys";
@@ -17,6 +18,7 @@ import {
 } from "../../../keys/query.keys";
 import { salePaginationKey, saleSortKey } from "../../../keys/table.keys";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
+import type { IDateRange } from "../../../models/common/period.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { ISale, ISaleSummary } from "../../../models/data/sale/sale.response";
 import type { ITransactionAudit } from "../../../models/data/transaction/transaction.response";
@@ -24,6 +26,8 @@ import saleServices from "../../../services/data/sale.services";
 import transactionServices from "../../../services/data/transaction.services";
 import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
 import { formatMoney } from "../../../utils/format.utils";
+import { printReport } from "../../../utils/print.utils";
+import { salesPrintDocument } from "../../../utils/report.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
@@ -79,7 +83,8 @@ export const useSaleListHook = () => {
   const { userById, userNameOf } = useUserListHook();
   const { paymentLabelOf } = useBankAccountListHook();
   const { labelOf: incomeSourceLabelOf } = useIncomeSourceListHook();
-  const { branch: scopeBranch } = useBranchScopeHook();
+  const { branch: scopeBranch, branchName: scopeName } = useBranchScopeHook();
+  const printModal = useModal(salePrintModalKey);
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
   const summaryFilters: ILedgerFilters = {
@@ -139,6 +144,13 @@ export const useSaleListHook = () => {
       onConfirm: () => removeMutation.mutate(sale.id),
     });
 
+  const printPeriod = async (range: IDateRange) => {
+    const sales = await saleServices.getAll(
+      scopedFilters({ dateFrom: range.from, dateTo: range.to }, scopeBranch)
+    );
+    printReport(salesPrintDocument(sales, range, scopeName ?? "All branches"));
+  };
+
   return {
     permissions,
     rows: listQuery.data?.data ?? [],
@@ -173,5 +185,8 @@ export const useSaleListHook = () => {
     auditLoading: auditQuery.isInitialLoading,
     verifySale,
     deleteSale,
+    printModalKey: salePrintModalKey,
+    openPrint: () => printModal.openModal(),
+    printPeriod,
   };
 };

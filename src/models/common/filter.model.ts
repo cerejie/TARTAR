@@ -5,7 +5,10 @@ import type {
   PaymentStatus,
 } from "../../enums/ledger.enum";
 import type { SaleStatus } from "../../enums/sale.enum";
-import type { TransactionType } from "../../enums/transaction.enum";
+import type {
+  PurchaseDateBasis,
+  TransactionType,
+} from "../../enums/transaction.enum";
 import type { VoucherStatus } from "../../enums/voucher.enum";
 
 export type ILedgerFilterScope =
@@ -22,6 +25,7 @@ export interface ILedgerFilters {
   farmSection?: string;
   dateFrom?: string;
   dateTo?: string;
+  dateBasis?: PurchaseDateBasis;
   amountMin?: number;
   amountMax?: number;
   referenceNumber?: string;

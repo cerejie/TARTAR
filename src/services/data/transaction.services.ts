@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import {
   transactionTypeLabels,
   type DisbursementKind,
@@ -85,20 +86,63 @@ const withVouchers = async (
   }));
 };
 
-const voucherStatusColumns = `${columns}, vouchers!inner(status)`;
+const voucherJoinColumns = `${columns}, vouchers!inner(status, created_at)`;
 
-const disbursementQuery = (kind: DisbursementKind, filters: ILedgerFilters) => {
+const dateBasisOf = (kind: DisbursementKind, filters: ILedgerFilters) =>
+  kind === "purchase" ? filters.dateBasis : undefined;
+
+const paidPurchaseIdsOf = async (
+  kind: DisbursementKind,
+  filters: ILedgerFilters
+): Promise<string[] | null> => {
+  if (dateBasisOf(kind, filters) !== "paid") return null;
+
+  const { data, error } = await supabase.rpc("purchase_ids_paid_between", {
+    p_from: filters.dateFrom ?? null,
+    p_to: filters.dateTo ?? null,
+  });
+  if (error) throw toError(error);
+
+  return (data ?? []) as string[];
+};
+
+const disbursementQuery = (
+  kind: DisbursementKind,
+  filters: ILedgerFilters,
+  paidIds: readonly string[] | null
+) => {
+  const basis = dateBasisOf(kind, filters);
+  const joinsVoucher = !!filters.voucherStatus || basis === "voucher";
   const base = supabase
     .from(table)
-    .select(filters.voucherStatus ? voucherStatusColumns : columns, {
+    .select(joinsVoucher ? voucherJoinColumns : columns, {
       count: "exact",
     })
     .eq("type", kind);
   const byVoucher = filters.voucherStatus
     ? base.eq("vouchers.status", filters.voucherStatus)
     : base;
+  const txnDateFilters = basis
+    ? { ...filters, dateFrom: undefined, dateTo: undefined }
+    : filters;
+  const filtered = applyLedgerFilters(byVoucher, txnDateFilters);
 
-  return applyLedgerFilters(byVoucher, filters);
+  if (basis === "paid") return filtered.in("id", paidIds ?? []);
+  if (basis !== "voucher") return filtered;
+
+  const fromVoucherDate = filters.dateFrom
+    ? filtered.gte(
+        "vouchers.created_at",
+        dayjs(filters.dateFrom).startOf("day").toISOString()
+      )
+    : filtered;
+
+  return filters.dateTo
+    ? fromVoucherDate.lte(
+        "vouchers.created_at",
+        dayjs(filters.dateTo).endOf("day").toISOString()
+      )
+    : fromVoucherDate;
 };
 
 const transactionServices = {
@@ -176,7 +220,12 @@ const transactionServices = {
     const { from, to } = pageRange(pagination);
     const sort = pagination.sort ?? defaultSort;
 
-    const { data, error, count } = await disbursementQuery(kind, filters)
+    const paidIds = await paidPurchaseIdsOf(kind, filters);
+    const { data, error, count } = await disbursementQuery(
+      kind,
+      filters,
+      paidIds
+    )
       .order(sort.column, { ascending: sort.direction === "ascending" })
       .order("created_at", { ascending: false })
       .range(from, to);
@@ -194,7 +243,8 @@ const transactionServices = {
     kind: DisbursementKind,
     filters: ILedgerFilters = {}
   ): Promise<IDisbursement[]> => {
-    const { data, error } = await disbursementQuery(kind, filters)
+    const paidIds = await paidPurchaseIdsOf(kind, filters);
+    const { data, error } = await disbursementQuery(kind, filters, paidIds)
       .order("txn_date", { ascending: false })
       .limit(reportLimit);
     if (error) throw toError(error);

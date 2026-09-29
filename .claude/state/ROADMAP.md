@@ -182,11 +182,22 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   (resubmitModal, rowDefaults, resubmitSections, resubmitMutation), saleResubmitSchema
   (sale.request.ts, saleShape shared), saleServices.resubmit = update + markDeposited (two
   runWrites), saleResubmitModalKey.
+- [x] P7 (v1.61) — migration supabase/migrations/20261003000015_voucher_signatories_purchase_paid.sql
+  (public.voucher_signatories(uuid[]) SECURITY DEFINER, branch-checked, full_name else username;
+  public.purchase_ids_paid_between(from, to) INVOKER: payable paid -> last payment date, no due
+  date -> txn_date). printVoucher (print.utils.ts) rebuilt to the LGC sample, breakdown copied
+  literally (user choice: "12% vat" = amount before VAT, TOTAL = gross), always rendered (old
+  vouchers: Gross/TOTAL = amount); Prepared/Approved names via voucherServices.getList
+  withSignatories (IVoucher.prepared_by_name/approved_by_name). Period print (user choice: list
+  + totals): models/common/period.model.ts, utils/period.utils.ts (week Mon-Sun),
+  hook/common/period.print.hook.ts, common/modal/PeriodPrintModal.tsx, report.utils
+  salesPrintDocument/disbursementPrintDocument, printPeriod in sale.list + disbursement.list,
+  Print button on Sales/Purchases/Expenses tables (periodPrintModalKey, salePrintModalKey).
+  Purchases filter "Date of" (Invoice date / Voucher created / Paid): ILedgerFilters.dateBasis,
+  LedgerFilterBar showDateBasis, transaction.services disbursementQuery (purchase only).
 
 ## Next
-1. P7 — Printing (D13, D14): voucher breakdown on employee prints + signatories; Print with
-   period picker on Sales, Purchases, Expenses; Purchases "created in month" / "paid in month"
-   filters.
+1. P8 — Reports by branch summary + print (D11).
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -202,13 +213,16 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
 
 ## Open
-- Every migration through 20261002000014 is applied (user confirmed 2026-09-29).
+- Every migration through 20261003000015 is applied (user confirmed 2026-09-29).
 - P5: payable delete is blocked in the UI only (pay_manager_all still allows it in the DB).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · Uncommitted: P6 (src + ROADMAP) until v1.60 is committed ·
-Last check: yarn build + yarn lint clean after P6. P5 UI compiled, not
+Branch: development-overhaul · Uncommitted: P7 (src + migration + ROADMAP) until v1.61 is
+committed · Migration 20261003000015 applied · Last check: yarn
+build + yarn lint clean after P7. P7 compiled, not screenshot-verified (fold into P10: voucher
+print vs sample, period print modal, Purchases "Date of" filter; period print scope reads "All
+branches" for employees, as the Reports print does). P5 UI compiled, not
 screenshot-verified (fold into P10: Mark paid modal stacking over the supplier ledger).
 P6 compiled, not screenshot-verified (fold into P10: View reason -> Resubmit end to end; a
 failed deposit step leaves the sale rejected with the edits saved).

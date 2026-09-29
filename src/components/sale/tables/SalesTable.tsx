@@ -7,6 +7,7 @@ import {
   MessageSquareWarning,
   Pencil,
   Plus,
+  Printer,
   Trash2,
 } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
@@ -15,6 +16,7 @@ import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
 import RequirePermission from "../../common/guard/RequirePermission";
+import PeriodPrintModal from "../../common/modal/PeriodPrintModal";
 import StatusTag from "../../common/status/StatusTag";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
@@ -62,6 +64,9 @@ const SalesTable = () => {
     auditLoading,
     verifySale,
     deleteSale,
+    printModalKey,
+    openPrint,
+    printPeriod,
   } = useSaleListHook();
 
   const reviewerOf = (row: ISale) =>
@@ -283,12 +288,18 @@ const SalesTable = () => {
               />
             }
             actions={
-              <RequirePermission can="encodeTransactions" fallback={null}>
-                <AppButton onPress={() => formModal.openModal()}>
-                  <Plus />
-                  Record sale
+              <>
+                <AppButton variant="outline" onPress={openPrint}>
+                  <Printer />
+                  Print
                 </AppButton>
-              </RequirePermission>
+                <RequirePermission can="encodeTransactions" fallback={null}>
+                  <AppButton onPress={() => formModal.openModal()}>
+                    <Plus />
+                    Record sale
+                  </AppButton>
+                </RequirePermission>
+              </>
             }
           >
             <LedgerFilterBar layout="popover" />
@@ -326,6 +337,12 @@ const SalesTable = () => {
         loading={auditLoading}
         userNameOf={userNameOf}
         onClose={historyModal.closeModal}
+      />
+
+      <PeriodPrintModal
+        modalKey={printModalKey}
+        title="Print sales"
+        onPrint={printPeriod}
       />
     </>
   );
