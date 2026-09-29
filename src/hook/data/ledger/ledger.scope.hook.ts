@@ -11,8 +11,6 @@ import type {
   IPayable,
   IReceivable,
 } from "../../../models/data/ledger/ledger.response";
-import type { IPartyInput } from "../../../models/data/party/party.request";
-import type { IParty } from "../../../models/data/party/party.response";
 import {
   payableServices,
   receivableServices,
@@ -22,7 +20,7 @@ import {
   supplierServices,
 } from "../../../services/data/party.services";
 import { todayIso } from "../../../utils/format.utils";
-import { nameKey } from "../../../utils/fuzzy.utils";
+import { resolveParty } from "../../../utils/party.utils";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useCustomerListHook } from "../party/customer.list.hook";
 import { useSupplierListHook } from "../party/supplier.list.hook";
@@ -45,25 +43,6 @@ const partyOf = (row: ILedgerRecord): ILedgerPartyKey =>
   "customer_name" in row
     ? { partyId: row.customer_id, partyName: row.customer_name }
     : { partyId: row.supplier_id, partyName: row.supplier_name };
-
-const resolveParty = async (
-  records: readonly IParty[],
-  typed: string,
-  create: (values: IPartyInput, id?: string) => Promise<unknown>
-): Promise<Pick<IParty, "id" | "name">> => {
-  const name = typed.trim();
-  const existing = records.find(
-    (record) => nameKey(record.name) === nameKey(name)
-  );
-  if (existing) return existing;
-
-  const id = crypto.randomUUID();
-  await create(
-    { name, contact: null, contact_person: null, address: null },
-    id
-  );
-  return { id, name };
-};
 
 const buildSections = (source: ISectionSource): IFieldSection<ILedgerInput>[] => [
   {

@@ -7,6 +7,7 @@ import type { IExpenseCategoryInput } from "../../models/data/expense-category/e
 import type { IExpenseCategory } from "../../models/data/expense-category/expense.category.response";
 import type { IIncomeSourceInput } from "../../models/data/income-source/income.source.request";
 import type { IIncomeSource } from "../../models/data/income-source/income.source.response";
+import { runWrite } from "../../store/common/sync.store";
 import { slugify } from "../../utils/slug.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 
@@ -165,6 +166,20 @@ const referenceServices = {
     }
 
     return data as IExpenseCategory;
+  },
+
+  ensureExpenseCategory: async (name: string): Promise<string> => {
+    const slug = slugify(name);
+    if (!slug) throw new Error("Expense type must contain letters or numbers");
+
+    await runWrite({
+      label: `New expense type "${name.trim()}"`,
+      kind: "rpc",
+      fn: "ensure_expense_category",
+      args: { p_slug: slug, p_name: name.trim() },
+    });
+
+    return slug;
   },
 
   updateExpenseCategory: async (

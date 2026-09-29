@@ -50,8 +50,8 @@ import { useSortOption } from "../../common/sort.hook";
 import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
+import { useDisbursementFormHook } from "./disbursement.form.hook";
 import { useFarmSectionListHook } from "../farm-section/farm.section.list.hook";
-import { useSupplierListHook } from "../party/supplier.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
 
 export const disbursementScopeOf = (kind: DisbursementKind) =>
@@ -104,11 +104,11 @@ export const useDisbursementListHook = (
   const { filters } = useLedgerFilters("page");
   const { branchOptions, branchName, defaultBranch } = useBranchListHook();
   const { farmSectionOptions } = useFarmSectionListHook();
-  const { supplierOptions } = useSupplierListHook();
   const { userById, userNameOf } = useUserListHook();
   const { paymentFields, paymentDefaultsOf, paymentLabelOf } =
     useBankAccountListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
+  const { payeeOptions, prepare } = useDisbursementFormHook(kind);
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
   const summaryFilters: ILedgerFilters = {
@@ -146,8 +146,12 @@ export const useDisbursementListHook = (
   const invalidate = [scope, summaryScope, voucherListKey];
 
   const createMutation = useMutation(
-    (values: IDisbursementInput) =>
-      transactionServices.createDisbursement(kind, values, createdBy),
+    async (values: IDisbursementInput) =>
+      transactionServices.createDisbursement(
+        kind,
+        await prepare(values),
+        createdBy
+      ),
     {
       successMessage: `${title} recorded — voucher pending approval`,
       invalidate,
@@ -159,8 +163,12 @@ export const useDisbursementListHook = (
   );
 
   const updateMutation = useMutation(
-    (payload: { id: string; values: IDisbursementInput }) =>
-      transactionServices.updateDisbursement(payload.id, kind, payload.values),
+    async (payload: { id: string; values: IDisbursementInput }) =>
+      transactionServices.updateDisbursement(
+        payload.id,
+        kind,
+        await prepare(payload.values)
+      ),
     {
       successMessage: `${title} updated`,
       invalidate,
@@ -178,6 +186,14 @@ export const useDisbursementListHook = (
     title: "Voucher breakdown",
     fields: voucherBreakdownFields<IDisbursementInput>(),
   };
+
+  const disbursementPaymentFields = paymentFields<IDisbursementInput>(
+    "Paid from"
+  ).map((field) =>
+    field.name === "cash_account"
+      ? { ...field, required: true, allowClear: false }
+      : field
+  );
 
   return {
     permissions,
@@ -201,7 +217,7 @@ export const useDisbursementListHook = (
     branchName,
     defaultBranch,
     farmSectionOptions,
-    supplierOptions,
+    payeeOptions,
     userById,
     userNameOf,
     formModal,
@@ -216,7 +232,7 @@ export const useDisbursementListHook = (
     removeMutation,
     breakdownSection,
     formSummary: voucherSummaryLines,
-    paymentFields,
+    disbursementPaymentFields,
     paymentDefaultsOf,
     paymentLabelOf,
     deriveFormValues: deriveDisbursementValues,

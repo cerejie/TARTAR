@@ -148,10 +148,22 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   reference_number). Reference fields removed: ledger.scope.hook.ts, ledger.list.hook.ts
   (payment form), PaymentAllocationModal.tsx, purchase.list.hook.ts; schemas ledger.request,
   payment.request, transaction.request (disbursement); services ledger/payment/transaction.
+- [x] P4 (v1.58) — migration supabase/migrations/20261001000013_ensure_expense_category.sql
+  (public.ensure_expense_category(p_slug, p_name), SECURITY DEFINER, manager or employee, auto
+  unique 3-letter code skipping PUR/EXP/GEN — user choice). Submit normalisation
+  hook/data/disbursement/disbursement.form.hook.ts (prepare: payee -> supplier via
+  utils/party.utils.ts resolveParty, typed expense type -> slug via
+  referenceServices.ensureExpenseCategory); disbursement.list.hook.ts (mutations run prepare,
+  disbursementPaymentFields = Paid from required). Expense form (expense.list.hook.ts): Payee
+  creatable over suppliers, Supplier + Voucher type gone, Expense type creatable, Amount (no
+  VAT hint), Particular textarea, no breakdown/summary (EWT 0). Purchase form: Supplier
+  creatable required (payee field) + Paid from; breakdown kept. transaction.request.ts: payee
+  required, Paid from required, expense_type = name.
 
 ## Next
-1. P4 — confirm 20260930000012 is applied, then locate, plan, wait, implement (D4, D5, D6,
-   purchase payment section = Supplier + Paid from only).
+1. P5 — confirm 20261001000013 is applied, then locate, plan, wait, implement (D7, D8, D9,
+   Payables "By supplier" ledger). Migration needed for D7 (voucher_approval_payable on
+   expenses with a due date) — note the Expense form has no Due date field yet.
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -167,10 +179,11 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
 
 ## Open
-- Migration 20260930000012_auto_reference_numbers.sql must be applied before P3 code is
-  deployed (without it new rows save with no reference). 20260929000011 confirmed applied.
+- Migration 20261001000013_ensure_expense_category.sql must be applied before P4 code is
+  deployed (without it a new expense type typed in the form fails to save).
+  20260930000012 confirmed applied.
 
 ## State
-Branch: development-overhaul · Uncommitted: P3 (migration + src + ROADMAP) until v1.57 is
-committed · Last check: yarn build + yarn lint clean after P3. P3 form changes compiled, not
+Branch: development-overhaul · Uncommitted: P4 (migration + src + ROADMAP) until v1.58 is
+committed · Last check: yarn build + yarn lint clean after P4. P4 form changes compiled, not
 screenshot-verified (fold into P10).

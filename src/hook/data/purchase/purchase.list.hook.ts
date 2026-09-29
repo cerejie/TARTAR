@@ -1,8 +1,4 @@
 import type { DefaultValues } from "react-hook-form";
-import {
-  voucherTypeLabels,
-  voucherTypeValues,
-} from "../../../enums/voucher.enum";
 import type { IFieldSection } from "../../../models/common/field.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
@@ -11,7 +7,6 @@ import type {
   IPurchaseSummary,
 } from "../../../models/data/transaction/transaction.response";
 import { todayIso } from "../../../utils/format.utils";
-import { toOptions } from "../../../utils/option.utils";
 import {
   voucherBreakdownDefaults,
   voucherBreakdownOf,
@@ -41,11 +36,11 @@ export const usePurchaseListHook = () => {
     breakdownSection,
     defaultBranch,
     editRow,
-    paymentFields,
+    disbursementPaymentFields,
     paymentDefaultsOf,
     farmSectionOptions,
     summaryRows,
-    supplierOptions,
+    payeeOptions,
   } = disbursement;
 
   const sections: IFieldSection<IDisbursementInput>[] = [
@@ -93,29 +88,13 @@ export const usePurchaseListHook = () => {
       title: "Payment",
       fields: [
         {
-          name: "supplier_id",
-          label: "Supplier",
-          type: "select",
-          span: "half",
-          allowClear: true,
-          options: supplierOptions,
-        },
-        {
           name: "payee",
-          label: "Payee",
-          type: "text",
-          span: "half",
-          hidden: (values) => !!values.supplier_id,
+          label: "Supplier",
+          type: "creatable",
+          required: true,
+          options: payeeOptions,
         },
-        ...paymentFields<IDisbursementInput>("Paid from"),
-        {
-          name: "voucher_type",
-          label: "Voucher type",
-          type: "select",
-          span: "half",
-          options: toOptions(voucherTypeValues, voucherTypeLabels),
-          hidden: (values) => !!values.cash_account,
-        },
+        ...disbursementPaymentFields,
       ],
     },
     breakdownSection,
@@ -146,9 +125,9 @@ export const usePurchaseListHook = () => {
         amount: editRow.amount,
         due_date: editRow.due_date,
         ...paymentDefaultsOf(editRow),
-        voucher_type: editRow.voucher?.type ?? null,
+        voucher_type: null,
         supplier_id: editRow.supplier_id,
-        payee: editRow.supplier_id ? "" : editRow.voucher?.payee ?? "",
+        payee: editRow.supplier?.name ?? editRow.voucher?.payee ?? "",
         description: editRow.description ?? "",
       }
     : null;

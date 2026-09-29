@@ -1,8 +1,4 @@
 import type { DefaultValues } from "react-hook-form";
-import {
-  voucherTypeLabels,
-  voucherTypeValues,
-} from "../../../enums/voucher.enum";
 import type { IFieldSection } from "../../../models/common/field.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
@@ -12,11 +8,7 @@ import type {
   IExpenseSummary,
 } from "../../../models/data/transaction/transaction.response";
 import { todayIso } from "../../../utils/format.utils";
-import { toOptions } from "../../../utils/option.utils";
-import {
-  voucherBreakdownDefaults,
-  voucherBreakdownOf,
-} from "../../../utils/voucher.utils";
+import { voucherBreakdownDefaults } from "../../../utils/voucher.utils";
 import {
   pendingVoucherCount,
   sumDisbursements,
@@ -59,14 +51,13 @@ export const useExpenseListHook = () => {
 
   const {
     branchOptions,
-    breakdownSection,
     defaultBranch,
     editRow,
-    paymentFields,
+    disbursementPaymentFields,
     paymentDefaultsOf,
     farmSectionOptions,
     summaryRows,
-    supplierOptions,
+    payeeOptions,
   } = disbursement;
 
   const { labelOf, optionsFor } = useExpenseCategoryListHook();
@@ -102,20 +93,20 @@ export const useExpenseListHook = () => {
         {
           name: "expense_type",
           label: "Expense type",
-          type: "select",
+          type: "creatable",
           span: "half",
           required: true,
           options: optionsFor(editRow?.expense_type),
         },
         {
           name: "amount",
-          label: "Invoice amount",
+          label: "Amount",
           type: "amount",
           span: "half",
           required: true,
           prefix: "₱",
-          hint: "VAT inclusive.",
         },
+        { name: "particulars", label: "Particular", type: "textarea" },
       ],
     },
     {
@@ -123,32 +114,15 @@ export const useExpenseListHook = () => {
       title: "Payment",
       fields: [
         {
-          name: "supplier_id",
-          label: "Supplier",
-          type: "select",
-          span: "half",
-          allowClear: true,
-          options: supplierOptions,
-        },
-        {
           name: "payee",
           label: "Payee",
-          type: "text",
-          span: "half",
-          hidden: (values) => !!values.supplier_id,
+          type: "creatable",
+          required: true,
+          options: payeeOptions,
         },
-        ...paymentFields<IDisbursementInput>("Paid from"),
-        {
-          name: "voucher_type",
-          label: "Voucher type",
-          type: "select",
-          span: "half",
-          options: toOptions(voucherTypeValues, voucherTypeLabels),
-          hidden: (values) => !!values.cash_account,
-        },
+        ...disbursementPaymentFields,
       ],
     },
-    breakdownSection,
   ];
 
   const defaults: DefaultValues<IDisbursementInput> = {
@@ -164,23 +138,24 @@ export const useExpenseListHook = () => {
     supplier_id: null,
     payee: "",
     description: "",
-    expense_type: undefined,
+    expense_type: "",
   };
 
   const editDefaults: DefaultValues<IDisbursementInput> | null = editRow
     ? {
-        ...voucherBreakdownOf(editRow.voucher),
+        ...voucherBreakdownDefaults,
+        particulars: editRow.voucher?.particulars ?? "",
         branch: editRow.branch as BranchSlug,
         farm_section:
           editRow.farm_section as IDisbursementInput["farm_section"],
         txn_date: editRow.txn_date,
         amount: editRow.amount,
         ...paymentDefaultsOf(editRow),
-        voucher_type: editRow.voucher?.type ?? null,
+        voucher_type: null,
         supplier_id: editRow.supplier_id,
-        payee: editRow.supplier_id ? "" : editRow.voucher?.payee ?? "",
+        payee: editRow.supplier?.name ?? editRow.voucher?.payee ?? "",
         description: editRow.description ?? "",
-        expense_type: editRow.expense_type,
+        expense_type: editRow.expense_type ? labelOf(editRow.expense_type) : "",
       }
     : null;
 
@@ -188,6 +163,7 @@ export const useExpenseListHook = () => {
     ...disbursement,
     summary: summarize(summaryRows, labelOf),
     expenseCategoryLabelOf: labelOf,
+    formSummary: undefined,
     sections,
     defaults,
     editDefaults,

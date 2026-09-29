@@ -71,13 +71,13 @@ const withDisbursementRules = <T extends typeof disbursementBase>(schema: T) =>
       path: ["farm_section"],
       message: "Farm section only applies to the Farm branch",
     })
-    .refine((values) => !!values.supplier_id || !!values.payee?.trim(), {
+    .refine((values) => !!values.payee?.trim(), {
       path: ["payee"],
-      message: "Select a supplier or enter a payee for the voucher",
+      message: "Select or type a supplier for the voucher",
     })
-    .refine((values) => !!values.cash_account || !!values.voucher_type, {
-      path: ["voucher_type"],
-      message: "Select check or cash (no payment account chosen)",
+    .refine((values) => !!values.cash_account, {
+      path: ["cash_account"],
+      message: "Select where it is paid from",
     })
     .refine(hasBankAccountWhenBank, bankAccountRequiredIssue)
     .refine(isBreakdownWithinInvoice, breakdownWithinInvoiceIssue);
@@ -86,7 +86,11 @@ export const purchaseSchema = withDisbursementRules(disbursementBase);
 
 export const expenseSchema = withDisbursementRules(
   disbursementBase.extend({
-    expense_type: expenseCategorySlugSchema,
+    expense_type: z
+      .string()
+      .trim()
+      .min(2, "Select or type an expense type")
+      .max(80),
   }) as unknown as typeof disbursementBase
 );
 
