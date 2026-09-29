@@ -47,12 +47,6 @@ const transactionColumns = {
 
 const reportLimit = 5000;
 
-const referenceOf = (
-  kind: DisbursementKind,
-  values: IDisbursementInput
-): string | null =>
-  kind === "purchase" ? values.reference_number?.trim() || null : null;
-
 const breakdownArgs = (values: IDisbursementInput) => {
   const totals = breakdownTotalsOf(values);
 
@@ -223,7 +217,6 @@ const transactionServices = {
         p_txn_date: values.txn_date,
         p_amount: values.amount,
         p_farm_section: values.farm_section ?? null,
-        p_reference_number: referenceOf(kind, values),
         p_description: values.description ?? null,
         p_supplier_id: values.supplier_id ?? null,
         p_cash_account: values.cash_account ?? null,
@@ -254,7 +247,6 @@ const transactionServices = {
         p_txn_date: values.txn_date,
         p_amount: values.amount,
         p_farm_section: values.farm_section ?? null,
-        p_reference_number: referenceOf(kind, values),
         p_description: values.description ?? null,
         p_supplier_id: values.supplier_id ?? null,
         p_cash_account: values.cash_account ?? null,

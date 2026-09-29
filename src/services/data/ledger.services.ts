@@ -45,7 +45,7 @@ type IPartySummaryRow = {
   Record<"customer_name" | "supplier_name", string>;
 const reportLimit = 5000;
 
-const makeLedgerServices = <Row, Input extends { branch: string; amount: number; due_date: string; reference_number?: string | null }>(
+const makeLedgerServices = <Row, Input extends { branch: string; amount: number; due_date: string }>(
   config: ILedgerConfig<Input>
 ) => {
   const noun = config.table.slice(0, -1);
@@ -169,7 +169,6 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
           [config.nameColumn]: config.getName(values),
           amount: values.amount,
           due_date: values.due_date,
-          reference_number: values.reference_number ?? null,
           status: "open" as LedgerStatus,
           created_by: createdBy,
         },

@@ -100,12 +100,6 @@ const buildSections = (source: ISectionSource): IFieldSection<ILedgerInput>[] =>
         required: true,
         prefix: "₱",
       },
-      {
-        name: "reference_number",
-        label: "Reference no.",
-        type: "text",
-        span: "half",
-      },
     ],
   },
 ];
@@ -135,7 +129,6 @@ export const useLedgerScopeHook = (scope: LedgerScope) => {
       branch,
       customer_name: "",
       due_date: todayIso(),
-      reference_number: "",
     },
     partyOf,
     prepare: async (values) => {
@@ -173,7 +166,6 @@ export const useLedgerScopeHook = (scope: LedgerScope) => {
       branch,
       supplier_name: "",
       due_date: todayIso(),
-      reference_number: "",
     },
     partyOf,
     prepare: async (values) => {

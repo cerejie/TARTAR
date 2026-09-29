@@ -133,7 +133,6 @@ export const usePurchaseListHook = () => {
     voucher_type: null,
     supplier_id: null,
     payee: "",
-    reference_number: "",
     description: "",
   };
 
@@ -150,7 +149,6 @@ export const usePurchaseListHook = () => {
         voucher_type: editRow.voucher?.type ?? null,
         supplier_id: editRow.supplier_id,
         payee: editRow.supplier_id ? "" : editRow.voucher?.payee ?? "",
-        reference_number: editRow.reference_number ?? "",
         description: editRow.description ?? "",
       }
     : null;

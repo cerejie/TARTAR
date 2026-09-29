@@ -106,7 +106,7 @@ const paymentServices = {
         p_party_name: values.partyName,
         p_amount: amount,
         p_paid_at: values.paidAt,
-        p_reference_number: values.referenceNumber,
+        p_reference_number: null,
         p_allocations: values.allocations.map((allocation) => ({
           ledger_id: allocation.ledgerId,
           amount: allocation.amount,

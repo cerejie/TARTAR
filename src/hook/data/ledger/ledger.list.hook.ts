@@ -230,7 +230,6 @@ export const useLedgerListHook = <
           partyId: paymentTarget?.party.partyId ?? null,
           partyName: paymentTarget?.party.partyName ?? "",
           paidAt: values.paid_at,
-          referenceNumber: values.reference_number ?? null,
           allocations: paymentRows
             .map((row) => ({
               ledgerId: row.id,
@@ -259,12 +258,6 @@ export const useLedgerListHook = <
           span: "half",
           required: true,
         },
-        {
-          name: "reference_number",
-          label: "Reference no.",
-          type: "text",
-          span: "half",
-        },
         ...paymentRows.map((row, index) => ({
           name: `amounts.${row.id}` as const,
           label: paymentRowLabel(row, index),
@@ -278,7 +271,6 @@ export const useLedgerListHook = <
 
   const paymentDefaults: DefaultValues<IPaymentFormInput> = {
     paid_at: todayIso(),
-    reference_number: "",
     amounts: Object.fromEntries(
       paymentRows.map((row) => [row.id, ledgerBalance(row)])
     ),

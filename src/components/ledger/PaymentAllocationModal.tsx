@@ -24,7 +24,6 @@ import DataTable from "../common/table/DataTable";
 
 const detailFields: IFieldConfig<IPaymentFormInput>[] = [
   { name: "paid_at", label: "Payment date", type: "date" },
-  { name: "reference_number", label: "Reference no. (OR/check)", type: "text" },
 ];
 
 type IProps = {
@@ -48,7 +47,6 @@ const PaymentAllocationModal = ({
 
   const defaults: IPaymentFormInput = {
     paid_at: todayIso(),
-    reference_number: "",
     amounts: Object.fromEntries(
       rows.map((row) => [row.id, ledgerBalance(row)])
     ),
@@ -83,7 +81,6 @@ const PaymentAllocationModal = ({
       partyId: customer.customerId,
       partyName: customer.customerName,
       paidAt: values.paid_at,
-      referenceNumber: values.reference_number?.trim() || null,
       allocations,
     });
   };

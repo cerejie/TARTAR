@@ -12,7 +12,6 @@ export const receivableSchema = z.object({
     .max(160),
   amount: amountField,
   due_date: isoDateField,
-  reference_number: z.string().trim().max(80).nullable().optional(),
 });
 
 export type IReceivableInput = z.infer<typeof receivableSchema>;
@@ -27,7 +26,6 @@ export const payableSchema = z.object({
     .max(160),
   amount: amountField,
   due_date: isoDateField,
-  reference_number: z.string().trim().max(80).nullable().optional(),
 });
 
 export type IPayableInput = z.infer<typeof payableSchema>;

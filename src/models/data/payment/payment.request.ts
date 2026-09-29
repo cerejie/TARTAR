@@ -4,7 +4,6 @@ import type { IAllocationDraft } from "./payment.response";
 
 export const paymentDetailsSchema = z.object({
   paid_at: isoDateField,
-  reference_number: z.string().trim().max(80).nullable().optional(),
 });
 
 export type IPaymentDetailsInput = z.infer<typeof paymentDetailsSchema>;
@@ -21,6 +20,5 @@ export interface IRecordPaymentInput {
   partyId: string | null;
   partyName: string;
   paidAt: string;
-  referenceNumber: string | null;
   allocations: IAllocationDraft[];
 }

@@ -140,9 +140,18 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   bank.services.ts, reference.services income sources). Wired: sale.form/sale.list,
   transaction.list (petty_cash out of Type), disbursement/purchase/expense hooks, voucher.list
   (Bank issuing -> Bank + Account), Sales/Transactions/Purchases/Expenses tables.
+- [x] P3 (v1.57) — migration supabase/migrations/20260930000012_auto_reference_numbers.sql
+  (reference_counters + app.next_reference_no; triggers PUR on purchase transactions by
+  txn_date month, RCV/PAY on receivables/payables by insert month, PMT on payments via first
+  payment_allocations row's branch + paid_at month (user choice); fills only empty refs, so
+  voucher-approved payables keep voucher_no; update_transaction_with_voucher no longer writes
+  reference_number). Reference fields removed: ledger.scope.hook.ts, ledger.list.hook.ts
+  (payment form), PaymentAllocationModal.tsx, purchase.list.hook.ts; schemas ledger.request,
+  payment.request, transaction.request (disbursement); services ledger/payment/transaction.
 
 ## Next
-1. P3 — confirm 20260929000011 is applied, then locate, plan, wait, implement (D3).
+1. P4 — confirm 20260930000012 is applied, then locate, plan, wait, implement (D4, D5, D6,
+   purchase payment section = Supplier + Paid from only).
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -158,10 +167,10 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
 
 ## Open
-- Migration 20260929000011_banks_income_sources.sql must be applied before P2 code is
-  deployed (enum + RPC signature change). Earlier migrations confirmed applied 2026-09-29.
+- Migration 20260930000012_auto_reference_numbers.sql must be applied before P3 code is
+  deployed (without it new rows save with no reference). 20260929000011 confirmed applied.
 
 ## State
-Branch: development-overhaul · Uncommitted: P2 (migration + src + ROADMAP) until v1.56 is
-committed · Last check: yarn build + yarn lint clean after P2. P2 visuals compiled, not
+Branch: development-overhaul · Uncommitted: P3 (migration + src + ROADMAP) until v1.57 is
+committed · Last check: yarn build + yarn lint clean after P3. P3 form changes compiled, not
 screenshot-verified (fold into P10).
