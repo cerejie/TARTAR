@@ -1,8 +1,10 @@
 import type {
   IFilterColumns,
+  ILedgerFilterScope,
   ILedgerFilters,
 } from "../models/common/filter.model";
-import { formatDate, todayIso } from "./format.utils";
+import { dueSoonDays } from "../enums/ledger.enum";
+import { daysFromTodayIso, formatDate, todayIso } from "./format.utils";
 
 interface IChainable {
   eq: (column: string, value: unknown) => unknown;
@@ -15,6 +17,9 @@ interface IStatusChainable {
   eq: (column: string, value: unknown) => unknown;
   neq: (column: string, value: unknown) => unknown;
   lt: (column: string, value: unknown) => unknown;
+  gt: (column: string, value: unknown) => unknown;
+  gte: (column: string, value: unknown) => unknown;
+  lte: (column: string, value: unknown) => unknown;
 }
 
 const defaultColumns: IFilterColumns = { date: "txn_date", amount: "amount" };
@@ -61,9 +66,16 @@ export const applyStatusFilter = <T>(
 
   if (status === "unpaid") return chainable.neq("status", "paid") as T;
 
-  if (status === "overdue") {
-    const unpaid = chainable.neq("status", "paid") as IStatusChainable;
-    return unpaid.lt("due_date", todayIso()) as T;
+  const unpaid = () => chainable.neq("status", "paid") as IStatusChainable;
+  const dueSoonLimit = daysFromTodayIso(dueSoonDays);
+
+  if (status === "overdue") return unpaid().lt("due_date", todayIso()) as T;
+
+  if (status === "upcoming") return unpaid().gt("due_date", dueSoonLimit) as T;
+
+  if (status === "due_soon") {
+    const dueFromToday = unpaid().gte("due_date", todayIso()) as IStatusChainable;
+    return dueFromToday.lte("due_date", dueSoonLimit) as T;
   }
 
   return chainable.eq("status", status) as T;
@@ -99,3 +111,7 @@ export const activeFilterCount = (filters: ILedgerFilters): number =>
     filters.referenceNumber,
     filters.search,
   ].filter(Boolean).length;
+
+export const ledgerFilterScopeOf = (
+  scope: "receivables" | "payables"
+): ILedgerFilterScope => (scope === "payables" ? "payables" : "ledger");

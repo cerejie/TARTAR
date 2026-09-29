@@ -227,7 +227,7 @@ const transactionServices = {
           ? null
           : values.voucher_type ?? null,
         p_created_by: createdBy,
-        p_due_date: kind === "purchase" ? values.due_date ?? null : null,
+        p_due_date: values.due_date ?? null,
         ...breakdownArgs(values),
       },
     }),
@@ -252,7 +252,7 @@ const transactionServices = {
         p_cash_account: values.cash_account ?? null,
         p_bank_account_id: bankAccountOf(values),
         p_expense_type: kind === "expense" ? values.expense_type ?? null : null,
-        p_due_date: kind === "purchase" ? values.due_date ?? null : null,
+        p_due_date: values.due_date ?? null,
         ...breakdownArgs(values),
       },
     }),

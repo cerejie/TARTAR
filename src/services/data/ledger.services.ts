@@ -6,7 +6,9 @@ import {
   type IPaginationResponse,
 } from "../../models/common/pagination.model";
 import type { ISortState } from "../../models/common/table.model";
+import { bankAccountOf } from "../../models/data/bank/bank.request";
 import type {
+  IMarkPaidInput,
   IPayableInput,
   IReceivableInput,
 } from "../../models/data/ledger/ledger.request";
@@ -270,10 +272,30 @@ export const receivableServices = {
   },
 };
 
-export const payableServices = makeLedgerServices<IPayable, IPayableInput>({
-  table: "payables",
-  nameColumn: "supplier_name",
-  idColumn: "supplier_id",
-  getName: (values) => values.supplier_name ?? "",
-  getPartyId: (values) => values.supplier_id,
-});
+export const payableServices = {
+  ...makeLedgerServices<IPayable, IPayableInput>({
+    table: "payables",
+    nameColumn: "supplier_name",
+    idColumn: "supplier_id",
+    getName: (values) => values.supplier_name ?? "",
+    getPartyId: (values) => values.supplier_id,
+  }),
+
+  markPaid: (
+    payable: IPayable,
+    values: IMarkPaidInput,
+    createdBy: string | null
+  ) =>
+    runWrite({
+      label: `Mark paid · ${payable.supplier_name}`,
+      kind: "rpc",
+      fn: "mark_payable_paid",
+      args: {
+        p_payable_id: payable.id,
+        p_paid_at: values.paid_at,
+        p_cash_account: values.cash_account ?? null,
+        p_bank_account_id: bankAccountOf(values),
+        p_created_by: createdBy,
+      },
+    }),
+};

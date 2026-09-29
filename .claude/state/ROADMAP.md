@@ -160,10 +160,23 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   creatable required (payee field) + Paid from; breakdown kept. transaction.request.ts: payee
   required, Paid from required, expense_type = name.
 
+- [x] P5 (v1.59) — migration supabase/migrations/20261002000014_payables_mark_paid.sql
+  (payments.cash_account + bank_account_id; public.mark_payable_paid SECURITY DEFINER, admin
+  or employee, full balance, verified; app.voucher_approval_payable opens payables for expense
+  vouchers with a due date). Statuses (user choice: exclusive tabs) upcoming "Open" / due_soon /
+  overdue / paid: enums/ledger.enum.ts (dueSoonDays, payableStatus*), ledger.response.ts
+  payableStatusOf, filter.utils.ts applyStatusFilter + ledgerFilterScopeOf (payables got its
+  own filter scope "payables", default All, so receivables' "unpaid" default no longer leaks).
+  Mark paid (admin + employee): payable.form.hook.ts, modal/MarkPaidModal.tsx,
+  payableServices.markPaid. tables/PayableRecordsTable.tsx (Amount, no Paid/Balance, no
+  Record/Delete); PayablesView drops RecordPaymentModal. Supplier ledger (user choice: full
+  mirror): SupplierLedgerModal/View, menus/SupplierLedgerButton, supplier.ledger/detail hooks,
+  ledger.store supplier state, printStatement(kind, partyName, ...). LedgerPartiesTable payables
+  row -> supplier ledger. Admin PayableEntrySheet drops Balance/Paid. Expense form Due date
+  (expense.list.hook.ts) + transaction.services sends due_date for expenses.
+
 ## Next
-1. P5 — confirm 20261001000013 is applied, then locate, plan, wait, implement (D7, D8, D9,
-   Payables "By supplier" ledger). Migration needed for D7 (voucher_approval_payable on
-   expenses with a due date) — note the Expense form has no Due date field yet.
+1. P6 — Sales rejection flow (D10). Confirm 20261002000014 is applied first.
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -179,11 +192,13 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
 
 ## Open
-- Migration 20261001000013_ensure_expense_category.sql must be applied before P4 code is
-  deployed (without it a new expense type typed in the form fails to save).
-  20260930000012 confirmed applied.
+- Migrations 20261001000013_ensure_expense_category.sql (P4) and
+  20261002000014_payables_mark_paid.sql (P5) must be applied before their code is deployed.
+  20260930000012 confirmed applied; 13 not yet confirmed by the user.
+- P5: payable delete is blocked in the UI only (pay_manager_all still allows it in the DB).
+  Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · Uncommitted: P4 (migration + src + ROADMAP) until v1.58 is
-committed · Last check: yarn build + yarn lint clean after P4. P4 form changes compiled, not
-screenshot-verified (fold into P10).
+Branch: development-overhaul · Uncommitted: P5 (migration + src + ROADMAP) until v1.59 is
+committed · Last check: yarn build + yarn lint clean after P5. P5 UI compiled, not
+screenshot-verified (fold into P10: Mark paid modal stacking over the supplier ledger).

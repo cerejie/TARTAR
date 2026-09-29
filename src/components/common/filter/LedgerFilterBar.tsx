@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   ledgerStatusLabels,
   ledgerStatusValues,
+  payableStatusLabels,
   paymentStatusLabels,
   paymentStatusValues,
   type PaymentKind,
@@ -28,6 +29,7 @@ import SearchInput from "./SearchInput";
 type ILedgerStatusFilter = NonNullable<ILedgerFilters["status"]>;
 
 const statusFilterLabels: Record<ILedgerStatusFilter, string> = {
+  ...payableStatusLabels,
   unpaid: "Unpaid",
   ...ledgerStatusLabels,
   overdue: "Overdue",
@@ -37,6 +39,7 @@ type IProps = {
   showSearch?: boolean;
   showStatus?: boolean;
   showOverdue?: boolean;
+  statusValues?: readonly ILedgerStatusFilter[];
   showType?: boolean;
   showReference?: boolean;
   paymentKind?: PaymentKind;
@@ -48,6 +51,7 @@ const LedgerFilterBar = ({
   showSearch = false,
   showStatus = false,
   showOverdue = false,
+  statusValues,
   showType = false,
   showReference = true,
   paymentKind,
@@ -56,9 +60,10 @@ const LedgerFilterBar = ({
 }: IProps) => {
   const { filters, setFilters, resetFilters } = useLedgerFilters(scope);
 
-  const statusFilterValues: readonly ILedgerStatusFilter[] = showOverdue
+  const defaultStatusValues: readonly ILedgerStatusFilter[] = showOverdue
     ? ["unpaid", ...ledgerStatusValues, "overdue"]
     : ["unpaid", ...ledgerStatusValues];
+  const statusFilterValues = statusValues ?? defaultStatusValues;
 
   const isPopover = layout === "popover";
 

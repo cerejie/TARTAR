@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { amountField, isoDateField } from "../../../utils/schema.utils";
+import {
+  bankAccountRequiredIssue,
+  hasBankAccountWhenBank,
+  paymentAccountShape,
+} from "../bank/bank.request";
 import { branchSlugSchema } from "../branch/branch.response";
 
 export const receivableSchema = z.object({
@@ -33,3 +38,16 @@ export type IPayableInput = z.infer<typeof payableSchema>;
 export const settlementSchema = z.object({ amount: amountField });
 
 export type ISettlementInput = z.infer<typeof settlementSchema>;
+
+export const markPaidSchema = z
+  .object({
+    paid_at: isoDateField,
+    ...paymentAccountShape,
+  })
+  .refine((values) => !!values.cash_account, {
+    path: ["cash_account"],
+    message: "Choose where it was paid from",
+  })
+  .refine(hasBankAccountWhenBank, bankAccountRequiredIssue);
+
+export type IMarkPaidInput = z.infer<typeof markPaidSchema>;

@@ -34,6 +34,9 @@ export const customerDetailsModalKey = "customer-details-form";
 export const customerInfoModalKey = "customer-info";
 export const customerPaymentModalKey = "customer-ledger-payment";
 
+export const supplierLedgerModalKey = "supplier-ledger";
+export const payableMarkPaidModalKey = "payable-mark-paid";
+
 export const ledgerFormModalKey = (scope: string) => `${scope}-form`;
 export const ledgerPaymentModalKey = (scope: string) => `${scope}-payment`;
 

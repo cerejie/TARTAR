@@ -1,5 +1,10 @@
 import dayjs from "dayjs";
-import type { LedgerStatus } from "../../../enums/ledger.enum";
+import { dueSoonDays } from "../../../enums/ledger.enum";
+import { daysFromTodayIso, todayIso } from "../../../utils/format.utils";
+import type {
+  LedgerStatus,
+  PayableStatus,
+} from "../../../enums/ledger.enum";
 
 interface ILedgerBase {
   id: string;
@@ -75,6 +80,17 @@ export const isLedgerOverdue = (row: {
   due_date: string;
 }): boolean =>
   row.status !== "paid" && row.due_date < dayjs().format("YYYY-MM-DD");
+
+export const payableStatusOf = (row: {
+  status: LedgerStatus;
+  due_date: string;
+}): PayableStatus => {
+  if (row.status === "paid") return "paid";
+  if (row.due_date < todayIso()) return "overdue";
+  if (row.due_date <= daysFromTodayIso(dueSoonDays)) return "due_soon";
+
+  return "upcoming";
+};
 
 export const ledgerBalance = (row: {
   amount: number;

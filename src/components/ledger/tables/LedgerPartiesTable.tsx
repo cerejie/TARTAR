@@ -1,4 +1,4 @@
-import { CircleDollarSign, IdCard } from "lucide-react";
+import { BookOpen, CircleDollarSign, IdCard } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import SearchInput from "../../common/filter/SearchInput";
@@ -13,10 +13,12 @@ import {
   useLedgerScopeHook,
   type LedgerScope,
 } from "../../../hook/data/ledger/ledger.scope.hook";
+import { useSupplierLedgerHook } from "../../../hook/data/ledger/supplier.ledger.hook";
 import { customerDetailsModalKey } from "../../../keys/modal.keys";
 import type { IRowAction } from "../../../models/common/action.model";
 import type { ILedgerPartySummary } from "../../../models/data/ledger/ledger.response";
 import { nowrapCell } from "../../../styles/table/table.styles";
+import { ledgerFilterScopeOf } from "../../../utils/filter.utils";
 import { formatDate, formatMoney } from "../../../utils/format.utils";
 
 type IProps = {
@@ -33,10 +35,20 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
     retryParties,
     openPaymentForParty,
   } = useLedgerScopeHook(scope);
-  const { filters, setFilters } = useLedgerFilters("ledger");
+  const { filters, setFilters } = useLedgerFilters(ledgerFilterScopeOf(scope));
   const detailsModal = useModal<ILedgerPartySummary>(customerDetailsModalKey);
+  const { openSupplierLedger } = useSupplierLedgerHook();
 
-  const actionsOf = (party: ILedgerPartySummary): IRowAction[] => [
+  const supplierActionsOf = (party: ILedgerPartySummary): IRowAction[] => [
+    {
+      key: "ledger",
+      label: "View ledger",
+      icon: <BookOpen />,
+      onSelect: () => openSupplierLedger(party),
+    },
+  ];
+
+  const customerActionsOf = (party: ILedgerPartySummary): IRowAction[] => [
     {
       key: "payment",
       label: "Record payment",
@@ -45,17 +57,16 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
       disabled: party.unpaidCount === 0,
       onSelect: () => openPaymentForParty(party),
     },
-    ...(scope === "receivables"
-      ? [
-          {
-            key: "details",
-            label: "Customer details",
-            icon: <IdCard />,
-            onSelect: () => detailsModal.openModal(party),
-          },
-        ]
-      : []),
+    {
+      key: "details",
+      label: "Customer details",
+      icon: <IdCard />,
+      onSelect: () => detailsModal.openModal(party),
+    },
   ];
+
+  const actionsOf =
+    scope === "payables" ? supplierActionsOf : customerActionsOf;
 
   const columns: IDataTableColumn<ILedgerPartySummary>[] = [
     {
@@ -116,6 +127,7 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
           error={partiesError}
           onRetry={retryParties}
           rowKey={(party) => party.partyId ?? `name:${party.partyName}`}
+          onRowClick={scope === "payables" ? openSupplierLedger : undefined}
           emptyText={`No ${partyLabel.toLowerCase()}s match the current search`}
         />
       </TablePanel>

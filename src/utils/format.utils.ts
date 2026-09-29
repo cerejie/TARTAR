@@ -43,6 +43,9 @@ export const formatTime = (value: string | null | undefined): string =>
 
 export const todayIso = (): string => dayjs().format("YYYY-MM-DD");
 
+export const daysFromTodayIso = (days: number): string =>
+  dayjs().add(days, "day").format("YYYY-MM-DD");
+
 export const formatDatePattern = (value: string, pattern: string): string =>
   dayjs(value).format(pattern);
 

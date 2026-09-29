@@ -20,7 +20,9 @@ const initialValues: States = {
   filters: {
     page: {},
     "customer-ledger": {},
+    "supplier-ledger": {},
     ledger: { status: "unpaid" },
+    payables: {},
     payments: { paymentStatus: "pending" },
     vouchers: {},
   },

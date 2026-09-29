@@ -1,7 +1,7 @@
-import dayjs from "dayjs";
 import type { DefaultValues, FieldValues } from "react-hook-form";
 import type { ZodType } from "zod";
 import {
+  dueSoonDays,
   ledgerSortOptions,
   type PaymentKind,
 } from "../../../enums/ledger.enum";
@@ -43,8 +43,17 @@ import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
-import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
-import { formatDate, formatMoney, todayIso } from "../../../utils/format.utils";
+import {
+  filterPeriodLabel,
+  ledgerFilterScopeOf,
+  scopedFilters,
+} from "../../../utils/filter.utils";
+import {
+  daysFromTodayIso,
+  formatDate,
+  formatMoney,
+  todayIso,
+} from "../../../utils/format.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
 import { useModal } from "../../common/modal.hook";
@@ -87,11 +96,9 @@ export interface ILedgerListConfig<
   prepare(values: Input): Promise<Input>;
 }
 
-const dueSoonDays = 7;
-
 const summarize = (rows: readonly ILedgerRow[]): ILedgerSummary => {
   const today = todayIso();
-  const soonLimit = dayjs().add(dueSoonDays, "day").format("YYYY-MM-DD");
+  const soonLimit = daysFromTodayIso(dueSoonDays);
   const unpaid = rows.filter((row) => row.status !== "paid");
   const overdueRows = unpaid.filter((row) => row.due_date < today);
   const dueSoonRows = unpaid.filter(
@@ -135,7 +142,7 @@ export const useLedgerListHook = <
   const permissions = usePermissions();
   const createdBy = useAccountStore(selectUserId);
 
-  const { filters } = useLedgerFilters("ledger");
+  const { filters } = useLedgerFilters(ledgerFilterScopeOf(config.scope));
   const { branchName } = useBranchListHook();
   const { userNameOf } = useUserListHook();
   const { branch: scopeBranch } = useBranchScopeHook();

@@ -1,15 +1,22 @@
-import { ledgerStatusLabels } from "../enums/ledger.enum";
+import {
+  ledgerStatusLabels,
+  payableStatusLabels,
+  type PaymentKind,
+} from "../enums/ledger.enum";
 import {
   voucherLineLabels,
   voucherLineValues,
   voucherTypeLabels,
 } from "../enums/voucher.enum";
 import type {
-  ICustomerLedgerKey,
   ICustomerReceivableSummary,
+  IPayable,
   IReceivable,
 } from "../models/data/ledger/ledger.response";
-import { ledgerBalance } from "../models/data/ledger/ledger.response";
+import {
+  ledgerBalance,
+  payableStatusOf,
+} from "../models/data/ledger/ledger.response";
 import type { ILedgerPayment } from "../models/data/payment/payment.response";
 import type { IVoucher } from "../models/data/voucher/voucher.response";
 import { voucherPurpose } from "../models/data/voucher/voucher.response";
@@ -193,16 +200,42 @@ export const printVoucher = (
   );
 };
 
+const statementLabels: Record<
+  PaymentKind,
+  { title: string; section: string; empty: string }
+> = {
+  receivable: {
+    title: "Customer Statement",
+    section: "Receivables",
+    empty: "No receivable records",
+  },
+  payable: {
+    title: "Supplier Statement",
+    section: "Payables",
+    empty: "No payable records",
+  },
+};
+
+const statementStatusOf = (
+  kind: PaymentKind,
+  row: IReceivable | IPayable
+): string =>
+  kind === "payable"
+    ? payableStatusLabels[payableStatusOf(row)]
+    : ledgerStatusLabels[row.status];
+
 export const printStatement = (
-  customer: ICustomerLedgerKey,
+  kind: PaymentKind,
+  partyName: string,
   summary:
     | Pick<ICustomerReceivableSummary, "outstanding" | "unpaidCount">
     | undefined,
-  rows: IReceivable[],
+  rows: readonly (IReceivable | IPayable)[],
   payments: ILedgerPayment[],
   branchName: (slug: string) => string
 ): void => {
-  const receivableRows = rows
+  const labels = statementLabels[kind];
+  const ledgerRows = rows
     .map(
       (row) => `<tr>
         <td>${formatDate(row.created_at)}</td>
@@ -212,7 +245,7 @@ export const printStatement = (
         <td class="num">${formatMoney(row.amount)}</td>
         <td class="num">${formatMoney(row.paid_amount)}</td>
         <td class="num">${formatMoney(ledgerBalance(row))}</td>
-        <td>${ledgerStatusLabels[row.status]}</td>
+        <td>${statementStatusOf(kind, row)}</td>
       </tr>`
     )
     .join("");
@@ -234,7 +267,7 @@ export const printStatement = (
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Statement — ${escapeHtml(customer.customerName)}</title>
+  <title>Statement — ${escapeHtml(partyName)}</title>
   <style>${baseStyles}
     h2 { margin: 28px 0 8px; font-size: 15px; }
     .sub { margin-bottom: 16px; }
@@ -248,19 +281,19 @@ export const printStatement = (
 </head>
 <body>
   <h1>TARTAR</h1>
-  <div class="sub">Customer Statement · generated ${formatDateTime(
+  <div class="sub">${labels.title} · generated ${formatDateTime(
     new Date().toISOString()
   )}</div>
-  <div class="meta"><strong>${escapeHtml(customer.customerName)}</strong></div>
+  <div class="meta"><strong>${escapeHtml(partyName)}</strong></div>
   <div class="meta">Outstanding balance: <span class="outstanding">${formatMoney(
     summary?.outstanding ?? 0
   )}</span> · Unpaid transactions: ${summary?.unpaidCount ?? 0}</div>
 
-  <h2>Receivables</h2>
+  <h2>${labels.section}</h2>
   <table>
     <tr><th>Date</th><th>Due date</th><th>Branch</th><th>Reference</th>
         <th class="num">Amount</th><th class="num">Paid</th><th class="num">Balance</th><th>Status</th></tr>
-    ${receivableRows || '<tr><td colspan="8">No receivable records</td></tr>'}
+    ${ledgerRows || `<tr><td colspan="8">${labels.empty}</td></tr>`}
   </table>
 
   <h2>Payment history</h2>

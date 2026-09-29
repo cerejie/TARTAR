@@ -60,6 +60,30 @@ export const ledgerStatusFilterLabels: Record<LedgerStatusFilter, string> = {
   paid: "Paid",
 };
 
+export const dueSoonDays = 7;
+
+export const payableStatusValues = [
+  "upcoming",
+  "due_soon",
+  "overdue",
+  "paid",
+] as const;
+export type PayableStatus = (typeof payableStatusValues)[number];
+
+export const payableStatusLabels: Record<PayableStatus, string> = {
+  upcoming: "Open",
+  due_soon: "Due soon",
+  overdue: "Overdue",
+  paid: "Paid",
+};
+
+export const payableStatusColors: Record<PayableStatus, StatusColor> = {
+  upcoming: "default",
+  due_soon: "warning",
+  overdue: "negative",
+  paid: "positive",
+};
+
 export const ledgerSortOptions: readonly ISortOption[] = [
   { key: "due-soonest", label: "Due soonest", column: "due_date", direction: "ascending" },
   { key: "due-latest", label: "Due latest", column: "due_date", direction: "descending" },

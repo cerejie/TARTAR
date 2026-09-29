@@ -145,7 +145,14 @@ const CustomerLedgerView = () => {
           <AppButton
             variant="outline"
             onPress={() =>
-              printStatement(customer, summary, rows, payments, branchName)
+              printStatement(
+                "receivable",
+                customer.customerName,
+                summary,
+                rows,
+                payments,
+                branchName
+              )
             }
           >
             <Printer />

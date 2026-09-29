@@ -1,5 +1,4 @@
 import { ExternalLink } from "lucide-react";
-import { ledgerBalance } from "../../../models/data/ledger/ledger.response";
 import { formatDate, formatMoney } from "../../../utils/format.utils";
 import AppSheet from "../../common/app/AppSheet";
 import AppButton from "../../common/button/AppButton";
@@ -29,10 +28,8 @@ const checkItems: readonly IDetailItem<IVoucher>[] = [
 
 const payableItems: readonly IDetailItem<IPayable>[] = [
   { key: "supplier", label: "Supplier", render: (payable) => payable.supplier_name, span: 2 },
-  { key: "balance", label: "Balance", render: (payable) => formatMoney(ledgerBalance(payable)) },
   { key: "dueDate", label: "Due date", render: (payable) => formatDate(payable.due_date) },
   { key: "amount", label: "Amount", render: (payable) => formatMoney(payable.amount) },
-  { key: "paid", label: "Paid", render: (payable) => formatMoney(payable.paid_amount) },
   { key: "reference", label: "Reference", render: (payable) => payable.reference_number ?? "—" },
   { key: "branch", label: "Branch", render: (payable) => payable.branch },
 ];
