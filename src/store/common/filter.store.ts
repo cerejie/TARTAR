@@ -24,6 +24,7 @@ const initialValues: States = {
     ledger: { status: "unpaid" },
     payables: {},
     payments: { paymentStatus: "pending" },
+    "report-summary": {},
     vouchers: {},
   },
 };

@@ -22,6 +22,9 @@ import {
   type ISale,
 } from "../models/data/sale/sale.response";
 import type {
+  IBranchSummaryData,
+  IBranchSummaryRow,
+  IBranchSummaryTotals,
   ICashFlowRow,
   IExpenseRow,
   IReportData,
@@ -340,6 +343,97 @@ export const disbursementPrintDocument = (
         formatMoney(amountToPayOf(row)),
       ]),
       emptyText: `No ${disbursementTitles[kind].toLowerCase()} in this period`,
+    },
+  ],
+});
+
+const isCountedDisbursement = (row: IDisbursement) =>
+  row.voucher?.status !== "rejected";
+
+export const branchSummaryRows = (
+  data: IBranchSummaryData,
+  branchNameOf: (slug: string) => string
+): IBranchSummaryRow[] => {
+  const purchases = data.purchases.filter(isCountedDisbursement);
+  const expenses = data.expenses.filter(isCountedDisbursement);
+  const branches = new Set(
+    [...data.sales, ...purchases, ...expenses].map((row) => row.branch)
+  );
+
+  return [...branches]
+    .map((branch) => {
+      const inBranch = <Row extends ITransaction>(rows: readonly Row[]) =>
+        rows.filter((row) => row.branch === branch);
+      const branchSales = inBranch(data.sales);
+      const sales = sumAmounts(branchSales.filter(isVerifiedSale), (row) => row.amount);
+      const expenseTotal = sumAmounts(inBranch(expenses), amountToPayOf);
+      const purchaseTotal = sumAmounts(inBranch(purchases), amountToPayOf);
+
+      return {
+        branch,
+        branchName: branchNameOf(branch),
+        sales,
+        pendingSales: sumAmounts(branchSales.filter(isPendingSale), (row) => row.amount),
+        expenses: expenseTotal,
+        purchases: purchaseTotal,
+        net: sales - expenseTotal - purchaseTotal,
+      };
+    })
+    .sort((left, right) => left.branchName.localeCompare(right.branchName));
+};
+
+export const branchSummaryTotals = (
+  rows: readonly IBranchSummaryRow[]
+): IBranchSummaryTotals => ({
+  sales: sumAmounts(rows, (row) => row.sales),
+  pendingSales: sumAmounts(rows, (row) => row.pendingSales),
+  expenses: sumAmounts(rows, (row) => row.expenses),
+  purchases: sumAmounts(rows, (row) => row.purchases),
+  net: sumAmounts(rows, (row) => row.net),
+});
+
+const branchSummaryCells = (label: string, totals: IBranchSummaryTotals) => [
+  label,
+  formatMoney(totals.sales),
+  formatMoney(totals.expenses),
+  formatMoney(totals.purchases),
+  formatMoney(totals.net),
+];
+
+export const branchSummaryPrintDocument = (
+  rows: readonly IBranchSummaryRow[],
+  totals: IBranchSummaryTotals,
+  range: IDateRange,
+  scope: string
+): IPrintReportDocument => ({
+  title: "Branch Summary",
+  period: dateRangeLabel(range),
+  scope,
+  stats: [
+    { label: "Sales", value: formatMoney(totals.sales) },
+    { label: "Expenses", value: formatMoney(totals.expenses) },
+    { label: "Purchases", value: formatMoney(totals.purchases) },
+    { label: "Net", value: formatMoney(totals.net) },
+    { label: "Pending verification", value: formatMoney(totals.pendingSales) },
+  ],
+  tables: [
+    {
+      title: "Totals by Branch",
+      subtitle: "Verified sales; expenses and purchases at amount to pay",
+      columns: [
+        { title: "Branch" },
+        { title: "Sales", numeric: true },
+        { title: "Expenses", numeric: true },
+        { title: "Purchases", numeric: true },
+        { title: "Net", numeric: true },
+      ],
+      rows: rows.length
+        ? [
+            ...rows.map((row) => branchSummaryCells(row.branchName, row)),
+            branchSummaryCells("Total", totals),
+          ]
+        : [],
+      emptyText: "No activity in this period",
     },
   ],
 });

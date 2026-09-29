@@ -6,6 +6,9 @@ import type {
 } from "../models/common/period.model";
 
 const isoFormat = "YYYY-MM-DD";
+const monthFormat = "YYYY-MM";
+const monthLabelFormat = "MMMM YYYY";
+const recentMonthCount = 12;
 const daysInWeek = 7;
 const mondayOffset = 6;
 
@@ -34,3 +37,33 @@ export const dateRangeLabel = (range: IDateRange): string =>
   range.from === range.to
     ? formatDate(range.from)
     : `${formatDate(range.from)} – ${formatDate(range.to)}`;
+
+export const currentMonth = (): string => dayjs().format(monthFormat);
+
+export const monthRangeOf = (month: string): IDateRange => {
+  const anchor = dayjs(`${month}-01`);
+  return {
+    from: anchor.startOf("month").format(isoFormat),
+    to: anchor.endOf("month").format(isoFormat),
+  };
+};
+
+export const recentMonths = (): string[] =>
+  Array.from({ length: recentMonthCount }, (_, index) =>
+    dayjs().subtract(index, "month").format(monthFormat)
+  );
+
+export const monthLabelsOf = (
+  months: readonly string[]
+): Record<string, string> =>
+  Object.fromEntries(
+    months.map((month) => [month, dayjs(`${month}-01`).format(monthLabelFormat)])
+  );
+
+export const monthOfRange = (range: IDateRange): string | undefined => {
+  const month = dayjs(range.from).format(monthFormat);
+  const wholeMonth = monthRangeOf(month);
+  return wholeMonth.from === range.from && wholeMonth.to === range.to
+    ? month
+    : undefined;
+};

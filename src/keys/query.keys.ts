@@ -31,6 +31,7 @@ export const dashboardChecksKey = "dashboard-checks";
 export const reportTransactionKey = "report-transactions";
 export const reportReceivableKey = "report-receivables";
 export const reportPayableKey = "report-payables";
+export const reportSummaryKey = "report-summary";
 
 export const scopedKey = (...parts: (string | number | null | undefined)[]) =>
   parts.map((part) => part ?? "all").join(":");

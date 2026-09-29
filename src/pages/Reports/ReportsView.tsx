@@ -3,6 +3,7 @@ import { Printer } from "lucide-react";
 import AppButton from "../../components/common/button/AppButton";
 import ContentView from "../../components/common/view/ContentView";
 import ViewSwitch from "../../components/common/view/ViewSwitch";
+import BranchSummaryReport from "../../components/report/BranchSummaryReport";
 import CashFlowReport from "../../components/report/CashFlowReport";
 import ExpensesReport from "../../components/report/ExpensesReport";
 import LedgerReport from "../../components/report/LedgerReport";
@@ -28,11 +29,32 @@ const ReportsView = () => {
     error,
     retry,
     print,
+    summaryRows,
+    summaryTotals,
+    summaryRange,
+    summaryMonth,
+    summaryMonths,
+    summaryMonthLabels,
+    setSummaryMonth,
+    setSummaryRange,
   } = useReportHook();
 
   const state: IReportState = { loading, refreshing, error, onRetry: retry };
 
   const body = {
+    summary: (
+      <BranchSummaryReport
+        rows={summaryRows}
+        totals={summaryTotals}
+        range={summaryRange}
+        month={summaryMonth}
+        months={summaryMonths}
+        monthLabels={summaryMonthLabels}
+        onMonthChange={setSummaryMonth}
+        onRangeChange={setSummaryRange}
+        {...state}
+      />
+    ),
     receivables: (
       <LedgerReport
         rows={receivables}

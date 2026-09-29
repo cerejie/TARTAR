@@ -18,6 +18,7 @@ export type ILedgerFilterScope =
   | "ledger"
   | "payables"
   | "payments"
+  | "report-summary"
   | "vouchers";
 
 export interface ILedgerFilters {

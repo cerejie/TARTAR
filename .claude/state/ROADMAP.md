@@ -195,9 +195,17 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   Print button on Sales/Purchases/Expenses tables (periodPrintModalKey, salePrintModalKey).
   Purchases filter "Date of" (Invoice date / Voucher created / Paid): ILedgerFilters.dateBasis,
   LedgerFilterBar showDateBasis, transaction.services disbursementQuery (purchase only).
+- [x] P8 (v1.62) — no migration. Reports tab "Branch Summary" (first, default type summary):
+  report.response.ts (IBranchSummaryRow/Totals/Data), report.summary.hook.ts (filter scope
+  "report-summary", default current month; Month select over last 12 months derived from the
+  range + DateRangeFilter custom range; top-bar branch scope), report.hook.ts spreads it,
+  components/report/BranchSummaryReport.tsx, ReportsView.tsx. User choices: Sales = verified
+  only (pending as caption), Expenses/Purchases = amount to pay (voucher net) by txn_date,
+  rejected vouchers excluded, only branches with activity get a row. Print = summary only
+  (report.utils branchSummaryPrintDocument, totals row); period.utils month helpers.
 
 ## Next
-1. P8 — Reports by branch summary + print (D11).
+1. P9 — Notifications (D15), accountant branch selector (D16), admin realtime (D12).
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -218,9 +226,10 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · Uncommitted: P7 (src + migration + ROADMAP) until v1.61 is
-committed · Migration 20261003000015 applied · Last check: yarn
-build + yarn lint clean after P7. P7 compiled, not screenshot-verified (fold into P10: voucher
+Branch: development-overhaul · Uncommitted: P8 (src + ROADMAP) until v1.62 is committed ·
+Migration 20261003000015 applied · Last check: yarn build + yarn lint clean after P8. P8
+compiled, not screenshot-verified (fold into P10: Branch Summary tab, month/custom range,
+print). P7 compiled, not screenshot-verified (fold into P10: voucher
 print vs sample, period print modal, Purchases "Date of" filter; period print scope reads "All
 branches" for employees, as the Reports print does). P5 UI compiled, not
 screenshot-verified (fold into P10: Mark paid modal stacking over the supplier ledger).

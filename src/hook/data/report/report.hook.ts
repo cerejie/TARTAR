@@ -27,17 +27,27 @@ import { useQuery } from "../../common/query.hook";
 import { useSearchParam } from "../../common/search.param.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useExpenseCategoryListHook } from "../expense-category/expense.category.list.hook";
+import { useReportSummaryHook } from "./report.summary.hook";
 
 export const useReportHook = () => {
   const { value: type, setValue: setType } = useSearchParam<ReportType>(
     "type",
     reportTypeValues,
-    "daily"
+    "summary"
   );
 
   const { from, to } = rangeFor(type);
   const { branch, branchName } = useBranchScopeHook();
   const { expenseCategories } = useExpenseCategoryListHook();
+  const isSummary = type === "summary";
+  const {
+    summaryLoading,
+    summaryRefreshing,
+    summaryError,
+    retrySummary,
+    printSummary,
+    ...summary
+  } = useReportSummaryHook(isSummary);
 
   const branchFilter: ILedgerFilters = branch ? { branch } : {};
   const isTransactionReport = transactionReportTypes.includes(type);
@@ -76,7 +86,7 @@ export const useReportHook = () => {
         ? payableQuery
         : transactionQuery;
 
-  const print = () =>
+  const printActiveReport = () =>
     printReport({
       title: `${reportTypeLabels[type]} Report`,
       period: periodLabel(type, from, to),
@@ -97,10 +107,11 @@ export const useReportHook = () => {
     receivables,
     payables,
     expenseCategories,
-    loading: activeQuery.isInitialLoading,
-    refreshing: activeQuery.isRefreshing,
-    error: activeQuery.error,
-    retry: activeQuery.refetch,
-    print,
+    ...summary,
+    loading: isSummary ? summaryLoading : activeQuery.isInitialLoading,
+    refreshing: isSummary ? summaryRefreshing : activeQuery.isRefreshing,
+    error: isSummary ? summaryError : activeQuery.error,
+    retry: isSummary ? retrySummary : activeQuery.refetch,
+    print: isSummary ? printSummary : printActiveReport,
   };
 };
