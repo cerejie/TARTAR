@@ -1,4 +1,4 @@
-import type { DefaultValues } from "react-hook-form";
+import type { DefaultValues, Path } from "react-hook-form";
 import {
   voucherKindLabels,
   voucherKindValues,
@@ -29,6 +29,7 @@ import {
 import { scopedFilters } from "../../../utils/filter.utils";
 import { formatMoney, todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
+import { derivePaymentValues } from "../../../utils/payment.utils";
 import { printVoucher } from "../../../utils/print.utils";
 import {
   deriveVoucherValues,
@@ -44,9 +45,18 @@ import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
+import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useSupplierListHook } from "../party/supplier.list.hook";
+
+const deriveManualVoucherValues = (
+  changed: Path<IVoucherInput>,
+  values: IVoucherInput
+): Partial<IVoucherInput> => ({
+  ...deriveVoucherValues(changed, values),
+  ...derivePaymentValues(changed, values),
+});
 
 export const useVoucherListHook = () => {
   const formModal = useModal(voucherFormModalKey);
@@ -66,6 +76,7 @@ export const useVoucherListHook = () => {
   const { branches, branchOptions, branchName, defaultBranch } =
     useBranchListHook();
   const { supplierOptions } = useSupplierListHook();
+  const { accountLabelOf, bankAccountFields } = useBankAccountListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
@@ -83,7 +94,11 @@ export const useVoucherListHook = () => {
   );
 
   const createMutation = useMutation(
-    (values: IVoucherInput) => voucherServices.create(values, createdBy),
+    (values: IVoucherInput) =>
+      voucherServices.create(
+        { ...values, check_bank: accountLabelOf(values.bank_account_id) },
+        createdBy
+      ),
     {
       successMessage: "Voucher submitted for approval",
       invalidate: [voucherListKey],
@@ -181,14 +196,7 @@ export const useVoucherListHook = () => {
       required: true,
       hidden: (values) => values.kind !== "purchase",
     },
-    {
-      name: "check_bank",
-      label: "Bank issuing",
-      type: "text",
-      required: true,
-      placeholder: "e.g. BDO — Tacloban",
-      hidden: (values) => values.type !== "check",
-    },
+    ...bankAccountFields<IVoucherInput>((values) => values.type === "check"),
     {
       name: "check_number",
       label: "Check number",
@@ -213,6 +221,8 @@ export const useVoucherListHook = () => {
     payee: "",
     supplier_id: null,
     due_date: todayIso(),
+    bank_id: null,
+    bank_account_id: null,
     check_bank: "",
     check_number: "",
     check_due_date: todayIso(),
@@ -236,7 +246,7 @@ export const useVoucherListHook = () => {
     fields,
     defaults,
     formSummary: voucherSummaryLines,
-    deriveFormValues: deriveVoucherValues,
+    deriveFormValues: deriveManualVoucherValues,
     createMutation,
     confirmDecision,
     print,

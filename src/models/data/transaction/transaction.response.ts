@@ -1,7 +1,6 @@
 import type { SaleStatus } from "../../../enums/sale.enum";
 import type {
   CashAccount,
-  IncomeSource,
   TransactionType,
 } from "../../../enums/transaction.enum";
 import type { IVoucher } from "../voucher/voucher.response";
@@ -18,7 +17,8 @@ export interface ITransaction {
   customer_id: string | null;
   supplier_id: string | null;
   cash_account: CashAccount | null;
-  income_source: IncomeSource | null;
+  bank_account_id: string | null;
+  income_source: string | null;
   expense_type: string | null;
   due_date: string | null;
   sale_status?: SaleStatus | null;

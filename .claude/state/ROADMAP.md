@@ -130,9 +130,19 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   kept); Purchases "Amount to pay" column = phone card amount (PurchasesTable.tsx); receivable
   statement drops payment Status (print.utils.ts); multiselect opens on focus + chevron
   (FormField.tsx, form.styles.ts fieldMultiselectTrigger) — fixes Users Branch access.
+- [x] P2 (v1.56) — migration supabase/migrations/20260929000011_banks_income_sources.sql
+  (banks, bank_accounts, income_sources, petty_cash, transactions.bank_account_id, RPCs +
+  p_bank_account_id, check_bank = account label). Picker (user choice): Cash Drawer / Petty
+  Cash / Bank, then Bank + Account selects — hook/data/bank/bank.account.list.hook.ts
+  (paymentFields, bankAccountFields, paymentLabelOf, paymentDefaultsOf), utils/payment.utils.ts
+  (derivePaymentValues), IFieldConfig.optionsOf (field.model.ts, FormFieldGrid.tsx). Master
+  Data tabs Income Sources + Banks (BankAccountsTable, IncomeSourcesTable, create buttons,
+  bank.services.ts, reference.services income sources). Wired: sale.form/sale.list,
+  transaction.list (petty_cash out of Type), disbursement/purchase/expense hooks, voucher.list
+  (Bank issuing -> Bank + Account), Sales/Transactions/Purchases/Expenses tables.
 
 ## Next
-1. P2 — first confirm the Open migrations are applied, then locate, plan, wait, implement.
+1. P3 — confirm 20260929000011 is applied, then locate, plan, wait, implement (D3).
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -148,10 +158,10 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
 
 ## Open
-- Migration 20260926000009_accountant_voucher_read.sql (and possibly 20260718000004..
-  20260722000008) may not be applied to Supabase yet — confirm with the user before P2.
+- Migration 20260929000011_banks_income_sources.sql must be applied before P2 code is
+  deployed (enum + RPC signature change). Earlier migrations confirmed applied 2026-09-29.
 
 ## State
-Branch: development-overhaul · Uncommitted: P1 (11 src files + ROADMAP) until v1.55 is
-committed · Last check: yarn build + yarn lint clean after P1. P1 visuals compiled, not
+Branch: development-overhaul · Uncommitted: P2 (migration + src + ROADMAP) until v1.56 is
+committed · Last check: yarn build + yarn lint clean after P2. P2 visuals compiled, not
 screenshot-verified (fold into P10).

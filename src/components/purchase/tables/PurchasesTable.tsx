@@ -13,7 +13,6 @@ import TablePanel from "../../common/table/TablePanel";
 import DisbursementHistoryModal from "../../disbursement/modal/DisbursementHistoryModal";
 import StatusTag from "../../common/status/StatusTag";
 import UserCell from "../../user/table/cells/UserCell";
-import { cashAccountLabels } from "../../../enums/transaction.enum";
 import {
   voucherStatusColors,
   voucherStatusLabels,
@@ -52,6 +51,7 @@ const PurchasesTable = () => {
     branchName,
     userById,
     userNameOf,
+    paymentLabelOf,
     formModal,
     editModal,
     historyModal,
@@ -205,8 +205,7 @@ const PurchasesTable = () => {
         {
           key: "cash_account",
           label: "Paid from",
-          render: (row) =>
-            row.cash_account ? cashAccountLabels[row.cash_account] : "—",
+          render: (row) => paymentLabelOf(row),
         },
         {
           key: "farm_section",

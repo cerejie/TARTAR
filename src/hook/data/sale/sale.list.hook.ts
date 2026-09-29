@@ -31,8 +31,10 @@ import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
+import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
+import { useIncomeSourceListHook } from "../income-source/income.source.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
 
 export const saleInvalidateKeys = [
@@ -73,6 +75,8 @@ export const useSaleListHook = () => {
   const { filters } = useLedgerFilters("page");
   const { branchName } = useBranchListHook();
   const { userById, userNameOf } = useUserListHook();
+  const { paymentLabelOf } = useBankAccountListHook();
+  const { labelOf: incomeSourceLabelOf } = useIncomeSourceListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
@@ -154,6 +158,8 @@ export const useSaleListHook = () => {
     branchName,
     userById,
     userNameOf,
+    paymentLabelOf,
+    incomeSourceLabelOf,
     formModal,
     editModal,
     historyModal,

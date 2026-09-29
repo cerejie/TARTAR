@@ -1,9 +1,5 @@
 import type { DefaultValues } from "react-hook-form";
 import {
-  cashAccountLabels,
-  cashAccountValues,
-} from "../../../enums/transaction.enum";
-import {
   voucherTypeLabels,
   voucherTypeValues,
 } from "../../../enums/voucher.enum";
@@ -66,6 +62,8 @@ export const useExpenseListHook = () => {
     breakdownSection,
     defaultBranch,
     editRow,
+    paymentFields,
+    paymentDefaultsOf,
     farmSectionOptions,
     summaryRows,
     supplierOptions,
@@ -139,14 +137,7 @@ export const useExpenseListHook = () => {
           span: "half",
           hidden: (values) => !!values.supplier_id,
         },
-        {
-          name: "cash_account",
-          label: "Paid from",
-          type: "select",
-          span: "half",
-          allowClear: true,
-          options: toOptions(cashAccountValues, cashAccountLabels),
-        },
+        ...paymentFields<IDisbursementInput>("Paid from"),
         {
           name: "voucher_type",
           label: "Voucher type",
@@ -167,6 +158,8 @@ export const useExpenseListHook = () => {
     txn_date: todayIso(),
     due_date: null,
     cash_account: "cash_drawer",
+    bank_id: null,
+    bank_account_id: null,
     voucher_type: null,
     supplier_id: null,
     payee: "",
@@ -182,7 +175,7 @@ export const useExpenseListHook = () => {
           editRow.farm_section as IDisbursementInput["farm_section"],
         txn_date: editRow.txn_date,
         amount: editRow.amount,
-        cash_account: editRow.cash_account,
+        ...paymentDefaultsOf(editRow),
         voucher_type: editRow.voucher?.type ?? null,
         supplier_id: editRow.supplier_id,
         payee: editRow.supplier_id ? "" : editRow.voucher?.payee ?? "",

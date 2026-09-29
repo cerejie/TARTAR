@@ -21,7 +21,11 @@ const FormFieldGrid = <TValues extends FieldValues>({
         .map((field) => (
           <FormField
             key={String(field.name)}
-            config={field}
+            config={
+              field.optionsOf
+                ? { ...field, options: field.optionsOf(values) }
+                : field
+            }
             control={control}
           />
         ))}

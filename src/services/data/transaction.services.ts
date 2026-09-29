@@ -10,6 +10,7 @@ import {
   type IPaginationResponse,
 } from "../../models/common/pagination.model";
 import type { ISortState } from "../../models/common/table.model";
+import { bankAccountOf } from "../../models/data/bank/bank.request";
 import type {
   IDisbursementInput,
   ITransactionInput,
@@ -33,7 +34,7 @@ const defaultSort: ISortState = { column: "txn_date", direction: "descending" };
 
 const columns = `
   id, type, branch, farm_section, txn_date, amount, reference_number, description,
-  customer_id, supplier_id, cash_account, income_source, expense_type, due_date,
+  customer_id, supplier_id, cash_account, bank_account_id, income_source, expense_type, due_date,
   sale_status, created_by, created_at,
   customer:customers(name), supplier:suppliers(name)
 `;
@@ -158,6 +159,7 @@ const transactionServices = {
         customer_id: values.customer_id ?? null,
         supplier_id: values.supplier_id ?? null,
         cash_account: values.cash_account ?? null,
+        bank_account_id: bankAccountOf(values),
         income_source: values.income_source ?? null,
         expense_type: values.expense_type ?? null,
         created_by: createdBy,
@@ -225,6 +227,7 @@ const transactionServices = {
         p_description: values.description ?? null,
         p_supplier_id: values.supplier_id ?? null,
         p_cash_account: values.cash_account ?? null,
+        p_bank_account_id: bankAccountOf(values),
         p_expense_type: kind === "expense" ? values.expense_type ?? null : null,
         p_payee: values.payee ?? null,
         p_voucher_type: values.cash_account
@@ -255,6 +258,7 @@ const transactionServices = {
         p_description: values.description ?? null,
         p_supplier_id: values.supplier_id ?? null,
         p_cash_account: values.cash_account ?? null,
+        p_bank_account_id: bankAccountOf(values),
         p_expense_type: kind === "expense" ? values.expense_type ?? null : null,
         p_due_date: kind === "purchase" ? values.due_date ?? null : null,
         ...breakdownArgs(values),

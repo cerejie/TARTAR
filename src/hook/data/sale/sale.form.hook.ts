@@ -1,11 +1,5 @@
 import type { DefaultValues } from "react-hook-form";
 import {
-  cashAccountLabels,
-  cashAccountValues,
-  incomeSourceLabels,
-  incomeSourceValues,
-} from "../../../enums/transaction.enum";
-import {
   saleDepositModalKey,
   saleEditModalKey,
   saleFormModalKey,
@@ -26,12 +20,14 @@ import {
   useAccountStore,
 } from "../../../store/data/account/account.store";
 import { todayIso } from "../../../utils/format.utils";
-import { toOptions } from "../../../utils/option.utils";
+import { derivePaymentValues } from "../../../utils/payment.utils";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
+import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useFarmSectionListHook } from "../farm-section/farm.section.list.hook";
+import { useIncomeSourceListHook } from "../income-source/income.source.list.hook";
 import { useCustomerListHook } from "../party/customer.list.hook";
 import { saleInvalidateKeys } from "./sale.list.hook";
 
@@ -66,6 +62,9 @@ export const useSaleFormHook = () => {
   const { branchOptions, defaultBranch } = useBranchListHook();
   const { farmSectionOptions } = useFarmSectionListHook();
   const { customerOptions } = useCustomerListHook();
+  const { optionsFor: incomeSourceOptionsFor } = useIncomeSourceListHook();
+  const { paymentFields, paymentDefaultsOf } = useBankAccountListHook();
+  const defaultIncomeSource = incomeSourceOptionsFor()[0]?.value ?? "";
 
   const editRow = editModal.modal.data;
   const depositRow = depositModal.modal.data;
@@ -155,7 +154,7 @@ export const useSaleFormHook = () => {
           type: "select",
           span: "half",
           required: true,
-          options: toOptions(incomeSourceValues, incomeSourceLabels),
+          options: incomeSourceOptionsFor(editRow?.income_source),
         },
       ],
     },
@@ -171,14 +170,7 @@ export const useSaleFormHook = () => {
           allowClear: true,
           options: customerOptions,
         },
-        {
-          name: "cash_account",
-          label: "Cash account",
-          type: "select",
-          span: "half",
-          allowClear: true,
-          options: toOptions(cashAccountValues, cashAccountLabels),
-        },
+        ...paymentFields<ISaleInput>("Cash account"),
       ],
     },
   ];
@@ -187,9 +179,11 @@ export const useSaleFormHook = () => {
     branch: defaultBranch as BranchSlug,
     farm_section: null,
     txn_date: todayIso(),
-    income_source: "product_sales",
+    income_source: defaultIncomeSource,
     customer_id: null,
     cash_account: null,
+    bank_id: null,
+    bank_account_id: null,
     reference_number: "",
     description: "",
   };
@@ -200,9 +194,9 @@ export const useSaleFormHook = () => {
         farm_section: editRow.farm_section as ISaleInput["farm_section"],
         txn_date: editRow.txn_date,
         amount: editRow.amount,
-        income_source: editRow.income_source ?? "product_sales",
+        income_source: editRow.income_source ?? defaultIncomeSource,
         customer_id: editRow.customer_id,
-        cash_account: editRow.cash_account,
+        ...paymentDefaultsOf(editRow),
         reference_number: editRow.reference_number ?? "",
         description: editRow.description ?? "",
       }
@@ -227,5 +221,6 @@ export const useSaleFormHook = () => {
     updateMutation,
     depositMutation,
     rejectMutation,
+    deriveFormValues: derivePaymentValues,
   };
 };

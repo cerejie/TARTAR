@@ -41,6 +41,8 @@ export const voucherSchema = z
     amount: amountField,
     supplier_id: z.string().uuid().nullable().optional(),
     due_date: isoDateField.nullable().optional(),
+    bank_id: z.string().uuid().nullable().optional(),
+    bank_account_id: z.string().uuid().nullable().optional(),
     check_bank: z.string().trim().max(120).nullable().optional(),
     check_number: z.string().trim().max(60).nullable().optional(),
     check_due_date: isoDateField.nullable().optional(),
@@ -60,7 +62,7 @@ export const voucherSchema = z
     if (values.type !== "check") return;
 
     const required = [
-      ["check_bank", values.check_bank, "Enter the issuing bank"],
+      ["bank_account_id", values.bank_account_id, "Select the issuing bank account"],
       ["check_number", values.check_number, "Enter the check number"],
       ["check_due_date", values.check_due_date, "Enter the check due date"],
     ] as const;

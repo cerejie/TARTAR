@@ -30,6 +30,7 @@ const SaleFormModals = () => {
     updateMutation,
     depositMutation,
     rejectMutation,
+    deriveFormValues,
   } = useSaleFormHook();
 
   return (
@@ -41,6 +42,7 @@ const SaleFormModals = () => {
         sections={sections}
         schema={saleSchema}
         defaultValues={defaults}
+        deriveValues={deriveFormValues}
         submitting={createMutation.loading}
         submitText="Record"
         onSubmit={(values) => void createMutation.mutate(values)}
@@ -55,6 +57,7 @@ const SaleFormModals = () => {
           sections={sections}
           schema={saleSchema}
           defaultValues={editDefaults}
+          deriveValues={deriveFormValues}
           submitting={updateMutation.loading}
           onSubmit={(values) => {
             if (editRow) void updateMutation.mutate({ id: editRow.id, values });

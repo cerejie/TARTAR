@@ -58,22 +58,18 @@ export const cashOutflowTypes: TransactionType[] = [
 export const disbursementKindValues = ["purchase", "expense"] as const;
 export type DisbursementKind = (typeof disbursementKindValues)[number];
 
-export const incomeSourceValues = ["product_sales", "rental_income"] as const;
-export const incomeSourceSchema = z.enum(incomeSourceValues);
-export type IncomeSource = z.infer<typeof incomeSourceSchema>;
-
-export const incomeSourceLabels: Record<IncomeSource, string> = {
-  product_sales: "Product Sales",
-  rental_income: "Rental Income",
-};
-
-export const cashAccountValues = ["cash_drawer", "bank_account"] as const;
+export const cashAccountValues = [
+  "cash_drawer",
+  "petty_cash",
+  "bank_account",
+] as const;
 export const cashAccountSchema = z.enum(cashAccountValues);
 export type CashAccount = z.infer<typeof cashAccountSchema>;
 
 export const cashAccountLabels: Record<CashAccount, string> = {
   cash_drawer: "Cash Drawer",
-  bank_account: "Bank Account",
+  petty_cash: "Petty Cash",
+  bank_account: "Bank",
 };
 
 export const transactionSortOptions: readonly ISortOption[] = [

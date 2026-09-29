@@ -24,6 +24,10 @@ export const supplierEditModalKey = "supplier-edit";
 
 export const expenseCategoryCreateModalKey = "expense-category-create";
 export const expenseCategoryEditModalKey = "expense-category-edit";
+export const incomeSourceCreateModalKey = "income-source-create";
+export const incomeSourceEditModalKey = "income-source-edit";
+export const bankAccountCreateModalKey = "bank-account-create";
+export const bankAccountEditModalKey = "bank-account-edit";
 
 export const customerLedgerModalKey = "customer-ledger";
 export const customerDetailsModalKey = "customer-details-form";

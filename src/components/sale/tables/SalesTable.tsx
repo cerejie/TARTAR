@@ -27,10 +27,6 @@ import {
   saleStatusColors,
   saleStatusLabels,
 } from "../../../enums/sale.enum";
-import {
-  cashAccountLabels,
-  incomeSourceLabels,
-} from "../../../enums/transaction.enum";
 import { useSaleListHook } from "../../../hook/data/sale/sale.list.hook";
 import { saleExpansionKey } from "../../../keys/table.keys";
 import type { IRowAction } from "../../../models/common/action.model";
@@ -56,6 +52,8 @@ const SalesTable = () => {
     branchName,
     userById,
     userNameOf,
+    paymentLabelOf,
+    incomeSourceLabelOf,
     formModal,
     editModal,
     historyModal,
@@ -212,14 +210,12 @@ const SalesTable = () => {
         {
           key: "income_source",
           label: "Income source",
-          render: (row) =>
-            row.income_source ? incomeSourceLabels[row.income_source] : "—",
+          render: (row) => incomeSourceLabelOf(row.income_source),
         },
         {
           key: "cash_account",
           label: "Cash account",
-          render: (row) =>
-            row.cash_account ? cashAccountLabels[row.cash_account] : "—",
+          render: (row) => paymentLabelOf(row),
         },
         {
           key: "farm_section",

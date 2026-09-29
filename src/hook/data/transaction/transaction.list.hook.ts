@@ -1,7 +1,5 @@
 import type { DefaultValues } from "react-hook-form";
 import {
-  cashAccountLabels,
-  cashAccountValues,
   cashInflowTypes,
   cashOutflowTypes,
   transactionSortOptions,
@@ -36,6 +34,7 @@ import {
 import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
 import { todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
+import { derivePaymentValues } from "../../../utils/payment.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
 import { useModal } from "../../common/modal.hook";
@@ -43,9 +42,11 @@ import { usePagination } from "../../common/pagination.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
+import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useFarmSectionListHook } from "../farm-section/farm.section.list.hook";
+import { useIncomeSourceListHook } from "../income-source/income.source.list.hook";
 import { useCustomerListHook } from "../party/customer.list.hook";
 import { useSupplierListHook } from "../party/supplier.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
@@ -103,6 +104,8 @@ export const useTransactionListHook = () => {
   const { customerOptions } = useCustomerListHook();
   const { supplierOptions } = useSupplierListHook();
   const { userById } = useUserListHook();
+  const { paymentFields, paymentLabelOf } = useBankAccountListHook();
+  const { labelOf: incomeSourceLabelOf } = useIncomeSourceListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
@@ -149,7 +152,8 @@ export const useTransactionListHook = () => {
       type !== "sale" &&
       type !== "purchase" &&
       type !== "expense" &&
-      type !== "collection"
+      type !== "collection" &&
+      type !== "petty_cash"
   );
 
   const sections: IFieldSection<ITransactionInput>[] = [
@@ -202,14 +206,7 @@ export const useTransactionListHook = () => {
       key: "accounting",
       title: "Accounting",
       fields: [
-        {
-          name: "cash_account",
-          label: "Cash account",
-          type: "select",
-          span: "half",
-          allowClear: true,
-          options: toOptions(cashAccountValues, cashAccountLabels),
-        },
+        ...paymentFields<ITransactionInput>("Cash account"),
         {
           name: "customer_id",
           label: "Customer",
@@ -240,6 +237,8 @@ export const useTransactionListHook = () => {
     customer_id: null,
     supplier_id: null,
     cash_account: null,
+    bank_id: null,
+    bank_account_id: null,
     reference_number: "",
     description: "",
   };
@@ -264,10 +263,13 @@ export const useTransactionListHook = () => {
     summaryPeriod: filterPeriodLabel(effectiveFilters),
     branchName,
     userById,
+    paymentLabelOf,
+    incomeSourceLabelOf,
     formModal,
     sections,
     defaults,
     createMutation,
     removeMutation,
+    deriveFormValues: derivePaymentValues,
   };
 };

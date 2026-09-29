@@ -1,15 +1,17 @@
 import { z } from "zod";
-import {
-  cashAccountSchema,
-  incomeSourceSchema,
-} from "../../../enums/transaction.enum";
 import { todayIso } from "../../../utils/format.utils";
 import { amountField, isoDateField } from "../../../utils/schema.utils";
+import {
+  bankAccountRequiredIssue,
+  hasBankAccountWhenBank,
+  paymentAccountShape,
+} from "../bank/bank.request";
 import {
   FARM_BRANCH,
   branchSlugSchema,
   farmSectionSlugSchema,
 } from "../branch/branch.response";
+import { incomeSourceSlugSchema } from "../income-source/income.source.response";
 
 export const saleSchema = z
   .object({
@@ -17,8 +19,8 @@ export const saleSchema = z
     farm_section: farmSectionSlugSchema.nullable().optional(),
     txn_date: isoDateField,
     amount: amountField,
-    income_source: incomeSourceSchema,
-    cash_account: cashAccountSchema.nullable().optional(),
+    income_source: incomeSourceSlugSchema,
+    ...paymentAccountShape,
     customer_id: z.string().uuid().nullable().optional(),
     reference_number: z.string().trim().max(80).nullable().optional(),
     description: z.string().trim().max(500).nullable().optional(),
@@ -26,7 +28,8 @@ export const saleSchema = z
   .refine((values) => !values.farm_section || values.branch === FARM_BRANCH, {
     path: ["farm_section"],
     message: "Farm section only applies to the Farm branch",
-  });
+  })
+  .refine(hasBankAccountWhenBank, bankAccountRequiredIssue);
 
 export type ISaleInput = z.infer<typeof saleSchema>;
 

@@ -1,17 +1,43 @@
+import type { ReactNode } from "react";
 import ContentView from "../../components/common/view/ContentView";
 import ViewSwitch from "../../components/common/view/ViewSwitch";
+import BankAccountCreateButton from "../../components/master-data/menus/BankAccountCreateButton";
 import ExpenseCategoryCreateButton from "../../components/master-data/menus/ExpenseCategoryCreateButton";
+import IncomeSourceCreateButton from "../../components/master-data/menus/IncomeSourceCreateButton";
 import SupplierCreateButton from "../../components/master-data/menus/SupplierCreateButton";
+import BankAccountsTable from "../../components/master-data/tables/BankAccountsTable";
 import ExpenseCategoriesTable from "../../components/master-data/tables/ExpenseCategoriesTable";
+import IncomeSourcesTable from "../../components/master-data/tables/IncomeSourcesTable";
 import SuppliersTable from "../../components/master-data/tables/SuppliersTable";
 import { useSearchParam } from "../../hook/common/search.param.hook";
 
-const sections = ["suppliers", "expense-categories"] as const;
+const sections = [
+  "suppliers",
+  "expense-categories",
+  "income-sources",
+  "banks",
+] as const;
 type Section = (typeof sections)[number];
 
 const sectionLabels: Record<Section, string> = {
   suppliers: "Suppliers",
   "expense-categories": "Expense Categories",
+  "income-sources": "Income Sources",
+  banks: "Banks",
+};
+
+const sectionActions: Record<Section, ReactNode> = {
+  suppliers: <SupplierCreateButton />,
+  "expense-categories": <ExpenseCategoryCreateButton />,
+  "income-sources": <IncomeSourceCreateButton />,
+  banks: <BankAccountCreateButton />,
+};
+
+const sectionTables: Record<Section, ReactNode> = {
+  suppliers: <SuppliersTable />,
+  "expense-categories": <ExpenseCategoriesTable />,
+  "income-sources": <IncomeSourcesTable />,
+  banks: <BankAccountsTable />,
 };
 
 const MasterDataView = () => {
@@ -31,19 +57,9 @@ const MasterDataView = () => {
           onChange={setSection}
         />
       }
-      actions={
-        section === "suppliers" ? (
-          <SupplierCreateButton />
-        ) : (
-          <ExpenseCategoryCreateButton />
-        )
-      }
+      actions={sectionActions[section]}
     >
-      {section === "suppliers" ? (
-        <SuppliersTable />
-      ) : (
-        <ExpenseCategoriesTable />
-      )}
+      {sectionTables[section]}
     </ContentView>
   );
 };

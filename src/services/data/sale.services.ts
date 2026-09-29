@@ -5,6 +5,7 @@ import {
   type IPaginationResponse,
 } from "../../models/common/pagination.model";
 import type { ISortState } from "../../models/common/table.model";
+import { bankAccountOf } from "../../models/data/bank/bank.request";
 import type { ISaleInput } from "../../models/data/sale/sale.request";
 import type { ISale } from "../../models/data/sale/sale.response";
 import { runWrite } from "../../store/common/sync.store";
@@ -17,7 +18,7 @@ const defaultSort: ISortState = { column: "txn_date", direction: "descending" };
 
 const columns = `
   id, type, branch, farm_section, txn_date, amount, reference_number, description,
-  customer_id, supplier_id, cash_account, income_source, expense_type, due_date,
+  customer_id, supplier_id, cash_account, bank_account_id, income_source, expense_type, due_date,
   created_by, created_at,
   sale_status, deposit_date, deposited_by, deposited_at, verified_by, verified_at,
   rejection_reason,
@@ -45,6 +46,7 @@ const saleValues = (values: ISaleInput) => ({
   amount: values.amount,
   income_source: values.income_source,
   cash_account: values.cash_account ?? null,
+  bank_account_id: bankAccountOf(values),
   customer_id: values.customer_id ?? null,
   reference_number: values.reference_number || null,
   description: values.description || null,

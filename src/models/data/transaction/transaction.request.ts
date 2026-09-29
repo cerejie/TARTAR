@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  cashAccountSchema,
-  incomeSourceSchema,
-  transactionTypeSchema,
-} from "../../../enums/transaction.enum";
+import { transactionTypeSchema } from "../../../enums/transaction.enum";
 import { voucherTypeSchema } from "../../../enums/voucher.enum";
 import { amountField, isoDateField } from "../../../utils/schema.utils";
 import {
@@ -12,11 +8,17 @@ import {
   voucherBreakdownShape,
 } from "../voucher/voucher.request";
 import {
+  bankAccountRequiredIssue,
+  hasBankAccountWhenBank,
+  paymentAccountShape,
+} from "../bank/bank.request";
+import {
   FARM_BRANCH,
   branchSlugSchema,
   farmSectionSlugSchema,
 } from "../branch/branch.response";
 import { expenseCategorySlugSchema } from "../expense-category/expense.category.response";
+import { incomeSourceSlugSchema } from "../income-source/income.source.response";
 
 export const transactionSchema = z
   .object({
@@ -29,8 +31,8 @@ export const transactionSchema = z
     description: z.string().trim().max(500).nullable().optional(),
     customer_id: z.string().uuid().nullable().optional(),
     supplier_id: z.string().uuid().nullable().optional(),
-    cash_account: cashAccountSchema.nullable().optional(),
-    income_source: incomeSourceSchema.nullable().optional(),
+    ...paymentAccountShape,
+    income_source: incomeSourceSlugSchema.nullable().optional(),
     expense_type: expenseCategorySlugSchema.nullable().optional(),
   })
   .refine((values) => !values.farm_section || values.branch === FARM_BRANCH, {
@@ -44,7 +46,8 @@ export const transactionSchema = z
   .refine((values) => values.type !== "expense" || !!values.expense_type, {
     path: ["expense_type"],
     message: "Select an expense type",
-  });
+  })
+  .refine(hasBankAccountWhenBank, bankAccountRequiredIssue);
 
 export type ITransactionInput = z.infer<typeof transactionSchema>;
 
@@ -54,7 +57,7 @@ const disbursementBase = z.object({
   txn_date: isoDateField,
   amount: amountField,
   due_date: isoDateField.nullable().optional(),
-  cash_account: cashAccountSchema.nullable().optional(),
+  ...paymentAccountShape,
   voucher_type: voucherTypeSchema.nullable().optional(),
   supplier_id: z.string().uuid().nullable().optional(),
   payee: z.string().trim().max(160).nullable().optional(),
@@ -77,6 +80,7 @@ const withDisbursementRules = <T extends typeof disbursementBase>(schema: T) =>
       path: ["voucher_type"],
       message: "Select check or cash (no payment account chosen)",
     })
+    .refine(hasBankAccountWhenBank, bankAccountRequiredIssue)
     .refine(isBreakdownWithinInvoice, breakdownWithinInvoiceIssue);
 
 export const purchaseSchema = withDisbursementRules(disbursementBase);

@@ -13,8 +13,6 @@ import TablePanel from "../../common/table/TablePanel";
 import StatusTag from "../../common/status/StatusTag";
 import UserCell from "../../user/table/cells/UserCell";
 import {
-  cashAccountLabels,
-  incomeSourceLabels,
   transactionTypeColors,
   transactionTypeLabels,
 } from "../../../enums/transaction.enum";
@@ -47,11 +45,14 @@ const TransactionsTable = () => {
     retry,
     branchName,
     userById,
+    paymentLabelOf,
+    incomeSourceLabelOf,
     formModal,
     sections,
     defaults,
     createMutation,
     removeMutation,
+    deriveFormValues,
   } = useTransactionListHook();
 
   const openConfirm = useConfirm();
@@ -165,14 +166,12 @@ const TransactionsTable = () => {
         {
           key: "cash_account",
           label: "Cash account",
-          render: (row) =>
-            row.cash_account ? cashAccountLabels[row.cash_account] : "—",
+          render: (row) => paymentLabelOf(row),
         },
         {
           key: "income_source",
           label: "Income source",
-          render: (row) =>
-            row.income_source ? incomeSourceLabels[row.income_source] : "—",
+          render: (row) => incomeSourceLabelOf(row.income_source),
         },
         {
           key: "party",
@@ -242,6 +241,7 @@ const TransactionsTable = () => {
         sections={sections}
         schema={transactionSchema}
         defaultValues={defaults}
+        deriveValues={deriveFormValues}
         submitting={createMutation.loading}
         submitText="Record"
         onSubmit={(values) => void createMutation.mutate(values)}

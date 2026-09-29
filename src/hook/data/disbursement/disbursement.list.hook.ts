@@ -19,6 +19,7 @@ import {
   disbursementPaginationKey,
   disbursementSortKey,
 } from "../../../keys/table.keys";
+import type { Path } from "react-hook-form";
 import type { IFieldSection } from "../../../models/common/field.model";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
@@ -33,6 +34,7 @@ import {
   useAccountStore,
 } from "../../../store/data/account/account.store";
 import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
+import { derivePaymentValues } from "../../../utils/payment.utils";
 import {
   deriveVoucherValues,
   voucherBreakdownFields,
@@ -45,6 +47,7 @@ import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
+import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useFarmSectionListHook } from "../farm-section/farm.section.list.hook";
@@ -53,6 +56,14 @@ import { useUserListHook } from "../user/user.list.hook";
 
 export const disbursementScopeOf = (kind: DisbursementKind) =>
   kind === "purchase" ? purchaseListKey : expenseListKey;
+
+const deriveDisbursementValues = (
+  changed: Path<IDisbursementInput>,
+  values: IDisbursementInput
+): Partial<IDisbursementInput> => ({
+  ...deriveVoucherValues(changed, values),
+  ...derivePaymentValues(changed, values),
+});
 
 const summaryKeyOf = (kind: DisbursementKind) =>
   kind === "purchase" ? purchaseSummaryKey : expenseSummaryKey;
@@ -95,6 +106,8 @@ export const useDisbursementListHook = (
   const { farmSectionOptions } = useFarmSectionListHook();
   const { supplierOptions } = useSupplierListHook();
   const { userById, userNameOf } = useUserListHook();
+  const { paymentFields, paymentDefaultsOf, paymentLabelOf } =
+    useBankAccountListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
@@ -203,6 +216,9 @@ export const useDisbursementListHook = (
     removeMutation,
     breakdownSection,
     formSummary: voucherSummaryLines,
-    deriveFormValues: deriveVoucherValues,
+    paymentFields,
+    paymentDefaultsOf,
+    paymentLabelOf,
+    deriveFormValues: deriveDisbursementValues,
   };
 };

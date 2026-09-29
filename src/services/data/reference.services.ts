@@ -5,15 +5,19 @@ import type {
 } from "../../models/data/branch/branch.response";
 import type { IExpenseCategoryInput } from "../../models/data/expense-category/expense.category.request";
 import type { IExpenseCategory } from "../../models/data/expense-category/expense.category.response";
+import type { IIncomeSourceInput } from "../../models/data/income-source/income.source.request";
+import type { IIncomeSource } from "../../models/data/income-source/income.source.response";
 import { slugify } from "../../utils/slug.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 
 const branchTable = "branches";
 const farmSectionTable = "farm_sections";
 const expenseCategoryTable = "expense_categories";
+const incomeSourceTable = "income_sources";
 
 const branchColumns = "slug, name, sort, active, voucher_prefix, legal_name, address";
 const expenseCategoryColumns = "slug, name, code, sort, active, created_at";
+const incomeSourceColumns = "slug, name, sort, active, created_at";
 
 const orderedBranches = () =>
   supabase
@@ -25,6 +29,13 @@ const orderedCategories = () =>
   supabase
     .from(expenseCategoryTable)
     .select(expenseCategoryColumns)
+    .order("sort", { ascending: true })
+    .order("name", { ascending: true });
+
+const orderedIncomeSources = () =>
+  supabase
+    .from(incomeSourceTable)
+    .select(incomeSourceColumns)
     .order("sort", { ascending: true })
     .order("name", { ascending: true });
 
@@ -198,6 +209,71 @@ const referenceServices = {
       if (error.code === "23503")
         throw new Error(
           "This category is used by existing expenses — archive it instead"
+        );
+      throw toError(error);
+    }
+  },
+
+  getAllIncomeSources: async (): Promise<IIncomeSource[]> => {
+    const { data, error } = await orderedIncomeSources();
+    if (error) throw toError(error);
+
+    return (data ?? []) as IIncomeSource[];
+  },
+
+  createIncomeSource: async (values: IIncomeSourceInput): Promise<void> => {
+    const slug = slugify(values.name);
+    if (!slug)
+      throw new Error("Income source name must contain letters or numbers");
+
+    const { error } = await supabase.from(incomeSourceTable).insert({
+      slug,
+      name: values.name.trim(),
+      sort: values.sort,
+      active: true,
+    });
+
+    if (error) {
+      if (error.code === "23505")
+        throw new Error("An income source with a similar name already exists");
+      throw toError(error);
+    }
+  },
+
+  updateIncomeSource: async (
+    slug: string,
+    values: IIncomeSourceInput
+  ): Promise<void> => {
+    const { error } = await supabase
+      .from(incomeSourceTable)
+      .update({ name: values.name.trim(), sort: values.sort })
+      .eq("slug", slug);
+
+    if (error) throw toError(error);
+  },
+
+  setIncomeSourceActive: async (
+    slug: string,
+    active: boolean
+  ): Promise<void> => {
+    const { error } = await supabase
+      .from(incomeSourceTable)
+      .update({ active })
+      .eq("slug", slug);
+
+    if (error) throw toError(error);
+  },
+
+  deleteIncomeSource: async (slug: string): Promise<void> => {
+    const { error } = await supabase
+      .from(incomeSourceTable)
+      .delete()
+      .eq("slug", slug);
+
+    if (error) {
+      if (error.code === "23503")
+        throw new Error(
+          "This income source is used by existing sales — archive it instead"
         );
       throw toError(error);
     }
