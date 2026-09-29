@@ -15,6 +15,10 @@ export const transactionTypeValues = [
 export const transactionTypeSchema = z.enum(transactionTypeValues);
 export type TransactionType = z.infer<typeof transactionTypeSchema>;
 
+export const transactionTypeFilterValues = transactionTypeValues.filter(
+  (type) => type !== "collection"
+);
+
 export const transactionTypeLabels: Record<TransactionType, string> = {
   sale: "Sale",
   expense: "Expense",

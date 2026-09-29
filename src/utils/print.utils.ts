@@ -1,7 +1,4 @@
-import {
-  ledgerStatusLabels,
-  paymentStatusLabels,
-} from "../enums/ledger.enum";
+import { ledgerStatusLabels } from "../enums/ledger.enum";
 import {
   voucherLineLabels,
   voucherLineValues,
@@ -220,14 +217,12 @@ export const printStatement = (
     )
     .join("");
 
-  const statusLabels = paymentStatusLabels("receivable");
   const paymentRows = payments
     .map(
       (payment) => `<tr>
         <td>${formatDate(payment.paid_at)}</td>
         <td>${escapeHtml(payment.reference_number ?? "—")}</td>
         <td class="num">${formatMoney(payment.amount)}</td>
-        <td>${statusLabels[payment.status]}</td>
       </tr>`
     )
     .join("");
@@ -270,8 +265,8 @@ export const printStatement = (
 
   <h2>Payment history</h2>
   <table>
-    <tr><th>Date</th><th>Reference</th><th class="num">Amount</th><th>Status</th></tr>
-    ${paymentRows || '<tr><td colspan="4">No payments recorded</td></tr>'}
+    <tr><th>Date</th><th>Reference</th><th class="num">Amount</th></tr>
+    ${paymentRows || '<tr><td colspan="3">No payments recorded</td></tr>'}
   </table>
   ${autoPrint}
 </body>

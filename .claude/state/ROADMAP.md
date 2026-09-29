@@ -123,9 +123,16 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
 
 ## Done
 - [x] Backlog triaged, decisions D1-D18 locked (2026-09-29).
+- [x] P1 (v1.55) — phone toolbar: styles/filter/filter.styles.ts (actions wrap, sort w-36 on
+  phone); Collection out of filter + Type field: enums/transaction.enum.ts
+  (transactionTypeFilterValues), LedgerFilterBar.tsx, transaction.list.hook.ts; "Additional
+  details" removed: transaction.list, sale.form, purchase.list, expense.list hooks (defaults
+  kept); Purchases "Amount to pay" column = phone card amount (PurchasesTable.tsx); receivable
+  statement drops payment Status (print.utils.ts); multiselect opens on focus + chevron
+  (FormField.tsx, form.styles.ts fieldMultiselectTrigger) — fixes Users Branch access.
 
 ## Next
-1. P1 — locate the phase's files, present the file plan, wait for approval, implement.
+1. P2 — first confirm the Open migrations are applied, then locate, plan, wait, implement.
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -145,5 +152,6 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   20260722000008) may not be applied to Supabase yet — confirm with the user before P2.
 
 ## State
-Branch: development-overhaul · Uncommitted: .claude/state/ROADMAP.md only · Last check:
-tree clean at v1.53.
+Branch: development-overhaul · Uncommitted: P1 (11 src files + ROADMAP) until v1.55 is
+committed · Last check: yarn build + yarn lint clean after P1. P1 visuals compiled, not
+screenshot-verified (fold into P10).

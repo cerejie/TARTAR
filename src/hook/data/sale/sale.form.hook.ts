@@ -181,14 +181,6 @@ export const useSaleFormHook = () => {
         },
       ],
     },
-    {
-      key: "details",
-      title: "Additional details",
-      fields: [
-        { name: "reference_number", label: "Reference no.", type: "text" },
-        { name: "description", label: "Description", type: "textarea" },
-      ],
-    },
   ];
 
   const defaults: DefaultValues<ISaleInput> = {

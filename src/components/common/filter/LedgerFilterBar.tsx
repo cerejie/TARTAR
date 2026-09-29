@@ -9,8 +9,8 @@ import {
   type PaymentKind,
 } from "../../../enums/ledger.enum";
 import {
+  transactionTypeFilterValues,
   transactionTypeLabels,
-  transactionTypeValues,
 } from "../../../enums/transaction.enum";
 import { useLedgerFilters } from "../../../hook/common/filter.hook";
 import type {
@@ -119,7 +119,7 @@ const LedgerFilterBar = ({
           <FilterSelect
             placeholder="Any type"
             value={filters.type}
-            values={transactionTypeValues}
+            values={transactionTypeFilterValues}
             labels={transactionTypeLabels}
             onChange={(type) => setFilters({ type })}
           />

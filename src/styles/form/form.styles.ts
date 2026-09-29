@@ -16,6 +16,8 @@ export const fieldControl = "w-full";
 export const fieldSelectClearable =
   "[&_[data-slot=combobox-trigger]]:inline-flex!";
 
+export const fieldMultiselectTrigger = "ml-auto";
+
 export const fieldNumberInput =
   "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none";
 

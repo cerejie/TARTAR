@@ -145,7 +145,11 @@ export const useTransactionListHook = () => {
   );
 
   const encodableTypes = transactionTypeValues.filter(
-    (type) => type !== "sale" && type !== "purchase" && type !== "expense"
+    (type) =>
+      type !== "sale" &&
+      type !== "purchase" &&
+      type !== "expense" &&
+      type !== "collection"
   );
 
   const sections: IFieldSection<ITransactionInput>[] = [
@@ -222,14 +226,6 @@ export const useTransactionListHook = () => {
           options: supplierOptions,
           hidden: (values) => !supplierTypes.includes(values.type),
         },
-      ],
-    },
-    {
-      key: "details",
-      title: "Additional details",
-      fields: [
-        { name: "reference_number", label: "Reference no.", type: "text" },
-        { name: "description", label: "Description", type: "textarea" },
       ],
     },
   ];

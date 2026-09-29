@@ -147,11 +147,18 @@ const PurchasesTable = () => {
     },
     {
       title: "Amount",
-      mobile: "amount",
       dataIndex: "amount",
       align: "right",
       className: nowrapCell,
       render: (value: number) => formatMoney(value),
+    },
+    {
+      title: "Amount to pay",
+      mobile: "amount",
+      key: "amount_to_pay",
+      align: "right",
+      className: nowrapCell,
+      render: (_, row) => formatMoney(row.voucher?.amount ?? row.amount),
     },
     {
       title: "Due date",

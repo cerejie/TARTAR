@@ -20,6 +20,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
+  ComboboxTrigger,
 } from "@/components/ui/combobox";
 import {
   Field,
@@ -47,6 +48,7 @@ import {
   fieldDatePopover,
   fieldDateTrigger,
   fieldLabelHidden,
+  fieldMultiselectTrigger,
   fieldNumberInput,
   fieldRequired,
   fieldSelectClearable,
@@ -250,6 +252,7 @@ const renderControl = <TValues extends FieldValues>(
           onBlur={field.onBlur}
           isInvalid={invalid}
           aria-label={config.label}
+          menuTrigger="focus"
           allowsEmptyCollection
           className={fieldControl}
         >
@@ -265,6 +268,7 @@ const renderControl = <TValues extends FieldValues>(
                 selected.length === 0 ? selectPlaceholder(config) : undefined
               }
             />
+            <ComboboxTrigger className={fieldMultiselectTrigger} />
           </ComboboxChips>
           <ComboboxContent>
             <ComboboxList

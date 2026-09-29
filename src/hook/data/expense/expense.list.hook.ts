@@ -158,11 +158,6 @@ export const useExpenseListHook = () => {
       ],
     },
     breakdownSection,
-    {
-      key: "details",
-      title: "Additional details",
-      fields: [{ name: "description", label: "Description", type: "textarea" }],
-    },
   ];
 
   const defaults: DefaultValues<IDisbursementInput> = {
