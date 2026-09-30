@@ -32,8 +32,12 @@ import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
-import { paymentFilterScopeOf } from "../../../utils/filter.utils";
+import {
+  paymentFilterScopeOf,
+  scopedFilters,
+} from "../../../utils/filter.utils";
 import { formatDate, formatMoney } from "../../../utils/format.utils";
+import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useUserListHook } from "../user/user.list.hook";
 
 export const usePaymentListHook = (
@@ -45,6 +49,8 @@ export const usePaymentListHook = (
   const { userNameOf } = useUserListHook();
   const openConfirm = useConfirm();
   const { filters } = useLedgerFilters(paymentFilterScopeOf(kind));
+  const { branch: scopeBranch } = useBranchScopeHook();
+  const effectiveFilters = scopedFilters(filters, scopeBranch);
   const { pagination, setPagination, goToPage } = usePagination(
     paymentPaginationKey(kind)
   );
@@ -61,13 +67,16 @@ export const usePaymentListHook = (
     scopedKey(
       paymentListKey,
       kind,
-      JSON.stringify(filters),
+      JSON.stringify(effectiveFilters),
       pagination.pageNumber,
       pagination.pageSize,
       sortKey
     ),
     () =>
-      paymentServices.getList(kind, filters, { ...pagination, sort: sortOption }),
+      paymentServices.getList(kind, effectiveFilters, {
+        ...pagination,
+        sort: sortOption,
+      }),
     { enabled: !party }
   );
 

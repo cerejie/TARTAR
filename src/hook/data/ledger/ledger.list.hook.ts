@@ -71,7 +71,7 @@ export interface ILedgerServices<Row extends ILedgerRow, Input> {
     pagination: IPaginationRequest
   ) => Promise<IPaginationResponse<Row>>;
   getAll: (filters: ILedgerFilters) => Promise<Row[]>;
-  getPartySummaries: () => Promise<ILedgerPartySummary[]>;
+  getPartySummaries: (branch?: string | null) => Promise<ILedgerPartySummary[]>;
   getPartyLedger: (
     party: ILedgerPartyKey,
     filters: ILedgerFilters
@@ -182,8 +182,8 @@ export const useLedgerListHook = <
   );
 
   const partyQuery = useQuery<ILedgerPartySummary[]>(
-    scopedKey(ledgerPartyKey, config.scope),
-    config.services.getPartySummaries
+    scopedKey(ledgerPartyKey, config.scope, scopeBranch),
+    () => config.services.getPartySummaries(scopeBranch)
   );
 
   const paymentTarget = paymentModal.modal.data;
@@ -191,13 +191,15 @@ export const useLedgerListHook = <
     scopedKey(
       config.scope,
       "party-open",
-      paymentTarget ? partyKeyOf(paymentTarget.party) : null
+      paymentTarget ? partyKeyOf(paymentTarget.party) : null,
+      scopeBranch
     ),
     () =>
       paymentTarget
-        ? config.services.getPartyLedger(paymentTarget.party, {
-            status: "unpaid",
-          })
+        ? config.services.getPartyLedger(
+            paymentTarget.party,
+            scopedFilters({ status: "unpaid" }, scopeBranch)
+          )
         : Promise.resolve([]),
     {
       enabled:

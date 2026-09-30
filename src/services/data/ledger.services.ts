@@ -21,7 +21,11 @@ import type {
   IReceivable,
 } from "../../models/data/ledger/ledger.response";
 import { runWrite } from "../../store/common/sync.store";
-import { applyLedgerFilters, applyStatusFilter } from "../../utils/filter.utils";
+import {
+  applyLedgerFilters,
+  applyStatusFilter,
+  scopeToBranch,
+} from "../../utils/filter.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 
 type LedgerTable = "receivables" | "payables";
@@ -101,12 +105,17 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
       return (data ?? []) as unknown as Row[];
     },
 
-    getPartySummaries: async (): Promise<ILedgerPartySummary[]> => {
-      const { data, error } = await supabase
-        .from(config.table)
-        .select(
-          `${config.idColumn}, ${config.nameColumn}, amount, paid_amount, status, created_at`
-        );
+    getPartySummaries: async (
+      branch?: string | null
+    ): Promise<ILedgerPartySummary[]> => {
+      const { data, error } = await scopeToBranch(
+        supabase
+          .from(config.table)
+          .select(
+            `${config.idColumn}, ${config.nameColumn}, amount, paid_amount, status, created_at`
+          ),
+        branch
+      );
       if (error) throw toError(error);
 
       const byKey = new Map<string, ILedgerPartySummary>();

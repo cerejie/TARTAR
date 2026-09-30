@@ -50,6 +50,7 @@ const paymentServices = {
       .select("*", { count: "exact" })
       .eq("kind", kind);
 
+    if (filters.branch) query = query.eq("branch", filters.branch);
     if (filters.paymentStatus) query = query.eq("status", filters.paymentStatus);
     if (filters.dateFrom) query = query.gte("paid_at", filters.dateFrom);
     if (filters.dateTo) query = query.lte("paid_at", filters.dateTo);

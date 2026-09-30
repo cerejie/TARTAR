@@ -152,10 +152,18 @@ any route (superadmin, accountant).
   Reports use getAllWithVouchers; Period reports 4 tiles (Net incl. purchases); Receivables/
   Payables reports unpaid only + branch names; statement skips rejected payments. Not
   harness-verified yet (F7: re-check Branch Summary P610, Expenses P250, Purchases totals).
+- [x] F3 branch scoping (v1.75): migration 20261007000019_payment_branch_scope.sql (NOT applied
+  until the user runs it) adds payments.branch (backfilled from allocations), record_ledger_payment
+  stamps it and rejects cross-branch allocations ("Pay one branch at a time" - user decision),
+  mark_payable_paid stamps the payable branch, pmt_read/pmt_insert/alloc_read branch-scoped.
+  ILedgerPayment.branch; payment.services getList filters branch; payment.list.hook uses
+  scopedFilters(top-bar scope); ledger getPartySummaries(branch) + ledger.list.hook party query
+  and party-open payment records honour scope. Not harness-verified yet (F7).
 
 ## Next
-1. F3 — branch scoping + migration (B2 payments/allocations RLS + payment list scope, B4 party
-   summaries take the branch scope). Propose SQL; user applies.
+1. Confirm the user applied 20261007000019 to Supabase (F3 depends on it).
+2. F4 - names + migration (B5 SECURITY DEFINER `user_display_names(uuid[])`, branch-checked like
+   voucher_signatories, wired into "Rejected by" and employee/accountant "Recorded by").
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -183,5 +191,5 @@ any route (superadmin, accountant).
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · F1 committed v1.73 · F2 done, uncommitted (suggested v1.74) · No
-new migration · Last check: yarn build + yarn lint clean 2026-09-30.
+Branch: development-overhaul · F2 committed v1.74 · F3 done, uncommitted (suggested v1.75) · New
+migration 20261007000019 pending user apply · Last check: yarn build + yarn lint clean 2026-09-30.
