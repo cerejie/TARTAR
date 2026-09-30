@@ -1,4 +1,4 @@
-import { LogOut, Monitor, Moon, Smartphone, Sun } from "lucide-react";
+import { LogOut, Monitor, Moon, Smartphone, Sun, UserCog } from "lucide-react";
 import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -65,6 +65,14 @@ const ProtectedUserMenu = () => {
             {appSwitch.label}
           </DropdownMenuItem>
         ) : null}
+        <DropdownMenuItem
+          id="account"
+          textValue="Account settings"
+          href="/account"
+        >
+          <UserCog />
+          Account settings
+        </DropdownMenuItem>
         <DropdownMenuItem id="theme" textValue={themeLabel} onAction={toggleMode}>
           {isDark ? <Sun /> : <Moon />}
           {themeLabel}

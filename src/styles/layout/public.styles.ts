@@ -52,9 +52,13 @@ export const authMeta = "-mt-1.5 mb-1 flex justify-end";
 export const authHint =
   "h-auto p-0 text-[13px] font-medium text-muted-foreground hover:text-foreground";
 
-export const authPopover = "w-64 text-[13px] leading-relaxed";
+export const authSuccess = "mt-7 gap-5 border-0 p-0";
 
-export const authPopoverDialog = "outline-none";
+export const authSuccessIcon = "size-14 rounded-full bg-brand-soft text-brand [&_svg:not([class*='size-'])]:size-7";
+
+export const authSuccessTitle = "font-heading text-lg font-semibold text-foreground";
+
+export const authSuccessText = "text-sm leading-relaxed text-muted-foreground";
 
 export const authSubmit = "h-12 w-full rounded-lg text-[15px] font-semibold";
 

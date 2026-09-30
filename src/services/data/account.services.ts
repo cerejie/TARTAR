@@ -15,6 +15,7 @@ const accountNotApprovedCode = "28000";
 const invalidCredentialsCode = "28P01";
 const developerRole = "developer";
 const invalidCredentialsMessage = "Invalid email or password.";
+const wrongCurrentPasswordMessage = "Current password is incorrect";
 
 const approvalMessages: Record<string, string> = {
   "account is pending":
@@ -67,11 +68,57 @@ const accountServices = {
     onSessionExpired(handler),
 
   register: async (values: IRegisterInput): Promise<void> => {
-    const { error } = await supabase.rpc("register", {
-      p_username: values.username,
+    const { error } = await supabase.rpc("register_email", {
+      p_email: values.email,
+      p_full_name: values.full_name,
       p_password: values.password,
-      p_full_name: null,
     });
+    if (error) throw toError(error);
+  },
+
+  emailExists: async (email: string): Promise<boolean> => {
+    const { data, error } = await supabase.rpc("account_email_exists", {
+      p_email: email,
+    });
+    if (error) throw toError(error);
+
+    return data === true;
+  },
+
+  requestPasswordReset: async (
+    email: string,
+    password: string
+  ): Promise<void> => {
+    const { error } = await supabase.rpc("request_password_reset", {
+      p_email: email,
+      p_password: password,
+    });
+    if (error) throw toError(error);
+  },
+
+  changeOwnPassword: async (
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> => {
+    const { error } = await supabase.rpc("change_own_password", {
+      p_current_password: currentPassword,
+      p_new_password: newPassword,
+    });
+    if (error) throw toError(error);
+  },
+
+  changeDeveloperPassword: async (
+    email: string,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> => {
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    });
+    if (verifyError) throw new Error(wrongCurrentPasswordMessage);
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) throw toError(error);
   },
 

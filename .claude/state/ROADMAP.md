@@ -231,38 +231,21 @@ any route (superadmin, accountant).
   approveUserSchema), reject/reset-decision confirms, branch field hidden for superadmin;
   UsersTable email hint, "Reset requested" tag + actions. tsc + lint clean.
 
+- [x] F6d D auth screens (v1.80): profile read-only (no migration 24). auth.flow.store
+  (registered, reset step/email); account.request registerSchema email/full_name/password/
+  confirm + forgotEmail/forgotPassword/changePassword schemas, username field gone;
+  accountServices register_email, emailExists, requestPasswordReset, changeOwnPassword,
+  changeDeveloperPassword (signIn re-verify + auth.updateUser); account.register/forgot/settings
+  hooks; AuthSuccessPanel; RegisterView success panel; ForgotPasswordView (/forgot-password,
+  ForgotPasswordHint deleted); /account (AccountView, AccountProfileCard, ChangePasswordCard,
+  isNotNav) + "Account settings" in ProtectedUserMenu. tsc + lint clean. Compiled only (F7).
+
 ## Next
-F6d - email-only accounts + role hierarchy (APPROVED 2026-09-30, implement A-C in one
-conversation; D in the one after). Supersedes the F6c authority-superadmin design: the
-superadmin is now a TABLE role, only the developer is a Supabase Auth account.
-Locked decisions:
-- Roles: developer (Supabase Auth, cerejie1342@gmail.com, app.authorities) > superadmin >
-  admin > accountant/employee. Many superadmins allowed; developer adds/replaces/removes them.
-- app.can_manage_role: developer -> superadmin/admin/accountant/employee; superadmin ->
-  admin/accountant/employee; admin -> accountant/employee. Superadmin never sees the developer
-  or other superadmins; admin sees admins read-only + manages accountant/employee.
-- Email-only sign-in for everyone. username column kept (auto from email, never shown).
-- Sign-up: email + full name + password + confirm -> pending; approver picks role (per
-  hierarchy) + branches at approval. Designed success panel ("waiting for approval").
-- Forgot password: /forgot-password, step 1 email (must exist), step 2 new + confirm password,
-  success panel "Waiting for admin approval. Please contact your admin." Stored as
-  users.pending_password_hash; someone above approves/rejects. No emails sent (free tier).
-- Account settings (/account): profile + change own password (current + new + confirm).
-- Delete every existing table user and every auth.users row except the developer.
-A-C done (see Done). Remaining:
-D. THIS conversation: RegisterView redesign + success panel, /forgot-password two-step flow
-   (replace ForgotPasswordHint popover), /account settings page (profile card + change
-   password; developer via supabase.auth.updateUser after re-verifying current password) +
-   "Account settings" in ProtectedUserMenu. Auth flow step state in a zustand store.
-   RPCs already in migration 22: register_email(p_email, p_full_name, p_password),
-   account_email_exists(p_email) (approved only), request_password_reset(p_email,
-   p_password), change_own_password(p_current_password, p_new_password). Profile edit
-   (full name) has no RPC yet - add update_own_profile to migration 22 if the card edits it.
-   Register still calls the revoked username `register` (registerSchema/usernameField in
-   account.request, account.register.hook) - switch it to register_email and delete
-   usernameField/USERNAME_REGEX once unused.
-Then: user applies 22 + 23, signs up cagapearlynmae@gmail.com and approves her as Superadmin,
-F7 live re-test.
+1. User signs up cagapearlynmae@gmail.com at /register and approves her as Superadmin (developer
+   account), then recreates QA users by email if the F7 harness needs them (profiles hold old
+   usernames - drive.mjs login step now needs an email).
+2. F7 live re-test of every fixed item incl. register -> approve, forgot password -> approve
+   reset -> sign in, /account change password (table user + developer).
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -290,6 +273,5 @@ F7 live re-test.
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · v1.78 committed · uncommitted: F6b + F6d A-C (suggested as
-v1.79) · Migrations 22 + 23 written, NOT applied (apply after D), 21 applied · Last check:
-npx tsc -b + yarn lint clean 2026-09-30.
+Branch: development-overhaul · v1.79 committed · uncommitted: F6d D (suggested as v1.80) ·
+Migrations through 23 applied · Last check: npx tsc -b + yarn lint clean 2026-09-30.

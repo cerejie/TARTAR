@@ -1,4 +1,5 @@
 import type { IRoute } from "../models/common/route.model";
+import ForgotPasswordView from "../pages/Auth/ForgotPasswordView";
 import LoginView from "../pages/Auth/LoginView";
 import RegisterView from "../pages/Auth/RegisterView";
 import { adminBasePath } from "../utils/route.utils";
@@ -27,5 +28,11 @@ export const publicViewsRoutes: IRoute[] = [
     path: "/register",
     label: "Create account",
     Component: RegisterView,
+  },
+  {
+    key: "forgot_password",
+    path: "/forgot-password",
+    label: "Forgot password",
+    Component: ForgotPasswordView,
   },
 ];

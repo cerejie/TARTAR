@@ -1,6 +1,5 @@
 import { Lock, Mail } from "lucide-react";
 import AuthShell from "../../components/auth/AuthShell";
-import ForgotPasswordHint from "../../components/auth/ForgotPasswordHint";
 import AppButton from "../../components/common/button/AppButton";
 import FormField from "../../components/common/form/FormField";
 import { useAccountLoginHook } from "../../hook/account/account.login.hook";
@@ -8,6 +7,7 @@ import {
   authAlt,
   authAltLink,
   authForm,
+  authHint,
   authMeta,
   authSubmit,
 } from "../../styles/layout/public.styles";
@@ -47,7 +47,9 @@ const LoginView = () => {
         ))}
 
         <div className={authMeta}>
-          <ForgotPasswordHint />
+          <AppButton href="/forgot-password" variant="link" className={authHint}>
+            Forgot password?
+          </AppButton>
         </div>
 
         <AppButton

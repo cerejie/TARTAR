@@ -9,6 +9,7 @@ import {
   LayoutGrid,
   Receipt,
   ShoppingCart,
+  UserCog,
   Users,
   Wallet,
 } from "lucide-react";
@@ -142,5 +143,14 @@ export const protectedViewsRoutes: IRoute[] = [
     can: "manageUsers",
     loader: permissionLoader("manageUsers", "/"),
     ...lazyView(() => import("../pages/Users/UsersView")),
+  },
+  {
+    key: "account",
+    path: "/account",
+    label: "Account settings",
+    description: "Your profile and password",
+    icon: UserCog,
+    isNotNav: true,
+    ...lazyView(() => import("../pages/Account/AccountView")),
   },
 ];
