@@ -1,0 +1,10 @@
+[
+ {"note":"login emp","login":["qaemp2@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm sales","goto":"/sales","settle":3000},
+ {"note":"BLOCK API (weak wifi)","blockApi":true},
+ {"note":"W5 sale 903 on weak wifi","button":"Record sale","page":true,"fill":{"amount":"903"},"pick":{"Cash account":"Cash Drawer"}},
+ {"submit":"Record","keepOpen":true,"toasts":true,"name":"w5"},
+ {"queue":true,"count":"[role=dialog]"},
+ {"note":"nav while weak","press":"Escape","nav":"Purchases","settle":6000,"text":"main","max":300,"name":"w5-nav"},
+ {"blockApi":false,"always":true}
+]

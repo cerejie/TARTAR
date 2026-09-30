@@ -1,0 +1,20 @@
+[
+ {"note":"login admin","login":["qaadmin2@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm dashboard","goto":"/","settle":4000,"js":"(async()=>({controller:!!navigator.serviceWorker.controller, caches:await Promise.all((await caches.keys()).map(async k=>[k,(await (await caches.open(k)).keys()).length]))}))()"},
+ {"note":"warm transactions","nav":"Transactions"},
+ {"note":"warm sales","nav":"Sales"},
+ {"note":"warm expenses","nav":"Expenses"},
+ {"note":"warm receivables","nav":"Receivables"},
+ {"note":"GO OFFLINE","offline":true},
+ {"note":"off dashboard","nav":"Dashboard","text":"main","max":400,"name":"off-dash"},
+ {"note":"off transactions (visited)","nav":"Transactions","text":"main","max":400,"name":"off-txn"},
+ {"note":"off sales (visited)","nav":"Sales","text":"main","max":400,"name":"off-sales"},
+ {"note":"off purchases (NOT visited)","nav":"Purchases","text":"main","max":400,"name":"off-purch"},
+ {"note":"off vouchers (NOT visited)","nav":"Vouchers","text":"main","max":400,"name":"off-vouch"},
+ {"note":"off payables (NOT visited)","nav":"Payables","text":"main","max":400,"name":"off-pay"},
+ {"note":"off reports (NOT visited)","nav":"Reports","text":"main","max":400,"name":"off-rep"},
+ {"note":"off RELOAD sales","goto":"/sales","text":"main","max":400,"name":"off-reload-sales","always":true},
+ {"note":"off expenses after reload","nav":"Expenses","text":"main","max":400,"name":"off-reload-exp","always":true},
+ {"note":"BACK ONLINE","offline":false,"always":true},
+ {"note":"online sales","nav":"Sales","text":"main","max":300,"always":true}
+]

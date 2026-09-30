@@ -1,23 +1,25 @@
 import { chromium } from "playwright-core";
 import { mkdirSync, readFileSync } from "node:fs";
 
-const base = "http://localhost:5199";
+const base = process.env.BASE ?? "http://localhost:5199";
 const dir = new URL(".", import.meta.url).pathname.slice(1);
 const steps = JSON.parse(readFileSync(process.argv[2], "utf8"));
 const profileName = process.env.PROFILE ?? "profile";
 const tag = process.env.TAG ?? profileName;
 mkdirSync(`${dir}shots/drive`, { recursive: true });
 
-const context = await chromium.launchPersistentContext(`${dir}${profileName}`, {
+const launchOptions = [`${dir}${profileName}`, {
   channel: "chrome",
   headless: process.env.HEADED ? false : true,
   viewport: { width: Number(process.env.W ?? 1440), height: Number(process.env.H ?? 900) },
-});
+}];
+const browser = process.env.EPHEMERAL ? await chromium.launch({ channel: "chrome", headless: !process.env.HEADED }) : null;
+const context = browser ? await browser.newContext({ viewport: launchOptions[1].viewport }) : await chromium.launchPersistentContext(...launchOptions);
 const page = context.pages()[0] ?? (await context.newPage());
 const out = [];
 const log = (s) => { out.push(s); console.log(s); };
 page.on("pageerror", (e) => log(`  !! pageerror ${e.message.split("\n")[0]}`));
-page.on("console", (m) => m.type() === "error" && !/favicon|Download the React DevTools/.test(m.text()) && log(`  !! console ${m.text().slice(0, 300)}`));
+page.on("console", (m) => m.type() === "error" && !/favicon|Download the React DevTools|ERR_INTERNET_DISCONNECTED/.test(m.text()) && log(`  !! console ${m.text().slice(0, 300)}`));
 page.on("response", async (r) => {
   if (r.status() < 400 || /favicon/.test(r.url())) return;
   let body = "";
@@ -79,6 +81,14 @@ for (const s of steps) {
       await page.locator("button[type=submit]").click();
       await page.waitForURL((u) => !/\/login$/.test(u.pathname), { timeout: 15000 });
       await page.waitForTimeout(2500);
+    }
+    if (s.offline !== undefined) { await context.setOffline(s.offline); await page.waitForTimeout(s.offline ? 1200 : 6000); }
+    if (s.blockApi !== undefined) { if (s.blockApi) await page.route(/supabase\.co/, (r) => r.abort("internetdisconnected")); else await page.unroute(/supabase\.co/); }
+    if (s.nav) { await page.getByRole("link", { name: s.nav, exact: true }).first().click({ timeout: 6000 }); await page.waitForTimeout(s.settle ?? 2500); }
+    if (s.js) log(`  js: ${JSON.stringify(await page.evaluate(s.js)).slice(0, 1500)}`);
+    if (s.queue) {
+      const q = await page.evaluate(() => { try { return JSON.parse(localStorage.getItem("tartar-sync-queue") ?? "{}")?.state?.queue ?? []; } catch { return "unreadable"; } });
+      log(`  queue(${Array.isArray(q) ? q.length : q}): ${Array.isArray(q) ? q.map((w) => w.label).join(" ; ") : ""}`);
     }
     if (s.goto) { await page.goto(base + s.goto, { waitUntil: "networkidle" }); await page.waitForTimeout(s.settle ?? 1500); }
     if (s.reload) { await page.reload({ waitUntil: "networkidle" }); await page.waitForTimeout(1500); }
@@ -153,3 +163,4 @@ for (const s of steps) {
   }
 }
 await context.close();
+if (browser) await browser.close();

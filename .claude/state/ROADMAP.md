@@ -1,297 +1,150 @@
-# ROADMAP — Pre-deployment QA fixes (live multi-role test, 2026-09-30)
+# ROADMAP — Offline hardening (live offline test, 2026-09-30)
 Updated: 2026-09-30
 
 ## Goal
-Fix every bug found in the 2026-09-30 live test (2 admins, 2 accountants, 2 employees, superadmin,
-QA Test branch) so the app is deployable. `yarn build` + `yarn lint` clean after each phase. One
-phase per conversation; the user reviews between phases. Replaces the finished client TO-DO roadmap
-(P1-P10 + carried-over, v1.55-v1.71).
+Offline, every write is kept on the device and reaches the database once back online, nothing is
+lost or silently stuck, and every page shows the last data it had while online, never a blank
+page or an endless skeleton. `yarn build` + `yarn lint` clean after each phase, each phase
+harness-verified offline. Replaces the finished pre-deployment QA roadmap (F1-F7, Q7, v1.83,
+merged into main).
 
 ## Session protocol
 1. New conversation: read this file, `git status --short`, start `Next` item 1. Load `build`
    (+ `tartar-shadcn` and `shadcn` docs for UI). Present the phase's file plan and WAIT for
    approval (global CLAUDE.md) before editing.
-2. Migrations: write the SQL file, show it, never apply it; the user applies it to Supabase.
-   Never drop/rename a column.
-3. Close a phase: build + lint clean, tick Done with paths, rewrite Next, suggest commit
-   (`git log --oneline --grep="^Development v" -1` + 0.1), tell the user to open a new
-   conversation. Visual work is reported **compiled** unless a harness run proves it.
-4. After the last phase: delete this file and `.claude/state/audit/` (ask first).
+2. Work on branch `offline-hardening` cut from `main` (create it in O1). Never commit or merge
+   unless asked; the user merges.
+3. Migrations: write the SQL file, show it, never apply it. Never drop/rename a column.
+   Dev and production are the SAME Supabase project: every harness write lands in production.
+4. Close a phase: build + lint clean, harness offline run for that phase, tick Done with paths,
+   rewrite Next, suggest commit (`git log --oneline --grep="^Development v" -1` + 0.1), tell the
+   user to open a new conversation.
 
 ## Decisions locked
-- L1 Branch Summary (D11) is the source of truth for money totals: Sales = verified sales,
-  Expenses/Purchases = amount to pay (voucher net) by txn_date, rejected vouchers excluded,
-  Net = Sales - Expenses - Purchases. Every other total (pages, dashboard, admin home, branch
-  monitoring, period reports) must agree with it. Pending-voucher handling: follow whatever
-  `transactionServices.getBranchSummary` does today — read it first, do not invent a rule.
-- L2 The user resets all data before deployment. QA rows may be created freely in QA Test.
-- L3 Carried over, unchanged: every CLAUDE.md convention (no comments, no useState, class strings
-  in *.styles.ts, tokens only in theme.css, useConfirm, runWrite, Transactions is reference).
+- L1 Every CLAUDE.md convention holds (no comments, no useState, class strings in *.styles.ts,
+  tokens only in theme.css, useConfirm, writes through runWrite, Transactions is reference).
+- L2 QA rows may be created freely in QA Test; the user resets all data after this roadmap.
+- L3 Offline test runs against the PRODUCTION BUILD (`yarn build` then `yarn preview --port 4199
+  --strictPort`), never the dev server: the service worker only exists in the build.
+- L4 A write refused by the server is never deleted silently: it is kept as "failed" with its
+  reason until the user retries or discards it.
 
-## Open decisions (ask the user at the start of the phase that needs them)
-- Q1 (F5, ANSWERED: remove) Current Cash / Bank Balance / Branch Monitoring "Cash balance" read
-  `cash_accounts.balance`, which nothing ever writes (always P0.00). Compute from transactions per
-  cash account + bank account (needs opening balances), or remove the three tiles?
-- Q2 (F6, ANSWERED: reduce only on verify) A PENDING (unverified) customer payment already reduces the receivable balance
-  (P2,000 -> P1,200 before verify; reject restores it). Keep, or only reduce on verify?
-- Q3 (F6, ANSWERED: add resubmit) Rejected expense/purchase vouchers are "Locked" for employees — no correct-and-resubmit
-  like sales (D10). Add a resubmit flow?
-- Q4 (F6, ANSWERED: required reason) Voucher "Reject" has no reason field (sale reject does). Add one?
-- Q5 (F6, ANSWERED: follow voucher status) A purchase with no due date shows "Paid" in Due date while its voucher is still Pending.
-- Q6 (F6b, ANSWERED: make admins branch-limited) Admin "Branch access" does nothing (admins always see all branches). Hide the field for
-  admins, or make admins branch-limited?
+## Open decisions (ask at the start of the phase that needs them)
+- OQ1 (O3) Read cache: extend the hand-rolled `store/common/query.store.ts` with IndexedDB
+  persistence (small, no migration of hooks) — RECOMMENDED — or do the planned TanStack Query
+  switch now with its persister (touches every data hook, much larger).
+- OQ2 (O1, ANSWERED: b — client uuid on inserts AND migration 24 for the RPCs) Duplicate protection for retried writes: client-generated uuid on queued inserts
+  (no migration), plus migration 24 adding an idempotency key to the RPC writes
+  (create_transaction_with_voucher, record_ledger_payment, mark_payable_paid,
+  mark_sale_deposited, verify/reject) — or inserts only for now.
+- OQ3 (O4) Banks, expense types, income sources and other setup writes: queue offline too, or
+  keep them online-only with a clear "needs internet" message.
 
-## Bugs (evidence from the live run)
-- B1 Sign in from `/login` -> "Page not found" until reload. Real path: Register -> redirected to
-  /login -> approved user signs in -> 404. Cause: account.login.hook.ts:53 sets the session (router
-  rebuilds at /login, not in the protected tree) and only then `resetLocation("/")` (replaceState,
-  router never sees it). Signing in from `/` works.
-- B2 Payments not branch-scoped: `payments`/`payment_allocations` read policy `using (true)`
-  (migrations/20260718000004_voucher_workflow.sql:363,376). Employees/accountants (QA Test only)
-  see Camille P6,500 and mario1 P1,200 of other branches; payment lists also ignore the manager's
-  top-bar branch scope (payment.services.ts getList has no branch filter).
-- B3 Totals count rejected vouchers / wrong basis:
-  Expenses page Total + Top category (expense.list.hook summarize, sumDisbursements), dashboard
-  "Today's Expenses" (dashboard.services onDay isExpense), Branch Monitoring Expenses and admin Home
-  Expenses all show P350 = P250 approved + P100 rejected. Purchases summary
-  (purchase.list.hook.ts:21-27): Outstanding = rows with due_date, gross invoice, never drops after
-  Mark paid (stayed P1,120 after the P1,110 payable was paid); Paid = rows without due date;
-  purchases table Due date column still shows the date after the payable is Paid.
-  Period reports (Daily/Weekly/Monthly, components/report/PeriodReport.tsx + report.hook.ts):
-  Expenses P415 includes rejected P100 + pending P65; Net = Sales - Expenses (no purchases).
-  Cash Flow report: Cash Out uses gross invoice + rejected/pending; still lists "Collection" (D1).
-- B4 "By customer" / "By supplier" ignore the top-bar branch scope:
-  ledger.services getPartySummaries takes no branch (ledger.list.hook.ts:184).
-- B5 "Rejected by —" on the employee's rejected-sale modal: users RLS lets an employee read only
-  their own row (init.sql:539); sale.form.hook.ts:268 userNameOf. Needs a SECURITY DEFINER name
-  RPC like `voucher_signatories` (P7).
-- B6 Inline-created lookups are not refreshed: after the expense form creates an expense type /
-  payee supplier (disbursement.form.hook.ts prepare -> resolveParty / ensureExpenseCategory), the
-  Expenses table shows the slug `qa_utilities` until reload, and a SECOND expense typed with the
-  same new payee created a DUPLICATE supplier ("QA Power Co" x2 in Master Data). Same risk for
-  purchase Supplier and receivable Customer creatables.
-- B7 Vouchers list purpose line is "—" for every expense voucher: voucherPurpose
-  (models/data/voucher/voucher.response.ts:45) only matches the generic expense code; expense
-  vouchers carry the expense type's code (WTR, QAU).
-- B8 `/vouchers` opens by URL for accountants — the only `can` route without `permissionLoader`
-  (routes/protected.view.routes.ts:71-80).
-- B9 Customer statement print lists the REJECTED P100 payment under Payment history as if paid
-  (print.utils.ts printStatement; P1 dropped the status column). Statements go to customers.
-- B10 Report tables show branch slugs (`qa_test`) instead of names: Daily/Weekly/Monthly
-  Transactions table, Receivables and Payables report tables. Payables report "Outstanding
-  Suppliers" lists Paid rows (P0 balance).
-- B11 Minor UX:
-  - Date picker stays open after picking a day (FormField date case) — must click outside.
-  - Payment "Verify" commits with no confirm (sale Verify confirms) — LedgerPaymentsTable /
-    payment list hook; convention: committing actions go through useConfirm.
-  - Main app has no favicon (index.html has no icon link -> /favicon.ico 404 on every load).
-  - Users table Branches column shows slugs and shows "All" for an EMPTY list
-    (UsersTable.tsx:127) — DB treats empty as NO branches for employees/accountants.
-  - Pending-account sign-in toast is the raw server text "account is pending".
-  - Manual voucher Branch defaults to LGC Hardware while the admin scope is QA Test.
-  - Period print says "All branches" for an employee limited to QA Test; walk-in customer prints
-    "—" (table says "Walk-in").
-  - Offline-queued sale is not shown in the list until sync; no toast when the queue syncs.
+## Bugs (evidence: harness runs o1-o5, 2026-09-30, shots in shots/drive/o1-* .. o5-*)
+- OB1 CRITICAL stuck queue: one refused write blocks every write behind it forever, silently.
+  Run o4: two offline "Mark deposited" on sale P333 both queued; on reconnect the 2nd got
+  P0001 "This sale is already deposited", flush `break`s, so "Expense · 902" and "Payment 50 ·
+  QA Customer A" NEVER reached the database. No toast; `lastError` and `discard` exist in
+  sync.store but nothing in the UI reads them; reload online retries and fails the same way.
+- OB2 Duplicate actions offline: a queued action does not change the row, so the same row
+  action can be queued again (cause of OB1 in o4).
+- OB3 Queued entries are invisible: offline sale P901 got "Saved offline" toast + header badge,
+  but was not in the Sales list or the summary cards until sync.
+- OB4 Reads are not kept offline: query.store is memory only (no persist). Pages opened before
+  going offline keep data; an offline RELOAD or a page not opened yet (Purchases, Vouchers,
+  Payables, Reports, Sales after reload) shows skeleton rows + skeleton cards FOREVER (no error,
+  no empty state), and the top-bar branch picker is blank (o1-off-reload-sales,
+  o1-off-rep). Forms then have no lookups (branches, customers, banks), so nothing can be
+  recorded after an offline reload. Root cause of "never settles" not yet found — O3 step 1.
+- OB5 Weak connection (navigator says online, API unreachable): write fails with raw toast
+  "TypeError: Failed to fetch", not queued, dialog stays open (o5-w5). runWrite only checks
+  navigator.onLine.
+- OB6 Crash: after recording a receivable payment offline the Receivables page went to
+  "Something went wrong" — console "Cannot change the id of an item" (React Aria collection)
+  (o4-w4-pay). Payment itself was queued. Reproduce online too before fixing.
+- OB7 After a flush nothing refreshes and nothing is announced: no "Synced N changes" toast,
+  the open page keeps pre-sync data until navigated away.
+- OB8 Not queued at all: bank.services (all writes), reference.services expense types / income
+  sources / most setup writes, account.services (login, register, passwords),
+  user.services.decidePasswordReset. See OQ3.
+- OB9 UNTESTED: flush after a long offline period (expired access token -> 401). Must refresh the
+  session and retry, never discard; test in O1.
 
 ## Verified working (do not re-test unless touched)
-Role nav + URL guards (employee/accountant redirects), accountant branch scope (qaacc2 = Hardware +
-QA Test only), user create/edit/reset password/approve registration, pending sign-in blocked,
-branch create with letterhead, income source + bank account create, supplier delete blocked with a
-clear toast when referenced, sale record (bank/cash/petty) -> deposit -> verify, reject -> View
-reason -> resubmit -> verify, sale edit + edit history + delete, purchase (1% WHT: P1,120 ->
-P1,110) and expense vouchers -> approve/reject, payables opened on approval (purchase + expense
-with due date), Mark paid from bank/cash (PMT refs), receivable + partial payment + verify +
-reject (balance restored), auto references RCV/PMT/QAT-*, voucher print (letterhead, breakdown,
-bank, Prepared/Approved names), customer ledger, period print, Branch Summary = dashboard Net
-Profit (P610), admin app pages, offline record -> sync, phone layout, no console/HTTP errors on
-any route (superadmin, accountant).
+- Service worker installs and precaches 86 files; the app shell and session survive an offline
+  reload (o1). Harness quirk, NOT an app bug: persistent Playwright profiles here throw
+  "Failed to execute 'open' on 'CacheStorage'", so run with EPHEMERAL=1.
+- Queue persists across an offline reload (o4: 5 items kept) and flushes on reconnect and on
+  app start; sync icon shows the pending count while offline.
+- Queued inserts/RPCs that do reach the server apply correctly (sale P901, deposit of P333).
 
 ## Phases
-- F1 Quick fixes, no DB: B1 (set location before the session so the router builds at "/"),
-  B8 (permissionLoader createVouchers -> /transactions), B7 (expense vouchers read "Expense" or the
-  expense type label), B6 (invalidate supplier/customer/expense-category queries after a creatable
-  saves; resolve against fresh data so no duplicates), B11 date picker closes on select, payment
-  Verify via useConfirm, favicon link, Users table branch names + "None" for empty non-admins,
-  friendly pending-account message, manual voucher Branch defaults to the scope.
-- F2 Totals consistency, no DB (L1): B3 everywhere (Expenses/Purchases summaries, dashboard today's
-  expenses, branch monitoring, admin home, period reports incl. purchases in Net, cash flow basis,
-  hide Collection row), purchases Outstanding/Paid from payable status + amount to pay, purchases
-  Due date column shows Paid once paid, B9 (statement excludes rejected payments or shows status),
-  B10 (branch names in report tables, Payables report unpaid only). Re-check Branch Summary P610
-  still matches.
-- F3 Branch scoping + migration: B2 (payments/allocations read policy through
-  receivables/payables branch with app.can_see_branch; payment lists honour the top-bar scope),
-  B4 (party summaries take the branch scope). Propose SQL, user applies.
-- F4 Names + migration: B5 (SECURITY DEFINER `user_display_names(uuid[])`, branch-checked like
-  voucher_signatories) wired into "Rejected by" and any employee/accountant "Recorded by".
-- F5 Cash & bank balances: ask Q1, then implement (compute or remove), migration only if needed.
-- F6a Behaviour decisions Q2-Q5 (done v1.78).
-- F6b Q6 admins branch-limited: app.branch_access() NULL for superadmin only; every
-  `app.is_manager()` policy/RPC on branch data gains app.can_see_branch; backfill existing admins'
-  users.branch_access to all branches; Users form shows Branch access for admins; Users table
-  stops printing "All" for admins; top-bar branch list follows access. Ask first: admin with no
-  branches; whether admins still manage users/branches/master data across all branches.
-- F7 Re-run the live harness on every fixed item (QA profiles below), then deployment checklist:
-  merge development-overhaul -> main, apply all migrations to production if it is a different
-  Supabase project, user resets data, add Banks + branch legal_name/address.
+- O1 Write safety (OB1, OB5, OB7, OB9, OQ2): sync.store keeps a `failed` list — server
+  refusal (PostgREST/P0001/4xx) moves the item there and flush CONTINUES; network errors stop
+  and retry later; 401/JWT expired -> supabase.auth.refreshSession() then retry. runWrite
+  queues on network failure (TypeError fetch) as well as navigator offline. Flush end:
+  invalidate all queries + toast "Synced N" / "N changes need attention". Sync panel
+  (popover on SyncIndicator): pending + failed items with reason, Retry / Discard (useConfirm).
+  Client uuid on queued inserts (+ migration 24 if OQ2 says so).
+  Verify: o4 duplicate-deposit replay, o5 weak wifi, expired-token run.
+- O2 Pending visibility + no duplicates (OB2, OB3, OB6): list hooks merge queued writes as
+  "Pending sync" rows (tag), row actions on a row with a queued write are disabled; summary
+  cards unchanged but show "+ pending" hint only if cheap. Fix OB6. Verify offline sale,
+  expense, purchase, payment, deposit, voucher approve each show pending and cannot repeat.
+- O3 Offline reads (OB4, OQ1): find why offline fetches never settle; persist the query cache
+  to IndexedDB with `updatedAt`; offline = serve cached data + "Offline — showing data from
+  <time>" notice in ContentView; prime the cache on sign-in and on every reconnect for every
+  page the role can open (first page of each list, summaries, lookups, branch scope, reports
+  default period); a view never loaded shows an explicit "Not saved for offline" state, never a
+  skeleton. Verify: sign in, go offline, reload, open every page per role.
+- O4 Setup writes (OB8, OQ3) + full offline matrix per role (admin, accountant, employee):
+  every page, every write, reload, reconnect. Then remove QA leftovers from the tests.
 
 ## Done
-- [x] Live multi-role test 2026-09-30 (this file's Bugs + Verified sections).
-- [x] F1 quick fixes (v1.73): B1 account.login.hook resetLocation before the session; B8 vouchers
-  permissionLoader; B7 voucherPurpose non-PUR = Expense; B6 disbursement.list.hook invalidates
-  suppliers + expense categories; FormField date Dialog close on select; receivable Verify via
-  useConfirm; Users Branches column (All admin / None empty / names, user.manage.hook
-  branchAccessLabelOf); pending/rejected sign-in text (account.services toLoginError); manual
-  voucher branch = scope. New icons: main stacked-ledger (public/icon*.png|svg,
-  apple-touch-icon.png, vite.config manifest icons, index.html links) and admin navy gauge
-  (admin-icon*, apple-touch-icon-admin.png; admin.manifest.hook swaps rel=icon). Generator:
-  session scratchpad icons/build-icons.mjs (not kept). Not harness-verified yet (F7).
-- [x] F2 totals consistency (v1.74): one rule in models/data/transaction/transaction.response.ts
-  (countedAmountOf / sumCounted / amountToPayOf / isCountedDisbursement) used by Expenses +
-  Purchases summaries (disbursement/expense/purchase list hooks), dashboard.services (today's/
-  yesterday's expenses, monthly cash in/out, getOverview = admin Home, getBranchMonitor via
-  `vouchers(status, amount)` embed), report.utils (sumBy, cashFlowTotals, periodTotals = Branch
-  Summary calc, Collection row hidden, branch names in print). Disbursements carry `payable`
-  (transaction.services withVouchers -> payablesOf); Purchases Outstanding = payable balance or
-  voucher amount, Paid = no-due-date + payable paid_amount; Due date shows Paid once payable paid.
-  Reports use getAllWithVouchers; Period reports 4 tiles (Net incl. purchases); Receivables/
-  Payables reports unpaid only + branch names; statement skips rejected payments. Not
-  harness-verified yet (F7: re-check Branch Summary P610, Expenses P250, Purchases totals).
-- [x] F3 branch scoping (v1.75): migration 20261007000019_payment_branch_scope.sql (NOT applied
-  until the user runs it) adds payments.branch (backfilled from allocations), record_ledger_payment
-  stamps it and rejects cross-branch allocations ("Pay one branch at a time" - user decision),
-  mark_payable_paid stamps the payable branch, pmt_read/pmt_insert/alloc_read branch-scoped.
-  ILedgerPayment.branch; payment.services getList filters branch; payment.list.hook uses
-  scopedFilters(top-bar scope); ledger getPartySummaries(branch) + ledger.list.hook party query
-  and party-open payment records honour scope. Not harness-verified yet (F7).
-- [x] F4 names (v1.76): migration 20261008000020_user_display_names.sql (NOT applied until the
-  user runs it) adds SECURITY DEFINER `user_display_names()` (no args - userNameOf is per-row
-  sync, so one name map: caller + admins + users sharing a visible branch; managers see all).
-  IUserDisplayName, userDisplayNamesKey, user.services getDisplayNames; user.list.hook runs it for
-  non-managers so every userNameOf ("Rejected by", "Recorded by", deposited/verified by) resolves.
-  Not harness-verified yet (F7). Migration 20 applied by the user.
-- [x] F5 balances (v1.77): Q1 = remove. Dashboard Current Cash + Bank Balance tiles and Branch
-  Monitoring "Cash balance" column gone (DashboardView, BranchMonitorTable); IDashboardSummary /
-  IBranchMonitorRow drop currentCash/bankBalance/cashBalance; dashboard.services no longer reads
-  cash_accounts (table kept, unused). Remaining 6 stat tiles are span "third" (2 rows of 3).
-  Compiled only (F7 checks the layout).
-
-- [x] F6a Q2-Q5 (v1.78): migration 20261009000021_voucher_resubmit_payment_verify.sql (NOT
-  applied until the user runs it): vouchers.rejection_reason; guard lets rejected -> pending
-  only; app.reopen_rejected_voucher called by update_transaction_with_voucher (resubmit);
-  record_ledger_payment applies only self-verified payments, balance check counts pending
-  (app.pending_allocated); new verify_payment RPC; reject_payment reverses verified only;
-  backfill strips pending allocations from paid_amount. Frontend: voucher Reject = reason modal
-  (voucher.list.hook rejectModal, VouchersTable, voucherRejectSchema); common/form/
-  RejectionIntro (sale + disbursements); Expenses/Purchases rejected row "View reason" ->
-  edit modal "Resubmit" (disbursement.list.hook editRejected/rejectedByName; locked = approved
-  or printed); status tag hint = reason; Purchases Due date Rejected/Pending/date/Paid;
-  paymentServices.verify -> verify_payment RPC. Pay modal still caps at amount - paid_amount
-  (server rejects over-allocation incl. pending). Not harness-verified yet (F7).
-
-- [x] F6b Q6 admins branch-limited (v1.79): decisions - empty access = none, only branch-bound
-  records scoped (users/branches/master data stay global), creating admin is granted the new
-  branch. Migration 20261010000022_admin_branch_scope.sql (NOT applied until the user runs it):
-  app.branch_access() NULL for superadmin only, admins read users.branch_access live (security
-  definer); app.manages_branch(branch) on tx/rcv/pay/vch/pmt manager policies, allocations follow
-  their payment; verify_sale/reject_sale/set_voucher_breakdown/reopen_rejected_voucher branch
-  checked; trigger branches_grant_creator; backfill admins = all branches. Frontend:
-  selectBranchAccess null for superadmin only + addBranchAccess (account.store); branch.list.hook
-  allBranchOptions + branchName over all; branch.scope.hook no manager bypass; branch.manage.hook
-  grants the new slug; user.manage.hook all branches in the field, admins show names;
-  account.request admin needs >= 1 branch. Not harness-verified yet (F7).
-- [x] F6c role hierarchy developer > superadmin > admin > accountant/employee (v1.79, same
-  migration 22): app.authorities (one developer cerejie1342@gmail.com, one superadmin
-  cagapearlynmae@gmail.com, Supabase Auth; other email logins refused), app.authority_role /
-  is_developer, is_superadmin = either authority, public.my_authority_role (login check),
-  developer_set_superadmin_password (bcrypt into auth.users). Admins read all users, manage
-  accountants/employees only (policies + admin_create_user/admin_set_password). Frontend:
-  AuthorityRole enum, account.store setAuthoritySession(email, role), loginSuperAdmin checks
-  role, permissions manageAdmins = superadmin/developer, manageSuperAdmin = developer,
-  Users page "Superadmin password" button (menus/SuperAdminPasswordButton) + modal, admin rows
-  read-only for admins. Developer is not in public.users, so never listed for the superadmin.
-  SUPERSEDED by F6d (authority superadmin, password RPC and button all removed).
-- [x] F6d A-C email accounts (v1.79, uncommitted): migration 22 reworked (NOT applied):
-  user_role enum + 'superadmin' (role::text comparisons), users.email (unique lower) +
-  pending_password_hash + password_reset_requested_at; authorities = developer only;
-  app.user_role() + app.branch_access() read LIVE from approved public.users rows (all table
-  users, not only admins); is_developer / is_superadmin; app.can_manage_role + users_manage_*
-  policies (admins also read admins); admin_set_password on it; user_display_names includes
-  superadmins; login_email, register_email, admin_create_user_email (app.username_from_email,
-  app.assert_new_account), account_email_exists, request_password_reset,
-  decide_password_reset, change_own_password; old login/register/admin_create_user revoked.
-  Migration 20261011000023_fresh_users.sql (NOT applied) wipes public.users + non-developer
-  auth.users - FK check pending (auto mode blocked the grep): if any table references
-  public.users without on delete, 23 fails and needs set-null updates first.
-  Frontend: role.enum (superadmin UserRole, AuthorityRole = developer, manageableRolesOf);
-  permissions drop manageAdmins/manageSuperAdmin; account.store setDeveloperSession /
-  developerEmail, superadmin = manager + all branches; accountServices.login (login_email,
-  28P01 -> developer Supabase Auth); LoginView "Email"; user.services email columns +
-  decidePasswordReset; user.manage.hook approve modal (userApproveModalKey,
-  approveUserSchema), reject/reset-decision confirms, branch field hidden for superadmin;
-  UsersTable email hint, "Reset requested" tag + actions. tsc + lint clean.
-
-- [x] F6d D auth screens (v1.80): profile read-only (no migration 24). auth.flow.store
-  (registered, reset step/email); account.request registerSchema email/full_name/password/
-  confirm + forgotEmail/forgotPassword/changePassword schemas, username field gone;
-  accountServices register_email, emailExists, requestPasswordReset, changeOwnPassword,
-  changeDeveloperPassword (signIn re-verify + auth.updateUser); account.register/forgot/settings
-  hooks; AuthSuccessPanel; RegisterView success panel; ForgotPasswordView (/forgot-password,
-  ForgotPasswordHint deleted); /account (AccountView, AccountProfileCard, ChangePasswordCard,
-  isNotNav) + "Account settings" in ProtectedUserMenu. tsc + lint clean. Compiled only (F7).
-
-- [x] F7 live re-test, mostly (v1.81-v1.82): superadmin cagapearlynmae@gmail.com + 6 QA users
-  re-registered by email and approved (register, duplicate email, pending sign-in); routes per
-  role; reports; B5/B6/B9/B11/Q2-Q4 flows; forgot password -> approve reset -> sign in; /account
-  change password (qaemp2 + developer). Harness "FAIL" shots f7-a2-sale-rej / f7-a2-vrej were
-  harness confirm-step misses (both rejects applied); f7-e1-rep-exp / rep-pay = employee has no
-  Reports (guard redirect, correct). Developer /account bug fixed: account.store partialize now
-  persists developerEmail (it was lost on reload -> Email "—" and change password hit the
-  table-user RPC). User confirmed the developer fix in the browser.
-
-- [x] Q7 + F7 finish (v1.83): Q7 = follow L1. transaction.list.hook summary reads
-  getAllWithVouchers and sums countedAmountOf (verified sales, amount to pay, rejected out).
-  Harness qaadmin2: cards Cash In P2,970 / Cash Out P1,879 (= 1,110+300+250+65+78+76, rejected
-  P100 out) / Sales P2,270; P78 voucher was already Approved (the earlier "FAIL" did apply; no
-  due date, so no payable); Payables page 2 paid payables; Reports Expenses by type renders,
-  Payables report "Nothing outstanding" (both paid). No HTTP/console errors.
+- (none yet) Evidence runs o1-o5 done 2026-09-30, no code changed.
 
 ## Next (one conversation, in order)
-1. Deployment checklist, confirming each outward step with the user first: merge
-   development-overhaul -> main; if production is a different Supabase project apply migrations
-   19-23 there (23 deletes every non-developer user - confirm the target project); user resets
-   data; add Banks + branch legal_name/address.
-2. Ask, then delete this file and `.claude/state/audit/` (and the old session scratchpad audit
-   dir - f7-approve.json there holds the superadmin password in plain text).
+1. O1 — OQ2 answered (b). Create branch `offline-hardening` from main, present the file plan
+   (incl. migration 24 SQL, shown not applied), wait for approval.
+2. O2, O3, O4 (one per conversation).
+3. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
+   offline test sale P901 and deposited P333), adds Banks + branch legal_name/address.
+4. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
+   (f7-approve.json there holds the superadmin password in plain text).
 
-## Audit harness (drives the real app, live Supabase)
+## Path map
+- queue: src/store/common/sync.store.ts (runWrite, enqueue, flush, discard, lastError)
+- write executor: src/utils/write.utils.ts · types: src/models/common/write.model.ts
+- read cache: src/store/common/query.store.ts · src/hook/common/query.hook.ts
+- mutation toasts: src/hook/common/mutation.hook.ts (queued -> "Saved offline")
+- online/flush triggers: src/hook/common/network.hook.ts · src/store/common/network.store.ts
+- sync UI: src/components/common/status/SyncIndicator.tsx
+- storage keys: src/keys/storage.keys.ts (syncStorageKey "tartar-sync-queue")
+- chunk-load error screen: src/components/common/status/RouteErrorView.tsx
+- OB6: src/components/ledger/modal/RecordPaymentModal.tsx
+- queued services: src/services/data/{transaction,sale,voucher,payment,ledger,party,user}.services.ts
+- not queued: src/services/data/{bank,reference,account}.services.ts
+- PWA: vite.config.ts (VitePWA generateSW, autoUpdate, globPatterns)
+
+## Audit harness (drives the real app, live Supabase = production)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
   Ejie-Business-TARTAR/fdf908ac-a5f4-4224-a10c-c56eaf659eb9/scratchpad/audit` (playwright-core
-  installed there; copy scripts from `.claude/state/audit/` if it is gone). Dev server
-  `yarn dev --port 5199 --strictPort` (often already running).
-- `drive.mjs <steps.json>` = LIVE writes (no faking). Env: PROFILE (profile dir), TAG (shot
-  prefix), W/H viewport. Logs HTTP >= 400, console errors, page errors. Step keys: login [user,pw]
-  (signs in from "/"), goto, button (+page), click, row (+item menu, expand), fill {name|label|
-  css: value}, pick {comboLabel: text} (typed text with no option = creatable new value), date
-  [fieldText, "October 3, 2026"], submit (+confirm), confirmOnly, dump, text, count, expect,
-  absent, url, toasts, popupItem / popupButton (print popups), name (screenshot), stop, always.
-  Shots in shots/drive/. `safe-shot.mjs` = read-only (fakes writes) for screenshots.
-- Profiles (email sign-in): `f7p-sa` superadmin, `f7p-dev` developer, `f7p-qaadmin1`,
-  `f7p-qaadmin2` (Admin), `f7p-qaacc1` (QA Test), `f7p-qaacc2` (QA Test + LGC Hardware),
-  `f7p-qaemp1`, `f7p-qaemp2` (Employee, QA Test). QA logins `<name>@qa.test` / `QaTest#2026`.
-  Developer and superadmin passwords are never written to disk - ask the user, pass them in a
-  temp spec and delete it after the run. Re-sign-in with a
-  `[{"login":["qaemp1@qa.test","QaTest#2026"]}]` step if a token expired.
-- QA data (left for the user's reset): branch QA Test (qa_test, QAT, letterhead set), 7 QA users,
-  QA Customer A, QA Supplier One, QA Power Co (x2 — B6), expense type QA Utilities (QAU), income
-  source QA Consulting, bank QA Bank / QA Account 000111222, sales P1,000/P750/P520 verified +
-  P333/P44 undeposited, purchases P1,120 (paid payable) + P300, expenses P250 (paid payable) /
-  P100 rejected / P65 pending, receivable RCV-QAT-2609-0001 (P1,200 left), payments PMT-QAT-2609-
-  0001..0004, customer payment P700.
-- Auto mode may block running the harness; if so, give the user the PowerShell line
-  `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
+  installed; copy scripts from `.claude/state/audit/` if it is gone).
+- Offline runs: `yarn build`, `yarn preview --port 4199 --strictPort` (background), then
+  `EPHEMERAL=1 BASE=http://localhost:4199 TAG=<t> node drive.mjs <spec>`. EPHEMERAL = fresh
+  context, so every spec starts with a login step.
+- `drive.mjs` step keys: login [user,pw], goto, reload, nav "<sidebar label>" (in-app click, no
+  page load), offline true|false (context.setOffline), blockApi true|false (aborts supabase.co
+  = weak wifi), queue (logs the persisted sync queue), js "<expr>" (page.evaluate), button
+  (+page), click, row (+item menu, expand), fill, pick, date, submit (+confirm, keepOpen),
+  confirmOnly, dump, text, count, expect, absent, url, toasts, name (screenshot), stop, always.
+  `queue` runs before `submit` in a step, so put it on the NEXT step to see that submit's item.
+- Specs: o1-read.json (offline reads, admin), o4-write.json (offline writes + sync, employee),
+  o5-weak.json (weak wifi). Shots in shots/drive/.
+- QA logins `<name>@qa.test` / `QaTest#2026` (qaadmin1/2, qaacc1/2, qaemp1/2). Developer and
+  superadmin passwords are never written to disk.
 
 ## State
-Branch: development-overhaul · v1.82 committed · uncommitted: transaction.list.hook Q7 + this
-file (suggested as v1.83) · Migrations through 23 applied · Last check: npx tsc -b + yarn lint
-clean 2026-09-30; Q7 cards harness-verified as qaadmin2.
+Branch: main (development-overhaul merged by the user) · v1.83 committed · uncommitted: this file
+· Migrations through 23 applied · No code changed for offline yet · Preview server may still be
+running on 4199.
