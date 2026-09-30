@@ -270,21 +270,19 @@ const PurchasesTable = () => {
               />
             }
             actions={
-              <>
-                <AppButton variant="outline" onPress={openPrint}>
-                  <Printer />
-                  Print
+              <RequirePermission can="encodeTransactions" fallback={null}>
+                <AppButton onPress={() => formModal.openModal()}>
+                  <Plus />
+                  Record purchase
                 </AppButton>
-                <RequirePermission can="encodeTransactions" fallback={null}>
-                  <AppButton onPress={() => formModal.openModal()}>
-                    <Plus />
-                    Record purchase
-                  </AppButton>
-                </RequirePermission>
-              </>
+              </RequirePermission>
             }
           >
             <LedgerFilterBar showDateBasis layout="popover" />
+            <AppButton variant="outline" onPress={openPrint}>
+              <Printer />
+              Print
+            </AppButton>
           </FilterToolbar>
         }
         footer={

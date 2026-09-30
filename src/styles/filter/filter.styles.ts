@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const filterToolbar = "flex flex-wrap items-center gap-2";
 
-export const filterToolbarStart = "flex min-w-0 flex-1 flex-wrap items-center gap-2";
+export const filterToolbarStart = "flex min-w-0 flex-auto flex-wrap items-center gap-2";
 
 export const filterToolbarActions =
   "ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2";

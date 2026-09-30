@@ -288,21 +288,19 @@ const SalesTable = () => {
               />
             }
             actions={
-              <>
-                <AppButton variant="outline" onPress={openPrint}>
-                  <Printer />
-                  Print
+              <RequirePermission can="encodeTransactions" fallback={null}>
+                <AppButton onPress={() => formModal.openModal()}>
+                  <Plus />
+                  Record sale
                 </AppButton>
-                <RequirePermission can="encodeTransactions" fallback={null}>
-                  <AppButton onPress={() => formModal.openModal()}>
-                    <Plus />
-                    Record sale
-                  </AppButton>
-                </RequirePermission>
-              </>
+              </RequirePermission>
             }
           >
             <LedgerFilterBar layout="popover" />
+            <AppButton variant="outline" onPress={openPrint}>
+              <Printer />
+              Print
+            </AppButton>
           </FilterToolbar>
         }
         footer={

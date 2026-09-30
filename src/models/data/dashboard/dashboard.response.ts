@@ -11,12 +11,14 @@ export interface IDashboardSummary {
   accountsReceivable: number;
   accountsPayable: number;
   monthlySales: number;
-  monthlyExpenses: number;
-  lastMonthSales: number;
-  lastMonthExpenses: number;
   monthlyPendingSales: number;
   monthlyCashIn: number;
   monthlyCashOut: number;
+}
+
+export interface IDashboardProfit {
+  current: number;
+  previous: number;
 }
 
 export interface IDailySalesPoint {

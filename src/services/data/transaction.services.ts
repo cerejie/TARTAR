@@ -12,6 +12,7 @@ import {
 } from "../../models/common/pagination.model";
 import type { ISortState } from "../../models/common/table.model";
 import { bankAccountOf } from "../../models/data/bank/bank.request";
+import type { IBranchSummaryData } from "../../models/data/report/report.response";
 import type {
   IDisbursementInput,
   ITransactionInput,
@@ -250,6 +251,17 @@ const transactionServices = {
     if (error) throw toError(error);
 
     return withVouchers((data ?? []) as unknown as ITransaction[]);
+  },
+
+  getBranchSummary: async (
+    filters: ILedgerFilters
+  ): Promise<IBranchSummaryData> => {
+    const [sales, purchases, expenses] = await Promise.all([
+      transactionServices.getAll({ ...filters, type: "sale" }),
+      transactionServices.getDisbursementAll("purchase", filters),
+      transactionServices.getDisbursementAll("expense", filters),
+    ]);
+    return { sales, purchases, expenses };
   },
 
   createDisbursement: (

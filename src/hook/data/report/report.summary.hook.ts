@@ -39,14 +39,7 @@ export const useReportSummaryHook = (enabled: boolean) => {
 
   const query = useQuery<IBranchSummaryData>(
     scopedKey(reportSummaryKey, range.from, range.to, branch),
-    async () => {
-      const [sales, purchases, expenses] = await Promise.all([
-        transactionServices.getAll({ ...rangeFilters, type: "sale" }),
-        transactionServices.getDisbursementAll("purchase", rangeFilters),
-        transactionServices.getDisbursementAll("expense", rangeFilters),
-      ]);
-      return { sales, purchases, expenses };
-    },
+    () => transactionServices.getBranchSummary(rangeFilters),
     { enabled }
   );
 

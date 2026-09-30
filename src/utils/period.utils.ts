@@ -67,3 +67,11 @@ export const monthOfRange = (range: IDateRange): string | undefined => {
     ? month
     : undefined;
 };
+
+export const monthToDateRange = (monthsAgo: number): IDateRange => {
+  const anchor = dayjs().subtract(monthsAgo, "month");
+  return {
+    from: anchor.startOf("month").format(isoFormat),
+    to: anchor.format(isoFormat),
+  };
+};

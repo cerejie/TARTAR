@@ -40,6 +40,9 @@ const DashboardView = () => {
     monthlyPendingSales,
     netProfit,
     lastMonthNetProfit,
+    profitLoading,
+    profitError,
+    retryProfit,
     cashIn,
     cashOut,
     netCashFlow,
@@ -162,9 +165,9 @@ const DashboardView = () => {
             <StatCard
               title="Net Profit (MTD)"
               value={netProfit}
-              loading={summaryLoading}
-              error={summaryError}
-              onRetry={retrySummary}
+              loading={profitLoading}
+              error={profitError}
+              onRetry={retryProfit}
               variant="accent"
               icon={<ChartPie />}
               chip={

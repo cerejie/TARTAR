@@ -179,15 +179,8 @@ const dashboardServices = {
   getSummary: async (branch?: string | null): Promise<IDashboardSummary> => {
     const today = todayIso();
     const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
-    const lastMonthStart = dayjs()
-      .subtract(1, "month")
-      .startOf("month")
-      .format("YYYY-MM-DD");
-    const lastMonthCutoff = dayjs()
-      .subtract(1, "month")
-      .format("YYYY-MM-DD");
 
-    const [cash, recent, thisMonth, lastMonth, receivables, payables] =
+    const [cash, recent, thisMonth, receivables, payables] =
       await Promise.all([
         scopeToBranch(
           supabase.from("cash_accounts").select("account, balance"),
@@ -212,15 +205,6 @@ const dashboardServices = {
         ),
         scopeToBranch(
           supabase
-            .from("transactions")
-            .select("type, sale_status, amount")
-            .in("type", ["sale", "expense"])
-            .gte("txn_date", lastMonthStart)
-            .lte("txn_date", lastMonthCutoff),
-          branch
-        ),
-        scopeToBranch(
-          supabase
             .from("receivables")
             .select("amount, paid_amount")
             .neq("status", "paid"),
@@ -239,7 +223,6 @@ const dashboardServices = {
       cash,
       recent,
       thisMonth,
-      lastMonth,
       receivables,
       payables,
     ].find((result) => result.error)?.error;
@@ -262,7 +245,6 @@ const dashboardServices = {
       sum(recentRows.filter((row) => row.txn_date === date && predicate(row)));
 
     const thisMonthRows = (thisMonth.data ?? []) as TypedAmountRow[];
-    const lastMonthRows = (lastMonth.data ?? []) as TypedAmountRow[];
 
     const matching = (
       rows: TypedAmountRow[],
@@ -283,9 +265,6 @@ const dashboardServices = {
       ),
       accountsPayable: outstanding((payables.data ?? []) as OutstandingRow[]),
       monthlySales: matching(thisMonthRows, isVerifiedSale),
-      monthlyExpenses: matching(thisMonthRows, isExpense),
-      lastMonthSales: matching(lastMonthRows, isVerifiedSale),
-      lastMonthExpenses: matching(lastMonthRows, isExpense),
       monthlyPendingSales: matching(thisMonthRows, isPendingSale),
       monthlyCashIn: ofDirection(thisMonthRows, cashInflowTypes),
       monthlyCashOut: ofDirection(thisMonthRows, cashOutflowTypes),

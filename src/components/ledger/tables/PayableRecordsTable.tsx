@@ -24,6 +24,7 @@ import type { IRowAction } from "../../../models/common/action.model";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import {
   isLedgerOverdue,
+  payableAmountDueOf,
   payableStatusOf,
   type IPayable,
 } from "../../../models/data/ledger/ledger.response";
@@ -105,7 +106,7 @@ const PayableRecordsTable = () => {
       dataIndex: "amount",
       align: "right",
       className: nowrapCell,
-      render: (value: number) => formatMoney(value),
+      render: (_, row) => formatMoney(payableAmountDueOf(row)),
     },
     {
       title: "Status",

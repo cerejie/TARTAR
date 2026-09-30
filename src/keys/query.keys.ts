@@ -28,6 +28,7 @@ export const dashboardSalesKey = "dashboard-sales";
 export const dashboardAlertsKey = "dashboard-alerts";
 export const dashboardOverviewKey = "dashboard-overview";
 export const dashboardChecksKey = "dashboard-checks";
+export const dashboardProfitKey = "dashboard-profit";
 export const reportTransactionKey = "report-transactions";
 export const reportReceivableKey = "report-receivables";
 export const reportPayableKey = "report-payables";
@@ -52,4 +53,12 @@ export const liveRefreshKeys: readonly string[] = [
   dashboardOverviewKey,
   reportTransactionKey,
   reportSummaryKey,
+  dashboardAlertsKey,
+  dashboardChecksKey,
+  dashboardProfitKey,
+  receivableListKey,
+  payableListKey,
+  paymentListKey,
+  ledgerSummaryKey,
+  ledgerPartyKey,
 ];

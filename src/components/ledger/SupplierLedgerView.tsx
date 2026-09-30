@@ -9,6 +9,7 @@ import { useSupplierDetailHook } from "../../hook/data/ledger/supplier.detail.ho
 import type { IRowAction } from "../../models/common/action.model";
 import {
   isLedgerOverdue,
+  payableAmountDueOf,
   payableStatusOf,
   type IPayable,
 } from "../../models/data/ledger/ledger.response";
@@ -92,7 +93,7 @@ const SupplierLedgerView = () => {
       mobile: "amount",
       dataIndex: "amount",
       align: "right",
-      render: (value: number) => formatMoney(value),
+      render: (_, row) => formatMoney(payableAmountDueOf(row)),
     },
     {
       title: "Status",

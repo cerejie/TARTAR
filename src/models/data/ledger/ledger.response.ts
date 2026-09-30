@@ -97,5 +97,8 @@ export const ledgerBalance = (row: {
   paid_amount: number;
 }): number => Number(row.amount) - Number(row.paid_amount);
 
+export const payableAmountDueOf = (row: IPayable): number =>
+  row.status === "paid" ? Number(row.amount) : ledgerBalance(row);
+
 export const ledgerKeyOf = (customer: ICustomerLedgerKey): string =>
   customer.customerId ?? customer.customerName;

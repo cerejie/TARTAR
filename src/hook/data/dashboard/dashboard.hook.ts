@@ -1,16 +1,21 @@
 import {
   dashboardAlertsKey,
+  dashboardProfitKey,
   dashboardSalesKey,
   dashboardSummaryKey,
   scopedKey,
 } from "../../../keys/query.keys";
 import type {
   IDailySalesPoint,
+  IDashboardProfit,
   IDashboardSummary,
   IDueAlerts,
 } from "../../../models/data/dashboard/dashboard.response";
 import dashboardServices from "../../../services/data/dashboard.services";
+import transactionServices from "../../../services/data/transaction.services";
 import { useDashboardStore } from "../../../store/data/dashboard/dashboard.store";
+import { monthToDateRange } from "../../../utils/period.utils";
+import { branchSummaryNet } from "../../../utils/report.utils";
 import { useQuery } from "../../common/query.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 
@@ -34,6 +39,25 @@ export const useDashboardHook = () => {
     () => dashboardServices.getDueAlerts(7, branch)
   );
 
+  const profitQuery = useQuery<IDashboardProfit>(
+    scopedKey(dashboardProfitKey, branch),
+    async () => {
+      const [current, previous] = await Promise.all(
+        [monthToDateRange(0), monthToDateRange(1)].map((range) =>
+          transactionServices.getBranchSummary({
+            dateFrom: range.from,
+            dateTo: range.to,
+            ...(branch ? { branch } : {}),
+          })
+        )
+      );
+      return {
+        current: branchSummaryNet(current),
+        previous: branchSummaryNet(previous),
+      };
+    }
+  );
+
   const summary = summaryQuery.data;
   const cashIn = summary?.monthlyCashIn ?? 0;
   const cashOut = summary?.monthlyCashOut ?? 0;
@@ -55,12 +79,11 @@ export const useDashboardHook = () => {
     alertsError: alertsQuery.error,
     retryAlerts: alertsQuery.refetch,
     monthlyPendingSales: summary?.monthlyPendingSales ?? 0,
-    netProfit: summary
-      ? summary.monthlySales - summary.monthlyExpenses
-      : undefined,
-    lastMonthNetProfit: summary
-      ? summary.lastMonthSales - summary.lastMonthExpenses
-      : undefined,
+    netProfit: profitQuery.data?.current,
+    lastMonthNetProfit: profitQuery.data?.previous,
+    profitLoading: profitQuery.isInitialLoading,
+    profitError: profitQuery.error,
+    retryProfit: profitQuery.refetch,
     cashIn,
     cashOut,
     netCashFlow: cashIn - cashOut,

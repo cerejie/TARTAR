@@ -82,9 +82,14 @@ const selectPlaceholder = <TValues extends FieldValues>(
   config: IFieldConfig<TValues>
 ) => config.placeholder ?? `Select ${config.label.toLowerCase()}`;
 
+const withArticle = (noun: string) =>
+  `${/^[aeiou]/.test(noun) ? "an" : "a"} ${noun}`;
+
 const creatablePlaceholder = <TValues extends FieldValues>(
   config: IFieldConfig<TValues>
-) => config.placeholder ?? `Select or type a ${config.label.toLowerCase()}`;
+) =>
+  config.placeholder ??
+  `Select or type ${withArticle(config.label.toLowerCase())}`;
 
 const asNumber = (text: string): number | null => {
   if (text === "") return null;

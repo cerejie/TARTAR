@@ -220,7 +220,7 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   hook/app/realtime.hook.ts (managers only, 500 ms debounce) called from app.hook.
 
 ## Next
-1. User applies migration 20261004000016, then P10 — screenshot verification (harness below)
+1. P10 — screenshot verification (harness below)
    of P1-P9 + carried-over items. P9 checks: accountant selector lists only assigned branches;
    notification click opens the ledger (popover + dashboard card); Purchase/Expense rows show
    bank; admin live refresh (insert a transaction in another tab, admin Home updates).
@@ -239,14 +239,13 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
 
 ## Open
-- Every migration through 20261003000015 is applied (user confirmed 2026-09-29); 20261004000016
-  pending.
+- Every migration through 20261004000016 is applied (user confirmed 2026-09-29).
 - P5: payable delete is blocked in the UI only (pay_manager_all still allows it in the DB).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
 Branch: development-overhaul · Uncommitted: P9 (src + migration + ROADMAP) until v1.63 is
-committed · Migration 20261004000016 NOT applied yet · Last check: yarn build + yarn lint clean
+committed · Migration 20261004000016 applied · Last check: yarn build + yarn lint clean
 after P9. P9 compiled, not screenshot-verified; realtime with the custom JWT unproven. P8
 compiled, not screenshot-verified (fold into P10: Branch Summary tab, month/custom range,
 print). P7 compiled, not screenshot-verified (fold into P10: voucher

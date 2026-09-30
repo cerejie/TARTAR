@@ -392,6 +392,9 @@ export const branchSummaryTotals = (
   net: sumAmounts(rows, (row) => row.net),
 });
 
+export const branchSummaryNet = (data: IBranchSummaryData): number =>
+  branchSummaryTotals(branchSummaryRows(data, (branch) => branch)).net;
+
 const branchSummaryCells = (label: string, totals: IBranchSummaryTotals) => [
   label,
   formatMoney(totals.sales),

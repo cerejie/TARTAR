@@ -1,17 +1,21 @@
 import { supabase } from "../../utils/supabase.utils";
 
-const transactionChannelName = "transactions-live";
+const liveChannelName = "ledger-live";
+
+const liveTables: readonly string[] = ["transactions", "receivables", "payables"];
 
 const realtimeServices = {
-  subscribeTransactions: (onChange: () => void): (() => void) => {
-    const channel = supabase
-      .channel(transactionChannelName)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "transactions" },
-        onChange
-      )
-      .subscribe();
+  subscribeLedgerChanges: (onChange: () => void): (() => void) => {
+    const channel = liveTables.reduce(
+      (subscribed, table) =>
+        subscribed.on(
+          "postgres_changes",
+          { event: "*", schema: "public", table },
+          onChange
+        ),
+      supabase.channel(liveChannelName)
+    );
+    channel.subscribe();
 
     return () => {
       void supabase.removeChannel(channel);

@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const slidePanes = "overflow-hidden";
+export const slidePanes = "-mx-1 overflow-hidden";
 
 export const slideTrack = cva(
   "flex w-[200%] items-start transition-transform duration-300 ease-in-out motion-reduce:transition-none",
@@ -12,7 +12,7 @@ export const slideTrack = cva(
   }
 );
 
-export const slidePane = "flex w-1/2 min-w-0 shrink-0 flex-col gap-4";
+export const slidePane = "flex w-1/2 min-w-0 shrink-0 flex-col gap-4 px-1";
 
 export const ledgerHead = "flex flex-wrap items-center justify-between gap-4";
 

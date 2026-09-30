@@ -26,7 +26,7 @@ export const useRealtimeRefreshHook = () => {
       );
     };
 
-    const unsubscribe = realtimeServices.subscribeTransactions(refresh);
+    const unsubscribe = realtimeServices.subscribeLedgerChanges(refresh);
 
     return () => {
       clearTimeout(pending);
