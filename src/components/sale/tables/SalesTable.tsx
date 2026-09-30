@@ -255,7 +255,7 @@ const SalesTable = () => {
       items: [
         {
           key: "deposited_by",
-          label: "Marked deposited by",
+          label: "Deposited by",
           render: (row) =>
             row.deposited_by
               ? `${userNameOf(row.deposited_by)} · ${formatDateTime(row.deposited_at)}`

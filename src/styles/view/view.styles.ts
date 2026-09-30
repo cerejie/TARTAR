@@ -8,12 +8,12 @@ export const viewTitle =
   "min-w-0 flex-1 truncate font-heading text-2xl font-semibold tracking-tight text-foreground md:text-[1.625rem]";
 
 export const viewHeadActions =
-  "flex min-w-0 flex-wrap items-center gap-2 max-md:has-data-[slot=view-tabs]:w-full";
+  "flex min-w-0 flex-wrap items-center gap-2 max-lg:has-data-[slot=view-tabs]:w-full";
 
 export const viewTabs =
-  "-mx-1 min-w-0 basis-full overflow-x-auto overscroll-x-contain px-1 py-0.5 [scrollbar-width:none] md:basis-auto";
+  "-mx-1 min-w-0 basis-full overflow-x-auto overscroll-x-contain px-1 py-0.5 [scrollbar-width:none] lg:basis-auto";
 
-export const viewHeadDivider = "mx-1 hidden h-6 self-center! md:block";
+export const viewHeadDivider = "mx-1 hidden h-6 self-center! lg:block";
 
 export const viewToolbar = "flex min-w-0 flex-wrap items-center gap-2";
 

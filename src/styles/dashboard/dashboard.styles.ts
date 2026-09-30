@@ -25,10 +25,10 @@ export const notificationGroupHead =
 export const notificationScrollFrame = "xl:relative xl:h-full xl:min-h-96";
 
 export const notificationScroll =
-  "-mr-2 max-h-96 overflow-y-auto pr-2 xl:absolute xl:inset-0 xl:max-h-none";
+  "@container/feed -mr-2 max-h-96 overflow-y-auto pr-2 xl:absolute xl:inset-0 xl:max-h-none";
 
 export const notificationItem =
-  "-mx-2 flex cursor-pointer items-start justify-between gap-2 rounded-md border-b border-border px-2 py-2 text-left outline-none transition-colors last:border-b-0 hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50";
+  "-mx-2 flex cursor-pointer items-start justify-between gap-2 rounded-md border-b border-border px-2 py-2 text-left outline-none transition-colors last:border-b-0 hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 @max-xs/feed:flex-wrap @max-xs/feed:gap-y-1";
 
 export const notificationItemMain = "flex min-w-0 flex-1 items-start gap-2.5";
 
@@ -40,7 +40,8 @@ export const notificationName = "truncate text-sm font-semibold";
 
 export const notificationSub = "text-xs text-muted-foreground";
 
-export const notificationFigures = "flex shrink-0 flex-col text-right";
+export const notificationFigures =
+  "flex shrink-0 flex-col text-right @max-xs/feed:w-full @max-xs/feed:flex-row @max-xs/feed:items-baseline @max-xs/feed:justify-between @max-xs/feed:pl-4.5";
 
 export const notificationAmount = cva("whitespace-nowrap text-sm font-bold tabular-nums", {
   variants: {

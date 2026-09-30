@@ -263,18 +263,41 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   DashboardView Today's Sales/Expenses + Net Profit); Notifications card list fills the card at
   xl (dashboard.styles notificationScrollFrame, NotificationsCard). Screenshot-verified.
 
+- [x] Carried-over batch (v1.67, uncommitted, no migration, screenshot-verified 2026-09-30):
+  SV1 Reject sale submit = danger (EntityFormModal submitKind: ConfirmKind -> confirmAction;
+  SaleFormModals Reject passes "delete"); SV2 "Deposited by" (SalesTable detail); AD3 admin
+  Receivable/PayableEntrySheet reference `|| "—"`. Mobile sweep (65 shots, 13 routes x
+  390/390d/768/1280/1280d) findings fixed (user choices): tablet = phone layout below 1024
+  (hook/use-mobile.ts MOBILE_BREAKPOINT 1024; view.styles title row md: -> lg:); table cells
+  px-3 below 1440 (table.styles dataTableHead/dataTableCell min-[1440px]:px-4); avatarCell
+  max-w-full (phone branch card overlap); dashboard alerts stack amount/date when feed < 20rem
+  (dashboard.styles @container/feed). Header at 768-1023 clipped the user name -> headerScope /
+  headerScopeTrigger md: -> lg: (compiled, NOT yet re-shot).
+
 ## Next
-1. All phases done. Ask the user before deleting this file and `.claude/state/audit/`
-   (session protocol step 4). Optional follow-ups the user may pick: carried-over items below.
+1. Option C (user-approved choice, file plan shown, awaiting OK in the new session): Purchases
+   Branch column truncates on desktop — + components/common/table/TruncateCell.tsx (span, native
+   `title` tooltip; ui/tooltip needs a focusable trigger), ~ table.styles `truncateCell =
+   "lg:block lg:max-w-44 lg:truncate"` (cards keep full text), ~ PurchasesTable.tsx:142 render.
+   Purchases only unless the user wants all 13 Branch columns. Why: 1280 Branch wraps 4 lines;
+   1024 (now the smallest desktop width) overflows (Due date cut).
+2. Re-shoot: Purchases 390/1024/1280 + header at 768 (user name no longer clipped). The user
+   runs the harness in their own terminal (see Audit harness) and pastes the output.
+3. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
 
 ## Carried over from the audit roadmap (fold into P10)
-- Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
-- AD1 sign in as accountant/employee, open /admin once (redirect). AD3 detail sheet empty
-  Reference blank vs "—". AD5 admin loading/error states uncaptured. AD6 no due checks in data.
-- SV1 Reject sale submit should be danger tone. SV2 "Marked deposited by" -> "Deposited by".
-  SV5 no branch has legal_name/address yet. Deposit -> verify flow never run end to end.
+- Done in v1.67: mobile sweep, AD3, SV1, SV2. AD1 done in v1.66.
+- Still open (data/manual, no code): AD5 admin loading/error states uncaptured. AD6 no due
+  checks in data. SV5 no branch has legal_name/address yet. Deposit -> verify flow never run
+  end to end.
 
 ## Audit harness (drives the real app with the user's Chrome)
+- Auto mode blocks Claude from running the harness (it drives signed-in Chrome profiles
+  against live Supabase). Claude writes the spec JSON to its scratchpad and gives the user a
+  PowerShell line: `cd "<harness dir>"; node safe-shot.mjs "<spec path>"`, run in a VS Code
+  terminal (`!` does not work in the VS Code panel); Claude then reads shots/profile-<name>.png.
+  Row menus: `tbody tr:first-child td:last-child button`; expand: `td:first-child button`;
+  admin tabs `[role=tab]`, admin entries `[role=listitem] :is(button,[role=button])`.
 - Scripts in `.claude/state/audit/` (login.mjs, shot.mjs, safe-shot.mjs, routes.json,
   modals.json). Copy to the scratchpad, `npm init -y && npm i playwright-core` there (never in
   the repo). Dev server `yarn dev --port 5199 --strictPort`. `node login.mjs` -> the USER signs
@@ -292,5 +315,6 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · Uncommitted: v1.66 P10 fixes (src + ROADMAP) · No new migration ·
-Last check: yarn build + yarn lint clean (2026-09-30). P1-P10 shipped and screenshot-verified.
+Branch: development-overhaul · v1.66 committed · Uncommitted: v1.67 carried-over + mobile
+fixes (10 src files + ROADMAP; .claude/settings.local.json is the user's, untracked) · No new
+migration · Last check: yarn build + yarn lint clean (2026-09-30).

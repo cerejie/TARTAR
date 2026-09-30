@@ -16,8 +16,10 @@ import type {
   IFieldSection,
   IFormSummaryLine,
 } from "../../../models/common/field.model";
+import type { ConfirmKind } from "../../../models/common/modal.model";
 import type { ModalSize } from "../../../models/common/view.model";
 import { entityForm } from "../../../styles/form/form.styles";
+import { confirmAction } from "../../../styles/modal/modal.styles";
 import AppModal from "../modal/AppModal";
 import FormFieldGrid from "./FormFieldGrid";
 import FormSection from "./FormSection";
@@ -33,6 +35,7 @@ type IBaseProps<TValues extends FieldValues> = {
   onSubmit: (values: TValues) => void | Promise<void>;
   onClose: () => void;
   submitText?: string;
+  submitKind?: ConfirmKind;
   submitting?: boolean;
   summary?: (values: TValues) => readonly IFormSummaryLine[];
   deriveValues?: (changed: Path<TValues>, values: TValues) => Partial<TValues> | null;
@@ -56,6 +59,7 @@ const EntityFormModal = <TValues extends FieldValues>({
   onSubmit,
   onClose,
   submitText = "Save",
+  submitKind = "confirm",
   submitting = false,
   summary,
   deriveValues,
@@ -105,7 +109,12 @@ const EntityFormModal = <TValues extends FieldValues>({
           <Button variant="outline" isDisabled={submitting} onPress={onClose}>
             Cancel
           </Button>
-          <Button type="submit" form={formId} isDisabled={submitting}>
+          <Button
+            type="submit"
+            form={formId}
+            className={confirmAction({ kind: submitKind })}
+            isDisabled={submitting}
+          >
             {submitting ? <Spinner /> : null}
             {submitText}
           </Button>

@@ -12,10 +12,10 @@ export const headerLogoMark =
 export const headerWordmark =
   "hidden font-heading text-lg font-semibold tracking-tight text-foreground sm:inline";
 
-export const headerScope = "min-w-0 flex-1 md:ml-6 md:flex-none";
+export const headerScope = "min-w-0 flex-1 lg:ml-6 lg:flex-none";
 
 export const headerScopeTrigger =
-  "h-10 w-full justify-start gap-2 rounded-pill bg-muted px-4 font-normal text-muted-foreground hover:bg-accent md:w-72";
+  "h-10 w-full justify-start gap-2 rounded-pill bg-muted px-4 font-normal text-muted-foreground hover:bg-accent lg:w-72";
 
 export const headerScopeLabel = "min-w-0 flex-1 truncate text-left text-foreground";
 

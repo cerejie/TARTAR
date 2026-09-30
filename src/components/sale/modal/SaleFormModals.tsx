@@ -128,6 +128,7 @@ const SaleFormModals = () => {
           defaultValues={rejectDefaults}
           submitting={rejectMutation.loading}
           submitText="Reject"
+          submitKind="delete"
           onSubmit={(values) =>
             void rejectMutation.mutate({ id: rejectRow.id, values })
           }

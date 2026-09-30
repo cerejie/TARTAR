@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node safe-shot.mjs:*)",
+      "Bash(node relogin.mjs:*)"
+    ]
+  }
+}

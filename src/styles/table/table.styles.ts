@@ -7,7 +7,7 @@ export const dataTableGrid = "border-collapse";
 export const dataTableHeader = "[&_tr]:border-border";
 
 export const dataTableHead = cva(
-  "h-11 px-4 text-[0.8125rem] font-medium text-muted-foreground",
+  "h-11 px-3 text-[0.8125rem] font-medium text-muted-foreground min-[1440px]:px-4",
   {
     variants: {
       align: { left: "", center: "text-center", right: "text-right" },
@@ -32,7 +32,7 @@ export const dataTableRowClickable = "cursor-pointer";
 
 export const dataTableRowOverdue = "bg-danger-bg/60 hover:bg-danger-bg";
 
-export const dataTableCell = cva("h-14 px-4 py-2 text-sm whitespace-normal text-foreground", {
+export const dataTableCell = cva("h-14 px-3 py-2 text-sm whitespace-normal text-foreground min-[1440px]:px-4", {
   variants: {
     align: { left: "", center: "text-center", right: "text-right tabular-nums" },
   },
@@ -179,7 +179,7 @@ export const tablePaginationSelect = "w-18";
 
 export const tablePaginationSelectTrigger = "rounded-full";
 
-export const avatarCell = "inline-flex min-w-0 items-center gap-3";
+export const avatarCell = "inline-flex min-w-0 max-w-full items-center gap-3";
 
 export const avatarCellFallback = "bg-brand-soft text-xs font-semibold text-brand";
 
