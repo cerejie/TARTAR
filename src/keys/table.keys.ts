@@ -12,6 +12,7 @@ export const ledgerPaginationKey = (scope: string) => `${scope}-table`;
 export const disbursementPaginationKey = (scope: string) => `${scope}-table`;
 
 export const transactionExpansionKey = "transactions-table-rows";
+export const branchMonitorExpansionKey = "branch-monitor-table-rows";
 export const disbursementExpansionKey = (scope: string) => `${scope}-table-rows`;
 export const ledgerExpansionKey = (scope: string) => `${scope}-table-rows`;
 

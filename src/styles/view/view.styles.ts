@@ -5,15 +5,16 @@ export const contentView = "flex min-w-0 flex-col gap-5";
 export const viewHead = "flex flex-wrap items-center gap-3";
 
 export const viewTitle =
-  "min-w-0 flex-1 truncate font-heading text-2xl font-semibold tracking-tight text-foreground md:text-[1.625rem]";
+  "min-w-0 flex-1 truncate font-heading text-2xl font-semibold tracking-tight text-foreground md:text-[1.625rem] lg:min-w-fit";
 
 export const viewHeadActions =
-  "flex min-w-0 flex-wrap items-center gap-2 max-lg:has-data-[slot=view-tabs]:w-full";
+  "flex min-w-0 flex-wrap items-center gap-2 max-lg:has-data-[slot=view-tabs]:w-full lg:flex-nowrap";
 
 export const viewTabs =
-  "-mx-1 min-w-0 basis-full overflow-x-auto overscroll-x-contain px-1 py-0.5 [scrollbar-width:none] lg:basis-auto";
+  "-mx-1 min-w-0 basis-full overflow-x-auto overscroll-x-contain px-1 py-0.5 [scrollbar-width:none] empty:hidden lg:basis-auto";
 
-export const viewHeadDivider = "mx-1 hidden h-6 self-center! lg:block";
+export const viewHeadDivider =
+  "mx-1 hidden h-6 self-center! lg:block [[data-slot=view-tabs]:empty+&]:hidden";
 
 export const viewToolbar = "flex min-w-0 flex-wrap items-center gap-2";
 

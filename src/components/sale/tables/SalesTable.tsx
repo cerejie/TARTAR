@@ -157,7 +157,12 @@ const SalesTable = () => {
       key: "customer",
       render: (_, row) => row.customer?.name ?? "Walk-in",
     },
-    { title: "Branch", dataIndex: "branch", render: branchName },
+    {
+      title: "Branch",
+      dataIndex: "branch",
+      collapse: "xl",
+      render: branchName,
+    },
     {
       title: "Status",
       mobile: "status",
@@ -182,6 +187,7 @@ const SalesTable = () => {
     {
       title: "Deposit date",
       dataIndex: "deposit_date",
+      collapse: "2xl",
       className: nowrapCell,
       render: (value: string | null) => formatDate(value),
     },
@@ -190,6 +196,7 @@ const SalesTable = () => {
           {
             title: "Recorded by",
             key: "user",
+            collapse: "2xl" as const,
             skeleton: "avatar" as const,
             render: (_: unknown, row: ISale) => (
               <UserCell
@@ -222,6 +229,20 @@ const SalesTable = () => {
           render: (row) => row.reference_number || "—",
         },
         {
+          key: "branch",
+          label: "Branch",
+          render: (row) => branchName(row.branch),
+        },
+        ...(permissions.isManager
+          ? [
+              {
+                key: "recorded_by",
+                label: "Recorded by",
+                render: (row: ISale) => userNameOf(row.created_by),
+              },
+            ]
+          : []),
+        {
           key: "income_source",
           label: "Income source",
           render: (row) => incomeSourceLabelOf(row.income_source),
@@ -253,6 +274,11 @@ const SalesTable = () => {
       title: "Deposit",
       icon: <Landmark />,
       items: [
+        {
+          key: "deposit_date",
+          label: "Deposit date",
+          render: (row) => formatDate(row.deposit_date),
+        },
         {
           key: "deposited_by",
           label: "Deposited by",

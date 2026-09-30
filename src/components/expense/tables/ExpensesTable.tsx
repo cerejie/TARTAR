@@ -140,7 +140,12 @@ const ExpensesTable = () => {
       render: (value: string) => formatDate(value),
     },
     { title: "Payee", mobile: "title", key: "payee", render: (_, row) => payeeOf(row) },
-    { title: "Branch", dataIndex: "branch", render: branchName },
+    {
+      title: "Branch",
+      dataIndex: "branch",
+      collapse: "xl",
+      render: branchName,
+    },
     {
       title: "Expense type",
       mobile: "status",
@@ -178,6 +183,7 @@ const ExpensesTable = () => {
           {
             title: "Recorded by",
             key: "user",
+            collapse: "2xl" as const,
             skeleton: "avatar" as const,
             render: (_: unknown, row: IDisbursement) => (
               <UserCell
@@ -204,6 +210,20 @@ const ExpensesTable = () => {
       title: "Expense",
       icon: <FileText />,
       items: [
+        {
+          key: "branch",
+          label: "Branch",
+          render: (row) => branchName(row.branch),
+        },
+        ...(permissions.isManager
+          ? [
+              {
+                key: "recorded_by",
+                label: "Recorded by",
+                render: (row: IDisbursement) => userNameOf(row.created_by),
+              },
+            ]
+          : []),
         {
           key: "cash_account",
           label: "Paid from",

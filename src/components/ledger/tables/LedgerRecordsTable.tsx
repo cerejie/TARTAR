@@ -127,12 +127,14 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     {
       title: "Branch",
       dataIndex: "branch",
+      collapse: "xl",
       className: branchCell,
       render: branchName,
     },
     {
       title: "Paid",
       key: "paid",
+      collapse: "2xl",
       render: (_, row) => (
         <ProgressCell
           value={row.paid_amount}
@@ -180,6 +182,17 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       title: "Record",
       icon: <FileText />,
       items: [
+        {
+          key: "branch",
+          label: "Branch",
+          render: (row) => branchName(row.branch),
+        },
+        {
+          key: "paid",
+          label: "Paid",
+          render: (row) =>
+            `${formatMoney(row.paid_amount)} of ${formatMoney(row.amount)}`,
+        },
         {
           key: "created",
           label: "Created",

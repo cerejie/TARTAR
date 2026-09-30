@@ -278,14 +278,35 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   components/common/table/TruncateCell.tsx (span + native `title`), table.styles `truncateCell`
   (lg: only, cards keep full text), PurchasesTable.tsx Branch render. Purchases only.
 
-## Next
-1. Re-shot (trunc.json) 2026-09-30: Branch one line + ellipsis at 1024/1280 PASS; header 768
+- [x] Re-shot (trunc.json) 2026-09-30: Branch one line + ellipsis at 1024/1280 PASS; header 768
    user name PASS. Overflow fix (user choice: hide columns, values stay in the row expansion),
    compiled: IDataTableColumn.collapse "xl" | "2xl" (table.model), table.styles
    dataTableCollapse, DataTable head/cell/skeleton; PurchasesTable Branch xl, Amount + Recorded
    by 2xl, Purchase detail section + Branch / Amount / Recorded by (managers). Re-shoot spec
    `collapse.json` (1024, 1024 expanded, 1280, 1536, 390) — ALL PASS 2026-09-30.
-2. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
+
+- [x] 1024 sweep (v1.69, uncommitted, no migration, screenshot-verified w1024b.json ALL PASS
+  2026-09-30). Collapse + row-detail values: TransactionsTable (Branch xl, Recorded by 2xl;
+  transaction.list.hook exposes userNameOf), SalesTable (Branch xl, Deposit date + Recorded by
+  2xl), ExpensesTable (Branch xl, Recorded by 2xl), VouchersTable (Branch xl, Created 2xl),
+  LedgerRecordsTable (Branch xl, Paid 2xl -> "x of y"), PayableRecordsTable (Branch xl),
+  BranchMonitorTable (Receivables + Payables xl, new "Ledger" expansion,
+  branchMonitorExpansionKey). view.styles: title lg:min-w-fit (actions wrap instead of
+  truncating Payables / Master Data titles), actions lg:flex-nowrap (Reports Print beside
+  tabs), empty tabs slot + its divider hidden (parties views). Admin: tiles xl:grid-cols-4,
+  list cards xl:grid-cols-3 + aside shrink-0 (app.styles, shared ListSection).
+
+## Next
+1. Confirm v1.69 is committed; if not, suggest it.
+2. Admin loading/error states (item 8, AD5): add a spec that throttles or blocks Supabase GETs
+   on /admin (safe-shot `rewrite` only patches rows; a block/delay option would need adding to
+   the scratchpad safe-shot.mjs, not the repo) and screenshot loading + error + retry.
+   AD6 (due checks) stays data-dependent: skip unless a check with a due date exists.
+3. Optional, only if the user asks: migration so payables cannot be deleted in the DB
+   (pay_manager_all still allows DELETE) — propose SQL, never apply.
+4. Remaining user-side (no code, just remind once): commit, add Banks in Master Data, branch
+   legal_name/address, run deposit -> verify end to end, delete the three P1.00 test rows.
+5. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
 
 ## Carried over from the audit roadmap (fold into P10)
 - Done in v1.67: mobile sweep, AD3, SV1, SV2. AD1 done in v1.66.
@@ -317,5 +338,6 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · v1.67 committed · Uncommitted: v1.68 TruncateCell (3 src files)
-· No new migration · Last check: yarn build + yarn lint clean (2026-09-30).
+Branch: development-overhaul · v1.68 committed · Uncommitted: v1.69 1024 sweep (7 tables,
+view/admin/app styles, table.keys, transaction.list.hook) · No new migration · Last check:
+yarn build + yarn lint clean, w1024b.json shots ALL PASS (2026-09-30).

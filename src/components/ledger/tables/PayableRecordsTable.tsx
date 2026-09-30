@@ -97,6 +97,7 @@ const PayableRecordsTable = () => {
     {
       title: "Branch",
       dataIndex: "branch",
+      collapse: "xl",
       className: branchCell,
       render: branchName,
     },
@@ -138,6 +139,11 @@ const PayableRecordsTable = () => {
       title: "Record",
       icon: <FileText />,
       items: [
+        {
+          key: "branch",
+          label: "Branch",
+          render: (row) => branchName(row.branch),
+        },
         {
           key: "created",
           label: "Created",

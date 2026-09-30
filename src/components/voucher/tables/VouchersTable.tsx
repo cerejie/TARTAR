@@ -129,6 +129,7 @@ const VouchersTable = () => {
     {
       title: "Branch",
       dataIndex: "branch",
+      collapse: "xl",
       className: branchCell,
       render: branchName,
     },
@@ -153,6 +154,7 @@ const VouchersTable = () => {
     {
       title: "Created",
       dataIndex: "created_at",
+      collapse: "2xl",
       className: nowrapCell,
       render: (value: string) => (
         <span className={stackedCell}>
@@ -190,6 +192,16 @@ const VouchersTable = () => {
       title: "Voucher",
       icon: <FileCheck />,
       items: [
+        {
+          key: "branch",
+          label: "Branch",
+          render: (voucher) => branchName(voucher.branch),
+        },
+        {
+          key: "created_at",
+          label: "Created",
+          render: (voucher) => formatDateTime(voucher.created_at),
+        },
         {
           key: "category",
           label: "Category",

@@ -103,7 +103,7 @@ export const useTransactionListHook = () => {
   const { farmSectionOptions } = useFarmSectionListHook();
   const { customerOptions } = useCustomerListHook();
   const { supplierOptions } = useSupplierListHook();
-  const { userById } = useUserListHook();
+  const { userById, userNameOf } = useUserListHook();
   const { paymentFields, paymentLabelOf } = useBankAccountListHook();
   const { labelOf: incomeSourceLabelOf } = useIncomeSourceListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
@@ -263,6 +263,7 @@ export const useTransactionListHook = () => {
     summaryPeriod: filterPeriodLabel(effectiveFilters),
     branchName,
     userById,
+    userNameOf,
     paymentLabelOf,
     incomeSourceLabelOf,
     formModal,

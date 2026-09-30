@@ -45,6 +45,7 @@ const TransactionsTable = () => {
     retry,
     branchName,
     userById,
+    userNameOf,
     paymentLabelOf,
     incomeSourceLabelOf,
     formModal,
@@ -102,12 +103,18 @@ const TransactionsTable = () => {
         />
       ),
     },
-    { title: "Branch", dataIndex: "branch", render: branchName },
+    {
+      title: "Branch",
+      dataIndex: "branch",
+      collapse: "xl",
+      render: branchName,
+    },
     ...(permissions.isManager
       ? [
           {
             title: "Recorded by",
             key: "user",
+            collapse: "2xl" as const,
             skeleton: "avatar" as const,
             render: (_: unknown, row: ITransaction) => (
               <UserCell
@@ -151,6 +158,20 @@ const TransactionsTable = () => {
           label: "Reference",
           render: (row) => row.reference_number || "—",
         },
+        {
+          key: "branch",
+          label: "Branch",
+          render: (row) => branchName(row.branch),
+        },
+        ...(permissions.isManager
+          ? [
+              {
+                key: "recorded_by",
+                label: "Recorded by",
+                render: (row: ITransaction) => userNameOf(row.created_by),
+              },
+            ]
+          : []),
         {
           key: "description",
           label: "Description",

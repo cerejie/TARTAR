@@ -47,7 +47,7 @@ export const listSectionTitle =
 export const listSectionMeta = "text-xs text-muted-foreground tabular-nums";
 
 export const listSectionItems =
-  "grid grid-cols-1 gap-2 transition-opacity md:grid-cols-2 lg:grid-cols-3";
+  "grid grid-cols-1 gap-2 transition-opacity md:grid-cols-2 xl:grid-cols-3";
 
 export const listSectionRefreshing = "opacity-60";
 
@@ -65,7 +65,7 @@ export const listCardNamePress =
 
 export const listCardMeta = "line-clamp-2";
 
-export const listCardAside = "flex flex-col items-end gap-1";
+export const listCardAside = "flex shrink-0 flex-col items-end gap-1";
 
 export const listCardAmount = "font-semibold tabular-nums";
 
