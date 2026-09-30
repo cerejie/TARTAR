@@ -3,7 +3,7 @@ import type {
   ILedgerFilterScope,
   ILedgerFilters,
 } from "../models/common/filter.model";
-import { dueSoonDays } from "../enums/ledger.enum";
+import { dueSoonDays, type PaymentKind } from "../enums/ledger.enum";
 import { daysFromTodayIso, formatDate, todayIso } from "./format.utils";
 
 interface IChainable {
@@ -116,3 +116,6 @@ export const activeFilterCount = (filters: ILedgerFilters): number =>
 export const ledgerFilterScopeOf = (
   scope: "receivables" | "payables"
 ): ILedgerFilterScope => (scope === "payables" ? "payables" : "ledger");
+
+export const paymentFilterScopeOf = (kind: PaymentKind): ILedgerFilterScope =>
+  kind === "payable" ? "payable-payments" : "payments";

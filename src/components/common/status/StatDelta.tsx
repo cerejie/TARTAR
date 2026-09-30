@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { cn } from "@/utils/cn.utils";
 import { toneText } from "../../../styles/common/tone.styles";
 import { statDelta } from "../../../styles/status/status.styles";
+import { statDeltaPercent } from "../../../utils/stat.utils";
 
 type IProps = {
   current: number | undefined;
@@ -11,10 +12,9 @@ type IProps = {
 };
 
 const StatDelta = ({ current, previous, goodDirection, label }: IProps) => {
-  if (current === undefined || previous === undefined || previous === 0)
-    return null;
+  const percent = statDeltaPercent(current, previous);
+  if (percent === undefined) return null;
 
-  const percent = ((current - previous) / Math.abs(previous)) * 100;
   const isUp = percent >= 0;
   const isGood = isUp === (goodDirection === "up");
 

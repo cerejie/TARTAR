@@ -22,7 +22,10 @@ export const notificationGroup = "mb-4 flex flex-col last:mb-0";
 export const notificationGroupHead =
   "mb-0.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider";
 
-export const notificationScroll = "-mr-2 max-h-96 overflow-y-auto pr-2";
+export const notificationScrollFrame = "xl:relative xl:h-full xl:min-h-96";
+
+export const notificationScroll =
+  "-mr-2 max-h-96 overflow-y-auto pr-2 xl:absolute xl:inset-0 xl:max-h-none";
 
 export const notificationItem =
   "-mx-2 flex cursor-pointer items-start justify-between gap-2 rounded-md border-b border-border px-2 py-2 text-left outline-none transition-colors last:border-b-0 hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50";

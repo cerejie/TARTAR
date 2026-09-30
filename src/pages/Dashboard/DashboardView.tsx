@@ -20,6 +20,7 @@ import NotificationsCard from "../../components/dashboard/NotificationsCard";
 import SalesOverviewCard from "../../components/dashboard/SalesOverviewCard";
 import { useDashboardHook } from "../../hook/data/dashboard/dashboard.hook";
 import { formatDate, formatMoney, todayIso } from "../../utils/format.utils";
+import { statCaptionOf } from "../../utils/stat.utils";
 
 const DashboardView = () => {
   const {
@@ -95,7 +96,12 @@ const DashboardView = () => {
                   label="vs yesterday"
                 />
               }
-              caption="vs yesterday"
+              caption={statCaptionOf(
+                summary?.todaysSales,
+                summary?.yesterdaysSales,
+                "vs yesterday",
+                "Recorded today"
+              )}
             />
           </BentoCell>
           <BentoCell span="quarter">
@@ -115,7 +121,12 @@ const DashboardView = () => {
                   label="vs yesterday"
                 />
               }
-              caption="vs yesterday"
+              caption={statCaptionOf(
+                summary?.todaysExpenses,
+                summary?.yesterdaysExpenses,
+                "vs yesterday",
+                "Recorded today"
+              )}
             />
           </BentoCell>
 
@@ -178,7 +189,12 @@ const DashboardView = () => {
                   label="vs last month"
                 />
               }
-              caption="vs last month"
+              caption={statCaptionOf(
+                netProfit,
+                lastMonthNetProfit,
+                "vs last month",
+                "Sales less expenses and purchases"
+              )}
             />
           </BentoCell>
 

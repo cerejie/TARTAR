@@ -251,16 +251,21 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   (DashboardView.tsx:181); Payables By supplier -> Payments Filters badge shows 1 with an empty
   list (check which filter is active). Header bell is phone-only by design (protected.hook:71).
 
+- [x] P10 (v1.66, uncommitted, no migration) — sweep PASSED on all three profiles (2026-09-30):
+  employee /admin -> redirect, rejected sale View reason -> Resubmit modal; accountant /admin ->
+  redirect, scope lists 4 assigned branches (superadmin 6), no Manage branches (D16);
+  notification click -> supplier/customer ledger from dashboard card + phone popover (D15);
+  Mark paid stacks over the supplier ledger; approved voucher print = LGC layout + breakdown +
+  Prepared/Approved names (D13/D14). Fixes: payable payments get their own filter scope
+  "payable-payments" (default All; receivables keep "pending") — filter.model, filter.store,
+  filter.utils paymentFilterScopeOf, payment.list.hook, LedgerPaymentsTable; stat captions
+  follow the delta chip (utils/stat.utils.ts statDeltaPercent/statCaptionOf, StatDelta,
+  DashboardView Today's Sales/Expenses + Net Profit); Notifications card list fills the card at
+  xl (dashboard.styles notificationScrollFrame, NotificationsCard). Screenshot-verified.
+
 ## Next
-1. P10 remaining (follow-up specs were blocked by the permission classifier when writing into
-   the fdf908ac harness folder — user to decide: allow it, or copy the harness into this
-   session's scratchpad): phone notifications popover + click, dashboard card click -> supplier
-   ledger, supplier ledger + Mark paid stacking, voucher print on an APPROVED row (row 1 is
-   pending, Print disabled), employee rejected sale -> View reason (fake via rewrite
-   transactions sale_status=rejected), employee/accountant /admin redirect, accountant scope
-   list. Then fix the two findings above. P9 checks: accountant
-   selector lists only assigned branches; notification click opens the ledger (popover +
-   dashboard card); Purchase/Expense rows show bank. Live refresh already proven.
+1. All phases done. Ask the user before deleting this file and `.claude/state/audit/`
+   (session protocol step 4). Optional follow-ups the user may pick: carried-over items below.
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -287,13 +292,5 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · Uncommitted: v1.65 session expiry (src + ROADMAP) ·
-Migration 20261005000017 applied · Last check: yarn build + yarn lint clean (2026-09-30).
-P9 realtime proven live; accountant selector + notification click still unverified. P8
-compiled, not screenshot-verified (fold into P10: Branch Summary tab, month/custom range,
-print). P7 compiled, not screenshot-verified (fold into P10: voucher
-print vs sample, period print modal, Purchases "Date of" filter; period print scope reads "All
-branches" for employees, as the Reports print does). P5 UI compiled, not
-screenshot-verified (fold into P10: Mark paid modal stacking over the supplier ledger).
-P6 compiled, not screenshot-verified (fold into P10: View reason -> Resubmit end to end; a
-failed deposit step leaves the sale rejected with the edits saved).
+Branch: development-overhaul · Uncommitted: v1.66 P10 fixes (src + ROADMAP) · No new migration ·
+Last check: yarn build + yarn lint clean (2026-09-30). P1-P10 shipped and screenshot-verified.

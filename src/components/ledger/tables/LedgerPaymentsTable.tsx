@@ -15,6 +15,7 @@ import {
 import { usePaymentListHook } from "../../../hook/data/payment/payment.list.hook";
 import type { ILedgerPayment } from "../../../models/data/payment/payment.response";
 import { nowrapCell } from "../../../styles/table/table.styles";
+import { paymentFilterScopeOf } from "../../../utils/filter.utils";
 import { formatDate, formatMoney } from "../../../utils/format.utils";
 
 type IProps = {
@@ -124,7 +125,7 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
             />
           }
         >
-          <LedgerFilterBar scope="payments" paymentKind={kind} layout="popover" />
+          <LedgerFilterBar scope={paymentFilterScopeOf(kind)} paymentKind={kind} layout="popover" />
         </FilterToolbar>
       }
       footer={

@@ -32,6 +32,7 @@ import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
+import { paymentFilterScopeOf } from "../../../utils/filter.utils";
 import { formatDate, formatMoney } from "../../../utils/format.utils";
 import { useUserListHook } from "../user/user.list.hook";
 
@@ -43,7 +44,7 @@ export const usePaymentListHook = (
   const verifierId = useAccountStore(selectUserId);
   const { userNameOf } = useUserListHook();
   const openConfirm = useConfirm();
-  const { filters } = useLedgerFilters("payments");
+  const { filters } = useLedgerFilters(paymentFilterScopeOf(kind));
   const { pagination, setPagination, goToPage } = usePagination(
     paymentPaginationKey(kind)
   );
