@@ -1,350 +1,167 @@
-# ROADMAP — Client TO-DO backlog (TARTAR TO DOs.txt, 2026-09-29)
-Updated: 2026-09-29
+# ROADMAP — Pre-deployment QA fixes (live multi-role test, 2026-09-30)
+Updated: 2026-09-30
 
 ## Goal
-Every item in the client's TO-DO list is shipped, `yarn build` + `yarn lint` clean after each
-phase. One phase per conversation; the user reviews between phases. Replaces the finished
-desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
+Fix every bug found in the 2026-09-30 live test (2 admins, 2 accountants, 2 employees, superadmin,
+QA Test branch) so the app is deployable. `yarn build` + `yarn lint` clean after each phase. One
+phase per conversation; the user reviews between phases. Replaces the finished client TO-DO roadmap
+(P1-P10 + carried-over, v1.55-v1.71).
 
 ## Session protocol
 1. New conversation: read this file, `git status --short`, start `Next` item 1. Load `build`
    (+ `tartar-shadcn` and `shadcn` docs for UI). Present the phase's file plan and WAIT for
    approval (global CLAUDE.md) before editing.
 2. Migrations: write the SQL file, show it, never apply it; the user applies it to Supabase.
-   Never drop/rename a column; old enum values stay in the DB (hide them in the UI only).
+   Never drop/rename a column.
 3. Close a phase: build + lint clean, tick Done with paths, rewrite Next, suggest commit
    (`git log --oneline --grep="^Development v" -1` + 0.1), tell the user to open a new
-   conversation. Visual work is reported **compiled** unless a screenshot proves it.
-4. After the last phase: delete this file and `.claude/state/audit/`.
+   conversation. Visual work is reported **compiled** unless a harness run proves it.
+4. After the last phase: delete this file and `.claude/state/audit/` (ask first).
 
-## Decisions locked (user, 2026-09-29)
-- D1 Collection == Customer payment in code (both inflow, customerTypes, ledger
-  ledger.services.ts:265). Remove `collection` from the Transactions type filter + Type field;
-  old rows keep rendering (label map stays).
-- D2 Banks master data: Bank -> many accounts (account name + number), one global list (not
-  per branch). Cash Drawer and Petty Cash stay fixed non-bank options. Every "Cash account" /
-  "Paid from" dropdown (Sale, Purchase, Expense, Transaction) and the voucher "Bank issuing"
-  field read this list.
-- D3 Auto reference numbers: `<KIND>-<branch prefix>-<YYMM>-<0001>` (e.g. PUR-FRM-2609-0001),
-  one counter per kind + branch + month, generated in the DB on insert. Receivables, payables,
-  purchases. Existing reference numbers untouched. Reference fields removed from the forms.
-- D4 Expense payee: creatable combobox (same as F24 customer: fuzzy >= 0.8, new name saved on
-  submit through service + runWrite) saving into the **Suppliers** list, so it shows in the
-  Payables supplier ledger. Supplier field removed from the Expense form.
-- D5 Expense type: creatable combobox over expense categories (add if not existing).
-- D6 Expense "Particular": free-text field, prints as the voucher Particulars. Voucher
-  breakdown section removed from the Expense form -> expenses carry no EWT
-  (amount = amount to pay). Purchases KEEP the breakdown.
-- D7 Expense payables: an expense with a due date opens a payable on voucher approval, same as
-  purchases (trigger app.voucher_approval_payable, currently category = 'PUR' only).
-- D8 Payables "Mark paid": row action pays the WHOLE balance immediately after useConfirm; the
-  confirm asks Paid from (bank account / cash). No partial payments, no approval step for it.
-  No one can delete a payable (all roles). "Record payable" button removed (admin). Paid and
-  Balance columns removed from the payables table — for admin, accountant and employee.
-- D9 Payable statuses: Open, Due soon (due date within 7 days), Overdue, Paid (kept so history
-  stays reachable).
-- D10 Rejected sale: employee row action "View reason" opens a modal with the reason and the
-  editable sale; resubmit sets status back to `deposited` (awaits admin verification again).
-- D11 Reports: per branch, Sales / Expenses / Purchases totals for a month or custom range,
-  Net = Sales - Expenses - Purchases, purchases counted by invoice date (txn_date). Print =
-  summary only. Admin report == accountant report.
-- D12 Admin live refresh: Supabase realtime subscription on transactions invalidates the
-  admin's queries (not polling).
-- D13 Voucher print format = client LGC check voucher (`C:\Users\cclisondato\Downloads\Sample\
-  vouchers sample2.png`; sample1 = same layout, AFC 818). Letterhead, CHECK VOUCHER / Voucher
-  No. / Date, payee as big heading, PARTICULARS | Amount, breakdown rows Gross Total / 12% vat
-  / 1% withhold / TOTAL / Less return, big net amount, Bank Name / Check No. / Date of Check,
-  Received By / Name / Signature / Date. Already built in v1.41 (print.utils.ts) — phase 7
-  only makes sure employee prints include the breakdown.
-- D14 Signatories: Prepared by = full name of the voucher's creator; Approved by = full name of
-  the admin who approved it.
-- D15 Notifications (dashboard NotificationsFeed + admin app): scrollable, each item clickable
-  -> opens that record. Adds purchases + expenses due, showing due date and bank.
-- D16 Accountant header: branch scope selector showing only the accountant's assigned branches.
-- D17 Master data: Income Sources CRUD; the Record sale "Income source" dropdown reads it
-  (replaces enum incomeSourceValues; old values seeded).
-- D18 Transactions: petty_cash removed from the Type field; Petty Cash added as a cash
-  account option (Accounting section).
-- Carried over, unchanged: every CLAUDE.md convention (no comments, no useState, class strings
+## Decisions locked
+- L1 Branch Summary (D11) is the source of truth for money totals: Sales = verified sales,
+  Expenses/Purchases = amount to pay (voucher net) by txn_date, rejected vouchers excluded,
+  Net = Sales - Expenses - Purchases. Every other total (pages, dashboard, admin home, branch
+  monitoring, period reports) must agree with it. Pending-voucher handling: follow whatever
+  `transactionServices.getBranchSummary` does today — read it first, do not invent a rule.
+- L2 The user resets all data before deployment. QA rows may be created freely in QA Test.
+- L3 Carried over, unchanged: every CLAUDE.md convention (no comments, no useState, class strings
   in *.styles.ts, tokens only in theme.css, useConfirm, runWrite, Transactions is reference).
 
-## Path map
-- Enums: src/enums/transaction.enum.ts (transactionTypeValues, cashAccountValues,
-  incomeSourceValues), ledger.enum.ts (ledgerStatus*, ledgerStatusFilter*), sale.enum.ts,
-  role.enum.ts, voucher.enum.ts
-- Transactions form: src/hook/data/transaction/transaction.list.hook.ts (customerTypes :53,
-  customer_payment :238, reference field :231)
-- Sale form: src/hook/data/sale/sale.form.hook.ts (sections :116, Additional details :186,
-  reject section :51); list: sale.list.hook.ts
-- Purchase form: src/hook/data/purchase/purchase.list.hook.ts (payment section ~:95, details
-  ~:132); table src/components/purchase/tables/PurchasesTable.tsx
-- Expense form: src/hook/data/expense/expense.list.hook.ts (Payee :137, Paid from :144);
-  table src/components/expense/tables/ExpensesTable.tsx
-- Shared disbursement: src/hook/data/disbursement/disbursement.list.hook.ts (breakdown :165)
-- Ledger (receivables/payables): src/hook/data/ledger/{ledger.list,ledger.scope,
-  customer.ledger,ledger.view}.hook.ts ; src/services/data/ledger.services.ts ;
-  src/components/ledger/PaymentAllocationModal.tsx
-- Vouchers: src/hook/data/voucher/voucher.list.hook.ts (Bank issuing :186) ;
-  src/components/voucher/tables/VouchersTable.tsx ; print src/utils/print.utils.ts
-  (check bank :102, Prepared/Approved :190)
-- Master data: src/pages/MasterData/MasterDataView.tsx ;
-  src/components/master-data/{tables,menus}/ ; hooks party/supplier.*, expense-category/*
-- Notifications: src/components/dashboard/NotificationsFeed.tsx ;
-  src/hook/data/admin/admin.notifications.hook.ts ;
-  src/components/admin/notifications/AdminNotificationsOverview.tsx ;
-  store/data/admin/notification.read.store.ts
-- Reports: src/hook/data/report/report.hook.ts ; models/data/report/report.response.ts
-- Payable trigger: supabase/migrations/20260722000007_check_details_and_purchase_terms.sql:65
-  (app.voucher_approval_payable) ; latest migration 20260928000010_*.sql
-- Form engine: models/common/field.model.ts (type `creatable`), components/common/form/
-  FormField.tsx, utils/fuzzy.utils.ts ; creatable pattern: ledger.scope.hook.ts prepare
+## Open decisions (ask the user at the start of the phase that needs them)
+- Q1 (F5) Current Cash / Bank Balance / Branch Monitoring "Cash balance" read
+  `cash_accounts.balance`, which nothing ever writes (always P0.00). Compute from transactions per
+  cash account + bank account (needs opening balances), or remove the three tiles?
+- Q2 (F6) A PENDING (unverified) customer payment already reduces the receivable balance
+  (P2,000 -> P1,200 before verify; reject restores it). Keep, or only reduce on verify?
+- Q3 (F6) Rejected expense/purchase vouchers are "Locked" for employees — no correct-and-resubmit
+  like sales (D10). Add a resubmit flow?
+- Q4 (F6) Voucher "Reject" has no reason field (sale reject does). Add one?
+- Q5 (F6) A purchase with no due date shows "Paid" in Due date while its voucher is still Pending.
+- Q6 (F6) Admin "Branch access" does nothing (admins always see all branches). Hide the field for
+  admins, or make admins branch-limited?
+
+## Bugs (evidence from the live run)
+- B1 Sign in from `/login` -> "Page not found" until reload. Real path: Register -> redirected to
+  /login -> approved user signs in -> 404. Cause: account.login.hook.ts:53 sets the session (router
+  rebuilds at /login, not in the protected tree) and only then `resetLocation("/")` (replaceState,
+  router never sees it). Signing in from `/` works.
+- B2 Payments not branch-scoped: `payments`/`payment_allocations` read policy `using (true)`
+  (migrations/20260718000004_voucher_workflow.sql:363,376). Employees/accountants (QA Test only)
+  see Camille P6,500 and mario1 P1,200 of other branches; payment lists also ignore the manager's
+  top-bar branch scope (payment.services.ts getList has no branch filter).
+- B3 Totals count rejected vouchers / wrong basis:
+  Expenses page Total + Top category (expense.list.hook summarize, sumDisbursements), dashboard
+  "Today's Expenses" (dashboard.services onDay isExpense), Branch Monitoring Expenses and admin Home
+  Expenses all show P350 = P250 approved + P100 rejected. Purchases summary
+  (purchase.list.hook.ts:21-27): Outstanding = rows with due_date, gross invoice, never drops after
+  Mark paid (stayed P1,120 after the P1,110 payable was paid); Paid = rows without due date;
+  purchases table Due date column still shows the date after the payable is Paid.
+  Period reports (Daily/Weekly/Monthly, components/report/PeriodReport.tsx + report.hook.ts):
+  Expenses P415 includes rejected P100 + pending P65; Net = Sales - Expenses (no purchases).
+  Cash Flow report: Cash Out uses gross invoice + rejected/pending; still lists "Collection" (D1).
+- B4 "By customer" / "By supplier" ignore the top-bar branch scope:
+  ledger.services getPartySummaries takes no branch (ledger.list.hook.ts:184).
+- B5 "Rejected by —" on the employee's rejected-sale modal: users RLS lets an employee read only
+  their own row (init.sql:539); sale.form.hook.ts:268 userNameOf. Needs a SECURITY DEFINER name
+  RPC like `voucher_signatories` (P7).
+- B6 Inline-created lookups are not refreshed: after the expense form creates an expense type /
+  payee supplier (disbursement.form.hook.ts prepare -> resolveParty / ensureExpenseCategory), the
+  Expenses table shows the slug `qa_utilities` until reload, and a SECOND expense typed with the
+  same new payee created a DUPLICATE supplier ("QA Power Co" x2 in Master Data). Same risk for
+  purchase Supplier and receivable Customer creatables.
+- B7 Vouchers list purpose line is "—" for every expense voucher: voucherPurpose
+  (models/data/voucher/voucher.response.ts:45) only matches the generic expense code; expense
+  vouchers carry the expense type's code (WTR, QAU).
+- B8 `/vouchers` opens by URL for accountants — the only `can` route without `permissionLoader`
+  (routes/protected.view.routes.ts:71-80).
+- B9 Customer statement print lists the REJECTED P100 payment under Payment history as if paid
+  (print.utils.ts printStatement; P1 dropped the status column). Statements go to customers.
+- B10 Report tables show branch slugs (`qa_test`) instead of names: Daily/Weekly/Monthly
+  Transactions table, Receivables and Payables report tables. Payables report "Outstanding
+  Suppliers" lists Paid rows (P0 balance).
+- B11 Minor UX:
+  - Date picker stays open after picking a day (FormField date case) — must click outside.
+  - Payment "Verify" commits with no confirm (sale Verify confirms) — LedgerPaymentsTable /
+    payment list hook; convention: committing actions go through useConfirm.
+  - Main app has no favicon (index.html has no icon link -> /favicon.ico 404 on every load).
+  - Users table Branches column shows slugs and shows "All" for an EMPTY list
+    (UsersTable.tsx:127) — DB treats empty as NO branches for employees/accountants.
+  - Pending-account sign-in toast is the raw server text "account is pending".
+  - Manual voucher Branch defaults to LGC Hardware while the admin scope is QA Test.
+  - Period print says "All branches" for an employee limited to QA Test; walk-in customer prints
+    "—" (table says "Walk-in").
+  - Offline-queued sale is not shown in the list until sync; no toast when the queue syncs.
+
+## Verified working (do not re-test unless touched)
+Role nav + URL guards (employee/accountant redirects), accountant branch scope (qaacc2 = Hardware +
+QA Test only), user create/edit/reset password/approve registration, pending sign-in blocked,
+branch create with letterhead, income source + bank account create, supplier delete blocked with a
+clear toast when referenced, sale record (bank/cash/petty) -> deposit -> verify, reject -> View
+reason -> resubmit -> verify, sale edit + edit history + delete, purchase (1% WHT: P1,120 ->
+P1,110) and expense vouchers -> approve/reject, payables opened on approval (purchase + expense
+with due date), Mark paid from bank/cash (PMT refs), receivable + partial payment + verify +
+reject (balance restored), auto references RCV/PMT/QAT-*, voucher print (letterhead, breakdown,
+bank, Prepared/Approved names), customer ledger, period print, Branch Summary = dashboard Net
+Profit (P610), admin app pages, offline record -> sync, phone layout, no console/HTTP errors on
+any route (superadmin, accountant).
 
 ## Phases
-- P1 Quick fixes (no DB): phone filter toolbar overlap; remove Collection (D1); remove the
-  "Additional details/information" sections from Sale, Purchase, Expense, Transaction forms;
-  Purchases phone card shows amount to pay (not gross); receivable print drops the payment
-  history status field; Users "Branch access" renders as a dropdown (admin bug).
-- P2 Master data + migration: banks/bank accounts (D2), income sources (D17), petty_cash cash
-  account (D18); wire every Cash account / Paid from / Bank issuing / Income source dropdown.
-- P3 Auto reference numbers + migration (D3); drop reference fields from Receivable, Payable,
-  Record payment, Purchase forms.
-- P4 Expense + Purchase forms: expense payee creatable (D4), expense type creatable (D5),
-  Particular + no breakdown (D6); purchase payment section = Supplier + Paid from only.
-- P5 Payables + migration: expense payables (D7), Mark paid, no delete, no Record payable,
-  columns (D8), statuses (D9), Payables "By supplier" supplier ledger like Receivables'
-  customer ledger.
-- P6 Sales rejection flow (D10).
-- P7 Printing: voucher breakdown on employee prints + signatories (D13, D14); Print with period
-  picker (daily / weekly / monthly / custom) on Sales, Purchases, Expenses; Purchases filters
-  "vouchers created in month" + "paid in month".
-- P8 Reports by branch summary + print (D11).
-- P9 Notifications (D15), accountant branch selector (D16), admin realtime (D12).
-- P10 Screenshot verification (harness below) of P1-P9 + carried-over items below.
+- F1 Quick fixes, no DB: B1 (set location before the session so the router builds at "/"),
+  B8 (permissionLoader createVouchers -> /transactions), B7 (expense vouchers read "Expense" or the
+  expense type label), B6 (invalidate supplier/customer/expense-category queries after a creatable
+  saves; resolve against fresh data so no duplicates), B11 date picker closes on select, payment
+  Verify via useConfirm, favicon link, Users table branch names + "None" for empty non-admins,
+  friendly pending-account message, manual voucher Branch defaults to the scope.
+- F2 Totals consistency, no DB (L1): B3 everywhere (Expenses/Purchases summaries, dashboard today's
+  expenses, branch monitoring, admin home, period reports incl. purchases in Net, cash flow basis,
+  hide Collection row), purchases Outstanding/Paid from payable status + amount to pay, purchases
+  Due date column shows Paid once paid, B9 (statement excludes rejected payments or shows status),
+  B10 (branch names in report tables, Payables report unpaid only). Re-check Branch Summary P610
+  still matches.
+- F3 Branch scoping + migration: B2 (payments/allocations read policy through
+  receivables/payables branch with app.can_see_branch; payment lists honour the top-bar scope),
+  B4 (party summaries take the branch scope). Propose SQL, user applies.
+- F4 Names + migration: B5 (SECURITY DEFINER `user_display_names(uuid[])`, branch-checked like
+  voucher_signatories) wired into "Rejected by" and any employee/accountant "Recorded by".
+- F5 Cash & bank balances: ask Q1, then implement (compute or remove), migration only if needed.
+- F6 Behaviour decisions: ask Q2-Q6, implement the chosen ones.
+- F7 Re-run the live harness on every fixed item (QA profiles below), then deployment checklist:
+  merge development-overhaul -> main, apply all migrations to production if it is a different
+  Supabase project, user resets data, add Banks + branch legal_name/address.
 
 ## Done
-- [x] Backlog triaged, decisions D1-D18 locked (2026-09-29).
-- [x] P1 (v1.55) — phone toolbar: styles/filter/filter.styles.ts (actions wrap, sort w-36 on
-  phone); Collection out of filter + Type field: enums/transaction.enum.ts
-  (transactionTypeFilterValues), LedgerFilterBar.tsx, transaction.list.hook.ts; "Additional
-  details" removed: transaction.list, sale.form, purchase.list, expense.list hooks (defaults
-  kept); Purchases "Amount to pay" column = phone card amount (PurchasesTable.tsx); receivable
-  statement drops payment Status (print.utils.ts); multiselect opens on focus + chevron
-  (FormField.tsx, form.styles.ts fieldMultiselectTrigger) — fixes Users Branch access.
-- [x] P2 (v1.56) — migration supabase/migrations/20260929000011_banks_income_sources.sql
-  (banks, bank_accounts, income_sources, petty_cash, transactions.bank_account_id, RPCs +
-  p_bank_account_id, check_bank = account label). Picker (user choice): Cash Drawer / Petty
-  Cash / Bank, then Bank + Account selects — hook/data/bank/bank.account.list.hook.ts
-  (paymentFields, bankAccountFields, paymentLabelOf, paymentDefaultsOf), utils/payment.utils.ts
-  (derivePaymentValues), IFieldConfig.optionsOf (field.model.ts, FormFieldGrid.tsx). Master
-  Data tabs Income Sources + Banks (BankAccountsTable, IncomeSourcesTable, create buttons,
-  bank.services.ts, reference.services income sources). Wired: sale.form/sale.list,
-  transaction.list (petty_cash out of Type), disbursement/purchase/expense hooks, voucher.list
-  (Bank issuing -> Bank + Account), Sales/Transactions/Purchases/Expenses tables.
-- [x] P3 (v1.57) — migration supabase/migrations/20260930000012_auto_reference_numbers.sql
-  (reference_counters + app.next_reference_no; triggers PUR on purchase transactions by
-  txn_date month, RCV/PAY on receivables/payables by insert month, PMT on payments via first
-  payment_allocations row's branch + paid_at month (user choice); fills only empty refs, so
-  voucher-approved payables keep voucher_no; update_transaction_with_voucher no longer writes
-  reference_number). Reference fields removed: ledger.scope.hook.ts, ledger.list.hook.ts
-  (payment form), PaymentAllocationModal.tsx, purchase.list.hook.ts; schemas ledger.request,
-  payment.request, transaction.request (disbursement); services ledger/payment/transaction.
-- [x] P4 (v1.58) — migration supabase/migrations/20261001000013_ensure_expense_category.sql
-  (public.ensure_expense_category(p_slug, p_name), SECURITY DEFINER, manager or employee, auto
-  unique 3-letter code skipping PUR/EXP/GEN — user choice). Submit normalisation
-  hook/data/disbursement/disbursement.form.hook.ts (prepare: payee -> supplier via
-  utils/party.utils.ts resolveParty, typed expense type -> slug via
-  referenceServices.ensureExpenseCategory); disbursement.list.hook.ts (mutations run prepare,
-  disbursementPaymentFields = Paid from required). Expense form (expense.list.hook.ts): Payee
-  creatable over suppliers, Supplier + Voucher type gone, Expense type creatable, Amount (no
-  VAT hint), Particular textarea, no breakdown/summary (EWT 0). Purchase form: Supplier
-  creatable required (payee field) + Paid from; breakdown kept. transaction.request.ts: payee
-  required, Paid from required, expense_type = name.
-
-- [x] P5 (v1.59) — migration supabase/migrations/20261002000014_payables_mark_paid.sql
-  (payments.cash_account + bank_account_id; public.mark_payable_paid SECURITY DEFINER, admin
-  or employee, full balance, verified; app.voucher_approval_payable opens payables for expense
-  vouchers with a due date). Statuses (user choice: exclusive tabs) upcoming "Open" / due_soon /
-  overdue / paid: enums/ledger.enum.ts (dueSoonDays, payableStatus*), ledger.response.ts
-  payableStatusOf, filter.utils.ts applyStatusFilter + ledgerFilterScopeOf (payables got its
-  own filter scope "payables", default All, so receivables' "unpaid" default no longer leaks).
-  Mark paid (admin + employee): payable.form.hook.ts, modal/MarkPaidModal.tsx,
-  payableServices.markPaid. tables/PayableRecordsTable.tsx (Amount, no Paid/Balance, no
-  Record/Delete); PayablesView drops RecordPaymentModal. Supplier ledger (user choice: full
-  mirror): SupplierLedgerModal/View, menus/SupplierLedgerButton, supplier.ledger/detail hooks,
-  ledger.store supplier state, printStatement(kind, partyName, ...). LedgerPartiesTable payables
-  row -> supplier ledger. Admin PayableEntrySheet drops Balance/Paid. Expense form Due date
-  (expense.list.hook.ts) + transaction.services sends due_date for expenses.
-- [x] P6 (v1.60) — no migration (mark_sale_deposited already accepts rejected -> deposited).
-  Rejected rows (encodeTransactions) show only "View reason" (user choice; Mark deposited /
-  Edit stay for undeposited): SalesTable.tsx, openSaleStatuses removed (sale.enum.ts).
-  Resubmit modal SaleFormModals.tsx (formIntro: reason, rejected by, rejected on; sale
-  sections + Deposit date prefilled with the previous one — user choice): sale.form.hook.ts
-  (resubmitModal, rowDefaults, resubmitSections, resubmitMutation), saleResubmitSchema
-  (sale.request.ts, saleShape shared), saleServices.resubmit = update + markDeposited (two
-  runWrites), saleResubmitModalKey.
-- [x] P7 (v1.61) — migration supabase/migrations/20261003000015_voucher_signatories_purchase_paid.sql
-  (public.voucher_signatories(uuid[]) SECURITY DEFINER, branch-checked, full_name else username;
-  public.purchase_ids_paid_between(from, to) INVOKER: payable paid -> last payment date, no due
-  date -> txn_date). printVoucher (print.utils.ts) rebuilt to the LGC sample, breakdown copied
-  literally (user choice: "12% vat" = amount before VAT, TOTAL = gross), always rendered (old
-  vouchers: Gross/TOTAL = amount); Prepared/Approved names via voucherServices.getList
-  withSignatories (IVoucher.prepared_by_name/approved_by_name). Period print (user choice: list
-  + totals): models/common/period.model.ts, utils/period.utils.ts (week Mon-Sun),
-  hook/common/period.print.hook.ts, common/modal/PeriodPrintModal.tsx, report.utils
-  salesPrintDocument/disbursementPrintDocument, printPeriod in sale.list + disbursement.list,
-  Print button on Sales/Purchases/Expenses tables (periodPrintModalKey, salePrintModalKey).
-  Purchases filter "Date of" (Invoice date / Voucher created / Paid): ILedgerFilters.dateBasis,
-  LedgerFilterBar showDateBasis, transaction.services disbursementQuery (purchase only).
-- [x] P8 (v1.62) — no migration. Reports tab "Branch Summary" (first, default type summary):
-  report.response.ts (IBranchSummaryRow/Totals/Data), report.summary.hook.ts (filter scope
-  "report-summary", default current month; Month select over last 12 months derived from the
-  range + DateRangeFilter custom range; top-bar branch scope), report.hook.ts spreads it,
-  components/report/BranchSummaryReport.tsx, ReportsView.tsx. User choices: Sales = verified
-  only (pending as caption), Expenses/Purchases = amount to pay (voucher net) by txn_date,
-  rejected vouchers excluded, only branches with activity get a row. Print = summary only
-  (report.utils branchSummaryPrintDocument, totals row); period.utils month helpers.
-- [x] P9 (v1.63) — migration supabase/migrations/20261004000016_accountant_branches_realtime.sql
-  (app.branch_access() NULL only for superadmin/admin -> accountants limited to assigned
-  branches, none assigned = nothing; tx/rcv/pay/vch accountant read policies + can_see_branch;
-  transactions added to supabase_realtime). D16: account.store selectCanScopeBranch +
-  selectBranchAccess, branch.scope.hook (enabled for accountant, canManage, stale stored branch
-  -> All), BranchScopeList hides Manage branches. D15 (user choices: click opens the party
-  ledger; purchases/expenses = approved payables): dashboard.response (IDuePayable source /
-  payment / check_bank, NotificationKind + purchase/expense, NotificationLedger),
-  dashboard.services toDuePayables (vouchers by payable_id -> transactions), notification.utils
-  (rows + notificationBankOf), hook/data/dashboard/notification.list.hook.ts (openItem ->
-  navigate + customer/supplier ledger modal), NotificationsFeed (no cap, pressable rows, "Pay
-  from <bank>"), NotificationsCard scroll wrapper, ProtectedNotifications closes on open, admin
-  notifications description + bank, routes by ledger. D12: supabase.utils setCustomToken ->
-  realtime.setAuth, services/data/realtime.services.ts, keys liveRefreshKeys,
-  hook/app/realtime.hook.ts (managers only, 500 ms debounce) called from app.hook.
-- [x] P10 fixes batch (v1.64, uncommitted) — migration
-  supabase/migrations/20261005000017_realtime_ledger.sql (receivables + payables join
-  supabase_realtime; applied 2026-09-30). realtime.services subscribeLedgerChanges (one channel,
-  transactions/receivables/payables); liveRefreshKeys + alerts, checks, profit, receivable,
-  payable, payment, ledger summary/party. Dashboard Net Profit (MTD) = Branch Summary net
-  (transactionServices.getBranchSummary shared with report.summary.hook, dashboardProfitKey,
-  period.utils monthToDateRange, report.utils branchSummaryNet); IDashboardSummary drops
-  monthlyExpenses/lastMonth*. Payables amount = balance until paid (ledger.response
-  payableAmountDueOf; PayableRecordsTable, SupplierLedgerView). Print button moved beside
-  Filters on Sales/Purchases/Expenses; filterToolbarStart flex-auto (phone overlap fixed,
-  screenshot-verified 390 + 1440). Stat value container-query sizing (stat.styles), ledger
-  slide pane px-1, creatable placeholder "a"/"an" (FormField withArticle).
-- [x] Live realtime test PASSED (2026-09-30): employee recorded a sale, marked it deposited,
-  recorded an expense and a receivable; superadmin tabs (/, /admin/notifications,
-  /receivables) got postgres_changes for each and refetched with no reload; notification
-  "Camille P1.00 Receivable due today" appeared live. Custom JWT realtime proven. Test rows
-  left in data: P1.00 sale (deposited), P1.00 expense "P10 LIVE TEST" (pending voucher, no due
-  date), P1.00 receivable (Camille, due 2026-09-30).
-- [x] Session expiry (v1.65, uncommitted, no migration): supabase.utils customFetch -> 401 off
-  /auth/v1/ calls onSessionExpired handler; accountServices.onSessionExpired;
-  account.logout.hook endSession(pathname) shared with logout; account.expiry.hook (toast +
-  endSession once, only while authenticated) from app.hook. Verified live (harness expiry.mjs:
-  tampered employee token -> 401s -> one toast, session cleared, sign-in page, no JWT text).
-
-- [~] P10 superadmin sweep (2026-09-30, p10.json re-run on v1.65): PASS P1 (phone toolbar, no
-  Additional details, Branch access multiselect), P2 (sale/voucher/receivable forms; Banks
-  master data EMPTY, so no bank account is pickable yet), P3, P4 (expense Particular, purchase
-  Supplier + Paid from), P5 (status tabs, Amount column, Mark paid modal), P7 (period print
-  modal, Purchases "Date of"), P8 (Branch Summary + print), dashboard Net Profit = summary net.
-  Findings: Net Profit tile caption "vs last month" dangles when StatDelta hides
-  (DashboardView.tsx:181); Payables By supplier -> Payments Filters badge shows 1 with an empty
-  list (check which filter is active). Header bell is phone-only by design (protected.hook:71).
-
-- [x] P10 (v1.66, uncommitted, no migration) — sweep PASSED on all three profiles (2026-09-30):
-  employee /admin -> redirect, rejected sale View reason -> Resubmit modal; accountant /admin ->
-  redirect, scope lists 4 assigned branches (superadmin 6), no Manage branches (D16);
-  notification click -> supplier/customer ledger from dashboard card + phone popover (D15);
-  Mark paid stacks over the supplier ledger; approved voucher print = LGC layout + breakdown +
-  Prepared/Approved names (D13/D14). Fixes: payable payments get their own filter scope
-  "payable-payments" (default All; receivables keep "pending") — filter.model, filter.store,
-  filter.utils paymentFilterScopeOf, payment.list.hook, LedgerPaymentsTable; stat captions
-  follow the delta chip (utils/stat.utils.ts statDeltaPercent/statCaptionOf, StatDelta,
-  DashboardView Today's Sales/Expenses + Net Profit); Notifications card list fills the card at
-  xl (dashboard.styles notificationScrollFrame, NotificationsCard). Screenshot-verified.
-
-- [x] Carried-over batch (v1.67, uncommitted, no migration, screenshot-verified 2026-09-30):
-  SV1 Reject sale submit = danger (EntityFormModal submitKind: ConfirmKind -> confirmAction;
-  SaleFormModals Reject passes "delete"); SV2 "Deposited by" (SalesTable detail); AD3 admin
-  Receivable/PayableEntrySheet reference `|| "—"`. Mobile sweep (65 shots, 13 routes x
-  390/390d/768/1280/1280d) findings fixed (user choices): tablet = phone layout below 1024
-  (hook/use-mobile.ts MOBILE_BREAKPOINT 1024; view.styles title row md: -> lg:); table cells
-  px-3 below 1440 (table.styles dataTableHead/dataTableCell min-[1440px]:px-4); avatarCell
-  max-w-full (phone branch card overlap); dashboard alerts stack amount/date when feed < 20rem
-  (dashboard.styles @container/feed). Header at 768-1023 clipped the user name -> headerScope /
-  headerScopeTrigger md: -> lg: (compiled, NOT yet re-shot).
-
-- [x] Option C (v1.68, uncommitted, compiled): Purchases Branch truncates on desktop —
-  components/common/table/TruncateCell.tsx (span + native `title`), table.styles `truncateCell`
-  (lg: only, cards keep full text), PurchasesTable.tsx Branch render. Purchases only.
-
-- [x] Re-shot (trunc.json) 2026-09-30: Branch one line + ellipsis at 1024/1280 PASS; header 768
-   user name PASS. Overflow fix (user choice: hide columns, values stay in the row expansion),
-   compiled: IDataTableColumn.collapse "xl" | "2xl" (table.model), table.styles
-   dataTableCollapse, DataTable head/cell/skeleton; PurchasesTable Branch xl, Amount + Recorded
-   by 2xl, Purchase detail section + Branch / Amount / Recorded by (managers). Re-shoot spec
-   `collapse.json` (1024, 1024 expanded, 1280, 1536, 390) — ALL PASS 2026-09-30.
-
-- [x] 1024 sweep (v1.69, uncommitted, no migration, screenshot-verified w1024b.json ALL PASS
-  2026-09-30). Collapse + row-detail values: TransactionsTable (Branch xl, Recorded by 2xl;
-  transaction.list.hook exposes userNameOf), SalesTable (Branch xl, Deposit date + Recorded by
-  2xl), ExpensesTable (Branch xl, Recorded by 2xl), VouchersTable (Branch xl, Created 2xl),
-  LedgerRecordsTable (Branch xl, Paid 2xl -> "x of y"), PayableRecordsTable (Branch xl),
-  BranchMonitorTable (Receivables + Payables xl, new "Ledger" expansion,
-  branchMonitorExpansionKey). view.styles: title lg:min-w-fit (actions wrap instead of
-  truncating Payables / Master Data titles), actions lg:flex-nowrap (Reports Print beside
-  tabs), empty tabs slot + its divider hidden (parties views). Admin: tiles xl:grid-cols-4,
-  list cards xl:grid-cols-3 + aside shrink-0 (app.styles, shared ListSection).
-
-- [x] v1.69 committed (9396050).
-- [x] AD5 admin loading/error states (2026-09-30, no repo change): harness safe-shot.mjs gained
-  spec `delay: {tables, ms}`, `block: {tables}` (500 PGRST body) and action `{unblock: true}`;
-  admin-states.json ALL PASS — /admin loading (tile + attention skeletons, chart spinner) 1280 +
-  390, error (per-tile "X unavailable" + Retry, attention + trend errors) 1280 + 390, Retry after
-  unblock recovers the overview tiles alone, /admin/notifications error + Retry. Note: header
-  branch scope renders nothing until branches load (ProtectedBranchScope.tsx:23) -> pops in;
-  cosmetic, left as is unless the user asks for a skeleton.
-
-- [x] v1.70 committed (1f3d007): migration
-  supabase/migrations/20261006000018_payables_no_delete.sql (pay_manager_all split into
-  read/insert/update policies, DELETE revoked) — applied by the user 2026-09-30;
-  branch.scope.hook exposes `loading`.
-- [x] Branch scope skeleton (v1.71, uncommitted, compiled): ProtectedBranchScope renders a
-  pill Skeleton (header.styles headerScopeSkeleton, trigger-sized) while branches load.
+- [x] Live multi-role test 2026-09-30 (this file's Bugs + Verified sections).
 
 ## Next
-1. Remaining user-side (no code, just remind once): add Banks in Master Data, branch
-   legal_name/address, run deposit -> verify end to end, delete the three P1.00 test rows.
-2. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
+1. F1 — quick fixes (no DB).
 
-## Carried over from the audit roadmap (fold into P10)
-- Done in v1.67: mobile sweep, AD3, SV1, SV2. AD1 done in v1.66.
-- Done 2026-09-30: AD5. Still open (data/manual, no code): AD6 no due
-  checks in data. SV5 no branch has legal_name/address yet. Deposit -> verify flow never run
-  end to end.
-
-## Audit harness (drives the real app with the user's Chrome)
-- Auto mode blocks Claude from running the harness (it drives signed-in Chrome profiles
-  against live Supabase). Claude writes the spec JSON to its scratchpad and gives the user a
-  PowerShell line: `cd "<harness dir>"; node safe-shot.mjs "<spec path>"`, run in a VS Code
-  terminal (`!` does not work in the VS Code panel); Claude then reads shots/profile-<name>.png.
-  Row menus: `tbody tr:first-child td:last-child button`; expand: `td:first-child button`;
-  admin tabs `[role=tab]`, admin entries `[role=listitem] :is(button,[role=button])`.
-- Scripts in `.claude/state/audit/` (login.mjs, shot.mjs, safe-shot.mjs, routes.json,
-  modals.json). Copy to the scratchpad, `npm init -y && npm i playwright-core` there (never in
-  the repo). Dev server `yarn dev --port 5199 --strictPort`. `node login.mjs` -> the USER signs
-  in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
-- A signed-in copy of the harness (profiles `profile` = superadmin, `employee`, `accountant`,
-  plus live.mjs, probe.mjs, relogin.mjs) is in the scratchpad of session fdf908ac:
-  `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
-  Ejie-Business-TARTAR/fdf908ac-a5f4-4224-a10c-c56eaf659eb9/scratchpad/audit`. Reuse it if it
-  still exists. Sessions expire: `PROFILE=<name> node relogin.mjs` clears storage and opens
-  /login for the USER. The `accountant` profile may need re-sign-in too.
-
-## Open
-- Every migration through 20261006000018 is applied (user confirmed 2026-09-30).
-- P5: payable delete is blocked in the UI and the DB (v1.70). Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
+## Audit harness (drives the real app, live Supabase)
+- Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
+  Ejie-Business-TARTAR/fdf908ac-a5f4-4224-a10c-c56eaf659eb9/scratchpad/audit` (playwright-core
+  installed there; copy scripts from `.claude/state/audit/` if it is gone). Dev server
+  `yarn dev --port 5199 --strictPort` (often already running).
+- `drive.mjs <steps.json>` = LIVE writes (no faking). Env: PROFILE (profile dir), TAG (shot
+  prefix), W/H viewport. Logs HTTP >= 400, console errors, page errors. Step keys: login [user,pw]
+  (signs in from "/"), goto, button (+page), click, row (+item menu, expand), fill {name|label|
+  css: value}, pick {comboLabel: text} (typed text with no option = creatable new value), date
+  [fieldText, "October 3, 2026"], submit (+confirm), confirmOnly, dump, text, count, expect,
+  absent, url, toasts, popupItem / popupButton (print popups), name (screenshot), stop, always.
+  Shots in shots/drive/. `safe-shot.mjs` = read-only (fakes writes) for screenshots.
+- Profiles: `profile` = superadmin; `qa-qaadmin1`, `qa-qaadmin2` (Admin), `qa-qaacc1` (QA Test),
+  `qa-qaacc2` (QA Test + LGC Hardware), `qa-qaemp1`, `qa-qaemp2` (Employee, QA Test), `qa-reg`
+  (qareg1, self-registered then approved). All QA passwords `QaTest#2026`. Re-sign-in with a
+  `[{"login":["qaemp1","QaTest#2026"]}]` step if a token expired.
+- QA data (left for the user's reset): branch QA Test (qa_test, QAT, letterhead set), 7 QA users,
+  QA Customer A, QA Supplier One, QA Power Co (x2 — B6), expense type QA Utilities (QAU), income
+  source QA Consulting, bank QA Bank / QA Account 000111222, sales P1,000/P750/P520 verified +
+  P333/P44 undeposited, purchases P1,120 (paid payable) + P300, expenses P250 (paid payable) /
+  P100 rejected / P65 pending, receivable RCV-QAT-2609-0001 (P1,200 left), payments PMT-QAT-2609-
+  0001..0004, customer payment P700.
+- Auto mode may block running the harness; if so, give the user the PowerShell line
+  `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · v1.70 committed · Uncommitted: v1.71 branch scope skeleton
-(ProtectedBranchScope, header.styles) · No new migration · Last check: yarn build + yarn lint.
+Branch: development-overhaul · v1.71 committed (f846c74) · Uncommitted: this roadmap +
+.claude/state/audit/drive.mjs · No new migration · Last check: live multi-role harness run
+2026-09-30.
