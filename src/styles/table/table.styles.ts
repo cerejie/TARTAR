@@ -34,6 +34,8 @@ export const dataTableRowExpanded = "border-b-0 bg-muted/40";
 
 export const dataTableRowStatic = "hover:bg-transparent";
 
+export const dataTableRowPending = "bg-warning/5 text-muted-foreground";
+
 export const dataTableRowClickable = "cursor-pointer";
 
 export const dataTableRowOverdue = "bg-danger-bg/60 hover:bg-danger-bg";

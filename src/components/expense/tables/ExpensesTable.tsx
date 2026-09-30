@@ -43,7 +43,10 @@ import {
   expenseSchema,
   type IDisbursementInput,
 } from "../../../models/data/transaction/transaction.request";
-import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
+import {
+  disbursementLinkedIds,
+  type IDisbursement,
+} from "../../../models/data/transaction/transaction.response";
 import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
 import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
 import { voucherBreakdownItems } from "../../../utils/voucher.utils";
@@ -332,6 +335,7 @@ const ExpensesTable = () => {
           pagination={pagination}
           detachedPagination
           expansionKey={disbursementExpansionKey(expenseListKey)}
+          pendingKeysOf={disbursementLinkedIds}
           detailSections={detailSections}
           emptyText="No expenses match the current filters"
         />

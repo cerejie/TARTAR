@@ -1,0 +1,11 @@
+[
+ {"note":"login emp","login":["qaemp2@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm sales","goto":"/sales","settle":3000},
+ {"note":"GO OFFLINE","offline":true},
+ {"note":"W1 offline sale 392","button":"Record sale","page":true,"fill":{"amount":"392"},"pick":{"Cash account":"Cash Drawer"}},
+ {"submit":"Record","toasts":true},
+ {"note":"392 listed pending","always":true,"text":"main tbody","max":400,"name":"sale-new-pending"},
+ {"note":"392 menu MUST FAIL","row":"₱392.00","item":"Mark deposited","always":true},
+ {"note":"BACK ONLINE","offline":false,"always":true,"wait":9000,"queue":true},
+ {"note":"sales after flush","always":true,"text":"main tbody","max":300}
+]

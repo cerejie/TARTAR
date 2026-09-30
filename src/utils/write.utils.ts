@@ -95,6 +95,61 @@ const withRecordId = (values: unknown): unknown => {
   return { id: newWriteId(), ...values };
 };
 
+type IRecordValues = Record<string, unknown>;
+
+const isRecordValues = (value: unknown): value is IRecordValues =>
+  !!value && typeof value === "object" && !Array.isArray(value);
+
+export const queuedInsertOf = (
+  write: IQueuedWrite,
+  table: string
+): IRecordValues | null =>
+  write.kind === "insert" && write.table === table && isRecordValues(write.values)
+    ? write.values
+    : null;
+
+export const queuedRpcArgsOf = (
+  write: IQueuedWrite,
+  fn: string
+): IRecordValues | null =>
+  write.kind === "rpc" && write.fn === fn ? write.args : null;
+
+export const queuedAtOf = (write: IQueuedWrite): string =>
+  new Date(write.queuedAt ?? Date.now()).toISOString();
+
+const recordArgs = ["p_transaction_id", "p_payment_id", "p_payable_id"] as const;
+
+const stringsOf = (values: readonly unknown[]): string[] =>
+  values.filter((value): value is string => typeof value === "string");
+
+const idOf = (record: unknown): unknown =>
+  record && typeof record === "object" && "id" in record ? record.id : undefined;
+
+const allocationTargetsOf = (allocations: unknown): unknown[] =>
+  Array.isArray(allocations)
+    ? allocations.map((allocation: unknown) =>
+        allocation && typeof allocation === "object" && "ledger_id" in allocation
+          ? allocation.ledger_id
+          : undefined
+      )
+    : [];
+
+export const writeTargetsOf = (write: IQueuedWrite): string[] => {
+  switch (write.kind) {
+    case "insert":
+      return stringsOf([idOf(write.values)]);
+    case "update":
+    case "delete":
+      return stringsOf([write.match.id]);
+    case "rpc":
+      return stringsOf([
+        write.id,
+        ...recordArgs.map((arg) => write.args[arg]),
+        ...allocationTargetsOf(write.args.p_allocations),
+      ]);
+  }
+};
+
 export const isOwnWrite = (write: IQueuedWrite, owner: string | null): boolean =>
   !write.owner || write.owner === owner;
 
@@ -103,12 +158,19 @@ export const prepareWrite = (
   owner: string | null
 ): IQueuedWrite => {
   const id = newWriteId();
+  const queuedAt = Date.now();
 
   if (write.kind === "insert") {
-    return { ...write, id, owner, values: withRecordId(write.values) };
+    return { ...write, id, owner, queuedAt, values: withRecordId(write.values) };
   }
   if (write.kind === "rpc" && idempotentRpcs.has(write.fn)) {
-    return { ...write, id, owner, args: { p_idempotency_key: id, ...write.args } };
+    return {
+      ...write,
+      id,
+      owner,
+      queuedAt,
+      args: { p_idempotency_key: id, ...write.args },
+    };
   }
-  return { ...write, id, owner };
+  return { ...write, id, owner, queuedAt };
 };

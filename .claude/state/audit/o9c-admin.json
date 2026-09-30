@@ -1,0 +1,13 @@
+[
+ {"note":"login admin","login":["qaadmin1@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm vouchers","goto":"/vouchers","settle":3000,"text":"main tbody","max":400},
+ {"note":"GO OFFLINE","offline":true},
+ {"note":"approve 909 offline","row":"₱909.00","item":"Approve voucher","wait":900},
+ {"confirmOnly":"Approve","toasts":true},
+ {"note":"909 voucher pending sync","always":true,"wait":800,"text":"main tbody","max":400,"name":"vch-pending"},
+ {"note":"approve 909 again MUST FAIL","row":"₱909.00","item":"Approve voucher","always":true},
+ {"note":"expenses shows lock via voucher id","nav":"Expenses","always":true,"wait":1500,"text":"main tbody","max":300,"name":"exp-vch-lock"},
+ {"note":"BACK ONLINE","offline":false,"always":true,"wait":9000,"queue":true},
+ {"note":"failed list","always":true,"js":"JSON.parse(localStorage.getItem('tartar-sync-queue')||'{}').state?.failed?.map(f=>f.write.label+' => '+f.reason)"},
+ {"note":"vouchers after flush","goto":"/vouchers","always":true,"settle":2500,"text":"main tbody","max":300}
+]

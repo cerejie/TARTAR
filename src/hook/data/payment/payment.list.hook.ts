@@ -26,6 +26,7 @@ import { useConfirm } from "../../common/confirmation.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
+import { useWithPendingRows } from "../../common/pending.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
 import {
@@ -87,6 +88,19 @@ export const usePaymentListHook = (
     { enabled: !!party }
   );
 
+  const pendingPayments = useWithPendingRows(
+    listQuery.data?.data ?? [],
+    (write) => paymentServices.pendingOf(kind, write),
+    {
+      enabled:
+        !party &&
+        pagination.pageNumber === 1 &&
+        (!effectiveFilters.paymentStatus ||
+          effectiveFilters.paymentStatus === "pending"),
+      branch: scopeBranch,
+    }
+  );
+
   const verifyMutation = useMutation(
     (id: string) => paymentServices.verify(id),
     {
@@ -140,7 +154,7 @@ export const usePaymentListHook = (
 
   return {
     permissions,
-    payments: party ? partyQuery.data ?? [] : listQuery.data?.data ?? [],
+    payments: party ? partyQuery.data ?? [] : pendingPayments,
     totalCount: listQuery.data?.totalCount ?? 0,
     pagination,
     goToPage,

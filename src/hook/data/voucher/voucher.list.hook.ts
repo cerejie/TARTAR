@@ -52,6 +52,7 @@ import { useLedgerFilters } from "../../common/filter.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
+import { useWithPendingRows } from "../../common/pending.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
 import { useBankAccountListHook } from "../bank/bank.account.list.hook";
@@ -111,6 +112,18 @@ export const useVoucherListHook = () => {
       sortKey
     ),
     () => voucherServices.getList(effectiveFilters, pageRequest)
+  );
+
+  const vouchers = useWithPendingRows(
+    listQuery.data?.data ?? [],
+    voucherServices.pendingOf,
+    {
+      enabled:
+        pagination.pageNumber === 1 &&
+        (!effectiveFilters.voucherStatus ||
+          effectiveFilters.voucherStatus === "pending"),
+      branch: scopeBranch,
+    }
   );
 
   const createMutation = useMutation(
@@ -253,7 +266,7 @@ export const useVoucherListHook = () => {
 
   return {
     permissions,
-    vouchers: listQuery.data?.data ?? [],
+    vouchers,
     totalCount: listQuery.data?.totalCount ?? 0,
     pagination,
     goToPage,

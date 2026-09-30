@@ -1,0 +1,10 @@
+[
+ {"note":"login admin","login":["qaadmin1@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm expenses","goto":"/expenses","settle":3000},
+ {"note":"warm vouchers","nav":"Vouchers","wait":2500},
+ {"note":"GO OFFLINE","offline":true},
+ {"note":"approve 908 offline","row":"₱908.00","item":"Approve voucher","wait":900},
+ {"confirmOnly":"Approve","toasts":true},
+ {"note":"expenses 908 locked via voucher id","nav":"Expenses","always":true,"wait":1500,"text":"main tbody","max":500,"name":"exp-vch-lock"},
+ {"note":"BACK ONLINE","offline":false,"always":true,"wait":9000,"queue":true}
+]

@@ -120,13 +120,29 @@ merged into main).
 - OB9 decided: custom 8h JWT has no refresh, so 401 stops the flush, keeps the queue, the existing
   expiry handler signs out, and the flush resumes on next sign-in (sync store is not in resetAllStores).
 
+- O2 DONE, harness-verified 2026-09-30 on the production build: o9-pending (emp: offline deposit
+  on sale 391 -> row "Pending sync", 2nd "Mark deposited" not reachable; expense 909 and purchase
+  393 listed as pending rows; receivable payment 52 -> no crash, record row locked, payment listed;
+  reconnect synced 4, 0 failed), o9b-emp (offline sale 392 listed pending, menu not reachable),
+  o9c/o9d-admin (offline voucher approve 909/908 -> voucher row and the Expenses row locked via
+  voucher id, synced as Approved).
+- O2 code: DataTable (OB6: key on the error/empty state rows — same-slot unkeyed TableRows changed
+  id; pending row class + "Pending sync" tag in the `actions` column, `pendingKeysOf` prop);
+  write.utils (writeTargetsOf, queuedInsertOf, queuedRpcArgsOf, queuedAtOf; prepareWrite stamps
+  queuedAt); src/hook/common/pending.hook.ts (usePendingIds, useWithPendingRows: page 1, status
+  filter compatible, branch scope, deduped by id); pendingOf mappers in sale/payment/voucher
+  services + transactionServices.pendingDisbursementOf; merged in sale/disbursement/payment/voucher
+  list hooks; transaction.response blankTransactionFields + disbursementLinkedIds.
+  Known gap: pending expense/purchase rows show "—" payee until synced (no join offline).
+
 ## Next (one conversation, in order)
-1. O2 (OB2, OB3, OB6). Reuse o6-replay.json as the base spec: a queued deposit must disable
-   "Mark deposited" on that row (W2b must fail to find the item) and show "Pending sync".
-2. O3, O4 (one per conversation).
+1. O3 (OB4, OQ1 — ask OQ1 first). Note from o9c: a page not opened before going offline still
+   renders empty skeleton rows (Expenses as admin).
+2. O4 (one conversation).
 3. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
-   offline test sales P901, P333, P341, P905, P906, expenses 902/904/907/908, payments 50/51),
-   adds Banks + branch legal_name/address.
+   offline test sales P901, P333, P341, P905, P906, P391, P392, expenses 902/904/907/908/909,
+   purchase 393, payments 50/51/52, voucher approvals 908/909), adds Banks + branch
+   legal_name/address.
 4. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
    (f7-approve.json there holds the superadmin password in plain text).
 
@@ -157,7 +173,8 @@ merged into main).
   (+page), click, row (+item menu, expand), fill, pick, date, submit (+confirm, keepOpen),
   confirmOnly, dump, text, count, expect, absent, url, toasts, name (screenshot), stop, always.
   `queue` runs before `submit` in a step, so put it on the NEXT step to see that submit's item.
-- Specs: o1-read.json (offline reads, admin), o4-write.json (offline writes + sync, employee),
+- Specs: o9-pending/o9b-emp/o9c-admin/o9d-admin (O2 pending rows + locks),
+  o1-read.json (offline reads, admin), o4-write.json (offline writes + sync, employee),
   o5-weak.json (weak wifi), o6-replay.json (refused replay + sync panel), o7-weak.json (weak wifi
   + 30s retry + toast recorder), o8-expiry.json (tampered token, re-login keeps storage).
   Shots in shots/drive/. Within one step the driver runs goto -> button -> click -> row -> fill ->
@@ -170,4 +187,5 @@ merged into main).
 
 ## State
 Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
-committed in v1.85 and verified · Migrations through 24 applied · O2 not started.
+committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
+not committed yet (suggested as v1.87) · O3 next.

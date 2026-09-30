@@ -44,7 +44,10 @@ import {
   purchaseSchema,
   type IDisbursementInput,
 } from "../../../models/data/transaction/transaction.request";
-import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
+import {
+  disbursementLinkedIds,
+  type IDisbursement,
+} from "../../../models/data/transaction/transaction.response";
 import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
 import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
 import { voucherBreakdownItems } from "../../../utils/voucher.utils";
@@ -356,6 +359,7 @@ const PurchasesTable = () => {
           pagination={pagination}
           detachedPagination
           expansionKey={disbursementExpansionKey(purchaseListKey)}
+          pendingKeysOf={disbursementLinkedIds}
           detailSections={detailSections}
           emptyText="No purchases match the current filters"
         />

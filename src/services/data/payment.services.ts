@@ -13,6 +13,8 @@ import type {
 } from "../../models/data/payment/payment.response";
 import { runWrite } from "../../store/common/sync.store";
 import { supabase, toError } from "../../utils/supabase.utils";
+import { queuedAtOf, queuedRpcArgsOf } from "../../utils/write.utils";
+import type { IQueuedWrite } from "../../models/common/write.model";
 
 const table = "payments";
 const reportLimit = 5000;
@@ -132,6 +134,28 @@ const paymentServices = {
       fn: "reject_payment",
       args: { p_payment_id: id },
     }),
+
+  pendingOf: (kind: PaymentKind, write: IQueuedWrite): ILedgerPayment | null => {
+    const args = queuedRpcArgsOf(write, "record_ledger_payment");
+    if (args?.p_kind !== kind) return null;
+
+    return {
+      id: write.id,
+      kind,
+      customer_id: kind === "receivable" ? args.p_party_id : null,
+      supplier_id: kind === "payable" ? args.p_party_id : null,
+      party_name: args.p_party_name,
+      amount: args.p_amount,
+      paid_at: args.p_paid_at,
+      reference_number: args.p_reference_number,
+      status: "pending",
+      verified_by: null,
+      verified_at: null,
+      created_by: args.p_created_by,
+      created_at: queuedAtOf(write),
+      branch: "",
+    } as unknown as ILedgerPayment;
+  },
 };
 
 export default paymentServices;

@@ -1,4 +1,9 @@
-type IWriteBase = { id: string; label: string; owner: string | null };
+type IWriteBase = {
+  id: string;
+  label: string;
+  owner: string | null;
+  queuedAt?: number;
+};
 
 export type IQueuedWrite =
   | (IWriteBase & { kind: "insert"; table: string; values: unknown })

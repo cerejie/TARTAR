@@ -19,6 +19,7 @@ import {
   useRowExpansion,
 } from "../../../hook/common/expansion.hook";
 import { usePagination } from "../../../hook/common/pagination.hook";
+import { usePendingIds } from "../../../hook/common/pending.hook";
 import { useSort } from "../../../hook/common/sort.hook";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import type { IPaginationRequest } from "../../../models/common/pagination.model";
@@ -41,6 +42,7 @@ import {
   dataTableRow,
   dataTableRowClickable,
   dataTableRowExpanded,
+  dataTableRowPending,
   dataTableRowStatic,
   dataTableSelectionCell,
   dataTableSkeletonAvatar,
@@ -54,12 +56,14 @@ import {
   leadCell,
 } from "../../../styles/table/table.styles";
 import ErrorState from "../status/ErrorState";
+import StatusTag from "../status/StatusTag";
 import DataTableCards from "./DataTableCards";
 import RowDetailPanel from "./RowDetailPanel";
 import TableEmptyState from "./TableEmptyState";
 import TablePagination from "./TablePagination";
 
 const skeletonRows = 5;
+const actionsColumnKey = "actions";
 
 type IProps<T> = {
   columns: readonly IDataTableColumn<T>[];
@@ -81,6 +85,7 @@ type IProps<T> = {
   emptyText?: string;
   rowSelection?: IDataTableSelection<T>;
   rowClassName?: (row: T) => string;
+  pendingKeysOf?: (row: T) => readonly (string | null | undefined)[];
 };
 
 const toCellContent = (value: unknown): ReactNode =>
@@ -125,6 +130,7 @@ const DataTable = <T extends object>({
   emptyText = "No records",
   rowSelection,
   rowClassName,
+  pendingKeysOf,
 }: IProps<T>) => {
   const tableId = useId();
   const isMobile = useIsMobile();
@@ -134,8 +140,18 @@ const DataTable = <T extends object>({
   const { pagination: clientPagination, setPagination: setClientPagination } =
     usePagination(tableId);
 
+  const pendingIds = usePendingIds();
+
   const resolveRowKey =
     typeof rowKey === "function" ? rowKey : (row: T) => String(row[rowKey]);
+
+  const isPendingRow = (row: T) =>
+    [resolveRowKey(row), ...(pendingKeysOf?.(row) ?? [])].some(
+      (key) => !!key && pendingIds.has(key)
+    );
+
+  const rowClassOf = (row: T) =>
+    cn(rowClassName?.(row), isPendingRow(row) && dataTableRowPending);
 
   const isExpandable = Boolean(expansionKey && detailSections?.length);
   const columnCount = columns.length + (rowSelection ? 1 : 0);
@@ -174,6 +190,15 @@ const DataTable = <T extends object>({
   };
 
   const renderContent = (column: IDataTableColumn<T>, row: T, rowIndex: number) => {
+    if (column.key === actionsColumnKey && isPendingRow(row)) {
+      return (
+        <StatusTag
+          label="Pending sync"
+          color="warning"
+          hint="Saved on this device. It syncs when you are back online."
+        />
+      );
+    }
     const value = column.dataIndex ? row[column.dataIndex] : undefined;
     return column.render ? column.render(value, row, rowIndex) : toCellContent(value);
   };
@@ -211,7 +236,7 @@ const DataTable = <T extends object>({
             dataTableRow,
             onRowClick && dataTableRowClickable,
             isOpen && dataTableRowExpanded,
-            rowClassName?.(row)
+            rowClassOf(row)
           )}
           onAction={onRowClick ? () => onRowClick(row) : undefined}
         >
@@ -284,7 +309,7 @@ const DataTable = <T extends object>({
 
     if (error && rows.length === 0) {
       return (
-        <TableRow id="error" className={cn(dataTableRow, dataTableRowStatic)}>
+        <TableRow key="error" id="error" className={cn(dataTableRow, dataTableRowStatic)}>
           <TableCell colSpan={columnCount} className={dataTableStateCell}>
             <ErrorState
               title={`Could not load ${label.toLowerCase()}`}
@@ -298,7 +323,7 @@ const DataTable = <T extends object>({
 
     if (rows.length === 0) {
       return (
-        <TableRow id="empty" className={cn(dataTableRow, dataTableRowStatic)}>
+        <TableRow key="empty" id="empty" className={cn(dataTableRow, dataTableRowStatic)}>
           <TableCell colSpan={columnCount} className={dataTableStateCell}>
             <TableEmptyState text={emptyText} />
           </TableCell>
@@ -388,7 +413,7 @@ const DataTable = <T extends object>({
           renderContent={renderContent}
           columnId={columnId}
           onRowClick={onRowClick}
-          rowClassName={rowClassName}
+          rowClassName={rowClassOf}
           rowSelection={rowSelection}
           expansion={isExpandable ? expansion : undefined}
           detailSections={detailSections}

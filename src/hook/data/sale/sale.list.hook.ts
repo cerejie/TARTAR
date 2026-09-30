@@ -34,6 +34,7 @@ import { useLedgerFilters } from "../../common/filter.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
+import { useWithPendingRows } from "../../common/pending.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
 import { useBankAccountListHook } from "../bank/bank.account.list.hook";
@@ -109,6 +110,17 @@ export const useSaleListHook = () => {
     () => saleServices.getAll(summaryFilters)
   );
 
+  const rows = useWithPendingRows(
+    listQuery.data?.data ?? [],
+    saleServices.pendingOf,
+    {
+      enabled:
+        pagination.pageNumber === 1 &&
+        (!effectiveFilters.saleStatus || effectiveFilters.saleStatus === "undeposited"),
+      branch: scopeBranch,
+    }
+  );
+
   const historyRow = historyModal.modal.data;
 
   const auditQuery = useQuery<ITransactionAudit[]>(
@@ -153,7 +165,7 @@ export const useSaleListHook = () => {
 
   return {
     permissions,
-    rows: listQuery.data?.data ?? [],
+    rows,
     totalCount: listQuery.data?.totalCount ?? 0,
     pagination,
     goToPage,

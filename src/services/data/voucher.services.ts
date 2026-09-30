@@ -15,6 +15,8 @@ import { runWrite } from "../../store/common/sync.store";
 import { applyLedgerFilters } from "../../utils/filter.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 import { breakdownTotalsOf } from "../../utils/voucher.utils";
+import { queuedAtOf, queuedInsertOf } from "../../utils/write.utils";
+import type { IQueuedWrite } from "../../models/common/write.model";
 
 const table = "vouchers";
 
@@ -137,6 +139,22 @@ const voucherServices = {
       values: { printed: true },
       match: { id },
     }),
+
+  pendingOf: (write: IQueuedWrite): IVoucher | null => {
+    const values = queuedInsertOf(write, table);
+    if (!values) return null;
+
+    return {
+      voucher_no: null,
+      approved_by: null,
+      approved_at: null,
+      rejection_reason: null,
+      transaction_id: null,
+      payable_id: null,
+      created_at: queuedAtOf(write),
+      ...values,
+    } as unknown as IVoucher;
+  },
 };
 
 export default voucherServices;

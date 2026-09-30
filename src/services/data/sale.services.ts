@@ -11,9 +11,12 @@ import type {
   ISaleResubmitInput,
 } from "../../models/data/sale/sale.request";
 import type { ISale } from "../../models/data/sale/sale.response";
+import { blankTransactionFields } from "../../models/data/transaction/transaction.response";
 import { runWrite } from "../../store/common/sync.store";
 import { applyLedgerFilters } from "../../utils/filter.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
+import { queuedAtOf, queuedInsertOf } from "../../utils/write.utils";
+import type { IQueuedWrite } from "../../models/common/write.model";
 
 const table = "transactions";
 
@@ -130,6 +133,24 @@ const saleServices = {
   resubmit: async (id: string, values: ISaleResubmitInput) => {
     await saleServices.update(id, values);
     return saleServices.markDeposited(id, values.deposit_date);
+  },
+
+  pendingOf: (write: IQueuedWrite): ISale | null => {
+    const values = queuedInsertOf(write, table);
+    if (values?.type !== "sale") return null;
+
+    return {
+      ...blankTransactionFields,
+      sale_status: "undeposited",
+      deposit_date: null,
+      deposited_by: null,
+      deposited_at: null,
+      verified_by: null,
+      verified_at: null,
+      rejection_reason: null,
+      created_at: queuedAtOf(write),
+      ...values,
+    } as unknown as ISale;
   },
 };
 

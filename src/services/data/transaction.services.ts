@@ -18,6 +18,7 @@ import type {
   ITransactionInput,
 } from "../../models/data/transaction/transaction.request";
 import {
+  blankTransactionFields,
   isDisbursementType,
   type IDisbursement,
   type IDisbursementPayable,
@@ -29,6 +30,8 @@ import { runWrite } from "../../store/common/sync.store";
 import { applyLedgerFilters } from "../../utils/filter.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 import { breakdownTotalsOf } from "../../utils/voucher.utils";
+import { queuedAtOf, queuedRpcArgsOf } from "../../utils/write.utils";
+import type { IQueuedWrite } from "../../models/common/write.model";
 
 const table = "transactions";
 const auditTable = "transaction_audit";
@@ -375,6 +378,34 @@ const transactionServices = {
     if (error) throw toError(error);
 
     return (data ?? []) as ITransactionAudit[];
+  },
+
+  pendingDisbursementOf: (
+    kind: DisbursementKind,
+    write: IQueuedWrite
+  ): IDisbursement | null => {
+    const args = queuedRpcArgsOf(write, "create_transaction_with_voucher");
+    if (args?.p_type !== kind) return null;
+
+    return {
+      ...blankTransactionFields,
+      id: write.id,
+      type: kind,
+      branch: args.p_branch,
+      txn_date: args.p_txn_date,
+      amount: args.p_amount,
+      farm_section: args.p_farm_section,
+      description: args.p_description,
+      supplier_id: args.p_supplier_id,
+      cash_account: args.p_cash_account,
+      bank_account_id: args.p_bank_account_id,
+      expense_type: args.p_expense_type,
+      due_date: args.p_due_date,
+      created_by: args.p_created_by,
+      created_at: queuedAtOf(write),
+      voucher: null,
+      payable: null,
+    } as unknown as IDisbursement;
   },
 };
 

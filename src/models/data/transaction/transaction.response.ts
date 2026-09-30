@@ -32,6 +32,22 @@ export interface ITransaction {
   supplier?: { name: string } | null;
 }
 
+export const blankTransactionFields = {
+  farm_section: null,
+  reference_number: null,
+  description: null,
+  customer_id: null,
+  supplier_id: null,
+  cash_account: null,
+  bank_account_id: null,
+  income_source: null,
+  expense_type: null,
+  due_date: null,
+  created_by: null,
+  customer: null,
+  supplier: null,
+} satisfies Partial<ITransaction>;
+
 export interface ITransactionSummary {
   cashIn: number;
   cashOut: number;
@@ -48,6 +64,8 @@ export interface IDisbursement extends ITransaction {
   voucher: IVoucher | null;
   payable?: IDisbursementPayable | null;
 }
+
+export const disbursementLinkedIds = (row: IDisbursement) => [row.voucher?.id];
 
 type ICountedVoucher = Pick<IVoucher, "status" | "amount">;
 
