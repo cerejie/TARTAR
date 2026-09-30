@@ -135,21 +135,37 @@ merged into main).
   list hooks; transaction.response blankTransactionFields + disbursementLinkedIds.
   Known gap: pending expense/purchase rows show "—" payee until synced (no join offline).
 
+- O3 DONE, harness-verified 2026-09-30 on the production build (OQ1 = IndexedDB on query.store;
+  priming = lookups + visited pages). Root cause of OB4 "never settles": postgrest-js 2.110 retries
+  every GET 3x on a network error (1s/2s/4s), and run() reset error to null each attempt, so each
+  offline read sat ~7s+ in skeleton; plus the cache was memory only. o11 (admin): warm dash/txn/
+  sales/expenses -> 19 keys in IDB; offline: visited pages show data + "Offline — showing data saved
+  <time>" in ~1.5s, unvisited Purchases/Vouchers/Reports show "Not saved for offline" (no skeleton);
+  offline RELOAD sales/expenses/dashboard serve cache, branch picker filled; online refetches.
+  o11b (emp): offline reload sales -> cached; offline sale 911 recorded with Cash Drawer lookup,
+  "Pending sync", synced on reconnect. NOT harness-tested: sign-out clears the IDB cache.
+- O3 code: src/utils/idb.utils.ts (readAllQueries/putQuery/clearQueries, DB queryCacheStorageKey
+  "tartar-query-cache" in keys/storage.keys.ts); src/store/common/query.store.ts (cacheReady
+  hydration, offline = no network + cache or "Not saved for offline" error, successful fetch -> IDB,
+  network failure keeps cached data, prime(), watch/unwatch + selectOfflineSavedAt /
+  selectHasUnsavedWatched, reset clears IDB); query.hook watch/unwatch; network.hook
+  useOfflineNotice; src/hook/app/prime.hook.ts (usePrimeLookupsHook in app.hook: on online+user ->
+  refetchAll + prime lookups); src/components/common/status/OfflineNotice.tsx in ContentView.
+
 ## Next (one conversation, in order)
-1. O3 (OB4, OQ1 — ask OQ1 first). Note from o9c: a page not opened before going offline still
-   renders empty skeleton rows (Expenses as admin).
-2. O4 (one conversation).
-3. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
-   offline test sales P901, P333, P341, P905, P906, P391, P392, expenses 902/904/907/908/909,
+1. O4 (one conversation). Ask OQ3 first.
+2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
+   offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909), adds Banks + branch
    legal_name/address.
-4. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
+3. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
    (f7-approve.json there holds the superadmin password in plain text).
 
 ## Path map
 - queue: src/store/common/sync.store.ts (runWrite, enqueue, flush, discard, lastError)
 - write executor: src/utils/write.utils.ts · types: src/models/common/write.model.ts
-- read cache: src/store/common/query.store.ts · src/hook/common/query.hook.ts
+- read cache: src/store/common/query.store.ts · src/hook/common/query.hook.ts · src/utils/idb.utils.ts
+  · src/hook/app/prime.hook.ts · src/components/common/status/OfflineNotice.tsx
 - mutation toasts: src/hook/common/mutation.hook.ts (queued -> "Saved offline")
 - online/flush triggers: src/hook/common/network.hook.ts · src/store/common/network.store.ts
 - sync UI: src/components/common/status/SyncIndicator.tsx
@@ -173,7 +189,7 @@ merged into main).
   (+page), click, row (+item menu, expand), fill, pick, date, submit (+confirm, keepOpen),
   confirmOnly, dump, text, count, expect, absent, url, toasts, name (screenshot), stop, always.
   `queue` runs before `submit` in a step, so put it on the NEXT step to see that submit's item.
-- Specs: o9-pending/o9b-emp/o9c-admin/o9d-admin (O2 pending rows + locks),
+- Specs: o11-admin/o11-emp (O3 offline reads + offline-reload write), o9-pending/o9b-emp/o9c-admin/o9d-admin (O2 pending rows + locks),
   o1-read.json (offline reads, admin), o4-write.json (offline writes + sync, employee),
   o5-weak.json (weak wifi), o6-replay.json (refused replay + sync panel), o7-weak.json (weak wifi
   + 30s retry + toast recorder), o8-expiry.json (tampered token, re-login keeps storage).
@@ -188,4 +204,4 @@ merged into main).
 ## State
 Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
 committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
-not committed yet (suggested as v1.87) · O3 next.
+committed v1.87 · O3 done and verified, not committed yet (suggested as v1.88) · O4 next.

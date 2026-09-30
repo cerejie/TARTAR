@@ -2,11 +2,16 @@ import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useAccountStore } from "../../store/data/account/account.store";
 import { useNetworkStore } from "../../store/common/network.store";
-import { useQueryStore } from "../../store/common/query.store";
+import {
+  selectHasUnsavedWatched,
+  selectOfflineSavedAt,
+  useQueryStore,
+} from "../../store/common/query.store";
 import {
   selectSessionOwner,
   useSyncStore,
 } from "../../store/common/sync.store";
+import { formatDateTime } from "../../utils/format.utils";
 import { isOwnWrite } from "../../utils/write.utils";
 import { useConfirm } from "./confirmation.hook";
 import type { IQueuedWrite } from "../../models/common/write.model";
@@ -82,6 +87,23 @@ export const useSyncStatus = () => {
     flushing,
     pending: pendingWrites.length,
     failedCount: failedWrites.length,
+  };
+};
+
+const offlineTitleOf = (savedAt: number, partlyUnsaved: boolean): string => {
+  if (partlyUnsaved) return "Offline — this page was not saved for offline";
+  if (savedAt === 0) return "Offline";
+  return `Offline — showing data saved ${formatDateTime(new Date(savedAt).toISOString())}`;
+};
+
+export const useOfflineNotice = () => {
+  const online = useNetworkStore((state) => state.online);
+  const savedAt = useQueryStore(selectOfflineSavedAt);
+  const partlyUnsaved = useQueryStore(selectHasUnsavedWatched);
+
+  return {
+    visible: !online,
+    title: offlineTitleOf(savedAt, partlyUnsaved),
   };
 };
 

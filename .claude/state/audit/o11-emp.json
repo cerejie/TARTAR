@@ -1,0 +1,12 @@
+[
+ {"note":"login emp","login":["qaemp2@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm sales (prime)","goto":"/sales","settle":5000},
+ {"note":"GO OFFLINE","offline":true},
+ {"note":"off RELOAD sales","goto":"/sales","settle":1500,"text":"body","max":600,"name":"off-reload-sales"},
+ {"note":"offline sale 911 after reload","button":"Record sale","page":true,"fill":{"amount":"911"},"pick":{"Cash account":"Cash Drawer"}},
+ {"submit":"Record","toasts":true},
+ {"note":"911 listed pending","always":true,"text":"main tbody","max":300,"name":"sale-911-pending"},
+ {"note":"off expenses (NOT visited)","nav":"Expenses","settle":1500,"text":"main","max":400,"name":"off-exp","always":true},
+ {"note":"BACK ONLINE","offline":false,"always":true,"wait":9000,"queue":true},
+ {"note":"sales after flush","nav":"Sales","always":true,"text":"main tbody","max":300}
+]

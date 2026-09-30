@@ -15,10 +15,16 @@ export const useQuery = <T>(
 ): IQueryState<T> => {
   const enabled = options.enabled ?? true;
   const run = useQueryStore((state) => state.run);
+  const watch = useQueryStore((state) => state.watch);
+  const unwatch = useQueryStore((state) => state.unwatch);
   const entry = useQueryStore(selectEntry<T>(key));
 
   useEffect(() => {
-    if (enabled) void run(key, fetcher);
+    if (!enabled) return;
+
+    watch(key);
+    void run(key, fetcher);
+    return () => unwatch(key);
   }, [key, enabled]);
 
   const hasData = entry.data !== undefined;

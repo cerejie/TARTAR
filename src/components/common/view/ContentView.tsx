@@ -14,6 +14,7 @@ import {
   viewTitle,
   viewToolbar,
 } from "../../../styles/view/view.styles";
+import OfflineNotice from "../status/OfflineNotice";
 import BentoGrid from "./BentoGrid";
 
 type IProps = {
@@ -56,6 +57,8 @@ const ContentView = ({
           </div>
         ) : null}
       </div>
+
+      <OfflineNotice />
 
       {toolbar ? <div className={viewToolbar}>{toolbar}</div> : null}
 

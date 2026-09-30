@@ -1,0 +1,18 @@
+[
+ {"note":"login admin","login":["qaadmin2@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm dashboard (prime)","goto":"/","settle":5000},
+ {"note":"warm transactions","nav":"Transactions"},
+ {"note":"warm sales","nav":"Sales"},
+ {"note":"warm expenses","nav":"Expenses"},
+ {"note":"idb keys","js":"new Promise(r=>{const q=indexedDB.open('tartar-query-cache');q.onsuccess=()=>{const t=q.result.transaction('queries').objectStore('queries').getAllKeys();t.onsuccess=()=>r(t.result.length+' '+JSON.stringify(t.result.slice(0,40)))}})"},
+ {"note":"GO OFFLINE","offline":true},
+ {"note":"off transactions (visited)","nav":"Transactions","settle":1500,"text":"main","max":500,"name":"off-txn"},
+ {"note":"off purchases (NOT visited)","nav":"Purchases","settle":1500,"text":"main","max":500,"name":"off-purch","always":true},
+ {"note":"off vouchers (NOT visited)","nav":"Vouchers","settle":1500,"text":"main","max":400,"name":"off-vouch","always":true},
+ {"note":"off reports (NOT visited)","nav":"Reports","settle":1500,"text":"main","max":400,"name":"off-rep","always":true},
+ {"note":"off RELOAD sales","goto":"/sales","settle":1500,"text":"body","max":700,"name":"off-reload-sales","always":true},
+ {"note":"off expenses after reload","nav":"Expenses","settle":1500,"text":"main","max":500,"name":"off-reload-exp","always":true},
+ {"note":"off dashboard after reload","nav":"Dashboard","settle":1500,"text":"main","max":500,"name":"off-reload-dash","always":true},
+ {"note":"BACK ONLINE","offline":false,"always":true,"wait":4000},
+ {"note":"online purchases","nav":"Purchases","settle":3000,"always":true,"text":"main","max":300,"name":"on-purch"}
+]
