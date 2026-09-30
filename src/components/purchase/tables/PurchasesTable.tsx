@@ -19,6 +19,7 @@ import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
+import TruncateCell from "../../common/table/TruncateCell";
 import DisbursementHistoryModal from "../../disbursement/modal/DisbursementHistoryModal";
 import StatusTag from "../../common/status/StatusTag";
 import UserCell from "../../user/table/cells/UserCell";
@@ -139,7 +140,12 @@ const PurchasesTable = () => {
       render: (value: string) => formatDate(value),
     },
     { title: "Payee", mobile: "title", key: "payee", render: (_, row) => payeeOf(row) },
-    { title: "Branch", dataIndex: "branch", render: branchName },
+    {
+      title: "Branch",
+      dataIndex: "branch",
+      collapse: "xl",
+      render: (value: string) => <TruncateCell text={branchName(value)} />,
+    },
     {
       title: "Voucher",
       key: "voucher_status",
@@ -160,6 +166,7 @@ const PurchasesTable = () => {
     {
       title: "Amount",
       dataIndex: "amount",
+      collapse: "2xl",
       align: "right",
       className: nowrapCell,
       render: (value: number) => formatMoney(value),
@@ -183,6 +190,7 @@ const PurchasesTable = () => {
           {
             title: "Recorded by",
             key: "user",
+            collapse: "2xl" as const,
             skeleton: "avatar" as const,
             render: (_: unknown, row: IDisbursement) => (
               <UserCell
@@ -214,6 +222,25 @@ const PurchasesTable = () => {
           label: "Reference",
           render: (row) => row.reference_number || "—",
         },
+        {
+          key: "branch",
+          label: "Branch",
+          render: (row) => branchName(row.branch),
+        },
+        {
+          key: "amount",
+          label: "Amount",
+          render: (row) => formatMoney(row.amount),
+        },
+        ...(permissions.isManager
+          ? [
+              {
+                key: "recorded_by",
+                label: "Recorded by",
+                render: (row: IDisbursement) => userNameOf(row.created_by),
+              },
+            ]
+          : []),
         {
           key: "cash_account",
           label: "Paid from",

@@ -13,6 +13,8 @@ export type IColumnMobileRole =
   | "actions"
   | "hidden";
 
+export type IColumnCollapse = "xl" | "2xl";
+
 export type ISortDirection = "ascending" | "descending";
 
 export interface ISortState {
@@ -29,6 +31,7 @@ export interface IDataTableColumn<T> {
   className?: string;
   skeleton?: IColumnSkeleton;
   mobile?: IColumnMobileRole;
+  collapse?: IColumnCollapse;
   sorter?: (left: T, right: T) => number;
   render?(value: unknown, row: T, index: number): ReactNode;
 }

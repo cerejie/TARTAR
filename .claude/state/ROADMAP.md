@@ -274,16 +274,18 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   (dashboard.styles @container/feed). Header at 768-1023 clipped the user name -> headerScope /
   headerScopeTrigger md: -> lg: (compiled, NOT yet re-shot).
 
+- [x] Option C (v1.68, uncommitted, compiled): Purchases Branch truncates on desktop —
+  components/common/table/TruncateCell.tsx (span + native `title`), table.styles `truncateCell`
+  (lg: only, cards keep full text), PurchasesTable.tsx Branch render. Purchases only.
+
 ## Next
-1. Option C (user-approved choice, file plan shown, awaiting OK in the new session): Purchases
-   Branch column truncates on desktop — + components/common/table/TruncateCell.tsx (span, native
-   `title` tooltip; ui/tooltip needs a focusable trigger), ~ table.styles `truncateCell =
-   "lg:block lg:max-w-44 lg:truncate"` (cards keep full text), ~ PurchasesTable.tsx:142 render.
-   Purchases only unless the user wants all 13 Branch columns. Why: 1280 Branch wraps 4 lines;
-   1024 (now the smallest desktop width) overflows (Due date cut).
-2. Re-shoot: Purchases 390/1024/1280 + header at 768 (user name no longer clipped). The user
-   runs the harness in their own terminal (see Audit harness) and pastes the output.
-3. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
+1. Re-shot (trunc.json) 2026-09-30: Branch one line + ellipsis at 1024/1280 PASS; header 768
+   user name PASS. Overflow fix (user choice: hide columns, values stay in the row expansion),
+   compiled: IDataTableColumn.collapse "xl" | "2xl" (table.model), table.styles
+   dataTableCollapse, DataTable head/cell/skeleton; PurchasesTable Branch xl, Amount + Recorded
+   by 2xl, Purchase detail section + Branch / Amount / Recorded by (managers). Re-shoot spec
+   `collapse.json` (1024, 1024 expanded, 1280, 1536, 390) — ALL PASS 2026-09-30.
+2. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
 
 ## Carried over from the audit roadmap (fold into P10)
 - Done in v1.67: mobile sweep, AD3, SV1, SV2. AD1 done in v1.66.
@@ -315,6 +317,5 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · v1.66 committed · Uncommitted: v1.67 carried-over + mobile
-fixes (10 src files + ROADMAP; .claude/settings.local.json is the user's, untracked) · No new
-migration · Last check: yarn build + yarn lint clean (2026-09-30).
+Branch: development-overhaul · v1.67 committed · Uncommitted: v1.68 TruncateCell (3 src files)
+· No new migration · Last check: yarn build + yarn lint clean (2026-09-30).

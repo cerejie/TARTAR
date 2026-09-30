@@ -17,6 +17,12 @@ export const dataTableHead = cva(
   }
 );
 
+export const dataTableCollapse = cva("", {
+  variants: {
+    collapse: { xl: "hidden xl:table-cell", "2xl": "hidden 2xl:table-cell" },
+  },
+});
+
 export const dataTableSortLabel = "inline-flex items-center gap-1";
 
 export const dataTableSortIcon = "size-3.5";
@@ -216,3 +222,5 @@ export const progressCellTotal = "text-muted-foreground";
 export const progressCellPercent = "text-xs text-muted-foreground";
 
 export const progressCellTrack = "h-0.75 bg-track";
+
+export const truncateCell = "lg:block lg:max-w-44 lg:truncate";

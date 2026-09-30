@@ -29,6 +29,7 @@ import type {
 } from "../../../models/common/table.model";
 import {
   dataTableCell,
+  dataTableCollapse,
   dataTableExpansionCell,
   dataTableGrid,
   dataTableHead,
@@ -227,6 +228,7 @@ const DataTable = <T extends object>({
                 key={columnId(column, index)}
                 className={cn(
                   dataTableCell({ align: column.align }),
+                  dataTableCollapse({ collapse: column.collapse }),
                   column.className
                 )}
               >
@@ -268,7 +270,10 @@ const DataTable = <T extends object>({
           {columns.map((column, cellIndex) => (
             <TableCell
               key={columnId(column, cellIndex)}
-              className={dataTableCell({ align: column.align })}
+              className={cn(
+                dataTableCell({ align: column.align }),
+                dataTableCollapse({ collapse: column.collapse })
+              )}
             >
               {skeletonCell(column)}
             </TableCell>
@@ -330,10 +335,13 @@ const DataTable = <T extends object>({
             id={columnId(column, index)}
             isRowHeader={index === 0}
             allowsSorting={Boolean(column.sorter)}
-            className={dataTableHead({
-              align: column.align,
-              sortable: Boolean(column.sorter),
-            })}
+            className={cn(
+              dataTableHead({
+                align: column.align,
+                sortable: Boolean(column.sorter),
+              }),
+              dataTableCollapse({ collapse: column.collapse })
+            )}
             style={column.width === undefined ? undefined : { width: column.width }}
           >
             {({ sortDirection }) => (
