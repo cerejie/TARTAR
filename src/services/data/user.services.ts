@@ -10,7 +10,7 @@ import { supabase, toError } from "../../utils/supabase.utils";
 const table = "users";
 
 const columns =
-  "id, username, full_name, role, access_flags, approval_status, branch_access, created_at, updated_at";
+  "id, email, username, full_name, role, access_flags, approval_status, branch_access, password_reset_requested_at, created_at, updated_at";
 
 const userServices = {
   getList: async (status?: ApprovalStatus): Promise<IUser[]> => {
@@ -30,6 +30,14 @@ const userServices = {
     if (error) throw toError(error);
 
     return (data ?? []) as IUserDisplayName[];
+  },
+
+  decidePasswordReset: async (id: string, approve: boolean): Promise<void> => {
+    const { error } = await supabase.rpc("decide_password_reset", {
+      p_user_id: id,
+      p_approve: approve,
+    });
+    if (error) throw toError(error);
   },
 
   update: (id: string, values: IUpdateUserInput) =>

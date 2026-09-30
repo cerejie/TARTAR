@@ -125,11 +125,11 @@ export const useProtectedUserHook = () => {
   const mode = useThemeStore(selectThemeMode);
   const toggleMode = useThemeStore((state) => state.toggleMode);
 
-  const displayName = user?.full_name || user?.username || "superAdmin";
-
   const roleLabel = permissions.role
     ? effectiveRoleLabels[permissions.role]
     : "";
+
+  const displayName = user?.full_name || user?.username || roleLabel;
 
   return {
     displayName,

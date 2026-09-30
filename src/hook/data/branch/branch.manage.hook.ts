@@ -15,6 +15,7 @@ import type { IBranch } from "../../../models/data/branch/branch.response";
 import type { IBranchMonitorRow } from "../../../models/data/dashboard/dashboard.response";
 import dashboardServices from "../../../services/data/dashboard.services";
 import referenceServices from "../../../services/data/reference.services";
+import { useAccountStore } from "../../../store/data/account/account.store";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
@@ -56,6 +57,7 @@ export const branchFormFields: IFieldConfig<IBranchInput>[] = [
 export const useBranchManageHook = () => {
   const createModal = useModal(branchCreateModalKey);
   const editModal = useModal<IBranch>(branchEditModalKey);
+  const addBranchAccess = useAccountStore((state) => state.addBranchAccess);
   const openConfirm = useConfirm();
 
   const listQuery = useQuery<IBranch[]>(
@@ -73,7 +75,10 @@ export const useBranchManageHook = () => {
     {
       successMessage: "Branch added",
       invalidate,
-      onSuccess: createModal.closeModal,
+      onSuccess: (branch) => {
+        addBranchAccess(branch.slug);
+        createModal.closeModal();
+      },
     }
   );
 

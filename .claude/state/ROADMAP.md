@@ -189,9 +189,80 @@ any route (superadmin, accountant).
   paymentServices.verify -> verify_payment RPC. Pay modal still caps at amount - paid_amount
   (server rejects over-allocation incl. pending). Not harness-verified yet (F7).
 
+- [x] F6b Q6 admins branch-limited (v1.79): decisions - empty access = none, only branch-bound
+  records scoped (users/branches/master data stay global), creating admin is granted the new
+  branch. Migration 20261010000022_admin_branch_scope.sql (NOT applied until the user runs it):
+  app.branch_access() NULL for superadmin only, admins read users.branch_access live (security
+  definer); app.manages_branch(branch) on tx/rcv/pay/vch/pmt manager policies, allocations follow
+  their payment; verify_sale/reject_sale/set_voucher_breakdown/reopen_rejected_voucher branch
+  checked; trigger branches_grant_creator; backfill admins = all branches. Frontend:
+  selectBranchAccess null for superadmin only + addBranchAccess (account.store); branch.list.hook
+  allBranchOptions + branchName over all; branch.scope.hook no manager bypass; branch.manage.hook
+  grants the new slug; user.manage.hook all branches in the field, admins show names;
+  account.request admin needs >= 1 branch. Not harness-verified yet (F7).
+- [x] F6c role hierarchy developer > superadmin > admin > accountant/employee (v1.79, same
+  migration 22): app.authorities (one developer cerejie1342@gmail.com, one superadmin
+  cagapearlynmae@gmail.com, Supabase Auth; other email logins refused), app.authority_role /
+  is_developer, is_superadmin = either authority, public.my_authority_role (login check),
+  developer_set_superadmin_password (bcrypt into auth.users). Admins read all users, manage
+  accountants/employees only (policies + admin_create_user/admin_set_password). Frontend:
+  AuthorityRole enum, account.store setAuthoritySession(email, role), loginSuperAdmin checks
+  role, permissions manageAdmins = superadmin/developer, manageSuperAdmin = developer,
+  Users page "Superadmin password" button (menus/SuperAdminPasswordButton) + modal, admin rows
+  read-only for admins. Developer is not in public.users, so never listed for the superadmin.
+  SUPERSEDED by F6d (authority superadmin, password RPC and button all removed).
+- [x] F6d A-C email accounts (v1.79, uncommitted): migration 22 reworked (NOT applied):
+  user_role enum + 'superadmin' (role::text comparisons), users.email (unique lower) +
+  pending_password_hash + password_reset_requested_at; authorities = developer only;
+  app.user_role() + app.branch_access() read LIVE from approved public.users rows (all table
+  users, not only admins); is_developer / is_superadmin; app.can_manage_role + users_manage_*
+  policies (admins also read admins); admin_set_password on it; user_display_names includes
+  superadmins; login_email, register_email, admin_create_user_email (app.username_from_email,
+  app.assert_new_account), account_email_exists, request_password_reset,
+  decide_password_reset, change_own_password; old login/register/admin_create_user revoked.
+  Migration 20261011000023_fresh_users.sql (NOT applied) wipes public.users + non-developer
+  auth.users - FK check pending (auto mode blocked the grep): if any table references
+  public.users without on delete, 23 fails and needs set-null updates first.
+  Frontend: role.enum (superadmin UserRole, AuthorityRole = developer, manageableRolesOf);
+  permissions drop manageAdmins/manageSuperAdmin; account.store setDeveloperSession /
+  developerEmail, superadmin = manager + all branches; accountServices.login (login_email,
+  28P01 -> developer Supabase Auth); LoginView "Email"; user.services email columns +
+  decidePasswordReset; user.manage.hook approve modal (userApproveModalKey,
+  approveUserSchema), reject/reset-decision confirms, branch field hidden for superadmin;
+  UsersTable email hint, "Reset requested" tag + actions. tsc + lint clean.
+
 ## Next
-1. User applies migration 21. Then F6b - Q6 admins branch-limited: ask the two sub-questions
-   (see Phases F6b), plan, write migration 22, implement.
+F6d - email-only accounts + role hierarchy (APPROVED 2026-09-30, implement A-C in one
+conversation; D in the one after). Supersedes the F6c authority-superadmin design: the
+superadmin is now a TABLE role, only the developer is a Supabase Auth account.
+Locked decisions:
+- Roles: developer (Supabase Auth, cerejie1342@gmail.com, app.authorities) > superadmin >
+  admin > accountant/employee. Many superadmins allowed; developer adds/replaces/removes them.
+- app.can_manage_role: developer -> superadmin/admin/accountant/employee; superadmin ->
+  admin/accountant/employee; admin -> accountant/employee. Superadmin never sees the developer
+  or other superadmins; admin sees admins read-only + manages accountant/employee.
+- Email-only sign-in for everyone. username column kept (auto from email, never shown).
+- Sign-up: email + full name + password + confirm -> pending; approver picks role (per
+  hierarchy) + branches at approval. Designed success panel ("waiting for approval").
+- Forgot password: /forgot-password, step 1 email (must exist), step 2 new + confirm password,
+  success panel "Waiting for admin approval. Please contact your admin." Stored as
+  users.pending_password_hash; someone above approves/rejects. No emails sent (free tier).
+- Account settings (/account): profile + change own password (current + new + confirm).
+- Delete every existing table user and every auth.users row except the developer.
+A-C done (see Done). Remaining:
+D. THIS conversation: RegisterView redesign + success panel, /forgot-password two-step flow
+   (replace ForgotPasswordHint popover), /account settings page (profile card + change
+   password; developer via supabase.auth.updateUser after re-verifying current password) +
+   "Account settings" in ProtectedUserMenu. Auth flow step state in a zustand store.
+   RPCs already in migration 22: register_email(p_email, p_full_name, p_password),
+   account_email_exists(p_email) (approved only), request_password_reset(p_email,
+   p_password), change_own_password(p_current_password, p_new_password). Profile edit
+   (full name) has no RPC yet - add update_own_profile to migration 22 if the card edits it.
+   Register still calls the revoked username `register` (registerSchema/usernameField in
+   account.request, account.register.hook) - switch it to register_email and delete
+   usernameField/USERNAME_REGEX once unused.
+Then: user applies 22 + 23, signs up cagapearlynmae@gmail.com and approves her as Superadmin,
+F7 live re-test.
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -219,5 +290,6 @@ any route (superadmin, accountant).
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · F5 committed v1.77 · F6a done, uncommitted (suggested
-v1.78) · Pending migration: 21 (user applies) · Last check: npx tsc -b + yarn lint clean 2026-09-30.
+Branch: development-overhaul · v1.78 committed · uncommitted: F6b + F6d A-C (suggested as
+v1.79) · Migrations 22 + 23 written, NOT applied (apply after D), 21 applied · Last check:
+npx tsc -b + yarn lint clean 2026-09-30.

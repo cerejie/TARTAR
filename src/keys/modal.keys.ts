@@ -13,6 +13,7 @@ export const voucherRejectModalKey = "voucher-reject";
 export const userCreateModalKey = "user-create";
 export const userEditModalKey = "user-edit";
 export const userResetModalKey = "user-reset";
+export const userApproveModalKey = "user-approve";
 
 export const branchCreateModalKey = "branch-create";
 export const branchEditModalKey = "branch-edit";

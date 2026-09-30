@@ -19,16 +19,18 @@ export const useBranchListHook = () => {
     access === null
       ? all
       : all.filter((branch) => access.includes(branch.slug));
+  const toOption = (branch: IBranch) => ({
+    value: branch.slug,
+    label: branch.name,
+  });
 
   return {
     ...query,
     branches,
     defaultBranch: branches[0]?.slug ?? "hardware",
-    branchOptions: branches.map((branch) => ({
-      value: branch.slug,
-      label: branch.name,
-    })),
+    branchOptions: branches.map(toOption),
+    allBranchOptions: all.map(toOption),
     branchName: (slug: string) =>
-      branches.find((branch) => branch.slug === slug)?.name ?? slug,
+      all.find((branch) => branch.slug === slug)?.name ?? slug,
   };
 };

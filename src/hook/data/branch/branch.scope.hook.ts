@@ -18,7 +18,7 @@ export const useBranchScopeHook = () => {
   const { branches, isInitialLoading } = useBranchListHook();
   const { search, setSearch } = useSearch(branchScopeSearchKey);
 
-  const storedIsListed = isManager || branches.some((item) => item.slug === stored);
+  const storedIsListed = branches.some((item) => item.slug === stored);
   const branch = canScope && storedIsListed ? stored : null;
   const branchName = branch
     ? branches.find((item) => item.slug === branch)?.name ?? branch

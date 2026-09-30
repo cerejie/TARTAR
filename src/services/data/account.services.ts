@@ -2,7 +2,6 @@ import type {
   ICreateUserInput,
   ILoginInput,
   IRegisterInput,
-  ISuperAdminLoginInput,
 } from "../../models/data/account/account.request";
 import type { ICustomLoginResponse } from "../../models/data/account/account.response";
 import {
@@ -13,6 +12,9 @@ import {
 } from "../../utils/supabase.utils";
 
 const accountNotApprovedCode = "28000";
+const invalidCredentialsCode = "28P01";
+const developerRole = "developer";
+const invalidCredentialsMessage = "Invalid email or password.";
 
 const approvalMessages: Record<string, string> = {
   "account is pending":
@@ -26,31 +28,37 @@ const toLoginError = (error: { code?: string; message: string }): Error =>
     ? new Error(approvalMessages[error.message] ?? error.message)
     : toError(error);
 
+const loginDeveloper = async (values: ILoginInput): Promise<void> => {
+  const { error } = await supabase.auth.signInWithPassword({
+    email: values.email,
+    password: values.password,
+  });
+  if (error) throw new Error(invalidCredentialsMessage);
+
+  const { data, error: roleError } = await supabase.rpc("my_authority_role");
+  if (!roleError && data === developerRole) return;
+
+  await supabase.auth.signOut().catch(() => undefined);
+  throw new Error(invalidCredentialsMessage);
+};
+
 const accountServices = {
-  loginCustomUser: async (
-    values: ILoginInput
-  ): Promise<ICustomLoginResponse> => {
-    const { data, error } = await supabase.rpc("login", {
-      p_username: values.username,
+  login: async (values: ILoginInput): Promise<ICustomLoginResponse | null> => {
+    setCustomToken(null);
+
+    const { data, error } = await supabase.rpc("login_email", {
+      p_email: values.email,
       p_password: values.password,
     });
+    if (error?.code === invalidCredentialsCode) {
+      await loginDeveloper(values);
+      return null;
+    }
     if (error) throw toLoginError(error);
 
     const response = data as ICustomLoginResponse;
     setCustomToken(response.token);
     return response;
-  },
-
-  loginSuperAdmin: async (values: ISuperAdminLoginInput) => {
-    setCustomToken(null);
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: values.email,
-      password: values.password,
-    });
-    if (error) throw toError(error);
-
-    return data;
   },
 
   restoreCustomToken: (token: string | null): void => setCustomToken(token),
@@ -73,10 +81,10 @@ const accountServices = {
   },
 
   createUser: async (values: ICreateUserInput): Promise<string> => {
-    const { data, error } = await supabase.rpc("admin_create_user", {
-      p_username: values.username,
+    const { data, error } = await supabase.rpc("admin_create_user_email", {
+      p_email: values.email,
       p_password: values.password,
-      p_full_name: values.full_name?.trim() || null,
+      p_full_name: values.full_name,
       p_role: values.role,
       p_branch_access: values.branch_access,
       p_access_flags: values.access_flags,

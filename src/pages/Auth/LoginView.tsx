@@ -1,4 +1,4 @@
-import { Lock, User } from "lucide-react";
+import { Lock, Mail } from "lucide-react";
 import AuthShell from "../../components/auth/AuthShell";
 import ForgotPasswordHint from "../../components/auth/ForgotPasswordHint";
 import AppButton from "../../components/common/button/AppButton";
@@ -12,16 +12,16 @@ import {
   authSubmit,
 } from "../../styles/layout/public.styles";
 import type { IFieldConfig } from "../../models/common/field.model";
-import type { ILoginFormInput } from "../../models/data/account/account.request";
+import type { ILoginInput } from "../../models/data/account/account.request";
 
-const fields: IFieldConfig<ILoginFormInput>[] = [
+const fields: IFieldConfig<ILoginInput>[] = [
   {
-    name: "identifier",
-    label: "Email or username",
+    name: "email",
+    label: "Email",
     type: "text",
-    placeholder: "you@company.com or username",
-    icon: <User />,
-    autoComplete: "username",
+    placeholder: "you@company.com",
+    icon: <Mail />,
+    autoComplete: "email",
   },
   {
     name: "password",

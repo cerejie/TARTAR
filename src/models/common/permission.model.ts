@@ -14,13 +14,12 @@ export interface IPermissions {
   approveVouchers: boolean;
   manageUsers: boolean;
   manageMasterData: boolean;
-  manageAdmins: boolean;
 }
 
 export const derivePermissions = (
   role: EffectiveRole | null
 ): IPermissions => {
-  const isSuperAdmin = role === "superadmin";
+  const isSuperAdmin = role === "developer" || role === "superadmin";
   const isAdmin = role === "admin";
   const isManager = isSuperAdmin || isAdmin;
   const isAccountant = role === "accountant";
@@ -40,6 +39,5 @@ export const derivePermissions = (
     approveVouchers: isManager,
     manageUsers: isManager,
     manageMasterData: isManager,
-    manageAdmins: isManager,
   };
 };

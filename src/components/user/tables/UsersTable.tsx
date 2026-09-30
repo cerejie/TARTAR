@@ -1,4 +1,12 @@
-import { Check, KeyRound, Pencil, Trash2, X } from "lucide-react";
+import {
+  Check,
+  KeyRound,
+  LockKeyhole,
+  LockKeyholeOpen,
+  Pencil,
+  Trash2,
+  X,
+} from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
@@ -10,16 +18,17 @@ import {
   approvalStatusColors,
   approvalStatusLabels,
   userRoleLabels,
-  type ApprovalStatus,
   type UserRole,
 } from "../../../enums/role.enum";
 import { useUserManageHook } from "../../../hook/data/user/user.manage.hook";
 import type { IRowAction } from "../../../models/common/action.model";
 import type { IFieldConfig } from "../../../models/common/field.model";
 import {
+  approveUserSchema,
   createUserSchema,
   resetPasswordSchema,
   updateUserSchema,
+  type IApproveUserInput,
   type ICreateUserInput,
   type IResetPasswordInput,
   type IUpdateUserInput,
@@ -37,6 +46,18 @@ const resetFields: IFieldConfig<IResetPasswordInput>[] = [
   },
 ];
 
+const renderApprovalTag = (user: IUser) => {
+  if (user.password_reset_requested_at)
+    return <StatusTag color="warning" label="Reset requested" />;
+
+  return (
+    <StatusTag
+      color={approvalStatusColors[user.approval_status]}
+      label={approvalStatusLabels[user.approval_status]}
+    />
+  );
+};
+
 const UsersTable = () => {
   const {
     users,
@@ -45,25 +66,34 @@ const UsersTable = () => {
     error,
     retry,
     displayName,
+    accountHintOf,
     branchAccessLabelOf,
     editing,
+    approving,
     currentUserId,
     createModal,
     editModal,
     resetModal,
+    approveModal,
     createFields,
     createDefaults,
     editFields,
     editDefaults,
+    approveFields,
+    approveDefaults,
     createMutation,
     updateMutation,
+    approveMutation,
     resetPasswordMutation,
-    confirmApproval,
+    canManageUser,
+    confirmReject,
+    confirmResetDecision,
     confirmRemove,
   } = useUserManageHook();
 
   const actionsOf = (user: IUser): IRowAction[] => {
     const isSelf = user.id === currentUserId;
+    if (!canManageUser(user)) return [];
 
     return [
       ...(user.approval_status === "pending"
@@ -72,14 +102,31 @@ const UsersTable = () => {
               key: "approve",
               label: "Approve account",
               icon: <Check />,
-              onSelect: () => confirmApproval(user, "approved"),
+              onSelect: () => approveModal.openModal(user),
             },
             {
               key: "reject",
               label: "Reject account",
               icon: <X />,
               danger: true,
-              onSelect: () => confirmApproval(user, "rejected"),
+              onSelect: () => confirmReject(user),
+            },
+          ]
+        : []),
+      ...(user.password_reset_requested_at
+        ? [
+            {
+              key: "approve-reset",
+              label: "Approve new password",
+              icon: <LockKeyholeOpen />,
+              onSelect: () => confirmResetDecision(user, true),
+            },
+            {
+              key: "reject-reset",
+              label: "Reject password reset",
+              icon: <LockKeyhole />,
+              danger: true,
+              onSelect: () => confirmResetDecision(user, false),
             },
           ]
         : []),
@@ -109,10 +156,10 @@ const UsersTable = () => {
   const columns: IDataTableColumn<IUser>[] = [
     {
       title: "User",
-      dataIndex: "username",
+      dataIndex: "email",
       skeleton: "avatar",
-      render: (username: string, user) => (
-        <AvatarCell name={displayName(user)} hint={`@${username}`} />
+      render: (_, user) => (
+        <AvatarCell name={displayName(user)} hint={accountHintOf(user)} />
       ),
     },
     {
@@ -131,12 +178,7 @@ const UsersTable = () => {
       mobile: "status",
       dataIndex: "approval_status",
       className: nowrapCell,
-      render: (status: ApprovalStatus) => (
-        <StatusTag
-          color={approvalStatusColors[status]}
-          label={approvalStatusLabels[status]}
-        />
-      ),
+      render: (_, user) => renderApprovalTag(user),
     },
     {
       title: "Created",
@@ -179,9 +221,24 @@ const UsersTable = () => {
         onClose={createModal.closeModal}
       />
 
+      <EntityFormModal<IApproveUserInput>
+        open={approveModal.modal.visible}
+        title={approving ? `Approve ${displayName(approving)}` : "Approve user"}
+        fields={approveFields}
+        schema={approveUserSchema}
+        defaultValues={approveDefaults}
+        submitting={approveMutation.loading}
+        submitText="Approve"
+        onSubmit={(values) => {
+          if (approving)
+            void approveMutation.mutate({ id: approving.id, values });
+        }}
+        onClose={approveModal.closeModal}
+      />
+
       <EntityFormModal<IUpdateUserInput>
         open={editModal.modal.visible}
-        title={`Edit ${editing?.username ?? "user"}`}
+        title={editing ? `Edit ${displayName(editing)}` : "Edit user"}
         fields={editFields}
         schema={updateUserSchema}
         defaultValues={editDefaults}
@@ -196,7 +253,7 @@ const UsersTable = () => {
         open={resetModal.modal.visible}
         title={
           resetModal.modal.data
-            ? `Reset password · ${resetModal.modal.data.username}`
+            ? `Reset password · ${displayName(resetModal.modal.data)}`
             : "Reset password"
         }
         fields={resetFields}
