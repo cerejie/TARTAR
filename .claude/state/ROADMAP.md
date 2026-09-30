@@ -240,12 +240,28 @@ any route (superadmin, accountant).
   ForgotPasswordHint deleted); /account (AccountView, AccountProfileCard, ChangePasswordCard,
   isNotNav) + "Account settings" in ProtectedUserMenu. tsc + lint clean. Compiled only (F7).
 
-## Next
-1. User signs up cagapearlynmae@gmail.com at /register and approves her as Superadmin (developer
-   account), then recreates QA users by email if the F7 harness needs them (profiles hold old
-   usernames - drive.mjs login step now needs an email).
-2. F7 live re-test of every fixed item incl. register -> approve, forgot password -> approve
-   reset -> sign in, /account change password (table user + developer).
+- [x] F7 live re-test, mostly (v1.81-v1.82): superadmin cagapearlynmae@gmail.com + 6 QA users
+  re-registered by email and approved (register, duplicate email, pending sign-in); routes per
+  role; reports; B5/B6/B9/B11/Q2-Q4 flows; forgot password -> approve reset -> sign in; /account
+  change password (qaemp2 + developer). Harness "FAIL" shots f7-a2-sale-rej / f7-a2-vrej were
+  harness confirm-step misses (both rejects applied); f7-e1-rep-exp / rep-pay = employee has no
+  Reports (guard redirect, correct). Developer /account bug fixed: account.store partialize now
+  persists developerEmail (it was lost on reload -> Email "—" and change password hit the
+  table-user RPC). User confirmed the developer fix in the browser.
+
+## Next (one conversation, in order)
+1. Ask the user (Q7): Transactions page summary cards (TransactionSummaryCards via
+   transaction.list.hook) - employee Cash Out P1,835 = P1,120 gross invoice + P300 + P250 +
+   rejected P100 + pending P65. Follow L1 (countedAmountOf / amountToPayOf, rejected excluded)
+   like every other total, or stay raw cash flow? Implement the answer.
+2. Finish F7: as an admin (qa-qaadmin2) approve the P78 voucher (skipped after the harness miss)
+   and check payables opened; as an accountant/admin open Reports -> Expenses and Payables
+   (the employee runs could not reach them). Fix anything that fails.
+3. Deployment checklist, confirming each outward step with the user first: merge
+   development-overhaul -> main; if production is a different Supabase project apply migrations
+   19-23 there (23 deletes every non-developer user - confirm the target project); user resets
+   data; add Banks + branch legal_name/address.
+4. Ask, then delete this file and `.claude/state/audit/`.
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -259,10 +275,12 @@ any route (superadmin, accountant).
   [fieldText, "October 3, 2026"], submit (+confirm), confirmOnly, dump, text, count, expect,
   absent, url, toasts, popupItem / popupButton (print popups), name (screenshot), stop, always.
   Shots in shots/drive/. `safe-shot.mjs` = read-only (fakes writes) for screenshots.
-- Profiles: `profile` = superadmin; `qa-qaadmin1`, `qa-qaadmin2` (Admin), `qa-qaacc1` (QA Test),
-  `qa-qaacc2` (QA Test + LGC Hardware), `qa-qaemp1`, `qa-qaemp2` (Employee, QA Test), `qa-reg`
-  (qareg1, self-registered then approved). All QA passwords `QaTest#2026`. Re-sign-in with a
-  `[{"login":["qaemp1","QaTest#2026"]}]` step if a token expired.
+- Profiles (email sign-in): `f7p-sa` superadmin, `f7p-dev` developer, `f7p-qaadmin1`,
+  `f7p-qaadmin2` (Admin), `f7p-qaacc1` (QA Test), `f7p-qaacc2` (QA Test + LGC Hardware),
+  `f7p-qaemp1`, `f7p-qaemp2` (Employee, QA Test). QA logins `<name>@qa.test` / `QaTest#2026`.
+  Developer and superadmin passwords are never written to disk - ask the user, pass them in a
+  temp spec and delete it after the run. Re-sign-in with a
+  `[{"login":["qaemp1@qa.test","QaTest#2026"]}]` step if a token expired.
 - QA data (left for the user's reset): branch QA Test (qa_test, QAT, letterhead set), 7 QA users,
   QA Customer A, QA Supplier One, QA Power Co (x2 — B6), expense type QA Utilities (QAU), income
   source QA Consulting, bank QA Bank / QA Account 000111222, sales P1,000/P750/P520 verified +
@@ -273,5 +291,6 @@ any route (superadmin, accountant).
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · v1.79 committed · uncommitted: F6d D (suggested as v1.80) ·
-Migrations through 23 applied · Last check: npx tsc -b + yarn lint clean 2026-09-30.
+Branch: development-overhaul · v1.81 committed · uncommitted: account.store developerEmail fix +
+this file (suggested as v1.82) · Migrations through 23 applied · Last check: npx tsc -b + yarn
+lint clean 2026-09-30 (the v1.82 one-liner confirmed in the browser by the user).
