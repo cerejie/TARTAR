@@ -3,10 +3,8 @@ import {
   ChartPie,
   FileCheck,
   FileText,
-  Landmark,
   TrendingUp,
   User,
-  Wallet,
 } from "lucide-react";
 import SectionCard from "../../components/common/card/SectionCard";
 import StatCard from "../../components/common/card/StatCard";
@@ -56,30 +54,7 @@ const DashboardView = () => {
     >
       <BentoCell span="main">
         <BentoGrid>
-          <BentoCell span="quarter">
-            <StatCard
-              title="Current Cash"
-              value={summary?.currentCash}
-              loading={summaryLoading}
-              error={summaryError}
-              onRetry={retrySummary}
-              variant="brand"
-              icon={<Wallet />}
-              caption="Available cash on hand"
-            />
-          </BentoCell>
-          <BentoCell span="quarter">
-            <StatCard
-              title="Bank Balance"
-              value={summary?.bankBalance}
-              loading={summaryLoading}
-              error={summaryError}
-              onRetry={retrySummary}
-              icon={<Landmark />}
-              caption="Total in bank accounts"
-            />
-          </BentoCell>
-          <BentoCell span="quarter">
+          <BentoCell span="third">
             <StatCard
               title="Today's Sales"
               value={summary?.todaysSales}
@@ -104,7 +79,7 @@ const DashboardView = () => {
               )}
             />
           </BentoCell>
-          <BentoCell span="quarter">
+          <BentoCell span="third">
             <StatCard
               title="Today's Expenses"
               value={summary?.todaysExpenses}
@@ -130,7 +105,7 @@ const DashboardView = () => {
             />
           </BentoCell>
 
-          <BentoCell span="quarter">
+          <BentoCell span="third">
             <StatCard
               title="Accounts Receivable"
               value={summary?.accountsReceivable}
@@ -141,7 +116,7 @@ const DashboardView = () => {
               caption="Total outstanding"
             />
           </BentoCell>
-          <BentoCell span="quarter">
+          <BentoCell span="third">
             <StatCard
               title="Accounts Payable"
               value={summary?.accountsPayable}
@@ -152,7 +127,7 @@ const DashboardView = () => {
               caption="Total outstanding"
             />
           </BentoCell>
-          <BentoCell span="quarter">
+          <BentoCell span="third">
             <StatCard
               title="Monthly Sales"
               value={summary?.monthlySales}
@@ -172,7 +147,7 @@ const DashboardView = () => {
               caption="Verified, month to date"
             />
           </BentoCell>
-          <BentoCell span="quarter">
+          <BentoCell span="third">
             <StatCard
               title="Net Profit (MTD)"
               value={netProfit}

@@ -116,7 +116,7 @@ const toDuePayables = async (payables: IPayable[]): Promise<IDuePayable[]> => {
   });
 };
 type TypedAmountRow = AmountRow & Pick<ITransaction, "type" | "sale_status">;
-type BalanceRow = { branch: string; balance?: number | string };
+type BranchAmountRow = { branch: string; amount: number | string };
 
 type CountedVoucher = Pick<IVoucher, "status" | "amount">;
 
@@ -204,12 +204,8 @@ const dashboardServices = {
     const today = todayIso();
     const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
 
-    const [cash, recent, thisMonth, receivables, payables] =
+    const [recent, thisMonth, receivables, payables] =
       await Promise.all([
-        scopeToBranch(
-          supabase.from("cash_accounts").select("account, balance"),
-          branch
-        ),
         scopeToBranch(
           supabase
             .from("transactions")
@@ -243,23 +239,10 @@ const dashboardServices = {
         ),
       ]);
 
-    const firstError = [
-      cash,
-      recent,
-      thisMonth,
-      receivables,
-      payables,
-    ].find((result) => result.error)?.error;
+    const firstError = [recent, thisMonth, receivables, payables].find(
+      (result) => result.error
+    )?.error;
     if (firstError) throw toError(firstError);
-
-    const cashRows = (cash.data ?? []) as {
-      account: string;
-      balance: number | string;
-    }[];
-    const balanceOf = (account: string) =>
-      cashRows
-        .filter((row) => row.account === account)
-        .reduce((total, row) => total + Number(row.balance), 0);
 
     const recentRows = (recent.data ?? []) as unknown as (CountedTransactionRow & {
       txn_date: string;
@@ -280,8 +263,6 @@ const dashboardServices = {
       sumCountedRows(rows.filter((row) => types.includes(row.type)));
 
     return {
-      currentCash: balanceOf("cash_drawer"),
-      bankBalance: balanceOf("bank_account"),
       todaysSales: onDay(today, isVerifiedSale),
       todaysExpenses: onDay(today, isExpense),
       yesterdaysSales: onDay(yesterday, isVerifiedSale),
@@ -373,8 +354,7 @@ const dashboardServices = {
   getBranchMonitor: async (
     branches: IBranch[]
   ): Promise<IBranchMonitorRow[]> => {
-    const [cash, sales, expenses, receivables, payables] = await Promise.all([
-      supabase.from("cash_accounts").select("branch, balance"),
+    const [sales, expenses, receivables, payables] = await Promise.all([
       supabase
         .from("transactions")
         .select("branch, amount")
@@ -394,19 +374,15 @@ const dashboardServices = {
         .neq("status", "paid"),
     ]);
 
-    const firstError = [cash, sales, expenses, receivables, payables].find(
+    const firstError = [sales, expenses, receivables, payables].find(
       (result) => result.error
     )?.error;
     if (firstError) throw toError(firstError);
 
-    const totalBy = (
-      rows: (BalanceRow & { amount?: number | string })[] | null,
-      branch: string,
-      key: "amount" | "balance"
-    ) =>
+    const totalBy = (rows: BranchAmountRow[] | null, branch: string) =>
       (rows ?? [])
         .filter((row) => row.branch === branch)
-        .reduce((total, row) => total + Number(row[key] ?? 0), 0);
+        .reduce((total, row) => total + Number(row.amount), 0);
 
     const outstandingBy = (
       rows: (OutstandingRow & { branch: string })[] | null,
@@ -422,8 +398,7 @@ const dashboardServices = {
     return branches.map((branch) => ({
       branch: branch.slug,
       branchName: branch.name,
-      cashBalance: totalBy(cash.data as never, branch.slug, "balance"),
-      sales: totalBy(sales.data as never, branch.slug, "amount"),
+      sales: totalBy(sales.data, branch.slug),
       expenses: sumCountedRows(
         ((expenses.data ?? []) as unknown as (CountedTransactionRow & {
           branch: string;

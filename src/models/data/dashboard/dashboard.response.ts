@@ -2,8 +2,6 @@ import type { CashAccount } from "../../../enums/transaction.enum";
 import type { IPayable, IReceivable } from "../ledger/ledger.response";
 
 export interface IDashboardSummary {
-  currentCash: number;
-  bankBalance: number;
   todaysSales: number;
   todaysExpenses: number;
   yesterdaysSales: number;
@@ -96,7 +94,6 @@ export interface IDashboardOverview {
 export interface IBranchMonitorRow {
   branch: string;
   branchName: string;
-  cashBalance: number;
   sales: number;
   expenses: number;
   receivables: number;

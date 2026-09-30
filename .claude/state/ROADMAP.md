@@ -29,7 +29,7 @@ phase per conversation; the user reviews between phases. Replaces the finished c
   in *.styles.ts, tokens only in theme.css, useConfirm, runWrite, Transactions is reference).
 
 ## Open decisions (ask the user at the start of the phase that needs them)
-- Q1 (F5) Current Cash / Bank Balance / Branch Monitoring "Cash balance" read
+- Q1 (F5, ANSWERED: remove) Current Cash / Bank Balance / Branch Monitoring "Cash balance" read
   `cash_accounts.balance`, which nothing ever writes (always P0.00). Compute from transactions per
   cash account + bank account (needs opening balances), or remove the three tiles?
 - Q2 (F6) A PENDING (unverified) customer payment already reduces the receivable balance
@@ -164,11 +164,16 @@ any route (superadmin, accountant).
   sync, so one name map: caller + admins + users sharing a visible branch; managers see all).
   IUserDisplayName, userDisplayNamesKey, user.services getDisplayNames; user.list.hook runs it for
   non-managers so every userNameOf ("Rejected by", "Recorded by", deposited/verified by) resolves.
-  Not harness-verified yet (F7).
+  Not harness-verified yet (F7). Migration 20 applied by the user.
+- [x] F5 balances (v1.77): Q1 = remove. Dashboard Current Cash + Bank Balance tiles and Branch
+  Monitoring "Cash balance" column gone (DashboardView, BranchMonitorTable); IDashboardSummary /
+  IBranchMonitorRow drop currentCash/bankBalance/cashBalance; dashboard.services no longer reads
+  cash_accounts (table kept, unused). Remaining 6 stat tiles are span "third" (2 rows of 3).
+  Compiled only (F7 checks the layout).
 
 ## Next
-1. Confirm the user applied 20261008000020 to Supabase (F4 depends on it).
-2. F5 - cash & bank balances: ask Q1 first, then compute or remove the three tiles.
+1. F6 - behaviour decisions: ask Q2-Q6 first (AskUserQuestion, max 3 per call - two rounds),
+   then plan and implement the chosen ones.
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -196,6 +201,5 @@ any route (superadmin, accountant).
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · F3 committed v1.75 (migration 19 applied) · F4 done, uncommitted
-(suggested v1.76) · New migration 20261008000020 pending user apply · Last check: yarn build +
-yarn lint clean 2026-09-30.
+Branch: development-overhaul · F4 committed v1.76 (migrations 19 + 20 applied) · F5 done,
+uncommitted (suggested v1.77) · No pending migrations · Last check: npx tsc -b clean 2026-09-30.

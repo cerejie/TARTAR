@@ -30,7 +30,6 @@ const columns: IDataTableColumn<IBranchMonitorRow>[] = [
     skeleton: "avatar",
     render: (name: string) => <AvatarCell name={name} />,
   },
-  moneyColumn("Cash balance", "cashBalance"),
   moneyColumn("Sales", "sales"),
   moneyColumn("Expenses", "expenses"),
   moneyColumn("Receivables", "receivables", "xl"),
