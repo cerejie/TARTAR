@@ -41,7 +41,7 @@ export const useUserManageHook = () => {
 
   const permissions = usePermissions();
   const currentUserId = useAccountStore(selectUserId);
-  const { branchOptions } = useBranchListHook();
+  const { branchOptions, branchName } = useBranchListHook();
   const openConfirm = useConfirm();
   const {
     users,
@@ -151,6 +151,12 @@ export const useUserManageHook = () => {
 
   const displayName = (user: IUser) => user.full_name || user.username;
 
+  const branchAccessLabelOf = (user: IUser) => {
+    if (user.role === "admin") return "All";
+    if (!user.branch_access.length) return "None";
+    return user.branch_access.map(branchName).join(", ");
+  };
+
   const confirmApproval = (user: IUser, status: ApprovalStatus) => {
     const approve = status === "approved";
 
@@ -189,6 +195,7 @@ export const useUserManageHook = () => {
     error,
     retry,
     displayName,
+    branchAccessLabelOf,
     editing,
     currentUserId,
     createModal,

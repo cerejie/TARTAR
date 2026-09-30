@@ -106,7 +106,13 @@ export const usePaymentListHook = (
 
   const approvePayment = (payment: ILedgerPayment) => {
     if (kind === "receivable") {
-      void verifyMutation.mutate(payment.id);
+      openConfirm({
+        kind: "confirm",
+        title: "Verify payment?",
+        message: `Confirm the ${formatMoney(payment.amount)} payment from ${payment.party_name} was received.`,
+        okText: "Verify",
+        onConfirm: () => verifyMutation.mutate(payment.id),
+      });
       return;
     }
 

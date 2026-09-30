@@ -9,11 +9,13 @@ import {
   periodPrintModalKey,
 } from "../../../keys/modal.keys";
 import {
+  expenseCategoryListKey,
   expenseListKey,
   expenseSummaryKey,
   purchaseListKey,
   purchaseSummaryKey,
   scopedKey,
+  supplierListKey,
   voucherListKey,
 } from "../../../keys/query.keys";
 import {
@@ -149,7 +151,13 @@ export const useDisbursementListHook = (
     { enabled: historyModal.modal.visible && !!historyRow }
   );
 
-  const invalidate = [scope, summaryScope, voucherListKey];
+  const invalidate = [
+    scope,
+    summaryScope,
+    voucherListKey,
+    supplierListKey,
+    expenseCategoryListKey,
+  ];
 
   const createMutation = useMutation(
     async (values: IDisbursementInput) =>

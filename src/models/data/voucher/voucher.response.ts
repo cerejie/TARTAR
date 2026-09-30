@@ -46,9 +46,7 @@ export const voucherPurpose = (
   voucher: Pick<IVoucher, "purpose" | "category">
 ): string => {
   if (voucher.purpose) return voucher.purpose;
-  if (voucher.category === voucherKindCategory.purchase)
-    return voucherKindLabels.purchase;
-  if (voucher.category === voucherKindCategory.expense)
-    return voucherKindLabels.expense;
-  return "—";
+  return voucher.category === voucherKindCategory.purchase
+    ? voucherKindLabels.purchase
+    : voucherKindLabels.expense;
 };

@@ -76,6 +76,7 @@ export const protectedViewsRoutes: IRoute[] = [
     icon: FileText,
     group: "Operations",
     can: "createVouchers",
+    loader: permissionLoader("createVouchers", "/transactions"),
     ...lazyView(() => import("../pages/Vouchers/VouchersView")),
   },
   {

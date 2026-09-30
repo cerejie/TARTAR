@@ -45,6 +45,7 @@ const UsersTable = () => {
     error,
     retry,
     displayName,
+    branchAccessLabelOf,
     editing,
     currentUserId,
     createModal,
@@ -123,8 +124,7 @@ const UsersTable = () => {
     {
       title: "Branches",
       dataIndex: "branch_access",
-      render: (branches: string[]) =>
-        branches.length ? branches.join(", ") : "All",
+      render: (_, user) => branchAccessLabelOf(user),
     },
     {
       title: "Approval",

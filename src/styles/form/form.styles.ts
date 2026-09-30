@@ -29,6 +29,8 @@ export const fieldDatePlaceholder = "text-muted-foreground";
 
 export const fieldDatePopover = "w-auto p-0";
 
+export const fieldDateDialog = "outline-hidden";
+
 export const formSection = "shrink-0 gap-4 [--card-spacing:--spacing(5)]";
 
 export const formSectionHeader = "mx-(--card-spacing) border-b px-0 pb-3";

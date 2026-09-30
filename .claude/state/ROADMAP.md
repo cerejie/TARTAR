@@ -132,9 +132,18 @@ any route (superadmin, accountant).
 
 ## Done
 - [x] Live multi-role test 2026-09-30 (this file's Bugs + Verified sections).
+- [x] F1 quick fixes (v1.73): B1 account.login.hook resetLocation before the session; B8 vouchers
+  permissionLoader; B7 voucherPurpose non-PUR = Expense; B6 disbursement.list.hook invalidates
+  suppliers + expense categories; FormField date Dialog close on select; receivable Verify via
+  useConfirm; Users Branches column (All admin / None empty / names, user.manage.hook
+  branchAccessLabelOf); pending/rejected sign-in text (account.services toLoginError); manual
+  voucher branch = scope. New icons: main stacked-ledger (public/icon*.png|svg,
+  apple-touch-icon.png, vite.config manifest icons, index.html links) and admin navy gauge
+  (admin-icon*, apple-touch-icon-admin.png; admin.manifest.hook swaps rel=icon). Generator:
+  session scratchpad icons/build-icons.mjs (not kept). Not harness-verified yet (F7).
 
 ## Next
-1. F1 — quick fixes (no DB).
+1. F2 — totals consistency (no DB, L1).
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -162,6 +171,5 @@ any route (superadmin, accountant).
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · v1.71 committed (f846c74) · Uncommitted: this roadmap +
-.claude/state/audit/drive.mjs · No new migration · Last check: live multi-role harness run
-2026-09-30.
+Branch: development-overhaul · F1 done, uncommitted (suggested v1.73) · No new migration · Last
+check: yarn build + yarn lint clean 2026-09-30.

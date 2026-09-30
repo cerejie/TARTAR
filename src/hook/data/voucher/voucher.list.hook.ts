@@ -217,7 +217,7 @@ export const useVoucherListHook = () => {
     ...voucherBreakdownDefaults,
     type: "cash",
     kind: "expense",
-    branch: defaultBranch as BranchSlug,
+    branch: (scopeBranch ?? defaultBranch) as BranchSlug,
     payee: "",
     supplier_id: null,
     due_date: todayIso(),

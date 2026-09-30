@@ -12,6 +12,20 @@ import {
   toError,
 } from "../../utils/supabase.utils";
 
+const accountNotApprovedCode = "28000";
+
+const approvalMessages: Record<string, string> = {
+  "account is pending":
+    "Your account is waiting for administrator approval.",
+  "account is rejected":
+    "Your registration was declined — contact an administrator.",
+};
+
+const toLoginError = (error: { code?: string; message: string }): Error =>
+  error.code === accountNotApprovedCode
+    ? new Error(approvalMessages[error.message] ?? error.message)
+    : toError(error);
+
 const accountServices = {
   loginCustomUser: async (
     values: ILoginInput
@@ -20,7 +34,7 @@ const accountServices = {
       p_username: values.username,
       p_password: values.password,
     });
-    if (error) throw toError(error);
+    if (error) throw toLoginError(error);
 
     const response = data as ICustomLoginResponse;
     setCustomToken(response.token);

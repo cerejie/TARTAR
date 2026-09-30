@@ -1,5 +1,6 @@
 import { parseDate, type CalendarDate } from "@internationalized/date";
 import { CalendarIcon } from "lucide-react";
+import { Dialog } from "react-aria-components";
 import {
   Controller,
   type Control,
@@ -44,6 +45,7 @@ import type {
 } from "../../../models/common/field.model";
 import {
   fieldControl,
+  fieldDateDialog,
   fieldDatePlaceholder,
   fieldDatePopover,
   fieldDateTrigger,
@@ -305,11 +307,18 @@ const renderControl = <TValues extends FieldValues>(
             )}
           </Button>
           <Popover placement="bottom start" className={fieldDatePopover}>
-            <Calendar
-              captionLayout="dropdown"
-              value={selected}
-              onChange={(next) => field.onChange(next.toString())}
-            />
+            <Dialog aria-label={config.label} className={fieldDateDialog}>
+              {({ close }) => (
+                <Calendar
+                  captionLayout="dropdown"
+                  value={selected}
+                  onChange={(next) => {
+                    field.onChange(next.toString());
+                    close();
+                  }}
+                />
+              )}
+            </Dialog>
           </Popover>
         </PopoverTrigger>
       );

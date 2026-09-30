@@ -11,6 +11,7 @@ type IHeadEntry = {
 const adminAppTitle = "TARTAR Admin";
 const adminManifestHref = "/admin.webmanifest";
 const adminTouchIconHref = "/apple-touch-icon-admin.png";
+const adminFaviconHref = "/admin-icon.svg";
 const themeColorToken = "--brand";
 
 const readThemeColor = (): string =>
@@ -57,6 +58,13 @@ export const useAdminManifestHook = (enabled = true) => {
         keyValue: "manifest",
         attribute: "href",
         value: adminManifestHref,
+      }),
+      swapHeadEntry({
+        tag: "link",
+        key: "rel",
+        keyValue: "icon",
+        attribute: "href",
+        value: adminFaviconHref,
       }),
       swapHeadEntry({
         tag: "link",

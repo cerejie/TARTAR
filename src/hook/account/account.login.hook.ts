@@ -19,6 +19,7 @@ import { useAdminManifestHook } from "../layout/admin.manifest.hook";
 export const useAccountLoginHook = () => {
   const { pathname } = useLocation();
   const isAdminLogin = isAdminPath(pathname);
+  const homePath = isAdminLogin ? adminBasePath : "/";
   useAdminManifestHook(isAdminLogin);
   const setCustomSession = useAccountStore((state) => state.setCustomSession);
   const setSuperAdminSession = useAccountStore(
@@ -39,6 +40,7 @@ export const useAccountLoginHook = () => {
           email: identifier,
           password: values.password,
         });
+        resetLocation(homePath);
         setSuperAdminSession(identifier);
         return;
       }
@@ -47,10 +49,8 @@ export const useAccountLoginHook = () => {
         username: identifier,
         password: values.password,
       });
+      resetLocation(homePath);
       setCustomSession(token, user);
-    },
-    {
-      onSuccess: () => resetLocation(isAdminLogin ? adminBasePath : "/"),
     }
   );
 
