@@ -64,6 +64,7 @@ export const useAccountStore = create<States & Actions>()(
         kind: state.kind,
         user: state.user,
         token: state.token,
+        developerEmail: state.developerEmail,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.kind === "custom" && state.token)
