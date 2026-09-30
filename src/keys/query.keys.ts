@@ -9,6 +9,7 @@ export const bankAccountListKey = "bank-accounts";
 export const customerListKey = "customers";
 export const supplierListKey = "suppliers";
 export const userListKey = "users";
+export const userDisplayNamesKey = "user-display-names";
 export const transactionListKey = "transactions";
 export const transactionSummaryKey = "transaction-summary";
 export const purchaseListKey = "purchases";

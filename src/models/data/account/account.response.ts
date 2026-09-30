@@ -12,6 +12,11 @@ export interface IUser {
   updated_at: string;
 }
 
+export interface IUserDisplayName {
+  id: string;
+  name: string;
+}
+
 export interface IAuthUser {
   id: string;
   username: string;

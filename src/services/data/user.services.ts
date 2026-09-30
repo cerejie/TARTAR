@@ -1,6 +1,9 @@
 import type { ApprovalStatus } from "../../enums/role.enum";
 import type { IUpdateUserInput } from "../../models/data/account/account.request";
-import type { IUser } from "../../models/data/account/account.response";
+import type {
+  IUser,
+  IUserDisplayName,
+} from "../../models/data/account/account.response";
 import { runWrite } from "../../store/common/sync.store";
 import { supabase, toError } from "../../utils/supabase.utils";
 
@@ -20,6 +23,13 @@ const userServices = {
     if (error) throw toError(error);
 
     return (data ?? []) as IUser[];
+  },
+
+  getDisplayNames: async (): Promise<IUserDisplayName[]> => {
+    const { data, error } = await supabase.rpc("user_display_names");
+    if (error) throw toError(error);
+
+    return (data ?? []) as IUserDisplayName[];
   },
 
   update: (id: string, values: IUpdateUserInput) =>

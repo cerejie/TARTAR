@@ -159,11 +159,16 @@ any route (superadmin, accountant).
   ILedgerPayment.branch; payment.services getList filters branch; payment.list.hook uses
   scopedFilters(top-bar scope); ledger getPartySummaries(branch) + ledger.list.hook party query
   and party-open payment records honour scope. Not harness-verified yet (F7).
+- [x] F4 names (v1.76): migration 20261008000020_user_display_names.sql (NOT applied until the
+  user runs it) adds SECURITY DEFINER `user_display_names()` (no args - userNameOf is per-row
+  sync, so one name map: caller + admins + users sharing a visible branch; managers see all).
+  IUserDisplayName, userDisplayNamesKey, user.services getDisplayNames; user.list.hook runs it for
+  non-managers so every userNameOf ("Rejected by", "Recorded by", deposited/verified by) resolves.
+  Not harness-verified yet (F7).
 
 ## Next
-1. Confirm the user applied 20261007000019 to Supabase (F3 depends on it).
-2. F4 - names + migration (B5 SECURITY DEFINER `user_display_names(uuid[])`, branch-checked like
-   voucher_signatories, wired into "Rejected by" and employee/accountant "Recorded by").
+1. Confirm the user applied 20261008000020 to Supabase (F4 depends on it).
+2. F5 - cash & bank balances: ask Q1 first, then compute or remove the three tiles.
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -191,5 +196,6 @@ any route (superadmin, accountant).
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · F2 committed v1.74 · F3 done, uncommitted (suggested v1.75) · New
-migration 20261007000019 pending user apply · Last check: yarn build + yarn lint clean 2026-09-30.
+Branch: development-overhaul · F3 committed v1.75 (migration 19 applied) · F4 done, uncommitted
+(suggested v1.76) · New migration 20261008000020 pending user apply · Last check: yarn build +
+yarn lint clean 2026-09-30.
