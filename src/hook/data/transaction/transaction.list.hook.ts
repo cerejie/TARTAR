@@ -19,9 +19,10 @@ import {
 import type { IFieldSection } from "../../../models/common/field.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
-import { isVerifiedSale } from "../../../models/data/sale/sale.response";
 import type { ITransactionInput } from "../../../models/data/transaction/transaction.request";
+import { countedAmountOf } from "../../../models/data/transaction/transaction.response";
 import type {
+  IDisbursement,
   ITransaction,
   ITransactionSummary,
 } from "../../../models/data/transaction/transaction.response";
@@ -55,15 +56,15 @@ const customerTypes = ["sale", "customer_payment", "collection"];
 const supplierTypes = ["purchase", "supplier_payment"];
 
 const sumAmount = (
-  transactions: readonly ITransaction[],
+  transactions: readonly IDisbursement[],
   types: readonly TransactionType[]
 ) =>
   transactions
     .filter((transaction) => types.includes(transaction.type))
-    .reduce((total, transaction) => total + transaction.amount, 0);
+    .reduce((total, transaction) => total + countedAmountOf(transaction), 0);
 
 const summarize = (
-  transactions: readonly ITransaction[]
+  transactions: readonly IDisbursement[]
 ): ITransactionSummary => {
   const cashIn = sumAmount(transactions, cashInflowTypes);
   const cashOut = sumAmount(transactions, cashOutflowTypes);
@@ -72,7 +73,7 @@ const summarize = (
     cashIn,
     cashOut,
     net: cashIn - cashOut,
-    sales: sumAmount(transactions.filter(isVerifiedSale), ["sale"]),
+    sales: sumAmount(transactions, ["sale"]),
   };
 };
 
@@ -121,9 +122,9 @@ export const useTransactionListHook = () => {
     () => transactionServices.getList(effectiveFilters, pageRequest)
   );
 
-  const summaryQuery = useQuery<ITransaction[]>(
+  const summaryQuery = useQuery<IDisbursement[]>(
     scopedKey(transactionSummaryKey, JSON.stringify(effectiveFilters)),
-    () => transactionServices.getAll(effectiveFilters)
+    () => transactionServices.getAllWithVouchers(effectiveFilters)
   );
 
   const createMutation = useMutation(

@@ -249,19 +249,20 @@ any route (superadmin, accountant).
   persists developerEmail (it was lost on reload -> Email "—" and change password hit the
   table-user RPC). User confirmed the developer fix in the browser.
 
+- [x] Q7 + F7 finish (v1.83): Q7 = follow L1. transaction.list.hook summary reads
+  getAllWithVouchers and sums countedAmountOf (verified sales, amount to pay, rejected out).
+  Harness qaadmin2: cards Cash In P2,970 / Cash Out P1,879 (= 1,110+300+250+65+78+76, rejected
+  P100 out) / Sales P2,270; P78 voucher was already Approved (the earlier "FAIL" did apply; no
+  due date, so no payable); Payables page 2 paid payables; Reports Expenses by type renders,
+  Payables report "Nothing outstanding" (both paid). No HTTP/console errors.
+
 ## Next (one conversation, in order)
-1. Ask the user (Q7): Transactions page summary cards (TransactionSummaryCards via
-   transaction.list.hook) - employee Cash Out P1,835 = P1,120 gross invoice + P300 + P250 +
-   rejected P100 + pending P65. Follow L1 (countedAmountOf / amountToPayOf, rejected excluded)
-   like every other total, or stay raw cash flow? Implement the answer.
-2. Finish F7: as an admin (qa-qaadmin2) approve the P78 voucher (skipped after the harness miss)
-   and check payables opened; as an accountant/admin open Reports -> Expenses and Payables
-   (the employee runs could not reach them). Fix anything that fails.
-3. Deployment checklist, confirming each outward step with the user first: merge
+1. Deployment checklist, confirming each outward step with the user first: merge
    development-overhaul -> main; if production is a different Supabase project apply migrations
    19-23 there (23 deletes every non-developer user - confirm the target project); user resets
    data; add Banks + branch legal_name/address.
-4. Ask, then delete this file and `.claude/state/audit/`.
+2. Ask, then delete this file and `.claude/state/audit/` (and the old session scratchpad audit
+   dir - f7-approve.json there holds the superadmin password in plain text).
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -291,6 +292,6 @@ any route (superadmin, accountant).
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · v1.81 committed · uncommitted: account.store developerEmail fix +
-this file (suggested as v1.82) · Migrations through 23 applied · Last check: npx tsc -b + yarn
-lint clean 2026-09-30 (the v1.82 one-liner confirmed in the browser by the user).
+Branch: development-overhaul · v1.82 committed · uncommitted: transaction.list.hook Q7 + this
+file (suggested as v1.83) · Migrations through 23 applied · Last check: npx tsc -b + yarn lint
+clean 2026-09-30; Q7 cards harness-verified as qaadmin2.
