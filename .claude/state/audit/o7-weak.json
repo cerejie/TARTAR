@@ -1,0 +1,12 @@
+[
+ {"note":"login emp","login":["qaemp2@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm sales","goto":"/sales","settle":3000},
+ {"note":"toast recorder","js":"window.__t=[];new MutationObserver(()=>document.querySelectorAll('[data-sonner-toast]').forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(' ');if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"},
+ {"note":"BLOCK API (weak wifi)","blockApi":true},
+ {"note":"W5 sale 906 on weak wifi","button":"Record sale","page":true,"fill":{"amount":"906"},"pick":{"Cash account":"Cash Drawer"}},
+ {"submit":"Record","keepOpen":true,"submitWait":6000,"name":"w5"},
+ {"note":"dialog closed + queued?","queue":true,"count":"[role=dialog]","text":"header","max":200},
+ {"note":"UNBLOCK","blockApi":false,"always":true,"wait":35000,"queue":true},
+ {"note":"toasts seen","always":true,"js":"window.__t","queue":true,"text":"header","max":200},
+ {"note":"906 in list without reload","always":true,"expect":"906.00","name":"w5-after"}
+]

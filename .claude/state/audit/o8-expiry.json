@@ -1,0 +1,102 @@
+[
+ {
+  "note": "login emp",
+  "login": [
+   "qaemp2@qa.test",
+   "QaTest#2026"
+  ],
+  "stop": true
+ },
+ {
+  "note": "warm expenses",
+  "goto": "/expenses",
+  "settle": 3000
+ },
+ {
+  "note": "GO OFFLINE",
+  "offline": true
+ },
+ {
+  "note": "expense 908 offline",
+  "button": "Record expense",
+  "page": true,
+  "wait": 900,
+  "fill": {
+   "amount": "908",
+   "particulars": "OFFLINE O8 EXPIRY"
+  },
+  "pick": {
+   "Expense type": "QA Utilities",
+   "Payee": "QA Power Co"
+  }
+ },
+ {
+  "submit": "Record",
+  "toasts": true,
+  "stop": true
+ },
+ {
+  "note": "tamper token",
+  "queue": true,
+  "js": "(()=>{const a=JSON.parse(localStorage.getItem('tartar-auth'));const t=a.state.token;a.state.token=t.slice(0,-6)+(t.endsWith('AAAAAA')?'BBBBBB':'AAAAAA');localStorage.setItem('tartar-auth',JSON.stringify(a));return 'tampered'})()"
+ },
+ {
+  "note": "offline reload with bad token",
+  "reload": true,
+  "url": true
+ },
+ {
+  "note": "toast recorder",
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll('[data-sonner-toast]').forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(' ');if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "note": "BACK ONLINE (401 expected)",
+  "offline": false,
+  "always": true,
+  "wait": 6000,
+  "url": true,
+  "queue": true,
+  "name": "expired"
+ },
+ {
+  "note": "failed + toasts",
+  "always": true,
+  "js": "[window.__t, JSON.parse(localStorage.getItem('tartar-sync-queue')||'{}').state?.failed?.length, !!localStorage.getItem('tartar-auth') && JSON.parse(localStorage.getItem('tartar-auth')).state?.token?.slice(-6)]"
+ },
+ {
+  "note": "sign in again (storage kept)",
+  "always": true,
+  "goto": "/login",
+  "fill": {
+   "Email": "qaemp2@qa.test",
+   "Password": "QaTest#2026"
+  }
+ },
+ {
+  "note": "submit + recorder",
+  "always": true,
+  "click": "button[type=submit]",
+  "wait": 4000,
+  "url": true,
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "note": "after sign-in wait",
+  "always": true,
+  "wait": 8000,
+  "queue": true
+ },
+ {
+  "note": "toasts after sign-in",
+  "always": true,
+  "js": "window.__t ?? 'recorder lost (page load)'"
+ },
+ {
+  "note": "908 listed",
+  "always": true,
+  "goto": "/expenses",
+  "settle": 3000,
+  "expect": "908.00",
+  "name": "after-relogin"
+ }
+]

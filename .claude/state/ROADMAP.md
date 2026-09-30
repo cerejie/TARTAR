@@ -102,7 +102,14 @@ merged into main).
 
 ## Done
 - Evidence runs o1-o5 done 2026-09-30.
-- O1 code (build + lint clean, NOT yet harness-verified): supabase/migrations/20261012000024_write_idempotency.sql
+- O1 DONE, harness-verified 2026-09-30 on the production build (v1.85 code + migration 24 applied):
+  o6-replay (online sale 341, offline deposit x2 + Expense 904 + Payment 51: 2nd deposit refused
+  "already deposited" -> sync panel "Needs attention (1)" with reason, the rest synced, list
+  refreshed without reload); o7-weak (blocked API: sale 906 queued, dialog closed, 30s retry synced,
+  "Synced 1 change"); o8-expiry (tampered token + offline reload: 401 stops flush, "session expired"
+  sign-out, queue kept, 0 failed; sign in again -> "Synced 1 change", expense 908 listed).
+  OB6 crash reproduced again in o6 (payment still queued and synced) -> O2.
+- O1 code: supabase/migrations/20261012000024_write_idempotency.sql
   (write_receipts + app.claim_write + key-first overloads of the 8 RPCs, originals untouched);
   src/utils/write.utils.ts (WriteError network|session|refused by status 0/401, prepareWrite stamps
   insert id + p_idempotency_key, replayed insert pkey 23505 = success); src/store/common/sync.store.ts
@@ -114,14 +121,12 @@ merged into main).
   expiry handler signs out, and the flush resumes on next sign-in (sync store is not in resetAllStores).
 
 ## Next (one conversation, in order)
-1. O1 verify: user applies migration 24 FIRST (the client already sends p_idempotency_key; the 8
-   RPCs fail until it is applied). Then harness: o4 duplicate-deposit replay (2nd deposit lands in
-   the sync panel as failed, Expense 902 + Payment 50 still sync), o5 weak wifi (queued, not raw
-   toast; syncs within 30s of unblock), expired token (tamper token via js step -> signed out,
-   queue kept, sign in -> syncs). Then tick O1 Done, commit.
-2. O2, O3, O4 (one per conversation).
+1. O2 (OB2, OB3, OB6). Reuse o6-replay.json as the base spec: a queued deposit must disable
+   "Mark deposited" on that row (W2b must fail to find the item) and show "Pending sync".
+2. O3, O4 (one per conversation).
 3. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
-   offline test sale P901 and deposited P333), adds Banks + branch legal_name/address.
+   offline test sales P901, P333, P341, P905, P906, expenses 902/904/907/908, payments 50/51),
+   adds Banks + branch legal_name/address.
 4. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
    (f7-approve.json there holds the superadmin password in plain text).
 
@@ -153,10 +158,16 @@ merged into main).
   confirmOnly, dump, text, count, expect, absent, url, toasts, name (screenshot), stop, always.
   `queue` runs before `submit` in a step, so put it on the NEXT step to see that submit's item.
 - Specs: o1-read.json (offline reads, admin), o4-write.json (offline writes + sync, employee),
-  o5-weak.json (weak wifi). Shots in shots/drive/.
+  o5-weak.json (weak wifi), o6-replay.json (refused replay + sync panel), o7-weak.json (weak wifi
+  + 30s retry + toast recorder), o8-expiry.json (tampered token, re-login keeps storage).
+  Shots in shots/drive/. Within one step the driver runs goto -> button -> click -> row -> fill ->
+  pick -> submit, so a click that must follow a fill goes on the next step. Toasts fade in ~4s:
+  catch them with the MutationObserver recorder `js` step from o7 (window.__t), not `toasts`.
+- A leftover `yarn preview` may already hold :4199 (strictPort then fails); it serves dist/ from
+  disk, so a fresh `yarn build` is still what it serves.
 - QA logins `<name>@qa.test` / `QaTest#2026` (qaadmin1/2, qaacc1/2, qaemp1/2). Developer and
   superadmin passwords are never written to disk.
 
 ## State
 Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
-uncommitted · Migration 24 written, NOT applied · Migrations through 23 applied.
+committed in v1.85 and verified · Migrations through 24 applied · O2 not started.
