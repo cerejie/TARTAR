@@ -1,6 +1,7 @@
 import { ChevronsUpDown, Store } from "lucide-react";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBranchScopeHook } from "../../../hook/data/branch/branch.scope.hook";
 import {
   headerCaret,
@@ -8,6 +9,7 @@ import {
   headerScopeLabel,
   headerScopeList,
   headerScopePopover,
+  headerScopeSkeleton,
   headerScopeTrigger,
 } from "../../../styles/layout/header.styles";
 import AppButton from "../button/AppButton";
@@ -18,9 +20,18 @@ type IProps = {
 };
 
 const ProtectedBranchScope = ({ onPress }: IProps) => {
-  const { enabled, branchName, branches } = useBranchScopeHook();
+  const { enabled, loading, branchName, branches } = useBranchScopeHook();
 
-  if (!enabled || branches.length === 0) return null;
+  if (!enabled) return null;
+
+  if (loading)
+    return (
+      <div className={headerScope}>
+        <Skeleton className={headerScopeSkeleton} />
+      </div>
+    );
+
+  if (branches.length === 0) return null;
 
   const trigger = (
     <AppButton

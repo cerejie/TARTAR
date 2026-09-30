@@ -305,13 +305,17 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   branch scope renders nothing until branches load (ProtectedBranchScope.tsx:23) -> pops in;
   cosmetic, left as is unless the user asks for a skeleton.
 
+- [x] v1.70 committed (1f3d007): migration
+  supabase/migrations/20261006000018_payables_no_delete.sql (pay_manager_all split into
+  read/insert/update policies, DELETE revoked) — applied by the user 2026-09-30;
+  branch.scope.hook exposes `loading`.
+- [x] Branch scope skeleton (v1.71, uncommitted, compiled): ProtectedBranchScope renders a
+  pill Skeleton (header.styles headerScopeSkeleton, trigger-sized) while branches load.
+
 ## Next
-1. Optional, only if the user asks: migration so payables cannot be deleted in the DB
-   (pay_manager_all still allows DELETE) — propose SQL, never apply. Also optional: branch
-   scope skeleton while branches load.
-2. Remaining user-side (no code, just remind once): add Banks in Master Data, branch
+1. Remaining user-side (no code, just remind once): add Banks in Master Data, branch
    legal_name/address, run deposit -> verify end to end, delete the three P1.00 test rows.
-3. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
+2. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
 
 ## Carried over from the audit roadmap (fold into P10)
 - Done in v1.67: mobile sweep, AD3, SV1, SV2. AD1 done in v1.66.
@@ -338,10 +342,9 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   /login for the USER. The `accountant` profile may need re-sign-in too.
 
 ## Open
-- Every migration through 20261005000017 is applied (user confirmed 2026-09-30).
-- P5: payable delete is blocked in the UI only (pay_manager_all still allows it in the DB).
-  Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
+- Every migration through 20261006000018 is applied (user confirmed 2026-09-30).
+- P5: payable delete is blocked in the UI and the DB (v1.70). Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · v1.69 committed · Uncommitted: none · No new migration · Last
-check: admin-states.json ALL PASS (2026-09-30).
+Branch: development-overhaul · v1.70 committed · Uncommitted: v1.71 branch scope skeleton
+(ProtectedBranchScope, header.styles) · No new migration · Last check: yarn build + yarn lint.
