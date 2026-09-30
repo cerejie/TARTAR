@@ -117,17 +117,12 @@ const paymentServices = {
     });
   },
 
-  verify: (id: string, verifierId: string | null) =>
+  verify: (id: string) =>
     runWrite({
       label: "Verify payment",
-      kind: "update",
-      table,
-      values: {
-        status: "verified",
-        verified_by: verifierId,
-        verified_at: new Date().toISOString(),
-      },
-      match: { id, status: "pending" },
+      kind: "rpc",
+      fn: "verify_payment",
+      args: { p_payment_id: id },
     }),
 
   reject: (id: string) =>

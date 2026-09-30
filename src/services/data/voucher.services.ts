@@ -110,7 +110,12 @@ const voucherServices = {
     });
   },
 
-  decide: (id: string, approve: boolean, approverId: string | null) =>
+  decide: (
+    id: string,
+    approve: boolean,
+    approverId: string | null,
+    reason: string | null = null
+  ) =>
     runWrite({
       label: `${approve ? "Approve" : "Reject"} voucher`,
       kind: "update",
@@ -119,6 +124,7 @@ const voucherServices = {
         status: approve ? "approved" : "rejected",
         approved_by: approverId,
         approved_at: new Date().toISOString(),
+        rejection_reason: approve ? null : reason,
       },
       match: { id },
     }),

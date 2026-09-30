@@ -8,6 +8,7 @@ export const saleRejectModalKey = "sale-reject";
 export const saleResubmitModalKey = "sale-resubmit";
 
 export const voucherFormModalKey = "voucher-form";
+export const voucherRejectModalKey = "voucher-reject";
 
 export const userCreateModalKey = "user-create";
 export const userEditModalKey = "user-edit";

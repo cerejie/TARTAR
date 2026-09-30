@@ -2,6 +2,7 @@ import {
   FileCheck,
   FileText,
   History,
+  MessageSquareWarning,
   Pencil,
   Plus,
   Printer,
@@ -13,6 +14,7 @@ import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
 import EntityFormModal from "../../common/form/EntityFormModal";
+import RejectionIntro from "../../common/form/RejectionIntro";
 import RequirePermission from "../../common/guard/RequirePermission";
 import PeriodPrintModal from "../../common/modal/PeriodPrintModal";
 import DataTable from "../../common/table/DataTable";
@@ -29,7 +31,10 @@ import {
   voucherTypeLabels,
 } from "../../../enums/voucher.enum";
 import { useConfirm } from "../../../hook/common/confirmation.hook";
-import { isDisbursementLocked } from "../../../hook/data/disbursement/disbursement.list.hook";
+import {
+  isDisbursementLocked,
+  isDisbursementRejected,
+} from "../../../hook/data/disbursement/disbursement.list.hook";
 import { usePurchaseListHook } from "../../../hook/data/purchase/purchase.list.hook";
 import { purchaseListKey } from "../../../keys/query.keys";
 import { disbursementExpansionKey } from "../../../keys/table.keys";
@@ -43,6 +48,13 @@ import type { IDisbursement } from "../../../models/data/transaction/transaction
 import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
 import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
 import { voucherBreakdownItems } from "../../../utils/voucher.utils";
+
+const dueDateLabelOf = (row: IDisbursement) => {
+  if (row.voucher?.status === "rejected") return "Rejected";
+  if (row.due_date && row.payable?.status !== "paid") return formatDate(row.due_date);
+  if (!row.voucher || row.voucher.status === "pending") return "Pending";
+  return "Paid";
+};
 
 const PurchasesTable = () => {
   const {
@@ -66,6 +78,8 @@ const PurchasesTable = () => {
     editModal,
     historyModal,
     editRow,
+    editRejected,
+    rejectedByName,
     historyRow,
     audit,
     auditLoading,
@@ -89,9 +103,20 @@ const PurchasesTable = () => {
 
   const actionsOf = (row: IDisbursement): IRowAction[] => {
     const locked = isDisbursementLocked(row);
+    const rejected = isDisbursementRejected(row);
 
     return [
-      ...(permissions.encodeTransactions
+      ...(permissions.encodeTransactions && rejected
+        ? [
+            {
+              key: "view-reason",
+              label: "View reason",
+              icon: <MessageSquareWarning />,
+              onSelect: () => editModal.openModal(row),
+            },
+          ]
+        : []),
+      ...(permissions.encodeTransactions && !rejected
         ? [
             {
               key: "edit",
@@ -109,7 +134,7 @@ const PurchasesTable = () => {
         icon: <History />,
         onSelect: () => historyModal.openModal(row),
       },
-      ...(permissions.isManager && !locked
+      ...(permissions.isManager && !locked && !rejected
         ? [
             {
               key: "delete",
@@ -156,6 +181,7 @@ const PurchasesTable = () => {
             <StatusTag
               color={voucherStatusColors[row.voucher.status]}
               label={voucherStatusLabels[row.voucher.status]}
+              hint={row.voucher.rejection_reason ?? undefined}
             />
             {row.voucher.printed ? <StatusTag label="Printed" /> : null}
           </span>
@@ -183,8 +209,7 @@ const PurchasesTable = () => {
       title: "Due date",
       dataIndex: "due_date",
       className: nowrapCell,
-      render: (value: string | null, row) =>
-        value && row.payable?.status !== "paid" ? formatDate(value) : "Paid",
+      render: (_, row) => dueDateLabelOf(row),
     },
     ...(permissions.isManager
       ? [
@@ -354,14 +379,24 @@ const PurchasesTable = () => {
       {editDefaults ? (
         <EntityFormModal<IDisbursementInput>
           open={editModal.modal.visible}
-          title="Edit purchase"
+          title={editRejected ? "Rejected purchase" : "Edit purchase"}
           size="lg"
+          intro={
+            editRejected && editRow ? (
+              <RejectionIntro
+                reason={editRow.voucher?.rejection_reason}
+                rejectedBy={rejectedByName}
+                rejectedAt={editRow.voucher?.approved_at ?? null}
+              />
+            ) : undefined
+          }
           sections={sections}
           summary={formSummary}
           deriveValues={deriveFormValues}
           schema={purchaseSchema}
           defaultValues={editDefaults}
           submitting={updateMutation.loading}
+          submitText={editRejected ? "Resubmit" : undefined}
           onSubmit={(values) => {
             if (editRow) void updateMutation.mutate({ id: editRow.id, values });
           }}

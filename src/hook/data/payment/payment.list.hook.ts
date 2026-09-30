@@ -21,10 +21,6 @@ import type {
   IPartyFilter,
 } from "../../../models/data/payment/payment.response";
 import paymentServices from "../../../services/data/payment.services";
-import {
-  selectUserId,
-  useAccountStore,
-} from "../../../store/data/account/account.store";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
@@ -45,7 +41,6 @@ export const usePaymentListHook = (
   party?: { partyId: string | null; partyName: string }
 ) => {
   const permissions = usePermissions();
-  const verifierId = useAccountStore(selectUserId);
   const { userNameOf } = useUserListHook();
   const openConfirm = useConfirm();
   const { filters } = useLedgerFilters(paymentFilterScopeOf(kind));
@@ -93,7 +88,7 @@ export const usePaymentListHook = (
   );
 
   const verifyMutation = useMutation(
-    (id: string) => paymentServices.verify(id, verifierId),
+    (id: string) => paymentServices.verify(id),
     {
       successMessage: `Payment ${
         kind === "receivable" ? "verified" : "approved"

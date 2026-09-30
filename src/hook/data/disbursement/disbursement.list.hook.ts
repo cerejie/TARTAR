@@ -76,7 +76,10 @@ const summaryKeyOf = (kind: DisbursementKind) =>
   kind === "purchase" ? purchaseSummaryKey : expenseSummaryKey;
 
 export const isDisbursementLocked = (row: IDisbursement) =>
-  !!row.voucher && (row.voucher.status !== "pending" || row.voucher.printed);
+  !!row.voucher && (row.voucher.status === "approved" || row.voucher.printed);
+
+export const isDisbursementRejected = (row: IDisbursement) =>
+  row.voucher?.status === "rejected";
 
 export const pendingVoucherCount = (rows: readonly IDisbursement[]) =>
   rows.filter((row) => row.voucher?.status === "pending").length;
@@ -144,6 +147,7 @@ export const useDisbursementListHook = (
   );
 
   const editRow = editModal.modal.data;
+  const editRejected = !!editRow && isDisbursementRejected(editRow);
   const historyRow = historyModal.modal.data;
 
   const auditQuery = useQuery<ITransactionAudit[]>(
@@ -185,7 +189,9 @@ export const useDisbursementListHook = (
         await prepare(payload.values)
       ),
     {
-      successMessage: `${title} updated`,
+      successMessage: editRejected
+        ? `${title} resubmitted — voucher pending approval`
+        : `${title} updated`,
       invalidate,
       onSuccess: editModal.closeModal,
     }
@@ -249,6 +255,8 @@ export const useDisbursementListHook = (
     editModal,
     historyModal,
     editRow,
+    editRejected,
+    rejectedByName: userNameOf(editRow?.voucher?.approved_by ?? null),
     historyRow,
     audit: auditQuery.data ?? [],
     auditLoading: auditQuery.isInitialLoading,

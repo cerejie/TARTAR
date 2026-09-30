@@ -1,4 +1,5 @@
 import EntityFormModal from "../../common/form/EntityFormModal";
+import RejectionIntro from "../../common/form/RejectionIntro";
 import { useSaleFormHook } from "../../../hook/data/sale/sale.form.hook";
 import {
   saleDepositSchema,
@@ -10,17 +11,7 @@ import {
   type ISaleRejectInput,
   type ISaleResubmitInput,
 } from "../../../models/data/sale/sale.request";
-import {
-  formIntro,
-  formIntroItem,
-  formIntroLabel,
-  formIntroValue,
-} from "../../../styles/form/form.styles";
-import {
-  formatDate,
-  formatDateTime,
-  formatMoney,
-} from "../../../utils/format.utils";
+import { formatDate, formatMoney } from "../../../utils/format.utils";
 
 const SaleFormModals = () => {
   const {
@@ -52,22 +43,11 @@ const SaleFormModals = () => {
   } = useSaleFormHook();
 
   const rejectionIntro = resubmitRow ? (
-    <div className={formIntro}>
-      <div className={formIntroItem}>
-        <span className={formIntroLabel}>Reason</span>
-        <span className={formIntroValue}>{resubmitRow.rejection_reason ?? "—"}</span>
-      </div>
-      <div className={formIntroItem}>
-        <span className={formIntroLabel}>Rejected by</span>
-        <span className={formIntroValue}>{rejectedByName}</span>
-      </div>
-      <div className={formIntroItem}>
-        <span className={formIntroLabel}>Rejected on</span>
-        <span className={formIntroValue}>
-          {formatDateTime(resubmitRow.verified_at)}
-        </span>
-      </div>
-    </div>
+    <RejectionIntro
+      reason={resubmitRow.rejection_reason}
+      rejectedBy={rejectedByName}
+      rejectedAt={resubmitRow.verified_at}
+    />
   ) : null;
 
   return (

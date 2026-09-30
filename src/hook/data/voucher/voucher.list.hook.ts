@@ -6,7 +6,10 @@ import {
   voucherTypeLabels,
   voucherTypeValues,
 } from "../../../enums/voucher.enum";
-import { voucherFormModalKey } from "../../../keys/modal.keys";
+import {
+  voucherFormModalKey,
+  voucherRejectModalKey,
+} from "../../../keys/modal.keys";
 import {
   payableListKey,
   scopedKey,
@@ -16,10 +19,16 @@ import {
   voucherPaginationKey,
   voucherSortKey,
 } from "../../../keys/table.keys";
-import type { IFieldConfig } from "../../../models/common/field.model";
+import type {
+  IFieldConfig,
+  IFieldSection,
+} from "../../../models/common/field.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
-import type { IVoucherInput } from "../../../models/data/voucher/voucher.request";
+import type {
+  IVoucherInput,
+  IVoucherRejectInput,
+} from "../../../models/data/voucher/voucher.request";
 import type { IVoucher } from "../../../models/data/voucher/voucher.response";
 import voucherServices from "../../../services/data/voucher.services";
 import {
@@ -58,8 +67,19 @@ const deriveManualVoucherValues = (
   ...derivePaymentValues(changed, values),
 });
 
+const rejectSections: IFieldSection<IVoucherRejectInput>[] = [
+  {
+    key: "reject",
+    title: "Rejection",
+    fields: [
+      { name: "reason", label: "Reason", type: "textarea", required: true },
+    ],
+  },
+];
+
 export const useVoucherListHook = () => {
   const formModal = useModal(voucherFormModalKey);
+  const rejectModal = useModal<IVoucher>(voucherRejectModalKey);
   const createdBy = useAccountStore(selectUserId);
   const permissions = usePermissions();
   const openConfirm = useConfirm();
@@ -109,12 +129,21 @@ export const useVoucherListHook = () => {
     }
   );
 
-  const decideMutation = useMutation(
-    (payload: { id: string; approve: boolean }) =>
-      voucherServices.decide(payload.id, payload.approve, createdBy),
+  const approveMutation = useMutation(
+    (id: string) => voucherServices.decide(id, true, createdBy),
     {
-      successMessage: "Voucher updated",
+      successMessage: "Voucher approved",
       invalidate: [voucherListKey, payableListKey],
+    }
+  );
+
+  const rejectMutation = useMutation(
+    (payload: { id: string; values: IVoucherRejectInput }) =>
+      voucherServices.decide(payload.id, false, createdBy, payload.values.reason),
+    {
+      successMessage: "Voucher rejected — returned to the employee",
+      invalidate: [voucherListKey, payableListKey],
+      onSuccess: rejectModal.closeModal,
     }
   );
 
@@ -123,22 +152,16 @@ export const useVoucherListHook = () => {
     { invalidate: [voucherListKey] }
   );
 
-  const confirmDecision = (voucher: IVoucher, approve: boolean) => {
-    const amount = formatMoney(voucher.amount);
-
+  const confirmApprove = (voucher: IVoucher) =>
     openConfirm({
-      kind: approve ? "confirm" : "delete",
-      title: approve
-        ? `Approve voucher for ${voucher.payee}?`
-        : `Reject voucher for ${voucher.payee}?`,
-      message: approve
-        ? `Once approved, the ${amount} voucher can be printed and can no longer be changed.`
-        : `The ${amount} voucher is marked rejected and cannot be printed.`,
-      okText: approve ? "Approve" : "Reject",
-      onConfirm: () =>
-        decideMutation.mutate({ id: voucher.id, approve }),
+      kind: "confirm",
+      title: `Approve voucher for ${voucher.payee}?`,
+      message: `Once approved, the ${formatMoney(
+        voucher.amount
+      )} voucher can be printed and can no longer be changed.`,
+      okText: "Approve",
+      onConfirm: () => approveMutation.mutate(voucher.id),
     });
-  };
 
   const print = (voucher: IVoucher) => {
     const branch = branches.find((item) => item.slug === voucher.branch);
@@ -248,7 +271,12 @@ export const useVoucherListHook = () => {
     formSummary: voucherSummaryLines,
     deriveFormValues: deriveManualVoucherValues,
     createMutation,
-    confirmDecision,
+    confirmApprove,
+    rejectModal,
+    rejectRow: rejectModal.modal.data,
+    rejectSections,
+    rejectDefaults: { reason: "" },
+    rejectMutation,
     print,
   };
 };

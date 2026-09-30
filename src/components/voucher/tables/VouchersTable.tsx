@@ -22,8 +22,10 @@ import { voucherExpansionKey } from "../../../keys/table.keys";
 import type { IRowAction } from "../../../models/common/action.model";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import {
+  voucherRejectSchema,
   voucherSchema,
   type IVoucherInput,
+  type IVoucherRejectInput,
 } from "../../../models/data/voucher/voucher.request";
 import {
   voucherPurpose,
@@ -65,7 +67,12 @@ const VouchersTable = () => {
     formSummary,
     deriveFormValues,
     createMutation,
-    confirmDecision,
+    confirmApprove,
+    rejectModal,
+    rejectRow,
+    rejectSections,
+    rejectDefaults,
+    rejectMutation,
     print,
   } = useVoucherListHook();
 
@@ -80,14 +87,14 @@ const VouchersTable = () => {
               key: "approve",
               label: "Approve voucher",
               icon: <Check />,
-              onSelect: () => confirmDecision(voucher, true),
+              onSelect: () => confirmApprove(voucher),
             },
             {
               key: "reject",
               label: "Reject voucher",
               icon: <X />,
               danger: true,
-              onSelect: () => confirmDecision(voucher, false),
+              onSelect: () => rejectModal.openModal(voucher),
             },
           ]
         : []),
@@ -172,6 +179,7 @@ const VouchersTable = () => {
           <StatusTag
             color={voucherStatusColors[status]}
             label={voucherStatusLabels[status]}
+            hint={voucher.rejection_reason ?? undefined}
           />
           {voucher.printed ? <StatusTag label="Printed" /> : null}
         </span>
@@ -317,6 +325,23 @@ const VouchersTable = () => {
         onSubmit={(values) => void createMutation.mutate(values)}
         onClose={formModal.closeModal}
       />
+
+      {rejectRow ? (
+        <EntityFormModal<IVoucherRejectInput>
+          open={rejectModal.modal.visible}
+          title={`Reject voucher · ${rejectRow.payee} · ${formatMoney(rejectRow.amount)}`}
+          sections={rejectSections}
+          schema={voucherRejectSchema}
+          defaultValues={rejectDefaults}
+          submitting={rejectMutation.loading}
+          submitText="Reject"
+          submitKind="delete"
+          onSubmit={(values) =>
+            void rejectMutation.mutate({ id: rejectRow.id, values })
+          }
+          onClose={rejectModal.closeModal}
+        />
+      ) : null}
     </>
   );
 };

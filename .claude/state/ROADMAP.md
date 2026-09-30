@@ -32,13 +32,13 @@ phase per conversation; the user reviews between phases. Replaces the finished c
 - Q1 (F5, ANSWERED: remove) Current Cash / Bank Balance / Branch Monitoring "Cash balance" read
   `cash_accounts.balance`, which nothing ever writes (always P0.00). Compute from transactions per
   cash account + bank account (needs opening balances), or remove the three tiles?
-- Q2 (F6) A PENDING (unverified) customer payment already reduces the receivable balance
+- Q2 (F6, ANSWERED: reduce only on verify) A PENDING (unverified) customer payment already reduces the receivable balance
   (P2,000 -> P1,200 before verify; reject restores it). Keep, or only reduce on verify?
-- Q3 (F6) Rejected expense/purchase vouchers are "Locked" for employees — no correct-and-resubmit
+- Q3 (F6, ANSWERED: add resubmit) Rejected expense/purchase vouchers are "Locked" for employees — no correct-and-resubmit
   like sales (D10). Add a resubmit flow?
-- Q4 (F6) Voucher "Reject" has no reason field (sale reject does). Add one?
-- Q5 (F6) A purchase with no due date shows "Paid" in Due date while its voucher is still Pending.
-- Q6 (F6) Admin "Branch access" does nothing (admins always see all branches). Hide the field for
+- Q4 (F6, ANSWERED: required reason) Voucher "Reject" has no reason field (sale reject does). Add one?
+- Q5 (F6, ANSWERED: follow voucher status) A purchase with no due date shows "Paid" in Due date while its voucher is still Pending.
+- Q6 (F6b, ANSWERED: make admins branch-limited) Admin "Branch access" does nothing (admins always see all branches). Hide the field for
   admins, or make admins branch-limited?
 
 ## Bugs (evidence from the live run)
@@ -125,7 +125,12 @@ any route (superadmin, accountant).
 - F4 Names + migration: B5 (SECURITY DEFINER `user_display_names(uuid[])`, branch-checked like
   voucher_signatories) wired into "Rejected by" and any employee/accountant "Recorded by".
 - F5 Cash & bank balances: ask Q1, then implement (compute or remove), migration only if needed.
-- F6 Behaviour decisions: ask Q2-Q6, implement the chosen ones.
+- F6a Behaviour decisions Q2-Q5 (done v1.78).
+- F6b Q6 admins branch-limited: app.branch_access() NULL for superadmin only; every
+  `app.is_manager()` policy/RPC on branch data gains app.can_see_branch; backfill existing admins'
+  users.branch_access to all branches; Users form shows Branch access for admins; Users table
+  stops printing "All" for admins; top-bar branch list follows access. Ask first: admin with no
+  branches; whether admins still manage users/branches/master data across all branches.
 - F7 Re-run the live harness on every fixed item (QA profiles below), then deployment checklist:
   merge development-overhaul -> main, apply all migrations to production if it is a different
   Supabase project, user resets data, add Banks + branch legal_name/address.
@@ -171,9 +176,22 @@ any route (superadmin, accountant).
   cash_accounts (table kept, unused). Remaining 6 stat tiles are span "third" (2 rows of 3).
   Compiled only (F7 checks the layout).
 
+- [x] F6a Q2-Q5 (v1.78): migration 20261009000021_voucher_resubmit_payment_verify.sql (NOT
+  applied until the user runs it): vouchers.rejection_reason; guard lets rejected -> pending
+  only; app.reopen_rejected_voucher called by update_transaction_with_voucher (resubmit);
+  record_ledger_payment applies only self-verified payments, balance check counts pending
+  (app.pending_allocated); new verify_payment RPC; reject_payment reverses verified only;
+  backfill strips pending allocations from paid_amount. Frontend: voucher Reject = reason modal
+  (voucher.list.hook rejectModal, VouchersTable, voucherRejectSchema); common/form/
+  RejectionIntro (sale + disbursements); Expenses/Purchases rejected row "View reason" ->
+  edit modal "Resubmit" (disbursement.list.hook editRejected/rejectedByName; locked = approved
+  or printed); status tag hint = reason; Purchases Due date Rejected/Pending/date/Paid;
+  paymentServices.verify -> verify_payment RPC. Pay modal still caps at amount - paid_amount
+  (server rejects over-allocation incl. pending). Not harness-verified yet (F7).
+
 ## Next
-1. F6 - behaviour decisions: ask Q2-Q6 first (AskUserQuestion, max 3 per call - two rounds),
-   then plan and implement the chosen ones.
+1. User applies migration 21. Then F6b - Q6 admins branch-limited: ask the two sub-questions
+   (see Phases F6b), plan, write migration 22, implement.
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -201,5 +219,5 @@ any route (superadmin, accountant).
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · F4 committed v1.76 (migrations 19 + 20 applied) · F5 done,
-uncommitted (suggested v1.77) · No pending migrations · Last check: npx tsc -b clean 2026-09-30.
+Branch: development-overhaul · F5 committed v1.77 · F6a done, uncommitted (suggested
+v1.78) · Pending migration: 21 (user applies) · Last check: npx tsc -b + yarn lint clean 2026-09-30.

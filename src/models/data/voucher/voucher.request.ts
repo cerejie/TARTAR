@@ -73,3 +73,13 @@ export const voucherSchema = z
   });
 
 export type IVoucherInput = z.infer<typeof voucherSchema>;
+
+export const voucherRejectSchema = z.object({
+  reason: z
+    .string()
+    .trim()
+    .min(1, "Enter the reason for rejecting this voucher")
+    .max(500),
+});
+
+export type IVoucherRejectInput = z.infer<typeof voucherRejectSchema>;
