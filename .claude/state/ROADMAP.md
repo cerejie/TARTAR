@@ -101,11 +101,24 @@ merged into main).
   every page, every write, reload, reconnect. Then remove QA leftovers from the tests.
 
 ## Done
-- (none yet) Evidence runs o1-o5 done 2026-09-30, no code changed.
+- Evidence runs o1-o5 done 2026-09-30.
+- O1 code (build + lint clean, NOT yet harness-verified): supabase/migrations/20261012000024_write_idempotency.sql
+  (write_receipts + app.claim_write + key-first overloads of the 8 RPCs, originals untouched);
+  src/utils/write.utils.ts (WriteError network|session|refused by status 0/401, prepareWrite stamps
+  insert id + p_idempotency_key, replayed insert pkey 23505 = success); src/store/common/sync.store.ts
+  (failed list persisted, refusal moves on, network/session stop, owner-scoped flush, retry/discard,
+  runWrite queues on network failure); src/store/common/query.store.ts refetchAll;
+  src/hook/common/network.hook.ts (flushAndReport toasts + refetch, 30s retry while queued,
+  useSyncPanelHook); src/components/common/status/{SyncIndicator,SyncPanel}.tsx.
+- OB9 decided: custom 8h JWT has no refresh, so 401 stops the flush, keeps the queue, the existing
+  expiry handler signs out, and the flush resumes on next sign-in (sync store is not in resetAllStores).
 
 ## Next (one conversation, in order)
-1. O1 — OQ2 answered (b). Create branch `offline-hardening` from main, present the file plan
-   (incl. migration 24 SQL, shown not applied), wait for approval.
+1. O1 verify: user applies migration 24 FIRST (the client already sends p_idempotency_key; the 8
+   RPCs fail until it is applied). Then harness: o4 duplicate-deposit replay (2nd deposit lands in
+   the sync panel as failed, Expense 902 + Payment 50 still sync), o5 weak wifi (queued, not raw
+   toast; syncs within 30s of unblock), expired token (tamper token via js step -> signed out,
+   queue kept, sign in -> syncs). Then tick O1 Done, commit.
 2. O2, O3, O4 (one per conversation).
 3. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
    offline test sale P901 and deposited P333), adds Banks + branch legal_name/address.
@@ -145,6 +158,5 @@ merged into main).
   superadmin passwords are never written to disk.
 
 ## State
-Branch: main (development-overhaul merged by the user) · v1.83 committed · uncommitted: this file
-· Migrations through 23 applied · No code changed for offline yet · Preview server may still be
-running on 4199.
+Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
+uncommitted · Migration 24 written, NOT applied · Migrations through 23 applied.

@@ -9,6 +9,7 @@ type Actions = {
   run: <T>(key: string, fetcher: () => Promise<T>) => Promise<T | undefined>;
   setEntry: (key: string, partial: Partial<IQueryEntry>) => void;
   invalidate: (keyPrefix: string) => void;
+  refetchAll: () => void;
   reset: () => void;
 };
 
@@ -93,6 +94,10 @@ export const useQueryStore = create<States & Actions>((set, get) => ({
         return { entries };
       });
     }
+  },
+
+  refetchAll: () => {
+    for (const [key, fetcher] of fetchers) void get().run(key, fetcher);
   },
 
   reset: () => {

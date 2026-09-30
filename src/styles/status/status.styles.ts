@@ -39,6 +39,20 @@ export const offlineDot =
 
 export const syncSpin = "animate-spin";
 
+export const failedBadge = "bg-danger";
+
+export const syncHeadHint = "block text-xs font-normal text-muted-foreground";
+
+export const syncSection = "flex flex-col gap-2";
+
+export const syncSectionTitle = "text-xs font-medium text-muted-foreground";
+
+export const syncFailedIcon = "text-danger";
+
+export const syncPendingIcon = "text-muted-foreground";
+
+export const syncReason = "text-danger";
+
 export const permissionDenied = "border";
 
 export const emptyState = "min-h-56 p-6";

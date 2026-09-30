@@ -1,80 +1,123 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { syncStorageKey } from "../../keys/storage.keys";
+import { useAccountStore } from "../data/account/account.store";
 import type {
+  IFailedWrite,
+  IFlushResult,
   IQueuedWrite,
   IQueuedWriteInput,
 } from "../../models/common/write.model";
 import type { IMutationResult } from "../../models/common/query.model";
-import { executeWrite, newWriteId } from "../../utils/write.utils";
+import {
+  executeWrite,
+  failureKindOf,
+  isOwnWrite,
+  messageOf,
+  prepareWrite,
+} from "../../utils/write.utils";
 
 type States = {
   queue: IQueuedWrite[];
+  failed: IFailedWrite[];
   flushing: boolean;
-  lastError: string | null;
 };
 
 type Actions = {
-  enqueue: (write: IQueuedWriteInput) => string;
-  flush: () => Promise<void>;
+  enqueue: (write: IQueuedWrite) => void;
+  flush: () => Promise<IFlushResult>;
+  retry: (id: string) => void;
   discard: (id: string) => void;
 };
 
 const initialValues: States = {
   queue: [],
+  failed: [],
   flushing: false,
-  lastError: null,
 };
+
+const noChanges: IFlushResult = { synced: 0, failed: 0 };
+
+export const selectSessionOwner = (
+  state: ReturnType<typeof useAccountStore.getState>
+): string | null => state.user?.id ?? state.developerEmail;
+
+const currentOwner = (): string | null =>
+  selectSessionOwner(useAccountStore.getState());
 
 export const useSyncStore = create<States & Actions>()(
   persist(
     (set, get) => ({
       ...initialValues,
 
-      enqueue: (write) => {
-        const id = newWriteId();
-        set((state) => ({
-          queue: [...state.queue, { ...write, id } as IQueuedWrite],
-        }));
-        return id;
-      },
+      enqueue: (write) =>
+        set((state) => ({ queue: [...state.queue, write] })),
 
       flush: async () => {
-        if (get().flushing) return;
-        set({ flushing: true, lastError: null });
+        const owner = currentOwner();
+        if (get().flushing || !owner) return noChanges;
+        set({ flushing: true });
+
+        const result = { ...noChanges };
 
         try {
-          while (get().queue.length > 0) {
-            const [next, ...rest] = get().queue;
+          for (;;) {
+            const next = get().queue.find((write) => isOwnWrite(write, owner));
+            if (!next) break;
 
             try {
               await executeWrite(next);
-              set({ queue: rest });
+              result.synced += 1;
+              set((state) => ({
+                queue: state.queue.filter((write) => write.id !== next.id),
+              }));
             } catch (error) {
-              set({
-                lastError:
-                  error instanceof Error ? error.message : String(error),
-              });
-              break;
+              if (failureKindOf(error) !== "refused") break;
+
+              result.failed += 1;
+              set((state) => ({
+                queue: state.queue.filter((write) => write.id !== next.id),
+                failed: [
+                  ...state.failed,
+                  { write: next, reason: messageOf(error), failedAt: Date.now() },
+                ],
+              }));
             }
           }
         } finally {
           set({ flushing: false });
         }
+
+        return result;
       },
+
+      retry: (id) =>
+        set((state) => {
+          const item = state.failed.find((failed) => failed.write.id === id);
+          if (!item) return state;
+          return {
+            failed: state.failed.filter((failed) => failed.write.id !== id),
+            queue: [...state.queue, item.write],
+          };
+        }),
 
       discard: (id) =>
         set((state) => ({
           queue: state.queue.filter((write) => write.id !== id),
+          failed: state.failed.filter((failed) => failed.write.id !== id),
         })),
     }),
-    { name: syncStorageKey, partialize: (state) => ({ queue: state.queue }) }
+    {
+      name: syncStorageKey,
+      partialize: (state) => ({ queue: state.queue, failed: state.failed }),
+    }
   )
 );
 
 export const runWrite = async (
-  write: IQueuedWriteInput
+  input: IQueuedWriteInput
 ): Promise<IMutationResult> => {
+  const write = prepareWrite(input, currentOwner());
   const online = typeof navigator === "undefined" ? true : navigator.onLine;
 
   if (!online) {
@@ -82,6 +125,12 @@ export const runWrite = async (
     return { queued: true };
   }
 
-  await executeWrite({ ...write, id: newWriteId() } as IQueuedWrite);
-  return { queued: false };
+  try {
+    await executeWrite(write);
+    return { queued: false };
+  } catch (error) {
+    if (failureKindOf(error) !== "network") throw error;
+    useSyncStore.getState().enqueue(write);
+    return { queued: true };
+  }
 };
