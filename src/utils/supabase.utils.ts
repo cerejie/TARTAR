@@ -10,18 +10,44 @@ if (!url || !anonKey) {
 }
 
 let customToken: string | null = null;
+let sessionExpiredHandler: (() => void) | null = null;
+
+const unauthorizedStatus = 401;
+const authEndpoint = "/auth/v1/";
 
 export const setCustomToken = (token: string | null): void => {
   customToken = token;
   void supabase.realtime.setAuth(token);
 };
 
-const customFetch: typeof fetch = (input, init) => {
+export const onSessionExpired = (handler: (() => void) | null): void => {
+  sessionExpiredHandler = handler;
+};
+
+const requestUrlOf = (input: RequestInfo | URL): string => {
+  if (typeof input === "string") return input;
+  if (input instanceof URL) return input.href;
+  return input.url;
+};
+
+const withAuthorization = (
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<Response> => {
   if (!customToken) return fetch(input, init);
 
   const headers = new Headers(init?.headers);
   headers.set("Authorization", `Bearer ${customToken}`);
   return fetch(input, { ...init, headers });
+};
+
+const customFetch: typeof fetch = async (input, init) => {
+  const response = await withAuthorization(input, init);
+  const isExpired =
+    response.status === unauthorizedStatus &&
+    !requestUrlOf(input).includes(authEndpoint);
+  if (isExpired) sessionExpiredHandler?.();
+  return response;
 };
 
 export const supabase = createClient(url, anonKey, {

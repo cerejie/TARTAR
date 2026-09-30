@@ -6,6 +6,7 @@ import type {
 } from "../../models/data/account/account.request";
 import type { ICustomLoginResponse } from "../../models/data/account/account.response";
 import {
+  onSessionExpired,
   setCustomToken,
   supabase,
   toError,
@@ -39,6 +40,9 @@ const accountServices = {
   },
 
   restoreCustomToken: (token: string | null): void => setCustomToken(token),
+
+  onSessionExpired: (handler: (() => void) | null): void =>
+    onSessionExpired(handler),
 
   register: async (values: IRegisterInput): Promise<void> => {
     const { error } = await supabase.rpc("register", {

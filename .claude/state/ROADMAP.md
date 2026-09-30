@@ -218,12 +218,49 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   notifications description + bank, routes by ledger. D12: supabase.utils setCustomToken ->
   realtime.setAuth, services/data/realtime.services.ts, keys liveRefreshKeys,
   hook/app/realtime.hook.ts (managers only, 500 ms debounce) called from app.hook.
+- [x] P10 fixes batch (v1.64, uncommitted) — migration
+  supabase/migrations/20261005000017_realtime_ledger.sql (receivables + payables join
+  supabase_realtime; applied 2026-09-30). realtime.services subscribeLedgerChanges (one channel,
+  transactions/receivables/payables); liveRefreshKeys + alerts, checks, profit, receivable,
+  payable, payment, ledger summary/party. Dashboard Net Profit (MTD) = Branch Summary net
+  (transactionServices.getBranchSummary shared with report.summary.hook, dashboardProfitKey,
+  period.utils monthToDateRange, report.utils branchSummaryNet); IDashboardSummary drops
+  monthlyExpenses/lastMonth*. Payables amount = balance until paid (ledger.response
+  payableAmountDueOf; PayableRecordsTable, SupplierLedgerView). Print button moved beside
+  Filters on Sales/Purchases/Expenses; filterToolbarStart flex-auto (phone overlap fixed,
+  screenshot-verified 390 + 1440). Stat value container-query sizing (stat.styles), ledger
+  slide pane px-1, creatable placeholder "a"/"an" (FormField withArticle).
+- [x] Live realtime test PASSED (2026-09-30): employee recorded a sale, marked it deposited,
+  recorded an expense and a receivable; superadmin tabs (/, /admin/notifications,
+  /receivables) got postgres_changes for each and refetched with no reload; notification
+  "Camille P1.00 Receivable due today" appeared live. Custom JWT realtime proven. Test rows
+  left in data: P1.00 sale (deposited), P1.00 expense "P10 LIVE TEST" (pending voucher, no due
+  date), P1.00 receivable (Camille, due 2026-09-30).
+- [x] Session expiry (v1.65, uncommitted, no migration): supabase.utils customFetch -> 401 off
+  /auth/v1/ calls onSessionExpired handler; accountServices.onSessionExpired;
+  account.logout.hook endSession(pathname) shared with logout; account.expiry.hook (toast +
+  endSession once, only while authenticated) from app.hook. Verified live (harness expiry.mjs:
+  tampered employee token -> 401s -> one toast, session cleared, sign-in page, no JWT text).
+
+- [~] P10 superadmin sweep (2026-09-30, p10.json re-run on v1.65): PASS P1 (phone toolbar, no
+  Additional details, Branch access multiselect), P2 (sale/voucher/receivable forms; Banks
+  master data EMPTY, so no bank account is pickable yet), P3, P4 (expense Particular, purchase
+  Supplier + Paid from), P5 (status tabs, Amount column, Mark paid modal), P7 (period print
+  modal, Purchases "Date of"), P8 (Branch Summary + print), dashboard Net Profit = summary net.
+  Findings: Net Profit tile caption "vs last month" dangles when StatDelta hides
+  (DashboardView.tsx:181); Payables By supplier -> Payments Filters badge shows 1 with an empty
+  list (check which filter is active). Header bell is phone-only by design (protected.hook:71).
 
 ## Next
-1. P10 — screenshot verification (harness below)
-   of P1-P9 + carried-over items. P9 checks: accountant selector lists only assigned branches;
-   notification click opens the ledger (popover + dashboard card); Purchase/Expense rows show
-   bank; admin live refresh (insert a transaction in another tab, admin Home updates).
+1. P10 remaining (follow-up specs were blocked by the permission classifier when writing into
+   the fdf908ac harness folder — user to decide: allow it, or copy the harness into this
+   session's scratchpad): phone notifications popover + click, dashboard card click -> supplier
+   ledger, supplier ledger + Mark paid stacking, voucher print on an APPROVED row (row 1 is
+   pending, Print disabled), employee rejected sale -> View reason (fake via rewrite
+   transactions sale_status=rejected), employee/accountant /admin redirect, accountant scope
+   list. Then fix the two findings above. P9 checks: accountant
+   selector lists only assigned branches; notification click opens the ledger (popover +
+   dashboard card); Purchase/Expense rows show bank. Live refresh already proven.
 
 ## Carried over from the audit roadmap (fold into P10)
 - Mobile M1/M2 shipped in v1.39-v1.46 — screenshot-verify at 390/768/1280 light+dark.
@@ -237,16 +274,22 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   modals.json). Copy to the scratchpad, `npm init -y && npm i playwright-core` there (never in
   the repo). Dev server `yarn dev --port 5199 --strictPort`. `node login.mjs` -> the USER signs
   in. Prefer `safe-shot.mjs`: fakes every Supabase write; never press Save/Approve/Delete live.
+- A signed-in copy of the harness (profiles `profile` = superadmin, `employee`, `accountant`,
+  plus live.mjs, probe.mjs, relogin.mjs) is in the scratchpad of session fdf908ac:
+  `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
+  Ejie-Business-TARTAR/fdf908ac-a5f4-4224-a10c-c56eaf659eb9/scratchpad/audit`. Reuse it if it
+  still exists. Sessions expire: `PROFILE=<name> node relogin.mjs` clears storage and opens
+  /login for the USER. The `accountant` profile may need re-sign-in too.
 
 ## Open
-- Every migration through 20261004000016 is applied (user confirmed 2026-09-29).
+- Every migration through 20261005000017 is applied (user confirmed 2026-09-30).
 - P5: payable delete is blocked in the UI only (pay_manager_all still allows it in the DB).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · Uncommitted: P9 (src + migration + ROADMAP) until v1.63 is
-committed · Migration 20261004000016 applied · Last check: yarn build + yarn lint clean
-after P9. P9 compiled, not screenshot-verified; realtime with the custom JWT unproven. P8
+Branch: development-overhaul · Uncommitted: v1.65 session expiry (src + ROADMAP) ·
+Migration 20261005000017 applied · Last check: yarn build + yarn lint clean (2026-09-30).
+P9 realtime proven live; accountant selector + notification click still unverified. P8
 compiled, not screenshot-verified (fold into P10: Branch Summary tab, month/custom range,
 print). P7 compiled, not screenshot-verified (fold into P10: voucher
 print vs sample, period print modal, Purchases "Date of" filter; period print scope reads "All

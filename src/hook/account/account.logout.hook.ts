@@ -10,18 +10,18 @@ import {
 } from "../../utils/route.utils";
 import { useMutation } from "../common/mutation.hook";
 
+export const endSession = async (pathname: string): Promise<void> => {
+  resetLocation(isAdminPath(pathname) ? adminBasePath : "/");
+  useAccountStore.getState().clear();
+  useQueryStore.getState().reset();
+  resetAllStores();
+  await accountServices.logout();
+};
+
 export const useAccountLogoutHook = () => {
   const { pathname } = useLocation();
-  const clear = useAccountStore((state) => state.clear);
-  const resetCache = useQueryStore((state) => state.reset);
 
-  const logoutMutation = useMutation(async () => {
-    resetLocation(isAdminPath(pathname) ? adminBasePath : "/");
-    clear();
-    resetCache();
-    resetAllStores();
-    await accountServices.logout();
-  });
+  const logoutMutation = useMutation(() => endSession(pathname));
 
   return { logoutMutation };
 };
