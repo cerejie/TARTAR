@@ -296,21 +296,26 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   tabs), empty tabs slot + its divider hidden (parties views). Admin: tiles xl:grid-cols-4,
   list cards xl:grid-cols-3 + aside shrink-0 (app.styles, shared ListSection).
 
+- [x] v1.69 committed (9396050).
+- [x] AD5 admin loading/error states (2026-09-30, no repo change): harness safe-shot.mjs gained
+  spec `delay: {tables, ms}`, `block: {tables}` (500 PGRST body) and action `{unblock: true}`;
+  admin-states.json ALL PASS — /admin loading (tile + attention skeletons, chart spinner) 1280 +
+  390, error (per-tile "X unavailable" + Retry, attention + trend errors) 1280 + 390, Retry after
+  unblock recovers the overview tiles alone, /admin/notifications error + Retry. Note: header
+  branch scope renders nothing until branches load (ProtectedBranchScope.tsx:23) -> pops in;
+  cosmetic, left as is unless the user asks for a skeleton.
+
 ## Next
-1. Confirm v1.69 is committed; if not, suggest it.
-2. Admin loading/error states (item 8, AD5): add a spec that throttles or blocks Supabase GETs
-   on /admin (safe-shot `rewrite` only patches rows; a block/delay option would need adding to
-   the scratchpad safe-shot.mjs, not the repo) and screenshot loading + error + retry.
-   AD6 (due checks) stays data-dependent: skip unless a check with a due date exists.
-3. Optional, only if the user asks: migration so payables cannot be deleted in the DB
-   (pay_manager_all still allows DELETE) — propose SQL, never apply.
-4. Remaining user-side (no code, just remind once): commit, add Banks in Master Data, branch
+1. Optional, only if the user asks: migration so payables cannot be deleted in the DB
+   (pay_manager_all still allows DELETE) — propose SQL, never apply. Also optional: branch
+   scope skeleton while branches load.
+2. Remaining user-side (no code, just remind once): add Banks in Master Data, branch
    legal_name/address, run deposit -> verify end to end, delete the three P1.00 test rows.
-5. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
+3. Then ask before deleting this file and `.claude/state/audit/` (session protocol step 4).
 
 ## Carried over from the audit roadmap (fold into P10)
 - Done in v1.67: mobile sweep, AD3, SV1, SV2. AD1 done in v1.66.
-- Still open (data/manual, no code): AD5 admin loading/error states uncaptured. AD6 no due
+- Done 2026-09-30: AD5. Still open (data/manual, no code): AD6 no due
   checks in data. SV5 no branch has legal_name/address yet. Deposit -> verify flow never run
   end to end.
 
@@ -338,6 +343,5 @@ desktop-audit roadmap (V1-V8 done, v1.30-v1.53).
   Payables "Record payable" form config remains in ledger.scope.hook.ts (generic hook needs it).
 
 ## State
-Branch: development-overhaul · v1.68 committed · Uncommitted: v1.69 1024 sweep (7 tables,
-view/admin/app styles, table.keys, transaction.list.hook) · No new migration · Last check:
-yarn build + yarn lint clean, w1024b.json shots ALL PASS (2026-09-30).
+Branch: development-overhaul · v1.69 committed · Uncommitted: none · No new migration · Last
+check: admin-states.json ALL PASS (2026-09-30).

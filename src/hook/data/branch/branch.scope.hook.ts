@@ -15,7 +15,7 @@ export const useBranchScopeHook = () => {
   const canScope = useAccountStore(selectCanScopeBranch);
   const stored = useBranchStore((state) => state.branchFilter);
   const setBranch = useBranchStore((state) => state.setBranchFilter);
-  const { branches } = useBranchListHook();
+  const { branches, isInitialLoading } = useBranchListHook();
   const { search, setSearch } = useSearch(branchScopeSearchKey);
 
   const storedIsListed = isManager || branches.some((item) => item.slug === stored);
@@ -26,6 +26,7 @@ export const useBranchScopeHook = () => {
 
   return {
     enabled: canScope,
+    loading: isInitialLoading,
     canManage: isManager,
     branch,
     branchName,
