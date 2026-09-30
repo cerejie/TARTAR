@@ -6,6 +6,7 @@ import {
 } from "../../../keys/query.keys";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type {
+  ILedgerRow,
   IPayable,
   IReceivable,
 } from "../../../models/data/ledger/ledger.response";
@@ -15,7 +16,7 @@ import {
   transactionReportTypes,
   type ReportType,
 } from "../../../models/data/report/report.response";
-import type { ITransaction } from "../../../models/data/transaction/transaction.response";
+import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
 import {
   payableServices,
   receivableServices,
@@ -25,9 +26,12 @@ import { periodLabel, rangeFor, reportBody } from "../../../utils/report.utils";
 import { printReport } from "../../../utils/print.utils";
 import { useQuery } from "../../common/query.hook";
 import { useSearchParam } from "../../common/search.param.hook";
+import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useExpenseCategoryListHook } from "../expense-category/expense.category.list.hook";
 import { useReportSummaryHook } from "./report.summary.hook";
+
+const isUnpaid = (row: ILedgerRow) => row.status !== "paid";
 
 export const useReportHook = () => {
   const { value: type, setValue: setType } = useSearchParam<ReportType>(
@@ -38,6 +42,7 @@ export const useReportHook = () => {
 
   const { from, to } = rangeFor(type);
   const { branch, branchName } = useBranchScopeHook();
+  const { branchName: branchNameOf } = useBranchListHook();
   const { expenseCategories } = useExpenseCategoryListHook();
   const isSummary = type === "summary";
   const {
@@ -52,10 +57,10 @@ export const useReportHook = () => {
   const branchFilter: ILedgerFilters = branch ? { branch } : {};
   const isTransactionReport = transactionReportTypes.includes(type);
 
-  const transactionQuery = useQuery<ITransaction[]>(
+  const transactionQuery = useQuery<IDisbursement[]>(
     scopedKey(reportTransactionKey, type, branch),
     () =>
-      transactionServices.getAll({
+      transactionServices.getAllWithVouchers({
         dateFrom: from,
         dateTo: to,
         ...branchFilter,
@@ -76,8 +81,8 @@ export const useReportHook = () => {
   );
 
   const transactions = transactionQuery.data ?? [];
-  const receivables = receivableQuery.data ?? [];
-  const payables = payableQuery.data ?? [];
+  const receivables = (receivableQuery.data ?? []).filter(isUnpaid);
+  const payables = (payableQuery.data ?? []).filter(isUnpaid);
 
   const activeQuery =
     type === "receivables"
@@ -96,6 +101,7 @@ export const useReportHook = () => {
         receivables,
         payables,
         categories: expenseCategories,
+        branchNameOf,
       }),
     });
 
@@ -107,6 +113,7 @@ export const useReportHook = () => {
     receivables,
     payables,
     expenseCategories,
+    branchNameOf,
     ...summary,
     loading: isSummary ? summaryLoading : activeQuery.isInitialLoading,
     refreshing: isSummary ? summaryRefreshing : activeQuery.isRefreshing,

@@ -1,8 +1,12 @@
 import type { SaleStatus } from "../../../enums/sale.enum";
-import type {
-  CashAccount,
-  TransactionType,
+import {
+  disbursementKindValues,
+  type CashAccount,
+  type DisbursementKind,
+  type TransactionType,
 } from "../../../enums/transaction.enum";
+import type { ILedgerRow } from "../ledger/ledger.response";
+import { isVerifiedSale } from "../sale/sale.response";
 import type { IVoucher } from "../voucher/voucher.response";
 
 export interface ITransaction {
@@ -35,9 +39,41 @@ export interface ITransactionSummary {
   sales: number;
 }
 
+export type IDisbursementPayable = Pick<
+  ILedgerRow,
+  "status" | "amount" | "paid_amount"
+>;
+
 export interface IDisbursement extends ITransaction {
   voucher: IVoucher | null;
+  payable?: IDisbursementPayable | null;
 }
+
+type ICountedVoucher = Pick<IVoucher, "status" | "amount">;
+
+type ICountedRow = Pick<ITransaction, "type" | "amount" | "sale_status"> & {
+  voucher: ICountedVoucher | null;
+};
+
+export const isDisbursementType = (
+  type: TransactionType
+): type is DisbursementKind =>
+  (disbursementKindValues as readonly TransactionType[]).includes(type);
+
+export const isCountedDisbursement = (row: { voucher: ICountedVoucher | null }) =>
+  row.voucher?.status !== "rejected";
+
+export const amountToPayOf = (row: ICountedRow) =>
+  Number(row.voucher?.amount ?? row.amount);
+
+export const countedAmountOf = (row: ICountedRow): number => {
+  if (row.type === "sale") return isVerifiedSale(row) ? Number(row.amount) : 0;
+  if (!isDisbursementType(row.type)) return Number(row.amount);
+  return isCountedDisbursement(row) ? amountToPayOf(row) : 0;
+};
+
+export const sumCounted = (rows: readonly ICountedRow[]) =>
+  rows.reduce((total, row) => total + countedAmountOf(row), 0);
 
 export interface IPurchaseSummary {
   total: number;

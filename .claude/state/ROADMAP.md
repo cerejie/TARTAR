@@ -141,9 +141,21 @@ any route (superadmin, accountant).
   apple-touch-icon.png, vite.config manifest icons, index.html links) and admin navy gauge
   (admin-icon*, apple-touch-icon-admin.png; admin.manifest.hook swaps rel=icon). Generator:
   session scratchpad icons/build-icons.mjs (not kept). Not harness-verified yet (F7).
+- [x] F2 totals consistency (v1.74): one rule in models/data/transaction/transaction.response.ts
+  (countedAmountOf / sumCounted / amountToPayOf / isCountedDisbursement) used by Expenses +
+  Purchases summaries (disbursement/expense/purchase list hooks), dashboard.services (today's/
+  yesterday's expenses, monthly cash in/out, getOverview = admin Home, getBranchMonitor via
+  `vouchers(status, amount)` embed), report.utils (sumBy, cashFlowTotals, periodTotals = Branch
+  Summary calc, Collection row hidden, branch names in print). Disbursements carry `payable`
+  (transaction.services withVouchers -> payablesOf); Purchases Outstanding = payable balance or
+  voucher amount, Paid = no-due-date + payable paid_amount; Due date shows Paid once payable paid.
+  Reports use getAllWithVouchers; Period reports 4 tiles (Net incl. purchases); Receivables/
+  Payables reports unpaid only + branch names; statement skips rejected payments. Not
+  harness-verified yet (F7: re-check Branch Summary P610, Expenses P250, Purchases totals).
 
 ## Next
-1. F2 — totals consistency (no DB, L1).
+1. F3 — branch scoping + migration (B2 payments/allocations RLS + payment list scope, B4 party
+   summaries take the branch scope). Propose SQL; user applies.
 
 ## Audit harness (drives the real app, live Supabase)
 - Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
@@ -171,5 +183,5 @@ any route (superadmin, accountant).
   `cd "<dir>"; node drive.mjs "<spec>"` and read the shots afterwards.
 
 ## State
-Branch: development-overhaul · F1 done, uncommitted (suggested v1.73) · No new migration · Last
-check: yarn build + yarn lint clean 2026-09-30.
+Branch: development-overhaul · F1 committed v1.73 · F2 done, uncommitted (suggested v1.74) · No
+new migration · Last check: yarn build + yarn lint clean 2026-09-30.

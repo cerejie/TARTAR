@@ -2,9 +2,11 @@ import type { DefaultValues } from "react-hook-form";
 import type { IFieldSection } from "../../../models/common/field.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
-import type {
-  IDisbursement,
-  IPurchaseSummary,
+import {
+  countedAmountOf,
+  isCountedDisbursement,
+  type IDisbursement,
+  type IPurchaseSummary,
 } from "../../../models/data/transaction/transaction.response";
 import { todayIso } from "../../../utils/format.utils";
 import {
@@ -17,13 +19,26 @@ import {
   useDisbursementListHook,
 } from "../disbursement/disbursement.list.hook";
 
+const paidAmountOf = (row: IDisbursement) => {
+  if (!row.due_date) return countedAmountOf(row);
+  return row.payable ? Number(row.payable.paid_amount) : 0;
+};
+
+const outstandingAmountOf = (row: IDisbursement) =>
+  countedAmountOf(row) - paidAmountOf(row);
+
+const sumOf = (
+  rows: readonly IDisbursement[],
+  amountOf: (row: IDisbursement) => number
+) => rows.reduce((total, row) => total + amountOf(row), 0);
+
 const summarize = (rows: readonly IDisbursement[]): IPurchaseSummary => {
-  const outstanding = rows.filter((row) => !!row.due_date);
+  const counted = rows.filter(isCountedDisbursement);
 
   return {
-    total: sumDisbursements(rows),
-    outstanding: sumDisbursements(outstanding),
-    paid: sumDisbursements(rows.filter((row) => !row.due_date)),
+    total: sumDisbursements(counted),
+    outstanding: sumOf(counted, outstandingAmountOf),
+    paid: sumOf(counted, paidAmountOf),
     pendingVouchers: pendingVoucherCount(rows),
   };
 };

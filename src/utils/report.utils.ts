@@ -21,30 +21,60 @@ import {
   isVerifiedSale,
   type ISale,
 } from "../models/data/sale/sale.response";
+import {
+  amountToPayOf,
+  isCountedDisbursement,
+  sumCounted,
+  type IDisbursement,
+  type ITransaction,
+} from "../models/data/transaction/transaction.response";
 import type {
   IBranchSummaryData,
   IBranchSummaryRow,
   IBranchSummaryTotals,
   ICashFlowRow,
+  ICashFlowTotals,
   IExpenseRow,
   IReportData,
   ReportType,
 } from "../models/data/report/report.response";
-import type {
-  IDisbursement,
-  ITransaction,
-} from "../models/data/transaction/transaction.response";
 import { formatDate, formatMoney, todayIso } from "./format.utils";
 import { dateRangeLabel } from "./period.utils";
 import type { IPrintReportDocument, IPrintTable } from "./print.utils";
 
 export const sumBy = (
-  transactions: ITransaction[],
-  predicate: (transaction: ITransaction) => boolean
-) =>
-  transactions
-    .filter(predicate)
-    .reduce((total, transaction) => total + Number(transaction.amount), 0);
+  transactions: readonly IDisbursement[],
+  predicate: (transaction: IDisbursement) => boolean
+) => sumCounted(transactions.filter(predicate));
+
+export const cashFlowTotals = (
+  transactions: readonly IDisbursement[]
+): ICashFlowTotals => ({
+  inflow: sumBy(transactions, (transaction) =>
+    cashInflowTypes.includes(transaction.type)
+  ),
+  outflow: sumBy(transactions, (transaction) =>
+    cashOutflowTypes.includes(transaction.type)
+  ),
+});
+
+export const periodTotals = (
+  transactions: readonly IDisbursement[]
+): IBranchSummaryTotals => {
+  const ofType = (type: ITransaction["type"]) =>
+    transactions.filter((transaction) => transaction.type === type);
+
+  return branchSummaryTotals(
+    branchSummaryRows(
+      {
+        sales: ofType("sale"),
+        purchases: ofType("purchase"),
+        expenses: ofType("expense"),
+      },
+      (branch) => branch
+    )
+  );
+};
 
 export const rangeFor = (type: ReportType): { from: string; to: string } => {
   const to = todayIso();
@@ -67,17 +97,19 @@ export const periodLabel = (
 };
 
 export const cashFlowRows = (
-  transactions: ITransaction[]
+  transactions: readonly IDisbursement[]
 ): ICashFlowRow[] =>
-  [...cashInflowTypes, ...cashOutflowTypes].map((type) => ({
-    key: type,
-    label: transactionTypeLabels[type],
-    direction: cashInflowTypes.includes(type) ? "Inflow" : "Outflow",
-    total: sumBy(transactions, (transaction) => transaction.type === type),
-  }));
+  [...cashInflowTypes, ...cashOutflowTypes]
+    .filter((type) => type !== "collection")
+    .map((type) => ({
+      key: type,
+      label: transactionTypeLabels[type],
+      direction: cashInflowTypes.includes(type) ? "Inflow" : "Outflow",
+      total: sumBy(transactions, (transaction) => transaction.type === type),
+    }));
 
 export const expenseRows = (
-  transactions: ITransaction[],
+  transactions: readonly IDisbursement[],
   categories: IExpenseCategory[]
 ): IExpenseRow[] => {
   const expenses = transactions.filter(
@@ -130,7 +162,7 @@ const ledgerReportBody = (
     rows: ordered.map((row) => [
       formatDate(row.due_date),
       "customer_name" in row ? row.customer_name : row.supplier_name,
-      row.branch,
+      data.branchNameOf(row.branch),
       formatMoney(row.amount),
       formatMoney(ledgerBalance(row)),
       isLedgerOverdue(row) ? "Overdue" : ledgerStatusLabels[row.status],
@@ -187,12 +219,7 @@ export const reportBody = (
   }
 
   if (type === "cashflow") {
-    const inflow = sumBy(data.transactions, (transaction) =>
-      cashInflowTypes.includes(transaction.type)
-    );
-    const outflow = sumBy(data.transactions, (transaction) =>
-      cashOutflowTypes.includes(transaction.type)
-    );
+    const { inflow, outflow } = cashFlowTotals(data.transactions);
 
     return {
       stats: [
@@ -219,19 +246,15 @@ export const reportBody = (
     };
   }
 
-  const sales = sumBy(data.transactions, isVerifiedSale);
-  const pendingSales = sumBy(data.transactions, isPendingSale);
-  const expenses = sumBy(
-    data.transactions,
-    (transaction) => transaction.type === "expense"
-  );
+  const totals = periodTotals(data.transactions);
 
   return {
     stats: [
-      { label: "Sales", value: formatMoney(sales) },
-      { label: "Pending verification", value: formatMoney(pendingSales) },
-      { label: "Expenses", value: formatMoney(expenses) },
-      { label: "Net", value: formatMoney(sales - expenses) },
+      { label: "Sales", value: formatMoney(totals.sales) },
+      { label: "Pending verification", value: formatMoney(totals.pendingSales) },
+      { label: "Expenses", value: formatMoney(totals.expenses) },
+      { label: "Purchases", value: formatMoney(totals.purchases) },
+      { label: "Net", value: formatMoney(totals.net) },
     ],
     tables: [
       {
@@ -247,7 +270,7 @@ export const reportBody = (
         rows: data.transactions.map((transaction) => [
           formatDate(transaction.txn_date),
           transactionTypeLabels[transaction.type],
-          transaction.branch,
+          data.branchNameOf(transaction.branch),
           transaction.reference_number ?? "—",
           formatMoney(transaction.amount),
         ]),
@@ -307,8 +330,6 @@ const disbursementTitles: Record<DisbursementKind, string> = {
   expense: "Expenses",
 };
 
-const amountToPayOf = (row: IDisbursement) => row.voucher?.amount ?? row.amount;
-
 export const disbursementPrintDocument = (
   kind: DisbursementKind,
   rows: readonly IDisbursement[],
@@ -346,9 +367,6 @@ export const disbursementPrintDocument = (
     },
   ],
 });
-
-const isCountedDisbursement = (row: IDisbursement) =>
-  row.voucher?.status !== "rejected";
 
 export const branchSummaryRows = (
   data: IBranchSummaryData,

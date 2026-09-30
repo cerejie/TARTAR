@@ -25,6 +25,7 @@ import BentoGrid from "../common/view/BentoGrid";
 type IProps<Row extends IReceivable | IPayable> = IReportState & {
   rows: Row[];
   nameOf: (row: Row) => string;
+  branchNameOf: (slug: string) => string;
   label: string;
 };
 
@@ -35,6 +36,7 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
   error,
   onRetry,
   nameOf,
+  branchNameOf,
   label,
 }: IProps<Row>) => {
   const outstanding = rows.reduce(
@@ -54,7 +56,11 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
       render: (value: string) => formatDate(value),
     },
     { title: label, key: "name", render: (_, row) => nameOf(row) },
-    { title: "Branch", dataIndex: "branch" },
+    {
+      title: "Branch",
+      dataIndex: "branch",
+      render: (value: string) => branchNameOf(value),
+    },
     {
       title: "Amount",
       dataIndex: "amount",

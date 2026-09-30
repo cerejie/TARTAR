@@ -2,10 +2,11 @@ import type { DefaultValues } from "react-hook-form";
 import type { IFieldSection } from "../../../models/common/field.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
-import type {
-  IDisbursement,
-  IExpenseCategoryTotal,
-  IExpenseSummary,
+import {
+  countedAmountOf,
+  type IDisbursement,
+  type IExpenseCategoryTotal,
+  type IExpenseSummary,
 } from "../../../models/data/transaction/transaction.response";
 import { todayIso } from "../../../utils/format.utils";
 import { voucherBreakdownDefaults } from "../../../utils/voucher.utils";
@@ -24,7 +25,7 @@ const topCategoryOf = (
 
   for (const row of rows) {
     const slug = row.expense_type ?? "";
-    totalBySlug.set(slug, (totalBySlug.get(slug) ?? 0) + row.amount);
+    totalBySlug.set(slug, (totalBySlug.get(slug) ?? 0) + countedAmountOf(row));
   }
 
   let top: IExpenseCategoryTotal | null = null;

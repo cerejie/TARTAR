@@ -1,98 +1,102 @@
-import { ArrowLeftRight, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowLeftRight, ShoppingCart, TrendingDown, TrendingUp } from "lucide-react";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   transactionTypeLabels,
   type TransactionType,
 } from "../../enums/transaction.enum";
 import type { IReportState } from "../../models/data/report/report.response";
-import {
-  isPendingSale,
-  isVerifiedSale,
-} from "../../models/data/sale/sale.response";
-import type { ITransaction } from "../../models/data/transaction/transaction.response";
+import type { IDisbursement } from "../../models/data/transaction/transaction.response";
 import { formatDate, formatMoney } from "../../utils/format.utils";
-import { sumBy } from "../../utils/report.utils";
+import { periodTotals } from "../../utils/report.utils";
 import StatCard from "../common/card/StatCard";
 import DataTable from "../common/table/DataTable";
 import TablePanel from "../common/table/TablePanel";
 import BentoCell from "../common/view/BentoCell";
 import BentoGrid from "../common/view/BentoGrid";
 
-const columns: IDataTableColumn<ITransaction>[] = [
-  {
-    title: "Date",
-    dataIndex: "txn_date",
-    render: (value: string) => formatDate(value),
-  },
-  {
-    title: "Type",
-    mobile: "status",
-    dataIndex: "type",
-    render: (type: TransactionType) => transactionTypeLabels[type],
-  },
-  { title: "Branch", dataIndex: "branch" },
-  {
-    title: "Reference",
-    dataIndex: "reference_number",
-    render: (value: string | null) => value || "—",
-  },
-  {
-    title: "Amount",
-    mobile: "amount",
-    dataIndex: "amount",
-    align: "right",
-    render: (value: number) => formatMoney(value),
-  },
-];
-
 type IProps = IReportState & {
-  transactions: ITransaction[];
+  transactions: IDisbursement[];
+  branchNameOf: (slug: string) => string;
 };
 
 const PeriodReport = ({
   transactions,
+  branchNameOf,
   loading,
   refreshing,
   error,
   onRetry,
 }: IProps) => {
-  const sales = sumBy(transactions, isVerifiedSale);
-  const pendingSales = sumBy(transactions, isPendingSale);
-  const expenses = sumBy(transactions, (row) => row.type === "expense");
+  const totals = periodTotals(transactions);
+  const cardState = { loading, error, onRetry };
+
+  const columns: IDataTableColumn<IDisbursement>[] = [
+    {
+      title: "Date",
+      dataIndex: "txn_date",
+      render: (value: string) => formatDate(value),
+    },
+    {
+      title: "Type",
+      mobile: "status",
+      dataIndex: "type",
+      render: (type: TransactionType) => transactionTypeLabels[type],
+    },
+    {
+      title: "Branch",
+      dataIndex: "branch",
+      render: (value: string) => branchNameOf(value),
+    },
+    {
+      title: "Reference",
+      dataIndex: "reference_number",
+      render: (value: string | null) => value || "—",
+    },
+    {
+      title: "Amount",
+      mobile: "amount",
+      dataIndex: "amount",
+      align: "right",
+      render: (value: number) => formatMoney(value),
+    },
+  ];
 
   return (
     <>
       <BentoGrid>
-        <BentoCell span="third">
+        <BentoCell span="quarter">
           <StatCard
             title="Sales"
-            value={sales}
-            loading={loading}
-            error={error}
-            onRetry={onRetry}
+            value={totals.sales}
+            {...cardState}
             variant="positive"
             icon={<TrendingUp />}
-            caption={`${formatMoney(pendingSales)} pending verification`}
+            caption={`${formatMoney(totals.pendingSales)} pending verification`}
           />
         </BentoCell>
-        <BentoCell span="third">
+        <BentoCell span="quarter">
           <StatCard
             title="Expenses"
-            value={expenses}
-            loading={loading}
-            error={error}
-            onRetry={onRetry}
+            value={totals.expenses}
+            {...cardState}
             variant="negative"
             icon={<TrendingDown />}
           />
         </BentoCell>
-        <BentoCell span="third">
+        <BentoCell span="quarter">
+          <StatCard
+            title="Purchases"
+            value={totals.purchases}
+            {...cardState}
+            variant="negative"
+            icon={<ShoppingCart />}
+          />
+        </BentoCell>
+        <BentoCell span="quarter">
           <StatCard
             title="Net"
-            value={sales - expenses}
-            loading={loading}
-            error={error}
-            onRetry={onRetry}
+            value={totals.net}
+            {...cardState}
             variant="brand"
             icon={<ArrowLeftRight />}
           />
@@ -100,7 +104,7 @@ const PeriodReport = ({
       </BentoGrid>
 
       <TablePanel title="Transactions">
-        <DataTable<ITransaction>
+        <DataTable<IDisbursement>
           columns={columns}
           data={transactions}
           loading={loading}

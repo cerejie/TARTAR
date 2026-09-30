@@ -17,10 +17,12 @@ import type {
   IDisbursementInput,
   ITransactionInput,
 } from "../../models/data/transaction/transaction.request";
-import type {
-  IDisbursement,
-  ITransaction,
-  ITransactionAudit,
+import {
+  isDisbursementType,
+  type IDisbursement,
+  type IDisbursementPayable,
+  type ITransaction,
+  type ITransactionAudit,
 } from "../../models/data/transaction/transaction.response";
 import type { IVoucher } from "../../models/data/voucher/voucher.response";
 import { runWrite } from "../../store/common/sync.store";
@@ -31,6 +33,7 @@ import { breakdownTotalsOf } from "../../utils/voucher.utils";
 const table = "transactions";
 const auditTable = "transaction_audit";
 const voucherTable = "vouchers";
+const payableTable = "payables";
 
 const defaultSort: ISortState = { column: "txn_date", direction: "descending" };
 
@@ -60,6 +63,27 @@ const breakdownArgs = (values: IDisbursementInput) => {
   };
 };
 
+const payablesOf = async (
+  vouchers: readonly IVoucher[]
+): Promise<Map<string, IDisbursementPayable>> => {
+  const payableIds = vouchers.flatMap((voucher) =>
+    voucher.payable_id ? [voucher.payable_id] : []
+  );
+  if (payableIds.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from(payableTable)
+    .select("id, status, amount, paid_amount")
+    .in("id", payableIds);
+  if (error) throw toError(error);
+
+  return new Map(
+    ((data ?? []) as (IDisbursementPayable & { id: string })[]).map(
+      ({ id, ...payable }) => [id, payable]
+    )
+  );
+};
+
 const withVouchers = async (
   rows: readonly ITransaction[]
 ): Promise<IDisbursement[]> => {
@@ -74,17 +98,23 @@ const withVouchers = async (
     );
   if (error) throw toError(error);
 
+  const vouchers = (data ?? []) as IVoucher[];
   const voucherByTransaction = new Map(
-    ((data ?? []) as IVoucher[]).map((voucher) => [
-      voucher.transaction_id,
-      voucher,
-    ])
+    vouchers.map((voucher) => [voucher.transaction_id, voucher])
   );
+  const payableById = await payablesOf(vouchers);
 
-  return rows.map((row) => ({
-    ...row,
-    voucher: voucherByTransaction.get(row.id) ?? null,
-  }));
+  return rows.map((row) => {
+    const voucher = voucherByTransaction.get(row.id) ?? null;
+
+    return {
+      ...row,
+      voucher,
+      payable: voucher?.payable_id
+        ? payableById.get(voucher.payable_id) ?? null
+        : null,
+    };
+  });
 };
 
 const voucherJoinColumns = `${columns}, vouchers!inner(status, created_at)`;
@@ -180,6 +210,22 @@ const transactionServices = {
     if (error) throw toError(error);
 
     return (data ?? []) as unknown as ITransaction[];
+  },
+
+  getAllWithVouchers: async (
+    filters: ILedgerFilters = {}
+  ): Promise<IDisbursement[]> => {
+    const rows = await transactionServices.getAll(filters);
+    const disbursements = await withVouchers(
+      rows.filter((row) => isDisbursementType(row.type))
+    );
+    const disbursementById = new Map(
+      disbursements.map((row) => [row.id, row])
+    );
+
+    return rows.map(
+      (row) => disbursementById.get(row.id) ?? { ...row, voucher: null }
+    );
   },
 
   create: (values: ITransactionInput, createdBy: string | null) =>

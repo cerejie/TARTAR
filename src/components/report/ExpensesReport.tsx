@@ -4,7 +4,7 @@ import type {
   IExpenseRow,
   IReportState,
 } from "../../models/data/report/report.response";
-import type { ITransaction } from "../../models/data/transaction/transaction.response";
+import type { IDisbursement } from "../../models/data/transaction/transaction.response";
 import { formatMoney } from "../../utils/format.utils";
 import { expenseRows } from "../../utils/report.utils";
 import DataTable from "../common/table/DataTable";
@@ -22,7 +22,7 @@ const columns: IDataTableColumn<IExpenseRow>[] = [
 ];
 
 type IProps = IReportState & {
-  transactions: ITransaction[];
+  transactions: IDisbursement[];
   categories: IExpenseCategory[];
 };
 

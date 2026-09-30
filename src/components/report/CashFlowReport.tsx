@@ -1,16 +1,12 @@
 import { ArrowLeftRight, TrendingDown, TrendingUp } from "lucide-react";
 import type { IDataTableColumn } from "../../models/common/table.model";
-import {
-  cashInflowTypes,
-  cashOutflowTypes,
-} from "../../enums/transaction.enum";
 import type {
   ICashFlowRow,
   IReportState,
 } from "../../models/data/report/report.response";
-import type { ITransaction } from "../../models/data/transaction/transaction.response";
+import type { IDisbursement } from "../../models/data/transaction/transaction.response";
 import { formatMoney } from "../../utils/format.utils";
-import { cashFlowRows, sumBy } from "../../utils/report.utils";
+import { cashFlowRows, cashFlowTotals } from "../../utils/report.utils";
 import StatCard from "../common/card/StatCard";
 import DataTable from "../common/table/DataTable";
 import TablePanel from "../common/table/TablePanel";
@@ -30,7 +26,7 @@ const columns: IDataTableColumn<ICashFlowRow>[] = [
 ];
 
 type IProps = IReportState & {
-  transactions: ITransaction[];
+  transactions: IDisbursement[];
 };
 
 const CashFlowReport = ({
@@ -40,12 +36,7 @@ const CashFlowReport = ({
   error,
   onRetry,
 }: IProps) => {
-  const inflow = sumBy(transactions, (row) =>
-    cashInflowTypes.includes(row.type)
-  );
-  const outflow = sumBy(transactions, (row) =>
-    cashOutflowTypes.includes(row.type)
-  );
+  const { inflow, outflow } = cashFlowTotals(transactions);
 
   return (
     <>

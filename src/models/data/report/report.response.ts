@@ -65,6 +65,11 @@ export interface IBranchSummaryRow extends IBranchSummaryTotals {
   branchName: string;
 }
 
+export interface ICashFlowTotals {
+  inflow: number;
+  outflow: number;
+}
+
 export interface IBranchSummaryData {
   sales: ITransaction[];
   purchases: IDisbursement[];
@@ -72,10 +77,11 @@ export interface IBranchSummaryData {
 }
 
 export interface IReportData {
-  transactions: ITransaction[];
+  transactions: IDisbursement[];
   receivables: IReceivable[];
   payables: IPayable[];
   categories: IExpenseCategory[];
+  branchNameOf: (slug: string) => string;
 }
 
 export interface IReportState {

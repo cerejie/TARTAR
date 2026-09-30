@@ -261,6 +261,7 @@ export const printStatement = (
     .join("");
 
   const paymentRows = payments
+    .filter((payment) => payment.status !== "rejected")
     .map(
       (payment) => `<tr>
         <td>${formatDate(payment.paid_at)}</td>

@@ -28,9 +28,10 @@ import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { IDateRange } from "../../../models/common/period.model";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
-import type {
-  IDisbursement,
-  ITransactionAudit,
+import {
+  sumCounted,
+  type IDisbursement,
+  type ITransactionAudit,
 } from "../../../models/data/transaction/transaction.response";
 import transactionServices from "../../../services/data/transaction.services";
 import {
@@ -81,7 +82,7 @@ export const pendingVoucherCount = (rows: readonly IDisbursement[]) =>
   rows.filter((row) => row.voucher?.status === "pending").length;
 
 export const sumDisbursements = (rows: readonly IDisbursement[]) =>
-  rows.reduce((total, row) => total + row.amount, 0);
+  sumCounted(rows);
 
 export const useDisbursementListHook = (
   kind: DisbursementKind,

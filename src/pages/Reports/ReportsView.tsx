@@ -24,6 +24,7 @@ const ReportsView = () => {
     receivables,
     payables,
     expenseCategories,
+    branchNameOf,
     loading,
     refreshing,
     error,
@@ -60,6 +61,7 @@ const ReportsView = () => {
         rows={receivables}
         {...state}
         nameOf={(row) => row.customer_name}
+        branchNameOf={branchNameOf}
         label="Customer"
       />
     ),
@@ -68,6 +70,7 @@ const ReportsView = () => {
         rows={payables}
         {...state}
         nameOf={(row) => row.supplier_name}
+        branchNameOf={branchNameOf}
         label="Supplier"
       />
     ),
@@ -99,7 +102,11 @@ const ReportsView = () => {
       }
     >
       {body[type] ?? (
-        <PeriodReport transactions={transactions} {...state} />
+        <PeriodReport
+          transactions={transactions}
+          branchNameOf={branchNameOf}
+          {...state}
+        />
       )}
     </ContentView>
   );

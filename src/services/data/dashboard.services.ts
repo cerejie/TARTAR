@@ -25,7 +25,10 @@ import {
   isPendingSale,
   isVerifiedSale,
 } from "../../models/data/sale/sale.response";
-import type { ITransaction } from "../../models/data/transaction/transaction.response";
+import {
+  sumCounted,
+  type ITransaction,
+} from "../../models/data/transaction/transaction.response";
 import type { IVoucher } from "../../models/data/voucher/voucher.response";
 import { scopeToBranch } from "../../utils/filter.utils";
 import { todayIso } from "../../utils/format.utils";
@@ -114,6 +117,27 @@ const toDuePayables = async (payables: IPayable[]): Promise<IDuePayable[]> => {
 };
 type TypedAmountRow = AmountRow & Pick<ITransaction, "type" | "sale_status">;
 type BalanceRow = { branch: string; balance?: number | string };
+
+type CountedVoucher = Pick<IVoucher, "status" | "amount">;
+
+type CountedTransactionRow = TypedAmountRow & {
+  vouchers: CountedVoucher | CountedVoucher[] | null;
+};
+
+const countedColumns = "type, sale_status, amount, vouchers(status, amount)";
+
+const voucherOf = (vouchers: CountedTransactionRow["vouchers"]) =>
+  Array.isArray(vouchers) ? vouchers[0] ?? null : vouchers;
+
+const sumCountedRows = (rows: readonly CountedTransactionRow[]) =>
+  sumCounted(
+    rows.map((row) => ({
+      type: row.type,
+      sale_status: row.sale_status,
+      amount: Number(row.amount),
+      voucher: voucherOf(row.vouchers),
+    }))
+  );
 type OutstandingRow = { amount: number | string; paid_amount: number | string };
 
 const monthStart = () => dayjs().startOf("month").format("YYYY-MM-DD");
@@ -189,7 +213,7 @@ const dashboardServices = {
         scopeToBranch(
           supabase
             .from("transactions")
-            .select("type, sale_status, txn_date, amount")
+            .select(`${countedColumns}, txn_date`)
             .in("type", ["sale", "expense"])
             .gte("txn_date", yesterday)
             .lte("txn_date", today),
@@ -198,7 +222,7 @@ const dashboardServices = {
         scopeToBranch(
           supabase
             .from("transactions")
-            .select("type, sale_status, amount")
+            .select(countedColumns)
             .gte("txn_date", monthStart())
             .lte("txn_date", today),
           branch
@@ -237,21 +261,23 @@ const dashboardServices = {
         .filter((row) => row.account === account)
         .reduce((total, row) => total + Number(row.balance), 0);
 
-    const recentRows = (recent.data ?? []) as (TypedAmountRow & {
+    const recentRows = (recent.data ?? []) as unknown as (CountedTransactionRow & {
       txn_date: string;
     })[];
     const isExpense = (row: TypedAmountRow) => row.type === "expense";
     const onDay = (date: string, predicate: (row: TypedAmountRow) => boolean) =>
-      sum(recentRows.filter((row) => row.txn_date === date && predicate(row)));
+      sumCountedRows(
+        recentRows.filter((row) => row.txn_date === date && predicate(row))
+      );
 
-    const thisMonthRows = (thisMonth.data ?? []) as TypedAmountRow[];
+    const thisMonthRows = (thisMonth.data ?? []) as unknown as CountedTransactionRow[];
 
     const matching = (
-      rows: TypedAmountRow[],
+      rows: CountedTransactionRow[],
       predicate: (row: TypedAmountRow) => boolean
     ) => sum(rows.filter(predicate));
-    const ofDirection = (rows: TypedAmountRow[], types: string[]) =>
-      sum(rows.filter((row) => types.includes(row.type)));
+    const ofDirection = (rows: CountedTransactionRow[], types: string[]) =>
+      sumCountedRows(rows.filter((row) => types.includes(row.type)));
 
     return {
       currentCash: balanceOf("cash_drawer"),
@@ -264,7 +290,7 @@ const dashboardServices = {
         (receivables.data ?? []) as OutstandingRow[]
       ),
       accountsPayable: outstanding((payables.data ?? []) as OutstandingRow[]),
-      monthlySales: matching(thisMonthRows, isVerifiedSale),
+      monthlySales: sumCountedRows(thisMonthRows.filter(isVerifiedSale)),
       monthlyPendingSales: matching(thisMonthRows, isPendingSale),
       monthlyCashIn: ofDirection(thisMonthRows, cashInflowTypes),
       monthlyCashOut: ofDirection(thisMonthRows, cashOutflowTypes),
@@ -278,7 +304,7 @@ const dashboardServices = {
     const start = overviewPeriodStart(period);
     const salesAndExpenses = supabase
       .from("transactions")
-      .select("type, sale_status, amount")
+      .select(countedColumns)
       .in("type", ["sale", "expense"])
       .lte("txn_date", todayIso());
 
@@ -297,11 +323,11 @@ const dashboardServices = {
       ]);
     if (transactions.error) throw toError(transactions.error);
 
-    const rows = (transactions.data ?? []) as TypedAmountRow[];
+    const rows = (transactions.data ?? []) as unknown as CountedTransactionRow[];
 
     return {
-      sales: sum(rows.filter(isVerifiedSale)),
-      expenses: sum(rows.filter((row) => row.type === "expense")),
+      sales: sumCountedRows(rows.filter(isVerifiedSale)),
+      expenses: sumCountedRows(rows.filter((row) => row.type === "expense")),
       arOutstanding,
       arNew,
       apOutstanding,
@@ -356,7 +382,7 @@ const dashboardServices = {
         .eq("sale_status", "verified"),
       supabase
         .from("transactions")
-        .select("branch, amount")
+        .select(`branch, ${countedColumns}`)
         .eq("type", "expense"),
       supabase
         .from("receivables")
@@ -398,7 +424,11 @@ const dashboardServices = {
       branchName: branch.name,
       cashBalance: totalBy(cash.data as never, branch.slug, "balance"),
       sales: totalBy(sales.data as never, branch.slug, "amount"),
-      expenses: totalBy(expenses.data as never, branch.slug, "amount"),
+      expenses: sumCountedRows(
+        ((expenses.data ?? []) as unknown as (CountedTransactionRow & {
+          branch: string;
+        })[]).filter((row) => row.branch === branch.slug)
+      ),
       receivables: outstandingBy(receivables.data as never, branch.slug),
       payables: outstandingBy(payables.data as never, branch.slug),
     }));

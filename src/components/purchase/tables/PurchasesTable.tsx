@@ -183,7 +183,8 @@ const PurchasesTable = () => {
       title: "Due date",
       dataIndex: "due_date",
       className: nowrapCell,
-      render: (value: string | null) => (value ? formatDate(value) : "Paid"),
+      render: (value: string | null, row) =>
+        value && row.payable?.status !== "paid" ? formatDate(value) : "Paid",
     },
     ...(permissions.isManager
       ? [
