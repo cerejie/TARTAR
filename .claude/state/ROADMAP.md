@@ -1,5 +1,5 @@
 # ROADMAP — Native-feel mobile PWA (branch mobilel-app-native)
-Updated: 2026-10-01 (M0 v2.02, M1 + M2 v2.03 committed; M3 done, not committed; M4 next)
+Updated: 2026-10-01 (M0 v2.02, M1 + M2 v2.03, M3 v2.04 committed; M4 done, not committed, migration 27 not applied; M5 next)
 
 ## Goal
 The MAIN app feels like a native app on phones (iOS + Android), installs as an app on iOS,
@@ -133,7 +133,43 @@ each phase, then a user check on a real phone.
     Sales, Expenses, Purchases, Vouchers, LedgerRecords tables and Branch/User/BankAccount/
     ExpenseCategory/IncomeSource/Supplier create buttons.
 
-- M3 DONE 2026-10-01, NOT committed. Build + lint clean; CSS verified emitted; not checked on a device.
+- M4 DONE 2026-10-01, NOT committed. Build + lint clean; precache 88 entries (4 manifest icons listed twice,
+  same revision). Migration 27 written, NOT applied; Edge Function not deployed; nothing checked on a device.
+  - supabase/migrations/20261015000027_push_notifications.sql: push_subscriptions (owner select/delete RLS,
+    endpoint unique, user_id index); save_push_subscription (endpoint moves to the signed-in user) +
+    delete_push_subscription RPCs; app.settings push_function_url + push_secret; app.push_managers,
+    app.peso, app.send_push (pg_net, skips the actor, no-op until settings are set); deferred constraint
+    triggers vouchers_push (pending -> branch managers; approved/rejected -> creator), payments_push
+    (pending -> branch managers), transactions_sale_push (verified/rejected -> creator, reason included);
+    app.send_due_digest (open/partial receivables + payables due <= today Manila, per user's branches) on
+    pg_cron 'tartar-due-digest' 0 0 * * * UTC.
+  - supabase/functions/send-push/index.ts: x-push-secret check, service-role read, npm:web-push, deletes
+    404/410 endpoints. Secrets VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT, PUSH_SECRET.
+  - SW: vite.config.ts injectManifest (srcDir src, sw.ts); src/sw.ts precache + cleanup + index.html
+    navigation fallback + SKIP_WAITING + push + notificationclick (focus a window in the same scope,
+    /admin vs main, navigate; else openWindow); tsconfig.sw.json (WebWorker), excluded from tsconfig.app.
+    devDeps workbox-precaching + workbox-routing ^7.4.1.
+  - Client: models/common/push.model.ts, utils/push.utils.ts (VITE_VAPID_PUBLIC_KEY), services/data/
+    push.services.ts (rpc, onlineOnly — not runWrite: device state needing the push service online),
+    store/common/push.store.ts (promptDismissed persisted, key pushPromptStorageKey),
+    hook/common/push.hook.ts (usePushStatusListener in app.hook, usePushNotifications, usePushPrompt,
+    usePushOffer, releasePushSubscription in endSession after the stores clear).
+  - UI: components/account/cards/NotificationsCard.tsx in AccountView (on/off, blocked, iOS needs install,
+    unsupported, unconfigured); components/common/status/PushPromptNotice.tsx in PhoneAlertsSheet;
+    usePushOffer toast ("Notify me" / "Not now", once per session, non-managers) after create in
+    sale.form, voucher.list and disbursement.list (expenses + purchases) hooks.
+  - Inbox (user request, same day): supabase/migrations/20261016000028_notification_inbox.sql (apply after 27):
+    public.notifications (owner select RLS, realtime), mark_notifications_read(p_ids | null = all),
+    app.notify = inbox rows for every recipient (minus actor) + send_push; the 3 event triggers use it;
+    digest stays push-only; cron 'tartar-notification-cleanup' 16:30 UTC deletes read rows > 30 days.
+    Client: models/data/inbox/inbox.response.ts, services/data/inbox.services.ts (markRead via runWrite rpc),
+    hook/data/inbox/inbox.list.hook.ts, components/inbox/{lists/InboxFeed,menus/InboxBell}.tsx; inboxListKey
+    in liveRefreshKeys; "notifications" in realtime liveTables. Desktop header bell (popover, all roles);
+    phone: managers' Alerts tab (badge + unread) / app-bar bell for other roles -> PhoneAlertsSheet (Updates,
+    then due list for managers); admin Notifications tab shows Updates on top, badge + Mark all read include
+    it. ListCard: amount optional, icon prop.
+
+- M3 DONE 2026-10-01, committed as Development v2.04. Build + lint clean; CSS verified emitted; not checked on a device.
   - Load more (D6): hook/common/query.hook.ts `keepPrevious` option (old rows stay, shown refreshing,
     while a new key loads) on the 6 paged list hooks; models/common/pagination.model.ts loadMoreStep 20 +
     grownPageSize (page 1, size = page x size + 20 — a growing window, no rows cached in a store);
@@ -167,8 +203,16 @@ each phase, then a user check on a real phone.
    skeleton flashes; tap a card title/chevron -> detail sheet, Back closes it; Filters and Sort sheets
    close on Back; delete/confirm shows as a bottom action sheet; tab switches crossfade (none with
    reduced motion); desktop paging, popover, sort select and alert dialog unchanged.
-2. M4 push — present the file plan (migration 27 SQL shown, never applied), wait for approval.
-3. Deployment checklist kept from the offline roadmap: user resets data (all QA rows incl.
+2. M4 setup by the user: apply migration 27, then 28; `npx web-push generate-vapid-keys`; put the public key in
+   .env as VITE_VAPID_PUBLIC_KEY (and the host's env); set function secrets VAPID_PUBLIC_KEY,
+   VAPID_PRIVATE_KEY, VAPID_SUBJECT (mailto:), PUSH_SECRET; `supabase functions deploy send-push
+   --no-verify-jwt`; `update app.settings set push_function_url = '<url>/functions/v1/send-push',
+   push_secret = '<PUSH_SECRET>'`. Then check: Account switch on/off, Alerts prompt, employee toast offer,
+   voucher submit -> manager push, approve -> employee push, sale verify/reject, payment pending,
+   `select app.send_due_digest()` by hand, tap opens the right page, sign-out stops pushes, offline
+   precache still works after the SW change.
+3. M5 verification matrix — present the plan, wait for approval.
+4. Deployment checklist kept from the offline roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
    bank "QA O12 Bank" (no delete in the UI); 2026-10-01 concurrency rows: sales 701, 702 (now
@@ -189,10 +233,12 @@ each phase, then a user check on a real phone.
 - touch/form (M2): styles/common/theme.css (coarse rule) · hook/app/keyboard.hook.ts · components/common/button/PrimaryAction.tsx · utils/field.utils.ts
 - modal on phones: components/common/modal/AppModal.tsx (Sheet below md) · form/EntityFormModal.tsx
 - tables on phones: components/common/table/{DataTable,DataTableCards,LoadMoreSentinel}.tsx · hook/common/load.more.hook.ts
-- PWA: vite.config.ts · public/{admin.webmanifest,splash,screenshots} · hook/app/update.hook.ts
+- PWA: vite.config.ts · src/sw.ts · public/{admin.webmanifest,splash,screenshots} · hook/app/update.hook.ts
+- push: supabase/functions/send-push · migration 27 · hook/common/push.hook.ts · store/common/push.store.ts
 - install: hook/common/install.hook.ts · store/common/install.store.ts
 - offline (must survive M4): store/common/{sync,query}.store.ts · utils/{write,idb}.utils.ts
 - harness: .claude/state/audit/ (drive.mjs, BASE default :5199; signed-in profiles are gone — run login.mjs first)
 
 ## State
-Branch mobilel-app-native. M0 v2.02, M1 + M2 v2.03 committed; M3 uncommitted. Migrations through 26 applied.
+Branch mobilel-app-native. M0 v2.02, M1 + M2 v2.03, M3 v2.04 committed; M4 uncommitted. Migrations through
+26 applied; 27 + 28 written, not applied.

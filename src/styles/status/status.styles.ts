@@ -67,3 +67,7 @@ export const errorState = cva("", {
 });
 
 export const errorStateMedia = "bg-danger-bg text-danger";
+
+export const pushPromptNotice = "mb-3";
+
+export const pushPromptActions = "mt-2 flex flex-wrap gap-2";

@@ -60,3 +60,5 @@ export const headerNotificationsHead =
   "sticky top-0 border-b border-border bg-popover px-4 py-3 text-sm font-semibold";
 
 export const headerNotificationsBody = "flex flex-col gap-3 p-4";
+
+export const headerInboxBody = "py-3";

@@ -4,6 +4,7 @@ import { adminTabStack } from "../../../styles/admin/admin.layout.styles";
 import SegmentedTabs from "../../common/app/SegmentedTabs";
 import AppButton from "../../common/button/AppButton";
 import AdminPageTitle from "../../common/layout/AdminPageTitle";
+import InboxFeed from "../../inbox/lists/InboxFeed";
 import NotificationFeed from "./NotificationFeed";
 
 const AdminNotificationsOverview = () => {
@@ -30,6 +31,7 @@ const AdminNotificationsOverview = () => {
         options={notifications.segmentOptions}
         onChange={notifications.setSegment}
       />
+      <InboxFeed />
       <NotificationFeed
         groups={notifications.groups}
         emptyText={notifications.emptyText}

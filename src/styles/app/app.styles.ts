@@ -182,3 +182,7 @@ export const floatingActionLabel = cva(
     },
   }
 );
+
+export const inboxIcon = "size-4";
+
+export const inboxStack = "flex flex-col gap-4";

@@ -8,6 +8,7 @@ const liveTables: readonly string[] = [
   "payables",
   "vouchers",
   "payments",
+  "notifications",
 ];
 
 const realtimeServices = {

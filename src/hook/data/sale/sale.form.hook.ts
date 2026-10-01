@@ -26,6 +26,7 @@ import { derivePaymentValues } from "../../../utils/payment.utils";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
+import { usePushOffer } from "../../common/push.hook";
 import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useFarmSectionListHook } from "../farm-section/farm.section.list.hook";
@@ -70,6 +71,7 @@ export const useSaleFormHook = () => {
   const resubmitModal = useModal<ISale>(saleResubmitModalKey);
   const { setPagination } = usePagination(salePaginationKey);
   const createdBy = useAccountStore(selectUserId);
+  const offerPush = usePushOffer();
 
   const { branchOptions, defaultBranch } = useBranchListHook();
   const { farmSectionOptions } = useFarmSectionListHook();
@@ -92,6 +94,7 @@ export const useSaleFormHook = () => {
       onSuccess: () => {
         formModal.closeModal();
         setPagination({ pageNumber: 1 });
+        offerPush();
       },
     }
   );

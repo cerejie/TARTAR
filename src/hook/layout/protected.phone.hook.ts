@@ -16,6 +16,7 @@ import { usePermissions } from "../account/account.permission.hook";
 import { useModal } from "../common/modal.hook";
 import { usePullToRefresh } from "../common/pull.hook";
 import { useScrollRestore } from "../common/scroll.hook";
+import { useInboxListHook } from "../data/inbox/inbox.list.hook";
 import { useProtectedNotificationsHook, useProtectedTitleHook } from "./protected.hook";
 
 import type { IRoute } from "../../models/common/route.model";
@@ -56,6 +57,7 @@ export const usePhoneTabBarHook = () => {
   const moreSheet = useModal(moreSheetModalKey);
   const alertsSheet = useModal(alertsSheetModalKey);
   const { alertCount } = useProtectedNotificationsHook(showAlerts);
+  const { unreadCount } = useInboxListHook();
 
   const routeTabs: ITabItem[] = tabRoutes.map((route) => {
     const path = route.path ?? dashboardPath;
@@ -77,7 +79,7 @@ export const usePhoneTabBarHook = () => {
     icon: Bell,
     onPress: () => alertsSheet.openModal(),
     active: alertsSheet.modal.visible,
-    badge: alertCount,
+    badge: alertCount + unreadCount,
   };
 
   const moreTab: ITabItem = {
@@ -92,6 +94,7 @@ export const usePhoneTabBarHook = () => {
   return {
     tabs: [...routeTabs, ...(showAlerts ? [alertsTab] : []), moreTab],
     showAlerts,
+    openAlerts: () => alertsSheet.openModal(),
   };
 };
 
@@ -115,7 +118,15 @@ export const useMoreSheetHook = () => {
 
 export const useAlertsSheetHook = () => {
   const { modal, closeModal } = useModal(alertsSheetModalKey);
-  const { alerts, alertsLoading } = useProtectedNotificationsHook(true);
+  const { showAlerts } = usePhoneRoutesHook();
+  const { alerts, alertsLoading } = useProtectedNotificationsHook(showAlerts);
 
-  return { open: modal.visible, close: closeModal, alerts, alertsLoading };
+  return {
+    open: modal.visible,
+    close: closeModal,
+    title: showAlerts ? "Notifications & Alerts" : "Notifications",
+    showAlerts,
+    alerts,
+    alertsLoading,
+  };
 };

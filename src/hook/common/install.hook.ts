@@ -13,7 +13,7 @@ import type {
 const isInstallPromptEvent = (event: Event): event is IBeforeInstallPromptEvent =>
   "prompt" in event && "userChoice" in event;
 
-const isAppleTouchDevice = (): boolean => {
+export const isAppleTouchDevice = (): boolean => {
   const agent = navigator.userAgent;
   const iPadAsDesktop = agent.includes("Macintosh") && navigator.maxTouchPoints > 1;
   return /iPhone|iPad|iPod/.test(agent) || iPadAsDesktop;

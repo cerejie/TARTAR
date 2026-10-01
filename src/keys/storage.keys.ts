@@ -5,3 +5,4 @@ export const syncFlushLockKey = "tartar-sync-flush";
 export const queryCacheStorageKey = "tartar-query-cache";
 export const themeStorageKey = "tartar-theme";
 export const notificationReadStorageKey = "tartar-admin-notification-read";
+export const pushPromptStorageKey = "tartar-push-prompt";

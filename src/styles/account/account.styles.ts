@@ -20,3 +20,9 @@ export const installSteps = "list-decimal space-y-2 pl-5 text-sm text-foreground
 export const installStepIcon = "inline size-4 align-text-bottom text-brand";
 
 export const installActions = "flex justify-start";
+
+export const notificationsBody = "flex flex-col gap-4";
+
+export const notificationsText = "text-sm text-muted-foreground";
+
+export const notificationsActions = "flex justify-start";

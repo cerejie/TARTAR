@@ -53,6 +53,7 @@ import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useWithPendingRows } from "../../common/pending.hook";
+import { usePushOffer } from "../../common/push.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
 import { useBankAccountListHook } from "../bank/bank.account.list.hook";
@@ -82,6 +83,7 @@ export const useVoucherListHook = () => {
   const formModal = useModal(voucherFormModalKey);
   const rejectModal = useModal<IVoucher>(voucherRejectModalKey);
   const createdBy = useAccountStore(selectUserId);
+  const offerPush = usePushOffer();
   const permissions = usePermissions();
   const openConfirm = useConfirm();
 
@@ -139,6 +141,7 @@ export const useVoucherListHook = () => {
       onSuccess: () => {
         formModal.closeModal();
         setPagination({ pageNumber: 1 });
+        offerPush();
       },
     }
   );

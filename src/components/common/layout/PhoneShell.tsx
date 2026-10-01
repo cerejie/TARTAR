@@ -8,6 +8,7 @@ import {
   phoneContent,
   phoneShell,
 } from "../../../styles/layout/shell.styles";
+import InboxBell from "../../inbox/menus/InboxBell";
 import PullIndicator from "../app/PullIndicator";
 import AppBar from "./AppBar";
 import AppTabBar from "./AppTabBar";
@@ -17,12 +18,12 @@ import RouteProgress from "./RouteProgress";
 
 const PhoneShell = () => {
   const { pathname, scrollRef, handleScroll, pullHandlers, title } = usePhoneShellHook();
-  const { tabs, showAlerts } = usePhoneTabBarHook();
+  const { tabs, showAlerts, openAlerts } = usePhoneTabBarHook();
 
   return (
     <div className={phoneShell}>
       <RouteProgress />
-      <AppBar title={title} />
+      <AppBar title={title} trailing={showAlerts ? null : <InboxBell onPress={openAlerts} />} />
 
       <main
         id="main-content"
@@ -39,7 +40,7 @@ const PhoneShell = () => {
 
       <AppTabBar label="Main" tabs={tabs} />
       <PhoneMoreSheet />
-      {showAlerts ? <PhoneAlertsSheet /> : null}
+      <PhoneAlertsSheet />
     </div>
   );
 };

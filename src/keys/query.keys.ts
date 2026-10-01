@@ -34,6 +34,7 @@ export const reportTransactionKey = "report-transactions";
 export const reportReceivableKey = "report-receivables";
 export const reportPayableKey = "report-payables";
 export const reportSummaryKey = "report-summary";
+export const inboxListKey = "inbox";
 
 export const scopedKey = (...parts: (string | number | null | undefined)[]) =>
   parts.map((part) => part ?? "all").join(":");
@@ -62,4 +63,5 @@ export const liveRefreshKeys: readonly string[] = [
   paymentListKey,
   ledgerSummaryKey,
   ledgerPartyKey,
+  inboxListKey,
 ];

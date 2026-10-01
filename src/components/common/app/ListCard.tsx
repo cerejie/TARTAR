@@ -33,7 +33,8 @@ import type { Tone } from "../../../styles/common/tone.styles";
 type IProps = {
   name: string;
   meta?: ReactNode;
-  amount: number;
+  amount?: number;
+  icon?: ReactNode;
   amountTone?: Tone;
   badge?: ReactNode;
   unread?: boolean;
@@ -45,6 +46,7 @@ const ListCard = ({
   name,
   meta,
   amount,
+  icon,
   amountTone = "default",
   badge,
   unread = false,
@@ -62,7 +64,7 @@ const ListCard = ({
         {unread ? <span className={listCardUnreadDot} role="img" aria-label="Unread" /> : null}
         <Avatar size="lg">
           <AvatarFallback className={listCardAvatarFallback}>
-            {formatInitials(name)}
+            {icon ?? formatInitials(name)}
           </AvatarFallback>
         </Avatar>
       </ItemMedia>
@@ -80,9 +82,11 @@ const ListCard = ({
       </ItemContent>
       <ItemActions className={listCardAside}>
         <span className={listCardFigures}>
-          <span className={cn(listCardAmount, toneText({ tone: amountTone }))}>
-            {formatMoney(amount)}
-          </span>
+          {amount === undefined ? null : (
+            <span className={cn(listCardAmount, toneText({ tone: amountTone }))}>
+              {formatMoney(amount)}
+            </span>
+          )}
           {badge}
         </span>
         {onPress ? <ChevronRight className={listCardChevron} aria-hidden="true" /> : null}

@@ -22,6 +22,7 @@ import { useQuery } from "../../common/query.hook";
 import { useSegment } from "../../common/segment.hook";
 import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
+import { useInboxListHook } from "../inbox/inbox.list.hook";
 
 import type { ISegmentOption } from "../../../models/common/segment.model";
 import type {
@@ -126,7 +127,8 @@ const useAdminNotificationFeed = () => {
 
 export const useAdminNotificationCountHook = () => {
   const { unreadCount } = useAdminNotificationFeed();
-  return { unreadCount };
+  const inbox = useInboxListHook();
+  return { unreadCount: unreadCount + inbox.unreadCount };
 };
 
 export const useAdminNotificationsHook = () => {
@@ -138,6 +140,7 @@ export const useAdminNotificationsHook = () => {
   );
   const { groups, unreadGroups, unreadCount, alertsQuery, checksQuery } =
     useAdminNotificationFeed();
+  const inbox = useInboxListHook();
 
   const totalCount = groups.reduce((total, group) => total + group.items.length, 0);
   const countBySegment: Record<AdminNotificationSegment, number> = {
@@ -158,7 +161,7 @@ export const useAdminNotificationsHook = () => {
     setSegment,
     groups: segment === "unread" ? unreadGroups : groups,
     emptyText: segment === "unread" ? "You're all caught up" : "No due alerts right now",
-    unreadCount,
+    unreadCount: unreadCount + inbox.unreadCount,
     loading: alertsQuery.isInitialLoading || checksQuery.isInitialLoading,
     refreshing: alertsQuery.isRefreshing || checksQuery.isRefreshing,
     error: alertsQuery.error ?? checksQuery.error,
@@ -170,7 +173,9 @@ export const useAdminNotificationsHook = () => {
       markRead([item.id]);
       navigate(item.path);
     },
-    markAllRead: () =>
-      markRead(unreadGroups.flatMap((group) => group.items.map((item) => item.id))),
+    markAllRead: () => {
+      markRead(unreadGroups.flatMap((group) => group.items.map((item) => item.id)));
+      if (inbox.unreadCount) inbox.markAllRead();
+    },
   };
 };

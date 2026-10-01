@@ -7,6 +7,7 @@ import {
   headerRoot,
   headerWordmark,
 } from "../../../styles/layout/header.styles";
+import InboxBell from "../../inbox/menus/InboxBell";
 import SyncIndicator from "../status/SyncIndicator";
 import ProtectedBranchScope from "./ProtectedBranchScope";
 import ProtectedUserMenu from "./ProtectedUserMenu";
@@ -23,6 +24,7 @@ const ProtectedHeader = () => (
     <ProtectedBranchScope />
 
     <div className={headerActions}>
+      <InboxBell />
       <SyncIndicator />
       <Separator orientation="vertical" className={headerDivider} />
       <ProtectedUserMenu />

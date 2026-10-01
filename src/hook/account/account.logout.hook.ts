@@ -9,12 +9,14 @@ import {
   resetLocation,
 } from "../../utils/route.utils";
 import { useMutation } from "../common/mutation.hook";
+import { releasePushSubscription } from "../common/push.hook";
 
 export const endSession = async (pathname: string): Promise<void> => {
   resetLocation(isAdminPath(pathname) ? adminBasePath : "/");
   useAccountStore.getState().clear();
   useQueryStore.getState().reset();
   resetAllStores();
+  await releasePushSubscription();
   await accountServices.logout();
 };
 

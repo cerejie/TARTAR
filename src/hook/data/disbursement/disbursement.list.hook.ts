@@ -53,6 +53,7 @@ import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { usePagination } from "../../common/pagination.hook";
 import { useWithPendingRows } from "../../common/pending.hook";
+import { usePushOffer } from "../../common/push.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
 import { useBankAccountListHook } from "../bank/bank.account.list.hook";
@@ -111,6 +112,7 @@ export const useDisbursementListHook = (
   );
   const permissions = usePermissions();
   const createdBy = useAccountStore(selectUserId);
+  const offerPush = usePushOffer();
 
   const { filters } = useLedgerFilters("page");
   const { branchOptions, branchName, defaultBranch } = useBranchListHook();
@@ -188,6 +190,7 @@ export const useDisbursementListHook = (
       onSuccess: () => {
         formModal.closeModal();
         setPagination({ pageNumber: 1 });
+        offerPush();
       },
     }
   );
