@@ -229,17 +229,16 @@ each phase, then a user check on a real phone.
 Fix roadmap to 100% deployable. P0 = blocks deploy, P1 = fix before go-live, P2 = soon after, P3 = polish.
 
 P0 — user actions (cannot be done from this machine: no Supabase CLI or service credentials)
-1. VAPID key leak: commit d3382c5 (pushed to origin/mobilel-app-native) has VITE_VAPID_PRIVATE_KEY in
-   .env.example. Treat that pair as burned: `npx web-push generate-vapid-keys` for a NEW pair; public key ->
-   host env + .env.local VITE_VAPID_PUBLIC_KEY; private key -> function secret only. Working tree is cleaned.
+1. DONE 2026-10-01: new VAPID pair generated in the browser (WebCrypto), old leaked pair retired;
+   .env.example cleaned. Public key in .env.local + Vercel env.
 2. DONE 2026-10-01: migration 28 applied (cron job 2 = tartar-notification-cleanup). Verified: inbox loads
    ("No updates yet"), offline banner back to "showing data saved ...". Was: apply 28 before deploying. Without it every page shows the
    inbox error in the bell/Alerts and the offline banner says "this page was not saved for offline".
-3. Deploy push: secrets VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT (mailto:), PUSH_SECRET;
-   `supabase functions deploy send-push --no-verify-jwt`; `update app.settings set push_function_url =
-   '<url>/functions/v1/send-push', push_secret = '<PUSH_SECRET>'`. First call: read the function log —
-   npm:web-push needs node ECDH under Deno; if it throws, switch to jsr:@negrel/webpush.
-4. Server push checks (2 devices): employee submits voucher -> manager push + inbox; approve/reject ->
+3. DONE 2026-10-01: send-push deployed from the dashboard (JWT verification off), 4 secrets set,
+   app.settings push_function_url/push_secret set. app.send_push -> net._http_response 200 {"sent":1}
+   (npm:web-push works under the Supabase Deno runtime; the createECDH risk is closed).
+4. Digest VERIFIED 2026-10-01 (qaadmin2 on a production build -> "Due today" push). Push needs a production
+   build: yarn dev has no service worker (no devOptions). Still to run — server push checks (2 devices): employee submits voucher -> manager push + inbox; approve/reject ->
    employee; employee payment -> manager; sale verify/reject -> employee; `select app.send_due_digest()`;
    tap opens the right page (main vs /admin window); sign-out stops pushes.
 5. Real devices: iOS Safari -> Add to Home Screen (splash light/dark, status bar, push only when installed),
@@ -304,5 +303,5 @@ Then ask before deleting `.claude/state/audit/` and the old scratchpad audit dir
 
 ## State
 Branch mobilel-app-native. M0-M4 committed through v2.05; M5 automated pass + its fixes uncommitted.
-Migrations 27 and 28 are applied (28 verified in the app 2026-10-01). Edge Function send-push not deployed; app.settings push_* unset. Harness for this pass lives in the
+Migrations 27 and 28 are applied (28 verified in the app 2026-10-01). Edge Function send-push deployed and answering 200; app.settings push_* set (2026-10-01). Harness for this pass lives in the
 session scratchpad (m5/*.mjs, playwright-core installed there); the repo harness is .claude/state/audit.
