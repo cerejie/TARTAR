@@ -1,5 +1,5 @@
 # ROADMAP — Offline hardening (live offline test, 2026-09-30)
-Updated: 2026-10-01
+Updated: 2026-10-01 (OB10)
 
 ## Goal
 Offline, every write is kept on the device and reaches the database once back online, nothing is
@@ -67,10 +67,10 @@ merged into main).
 - OB8 Not queued at all: bank.services (all writes), reference.services expense types / income
   sources / most setup writes, account.services (login, register, passwords),
   user.services.decidePasswordReset. See OQ3.
-- OB10 NOT OFFLINE, pre-existing (o12-acc4, 2026-10-01): accountant sees "Record payment" on
-  Receivables but record_ledger_payment is refused online too: 42501 RLS on table payments. Either
-  hide the action for accountants or widen the payments policy — business decision, ask the user.
-  Offline the refused write lands in the sync panel's failed list as designed (L4).
+- OB10 DECIDED 2026-10-01: the accountant role is fully READ-ONLY (no record, create, update,
+  delete, approve). RLS already refuses accountant payment inserts (42501), so no migration. UI fix:
+  "Record payment" in LedgerRecordsTable and "Record payment" + "Customer details" in
+  LedgerPartiesTable now gated on encodeTransactions (every other write was already gated).
 - OB9 UNTESTED: flush after a long offline period (expired access token -> 401). Must refresh the
   session and retry, never discard; test in O1.
 
@@ -173,7 +173,8 @@ merged into main).
   account under the same NEW bank name creates the bank twice.
 
 ## Next (one conversation, in order)
-1. Ask the user about OB10 (accountant Record payment: hide it or widen RLS).
+1. Harness-check accountant (qaacc1) Receivables/Payables records + parties views: no write
+   actions anywhere. Optionally audit RLS so the DB refuses every accountant write, not only payments.
 2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
@@ -225,5 +226,6 @@ merged into main).
 ## State
 Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
 committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
-committed v1.87 · O3 committed v1.88 · O4 done and verified, not committed yet (suggested
-as v1.89) · roadmap phases O1-O4 complete; OB10 open.
+committed v1.87 · O3 committed v1.88 · O4 committed v1.89 · roadmap phases O1-O4 complete;
+OB10 UI fix done, not committed (suggested v1.90), not harness-checked. LedgerPartiesTable IS
+mounted (LedgerRecordsSection, view "parties").

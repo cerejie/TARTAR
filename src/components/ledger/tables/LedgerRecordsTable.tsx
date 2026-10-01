@@ -79,14 +79,20 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     "customer_name" in row ? row.customer_name : row.supplier_name;
 
   const actionsOf = (row: ILedgerRecord): IRowAction[] => [
-    {
-      key: "payment",
-      label:
-        row.status === "paid" ? "Record payment — already paid" : "Record payment",
-      icon: <CircleDollarSign />,
-      disabled: row.status === "paid",
-      onSelect: () => openPaymentFor(row),
-    },
+    ...(permissions.encodeTransactions
+      ? [
+          {
+            key: "payment",
+            label:
+              row.status === "paid"
+                ? "Record payment — already paid"
+                : "Record payment",
+            icon: <CircleDollarSign />,
+            disabled: row.status === "paid",
+            onSelect: () => openPaymentFor(row),
+          },
+        ]
+      : []),
     ...(permissions.isManager
       ? [
           {

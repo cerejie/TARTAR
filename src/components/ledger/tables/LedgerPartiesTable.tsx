@@ -27,6 +27,7 @@ type IProps = {
 
 const LedgerPartiesTable = ({ scope }: IProps) => {
   const {
+    permissions,
     partyLabel,
     parties,
     partiesLoading,
@@ -48,22 +49,25 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
     },
   ];
 
-  const customerActionsOf = (party: ILedgerPartySummary): IRowAction[] => [
-    {
-      key: "payment",
-      label: "Record payment",
-      hint: party.unpaidCount === 0 ? "Nothing unpaid" : undefined,
-      icon: <CircleDollarSign />,
-      disabled: party.unpaidCount === 0,
-      onSelect: () => openPaymentForParty(party),
-    },
-    {
-      key: "details",
-      label: "Customer details",
-      icon: <IdCard />,
-      onSelect: () => detailsModal.openModal(party),
-    },
-  ];
+  const customerActionsOf = (party: ILedgerPartySummary): IRowAction[] =>
+    permissions.encodeTransactions
+      ? [
+          {
+            key: "payment",
+            label: "Record payment",
+            hint: party.unpaidCount === 0 ? "Nothing unpaid" : undefined,
+            icon: <CircleDollarSign />,
+            disabled: party.unpaidCount === 0,
+            onSelect: () => openPaymentForParty(party),
+          },
+          {
+            key: "details",
+            label: "Customer details",
+            icon: <IdCard />,
+            onSelect: () => detailsModal.openModal(party),
+          },
+        ]
+      : [];
 
   const actionsOf =
     scope === "payables" ? supplierActionsOf : customerActionsOf;
