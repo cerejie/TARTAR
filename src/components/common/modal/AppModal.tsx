@@ -18,6 +18,7 @@ import type { ModalSize } from "../../../models/common/view.model";
 import {
   drawerBody,
   drawerContent,
+  drawerContentFill,
   drawerFooter,
   drawerHeaderRuled,
   modalBody,
@@ -31,6 +32,7 @@ type IProps = {
   open: boolean;
   title: string;
   size?: ModalSize;
+  fill?: boolean;
   footer?: ReactNode;
   onClose: () => void;
   children: ReactNode;
@@ -40,6 +42,7 @@ const AppModal = ({
   open,
   title,
   size = "md",
+  fill = false,
   footer,
   onClose,
   children,
@@ -62,7 +65,7 @@ const AppModal = ({
         side="bottom"
         isOpen={open}
         onOpenChange={handleOpenChange}
-        className={drawerContent}
+        className={cn(drawerContent, fill && drawerContentFill)}
       >
         <SheetHeader className={drawerHeaderRuled}>
           <SheetTitle>{title}</SheetTitle>

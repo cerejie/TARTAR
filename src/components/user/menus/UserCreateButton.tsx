@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import AppButton from "../../common/button/AppButton";
+import PrimaryAction from "../../common/button/PrimaryAction";
 import { useModal } from "../../../hook/common/modal.hook";
 import { userCreateModalKey } from "../../../keys/modal.keys";
 
@@ -7,10 +7,11 @@ const UserCreateButton = () => {
   const createModal = useModal(userCreateModalKey);
 
   return (
-    <AppButton onPress={() => createModal.openModal()}>
-      <Plus />
-      Add user
-    </AppButton>
+    <PrimaryAction
+      icon={<Plus />}
+      label="Add user"
+      onPress={() => createModal.openModal()}
+    />
   );
 };
 

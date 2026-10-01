@@ -99,9 +99,12 @@ const asNumber = (text: string): number | null => {
   return Number.isFinite(amount) ? amount : null;
 };
 
+type IEnterKeyHint = "next" | "done";
+
 type IProps<TValues extends FieldValues> = {
   config: IFieldConfig<TValues>;
   control: Control<TValues>;
+  enterKeyHint?: IEnterKeyHint;
 };
 
 type IFieldBinding<TValues extends FieldValues> = ControllerRenderProps<
@@ -112,7 +115,8 @@ type IFieldBinding<TValues extends FieldValues> = ControllerRenderProps<
 const renderControl = <TValues extends FieldValues>(
   config: IFieldConfig<TValues>,
   field: IFieldBinding<TValues>,
-  invalid: boolean
+  invalid: boolean,
+  enterKeyHint?: IEnterKeyHint
 ) => {
   const fieldId = String(config.name);
   const options: IFieldOption[] = config.options ?? [];
@@ -138,6 +142,7 @@ const renderControl = <TValues extends FieldValues>(
             id={fieldId}
             aria-invalid={invalid}
             type="password"
+            enterKeyHint={enterKeyHint}
             value={asText(field.value)}
             placeholder={config.placeholder}
             autoComplete={config.autoComplete ?? "new-password"}
@@ -164,6 +169,7 @@ const renderControl = <TValues extends FieldValues>(
             max={config.max}
             step={config.type === "amount" ? 0.01 : 1}
             inputMode={config.type === "amount" ? "decimal" : "numeric"}
+            enterKeyHint={enterKeyHint}
             value={asText(field.value)}
             placeholder={config.placeholder}
             onChange={(event) => field.onChange(asNumber(event.target.value))}
@@ -335,6 +341,8 @@ const renderControl = <TValues extends FieldValues>(
               value={asText(field.value)}
               placeholder={config.placeholder}
               autoComplete={config.autoComplete}
+              inputMode={config.inputMode}
+              enterKeyHint={enterKeyHint}
             />
           </InputGroup>
         );
@@ -348,6 +356,8 @@ const renderControl = <TValues extends FieldValues>(
           value={asText(field.value)}
           placeholder={config.placeholder}
           autoComplete={config.autoComplete}
+          inputMode={config.inputMode}
+          enterKeyHint={enterKeyHint}
         />
       );
   }
@@ -356,6 +366,7 @@ const renderControl = <TValues extends FieldValues>(
 const FormField = <TValues extends FieldValues>({
   config,
   control,
+  enterKeyHint,
 }: IProps<TValues>) => {
   return (
     <Controller
@@ -373,7 +384,7 @@ const FormField = <TValues extends FieldValues>({
             {config.label}
             {config.required ? <span className={fieldRequired}>*</span> : null}
           </FieldLabel>
-          {renderControl(config, field, fieldState.invalid)}
+          {renderControl(config, field, fieldState.invalid, enterKeyHint)}
           {config.hint ? <FieldDescription>{config.hint}</FieldDescription> : null}
           <FieldError errors={[fieldState.error]} />
         </Field>

@@ -18,7 +18,9 @@ export const userApproveModalKey = "user-approve";
 export const branchCreateModalKey = "branch-create";
 export const branchEditModalKey = "branch-edit";
 export const branchScopeSearchKey = "branch-scope-search";
-export const adminBranchSheetModalKey = "admin-branch-sheet";
+export const branchSheetModalKey = "branch-sheet";
+export const moreSheetModalKey = "more-sheet";
+export const alertsSheetModalKey = "alerts-sheet";
 export const adminUserSheetModalKey = "admin-user-sheet";
 export const adminPayableSheetModalKey = "admin-payable-sheet";
 export const adminReceivableSheetModalKey = "admin-receivable-sheet";
@@ -50,3 +52,5 @@ export const disbursementHistoryModalKey = (scope: string) => `${scope}-history`
 
 export const periodPrintModalKey = (scope: string) => `${scope}-print`;
 export const salePrintModalKey = "sale-print";
+
+export const confirmOverlayKey = "confirm-dialog";

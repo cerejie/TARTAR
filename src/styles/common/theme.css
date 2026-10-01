@@ -294,3 +294,40 @@
     background-clip: content-box;
   }
 }
+
+@layer base {
+  :root {
+    --keyboard-inset: 0px;
+  }
+
+  @media (pointer: coarse) {
+    :where(
+      [data-slot="button"]:not([data-size^="icon"], [data-size="xs"]),
+      [data-slot="input"],
+      [data-slot="input-group"],
+      [data-slot="select-trigger"],
+      [data-slot="combobox-chips"]
+    ) {
+      min-height: 2.75rem;
+    }
+
+    :where([data-slot="button"]:is([data-size="icon"], [data-size="icon-lg"])) {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+    }
+
+    :where([data-slot="button"]:is([data-size="xs"], [data-size="icon-xs"], [data-size="icon-sm"])) {
+      position: relative;
+    }
+
+    :where([data-slot="button"]:is([data-size="xs"], [data-size="icon-xs"], [data-size="icon-sm"]))::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 2.75rem);
+      height: max(100%, 2.75rem);
+      translate: -50% -50%;
+    }
+  }
+}

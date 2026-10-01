@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import AppButton from "../../common/button/AppButton";
+import PrimaryAction from "../../common/button/PrimaryAction";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
@@ -318,10 +319,11 @@ const SalesTable = () => {
             }
             actions={
               <RequirePermission can="encodeTransactions" fallback={null}>
-                <AppButton onPress={() => formModal.openModal()}>
-                  <Plus />
-                  Record sale
-                </AppButton>
+                <PrimaryAction
+                  icon={<Plus />}
+                  label="Record sale"
+                  onPress={() => formModal.openModal()}
+                />
               </RequirePermission>
             }
           >

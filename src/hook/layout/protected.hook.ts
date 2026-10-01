@@ -23,6 +23,7 @@ import {
 import { usePermissions } from "../account/account.permission.hook";
 import { useAccountLogoutHook } from "../account/account.logout.hook";
 import { backdropThemeColorToken, useThemeColorHook } from "../app/theme.color.hook";
+import { useIsTabletUp } from "../common/breakpoint.hook";
 import { useNetwork } from "../common/network.hook";
 import { useQuery } from "../common/query.hook";
 import { useBranchScopeHook } from "../data/branch/branch.scope.hook";
@@ -31,6 +32,8 @@ import type { IDueAlerts } from "../../models/data/dashboard/dashboard.response"
 export const useProtectedLayoutHook = () => {
   useNetwork();
   useThemeColorHook(backdropThemeColorToken);
+
+  return { isPhone: !useIsTabletUp() };
 };
 
 export const useProtectedSiderHook = () => {
@@ -64,22 +67,12 @@ export const useProtectedMenuHook = (pinned: boolean) => {
   return { groups, activePath: location.pathname, closeMobileMenu };
 };
 
-export const useProtectedHeaderHook = () => {
-  const { isMobile, toggleSidebar } = useSidebar();
-  const permissions = usePermissions();
-
-  return {
-    showMenuButton: isMobile,
-    showNotifications: isMobile && permissions.viewDashboard,
-    toggleMenu: toggleSidebar,
-  };
-};
-
-export const useProtectedNotificationsHook = () => {
+export const useProtectedNotificationsHook = (enabled: boolean) => {
   const { branch } = useBranchScopeHook();
   const alertsQuery = useQuery<IDueAlerts>(
     scopedKey(dashboardAlertsKey, branch),
-    () => dashboardServices.getDueAlerts(7, branch)
+    () => dashboardServices.getDueAlerts(7, branch),
+    { enabled }
   );
 
   return {

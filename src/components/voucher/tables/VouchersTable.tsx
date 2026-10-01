@@ -1,6 +1,6 @@
 import { Calculator, Check, FileCheck, Landmark, Plus, Printer, X } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
-import AppButton from "../../common/button/AppButton";
+import PrimaryAction from "../../common/button/PrimaryAction";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
@@ -276,10 +276,11 @@ const VouchersTable = () => {
             }
             actions={
               <RequirePermission can="createManualVouchers" fallback={null}>
-                <AppButton onPress={() => formModal.openModal()}>
-                  <Plus />
-                  Manual voucher
-                </AppButton>
+                <PrimaryAction
+                  icon={<Plus />}
+                  label="Manual voucher"
+                  onPress={() => formModal.openModal()}
+                />
               </RequirePermission>
             }
           >

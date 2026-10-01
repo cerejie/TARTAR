@@ -1,9 +1,9 @@
 import { Outlet } from "react-router-dom";
 import AdminAppBar from "../components/common/layout/AdminAppBar";
-import AdminTabBar from "../components/common/layout/AdminTabBar";
+import AppTabBar from "../components/common/layout/AppTabBar";
 import PullIndicator from "../components/common/app/PullIndicator";
 import RouteProgress from "../components/common/layout/RouteProgress";
-import { useAdminLayoutHook } from "../hook/layout/admin.hook";
+import { useAdminLayoutHook, useAdminTabBarHook } from "../hook/layout/admin.hook";
 import {
   adminColumn,
   adminContent,
@@ -13,11 +13,12 @@ import {
 
 const AdminAppLayout = () => {
   const { pathname, scrollRef, handleScroll, pullHandlers } = useAdminLayoutHook();
+  const { tabs } = useAdminTabBarHook();
 
   return (
     <div className={adminShell}>
       <RouteProgress />
-      <AdminTabBar />
+      <AppTabBar label="Admin" tabs={tabs} />
 
       <div className={adminMain}>
         <AdminAppBar />

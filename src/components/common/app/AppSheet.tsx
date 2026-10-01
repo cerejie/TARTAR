@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/utils/cn.utils";
 import { useIsDesktop } from "../../../hook/common/breakpoint.hook";
+import { useCloseOnNavigate } from "../../../hook/common/sheet.hook";
 import { useSwipeToClose } from "../../../hook/common/swipe.hook";
 import {
   appSheetBody,
@@ -43,6 +44,7 @@ const AppSheet = ({
   const isDesktop = useIsDesktop();
   const swipeHandlers = useSwipeToClose(onClose);
   const dragHandlers = isDesktop ? {} : swipeHandlers;
+  useCloseOnNavigate(open, onClose);
 
   const handleOpenChange = (next: boolean) => {
     if (!next) onClose();

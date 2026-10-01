@@ -155,3 +155,30 @@ export const detailPanelTitle = "font-heading text-base font-semibold";
 export const detailPanelBody = "px-4 pb-4";
 
 export const detailPanelFooter = "flex flex-col gap-2 border-t border-border bg-muted/50 p-4";
+
+export const floatingActionDock =
+  "fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[calc(5.5rem+max(1rem,env(safe-area-inset-bottom)))] z-40";
+
+export const floatingAction = cva(
+  "h-14 rounded-pill px-5 shadow-pop transition-[width,padding] duration-200 motion-reduce:transition-none [&_svg:not([class*='size-'])]:size-5",
+  {
+    variants: {
+      collapsed: {
+        true: "w-14 gap-0 px-0",
+        false: "gap-2",
+      },
+    },
+  }
+);
+
+export const floatingActionLabel = cva(
+  "overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-200 motion-reduce:transition-none",
+  {
+    variants: {
+      collapsed: {
+        true: "max-w-0 opacity-0",
+        false: "max-w-60 opacity-100",
+      },
+    },
+  }
+);

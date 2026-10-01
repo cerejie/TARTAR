@@ -1,13 +1,7 @@
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { useIsMobile } from "@/hook/use-mobile";
-import { adminBranchSheetModalKey, adminUserSheetModalKey } from "../../keys/modal.keys";
+import { adminUserSheetModalKey } from "../../keys/modal.keys";
 import { adminViewRoutes } from "../../routes/admin.view.routes";
-import {
-  selectIsScrolledPast,
-  selectScrollPosition,
-  useScrollStore,
-} from "../../store/common/scroll.store";
 import {
   adminBasePath,
   adminNotificationsPath,
@@ -20,12 +14,11 @@ import { useIsTabletUp } from "../common/breakpoint.hook";
 import { useModal } from "../common/modal.hook";
 import { useNetwork } from "../common/network.hook";
 import { usePullToRefresh } from "../common/pull.hook";
+import { useScrollRestore } from "../common/scroll.hook";
 import { useAdminNotificationCountHook } from "../data/admin/admin.notifications.hook";
 import { useAdminManifestHook } from "./admin.manifest.hook";
 
-import type { UIEvent } from "react";
-
-const compactTitleOffset = 44;
+import type { ITabItem } from "../../models/common/tab.model";
 
 const isActiveAdminPath = (pathname: string, path: string): boolean =>
   path === adminBasePath
@@ -37,18 +30,7 @@ export const useAdminLayoutHook = () => {
   useAdminManifestHook();
   useThemeColorHook(panelThemeColorToken);
 
-  const { pathname } = useLocation();
-  const scrollRef = useRef<HTMLElement>(null);
-  const setPosition = useScrollStore((state) => state.setPosition);
-
-  useLayoutEffect(() => {
-    const top = selectScrollPosition(pathname)(useScrollStore.getState());
-    scrollRef.current?.scrollTo({ top });
-  }, [pathname]);
-
-  const handleScroll = (event: UIEvent<HTMLElement>) =>
-    setPosition(pathname, event.currentTarget.scrollTop);
-
+  const { pathname, scrollRef, handleScroll } = useScrollRestore();
   const pullHandlers = usePullToRefresh();
 
   return { pathname, scrollRef, handleScroll, pullHandlers };
@@ -58,17 +40,28 @@ export const useAdminTabBarHook = () => {
   const { pathname } = useLocation();
   const permissions = usePermissions();
 
-  const tabs = useMemo(
+  const routes = useMemo(
     () => navigableRoutes(filterRoutesByPermission(adminViewRoutes, permissions)),
     [permissions.role]
   );
 
   const { unreadCount } = useAdminNotificationCountHook();
 
-  const isActive = (path: string) => isActiveAdminPath(pathname, path);
-  const badgeOf = (path: string) => (path === adminNotificationsPath ? unreadCount : 0);
+  const tabs: ITabItem[] = routes.map((route) => {
+    const path = route.path ?? adminBasePath;
 
-  return { tabs, isActive, badgeOf };
+    return {
+      key: path,
+      label: route.label ?? "",
+      icon: route.icon,
+      href: path,
+      active: isActiveAdminPath(pathname, path),
+      badge: path === adminNotificationsPath ? unreadCount : 0,
+      preload: route.preload,
+    };
+  });
+
+  return { tabs };
 };
 
 export const useAdminTitleHook = () => {
@@ -82,12 +75,10 @@ export const useAdminTitleHook = () => {
 };
 
 export const useAdminAppBarHook = () => {
-  const { pathname } = useLocation();
   const isPhone = !useIsTabletUp();
-  const scrolled = useScrollStore(selectIsScrolledPast(pathname, compactTitleOffset));
   const { title } = useAdminTitleHook();
 
-  return { scrolled, compact: isPhone && scrolled, title };
+  return { title, showUserSheet: isPhone };
 };
 
 export const useAdminUserSheetHook = () => {
@@ -96,18 +87,6 @@ export const useAdminUserSheetHook = () => {
 
   return {
     showSheet: isPhone,
-    sheetOpen: modal.visible,
-    openSheet: () => openModal(),
-    closeSheet: closeModal,
-  };
-};
-
-export const useAdminBranchSheetHook = () => {
-  const isMobile = useIsMobile();
-  const { modal, openModal, closeModal } = useModal(adminBranchSheetModalKey);
-
-  return {
-    showSheet: isMobile,
     sheetOpen: modal.visible,
     openSheet: () => openModal(),
     closeSheet: closeModal,

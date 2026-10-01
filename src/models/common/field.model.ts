@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import type { FieldValues, Path } from "react-hook-form";
 
 export type IFieldType =
@@ -34,6 +34,7 @@ export interface IFieldConfig<TValues extends FieldValues = FieldValues> {
   hideLabel?: boolean;
   icon?: ReactNode;
   autoComplete?: string;
+  inputMode?: HTMLAttributes<HTMLInputElement>["inputMode"];
   allowClear?: boolean;
   hidden?: (values: TValues) => boolean;
 }

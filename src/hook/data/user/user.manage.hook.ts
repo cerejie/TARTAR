@@ -135,7 +135,13 @@ export const useUserManageHook = () => {
   } as const;
 
   const createFields: IFieldConfig<ICreateUserInput>[] = [
-    { name: "email", label: "Email", type: "text", required: true },
+    {
+      name: "email",
+      label: "Email",
+      type: "text",
+      required: true,
+      inputMode: "email",
+    },
     { name: "full_name", label: "Full name", type: "text", required: true },
     {
       name: "password",

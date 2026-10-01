@@ -1,4 +1,4 @@
-import type { Control, FieldValues } from "react-hook-form";
+import type { Control, FieldValues, Path } from "react-hook-form";
 import {
   Card,
   CardContent,
@@ -17,12 +17,14 @@ type IProps<TValues extends FieldValues> = {
   section: IFieldSection<TValues>;
   control: Control<TValues>;
   values: TValues;
+  lastKeyboardField?: Path<TValues>;
 };
 
 const FormSection = <TValues extends FieldValues>({
   section,
   control,
   values,
+  lastKeyboardField,
 }: IProps<TValues>) => {
   return (
     <Card className={formSection}>
@@ -34,6 +36,7 @@ const FormSection = <TValues extends FieldValues>({
           fields={section.fields}
           control={control}
           values={values}
+          lastKeyboardField={lastKeyboardField}
         />
       </CardContent>
     </Card>

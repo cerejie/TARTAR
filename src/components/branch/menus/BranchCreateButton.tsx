@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import AppButton from "../../common/button/AppButton";
+import PrimaryAction from "../../common/button/PrimaryAction";
 import { useModal } from "../../../hook/common/modal.hook";
 import { branchCreateModalKey } from "../../../keys/modal.keys";
 
@@ -7,10 +7,11 @@ const BranchCreateButton = () => {
   const createModal = useModal(branchCreateModalKey);
 
   return (
-    <AppButton onPress={() => createModal.openModal()}>
-      <Plus />
-      Add branch
-    </AppButton>
+    <PrimaryAction
+      icon={<Plus />}
+      label="Add branch"
+      onPress={() => createModal.openModal()}
+    />
   );
 };
 

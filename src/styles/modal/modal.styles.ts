@@ -25,7 +25,11 @@ export const modalActionSize =
 
 export const modalFooter = `flex-wrap -mx-6 -mb-6 rounded-b-panel border-t border-border bg-muted/50 px-6 py-4 ${modalActionSize}`;
 
-export const drawerContent = "max-h-[92dvh] rounded-t-panel bg-panel";
+export const drawerContent =
+  "max-h-[calc(92dvh-var(--keyboard-inset))] rounded-t-panel bg-panel data-[side=bottom]:bottom-(--keyboard-inset)";
+
+export const drawerContentFill =
+  "h-[calc(100dvh-var(--keyboard-inset)-max(env(safe-area-inset-top),0.75rem))] max-h-none";
 
 export const drawerHeaderRuled =
   "border-b border-border pr-14 [&_[data-slot=sheet-title]]:text-base [&_[data-slot=sheet-title]]:font-semibold [&_[data-slot=sheet-title]]:leading-8";

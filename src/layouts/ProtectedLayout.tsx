@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import PhoneShell from "../components/common/layout/PhoneShell";
 import ProtectedHeader from "../components/common/layout/ProtectedHeader";
 import ProtectedSider from "../components/common/layout/ProtectedSider";
 import RouteProgress from "../components/common/layout/RouteProgress";
@@ -12,7 +13,9 @@ import {
 } from "../styles/layout/shell.styles";
 
 const ProtectedLayout = () => {
-  useProtectedLayoutHook();
+  const { isPhone } = useProtectedLayoutHook();
+
+  if (isPhone) return <PhoneShell />;
 
   return (
     <SidebarProvider className={shellRoot}>

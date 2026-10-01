@@ -9,8 +9,6 @@ import {
   type Resolver,
 } from "react-hook-form";
 import type { ZodType } from "zod";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import type {
   IFieldConfig,
   IFieldSection,
@@ -20,6 +18,8 @@ import type { ConfirmKind } from "../../../models/common/modal.model";
 import type { ModalSize } from "../../../models/common/view.model";
 import { entityForm } from "../../../styles/form/form.styles";
 import { confirmAction } from "../../../styles/modal/modal.styles";
+import { lastKeyboardFieldOf } from "../../../utils/field.utils";
+import AppButton from "../button/AppButton";
 import AppModal from "../modal/AppModal";
 import FormFieldGrid from "./FormFieldGrid";
 import FormSection from "./FormSection";
@@ -97,27 +97,31 @@ const EntityFormModal = <TValues extends FieldValues>({
   }, [watch, setValue, deriveValues]);
 
   const values = watch();
+  const lastKeyboardField = lastKeyboardFieldOf(
+    sections ? sections.flatMap((section) => section.fields) : (fields ?? []),
+    values
+  );
 
   return (
     <AppModal
       open={open}
       title={title}
       size={size}
+      fill
       onClose={onClose}
       footer={
         <>
-          <Button variant="outline" isDisabled={submitting} onPress={onClose}>
+          <AppButton variant="outline" disabled={submitting} onPress={onClose}>
             Cancel
-          </Button>
-          <Button
+          </AppButton>
+          <AppButton
             type="submit"
             form={formId}
             className={confirmAction({ kind: submitKind })}
-            isDisabled={submitting}
+            loading={submitting}
           >
-            {submitting ? <Spinner /> : null}
             {submitText}
-          </Button>
+          </AppButton>
         </>
       }
     >
@@ -135,6 +139,7 @@ const EntityFormModal = <TValues extends FieldValues>({
               section={section}
               control={control}
               values={values}
+              lastKeyboardField={lastKeyboardField}
             />
           ))
         ) : (
@@ -142,6 +147,7 @@ const EntityFormModal = <TValues extends FieldValues>({
             fields={fields ?? []}
             control={control}
             values={values}
+            lastKeyboardField={lastKeyboardField}
           />
         )}
         {summary ? <FormSummary lines={summary(values)} /> : null}
