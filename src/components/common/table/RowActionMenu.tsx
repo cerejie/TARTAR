@@ -8,7 +8,11 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { rowActionItem, rowActionMenu } from "../../../styles/table/table.styles";
+import {
+  rowActionItem,
+  rowActionMenu,
+  rowActionTrigger,
+} from "../../../styles/table/table.styles";
 import type { IRowAction } from "../../../models/common/action.model";
 
 type IProps = {
@@ -22,7 +26,12 @@ const RowActionMenu = ({ actions }: IProps) => {
 
   return (
     <DropdownMenuTrigger>
-      <Button variant="outline" size="icon-sm" aria-label="Row actions">
+      <Button
+        variant="outline"
+        size="icon-sm"
+        className={rowActionTrigger}
+        aria-label="Row actions"
+      >
         <EllipsisVertical />
       </Button>
       <DropdownMenu

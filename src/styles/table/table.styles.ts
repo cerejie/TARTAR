@@ -206,6 +206,8 @@ export const branchCell = "min-w-32";
 
 export const emptyCell = "text-muted-foreground";
 
+export const rowActionTrigger = "max-md:rounded-full";
+
 export const rowActionMenu = "w-auto min-w-48";
 
 export const rowActionItem = "whitespace-nowrap";
