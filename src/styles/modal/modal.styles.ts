@@ -42,6 +42,14 @@ export const confirmContent = "rounded-panel bg-panel ring-border shadow-panel";
 
 export const confirmFooter = `sm:flex-wrap -mx-6 -mb-6 rounded-b-panel border-t border-border bg-muted/50 px-6 py-4 ${modalActionSize} [&_[data-slot=alert-dialog-cancel]]:h-11 [&_[data-slot=alert-dialog-cancel]]:px-6`;
 
+export const confirmSheetHeader = "items-center pt-6 text-center";
+
+export const confirmSheetMedia =
+  "flex size-12 items-center justify-center rounded-full [&_svg]:size-6";
+
+export const confirmSheetFooter =
+  "flex-col gap-2 px-4 pb-safe [&_[data-slot=button]]:h-11 [&_[data-slot=button]]:w-full";
+
 export const confirmMedia = cva("", {
   variants: {
     kind: {

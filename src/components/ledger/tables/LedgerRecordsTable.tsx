@@ -259,6 +259,8 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
           onRetry={retry}
           pagination={pagination}
           detachedPagination
+          totalCount={totalCount}
+          onPageChange={goToPage}
           expansionKey={ledgerExpansionKey(scope)}
           detailSections={detailSections}
           emptyText={`No ${noun}s match the current filters`}

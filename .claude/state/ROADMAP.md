@@ -1,5 +1,5 @@
 # ROADMAP — Native-feel mobile PWA (branch mobilel-app-native)
-Updated: 2026-10-01 (M0 committed v2.02; M1 + M2 done, not committed; M3 next)
+Updated: 2026-10-01 (M0 v2.02, M1 + M2 v2.03 committed; M3 done, not committed; M4 next)
 
 ## Goal
 The MAIN app feels like a native app on phones (iOS + Android), installs as an app on iOS,
@@ -36,7 +36,7 @@ each phase, then a user check on a real phone.
 - Android Back closes the open sheet/modal (M1) · toasts clear of the tab bar (M1)
 - Touch targets >= 44px on coarse pointers · primary action in thumb reach (FAB)
 - Forms as full-height sheets, Save above the keyboard, enterKeyHint/inputMode per field
-- Detail in bottom sheet · filters/sort as sheets · confirm as action sheet · View Transitions
+- Detail in bottom sheet (M3) · filters/sort as sheets (M3) · confirm as action sheet (M3) · View Transitions (M3)
 - Edge-to-edge + safe areas (M0) · status bar colour (M0) · splash (M0) · install UI (M0)
 - Update prompt (M0) · push (M4)
 
@@ -90,7 +90,7 @@ each phase, then a user check on a real phone.
     browser-menu note / installed), styles in account.styles.ts.
   - Splash + screenshots were rendered with the harness Chrome (scratchpad assets/gen.mjs), no dep.
 
-- M1 DONE 2026-10-01, NOT committed. Build + lint clean; not yet checked on a device or in the
+- M1 DONE 2026-10-01, committed as Development v2.03. Build + lint clean; not yet checked on a device or in the
   harness (audit profiles are gone, so the harness needs a fresh sign-in first).
   - Phone shell (< 768px): layouts/ProtectedLayout.tsx renders components/common/layout/PhoneShell.tsx
     (AppBar + scroll main with pull to refresh + AppTabBar + PhoneMoreSheet + PhoneAlertsSheet);
@@ -114,7 +114,7 @@ each phase, then a user check on a real phone.
   - Deferred: back chevron on detail (no detail routes; detail sheets arrive in M3). Branch scope
     lives in the app bar, not in More.
 
-- M2 DONE 2026-10-01, NOT committed. Build + lint clean; CSS verified emitted; not checked on a device.
+- M2 DONE 2026-10-01, committed as Development v2.03. Build + lint clean; CSS verified emitted; not checked on a device.
   - Touch: theme.css base-layer `@media (pointer: coarse)` rule — min 44px on data-slot button (text
     sizes), input, input-group, select-trigger, combobox-chips; icon/icon-lg size 44; xs/icon-xs/
     icon-sm keep their look with a 44px ::after hit area. No `coarse` custom variant (nothing uses
@@ -133,6 +133,26 @@ each phase, then a user check on a real phone.
     Sales, Expenses, Purchases, Vouchers, LedgerRecords tables and Branch/User/BankAccount/
     ExpenseCategory/IncomeSource/Supplier create buttons.
 
+- M3 DONE 2026-10-01, NOT committed. Build + lint clean; CSS verified emitted; not checked on a device.
+  - Load more (D6): hook/common/query.hook.ts `keepPrevious` option (old rows stay, shown refreshing,
+    while a new key loads) on the 6 paged list hooks; models/common/pagination.model.ts loadMoreStep 20 +
+    grownPageSize (page 1, size = page x size + 20 — a growing window, no rows cached in a store);
+    components/common/table/LoadMoreSentinel.tsx + hook/common/load.more.hook.ts (IntersectionObserver,
+    re-armed when the loaded count changes; stops on error and shows Retry). DataTable renders it on
+    phones when given pagination + onPageChange (the 8 paged tables now pass totalCount/onPageChange);
+    TablePagination returns null on phones unless `visibleOnPhone` (DataTable's client pager passes it).
+    A grown size carries over to desktop (size select shows blank until changed).
+  - Detail sheet: DataTableCards opens RowDetailPanel in an AppSheet (title press or chevron) through
+    the modal registry key rowDetailSheetModalKey(expansionKey ?? useId), so Android Back closes it;
+    inline card expansion removed. DataTable `detailTitle?: (row) => string` (fallback "Details") —
+    no table passes it yet.
+  - Filters/sort: FilterPopover phone sheet moved to the modal registry (filterSheetModalKey(useId));
+    SortSelect on phones = icon pill + AppSheet list of ghost buttons with a check (sortSheetModalKey).
+  - Confirm: ConfirmationModal on phones = bottom Sheet action sheet (icon, title, message, full-width
+    action over Cancel, not dismissable while running); desktop AlertDialog unchanged.
+  - View Transitions: RouteRoot navigate passes `viewTransition` on phones; theme.css root crossfade
+    180ms, off under prefers-reduced-motion; app bar + tab bar carry their own view-transition-name.
+
 ## Next
 1. User check of M0 + M1 + M2 on devices. M2: inputs/buttons 44px on a phone, form opens full height,
    Save stays above the keyboard on iOS and Android, keyboard Next/Done, tel/email keypads, FAB above
@@ -143,7 +163,11 @@ each phase, then a user check on a real phone.
    M0: install on Android (Chrome), iOS (Safari -> Add to Home Screen:
    splash light/dark, status bar), Windows (Edge -> Install; shortcuts on the taskbar icon);
    landscape iPhone keeps content out of the notch; deploy twice to see the update toast.
-2. M3 lists + detail — present the file plan, wait for approval.
+   M3: phone lists load the next rows at the bottom ("n of N", spinner, Retry offline) without
+   skeleton flashes; tap a card title/chevron -> detail sheet, Back closes it; Filters and Sort sheets
+   close on Back; delete/confirm shows as a bottom action sheet; tab switches crossfade (none with
+   reduced motion); desktop paging, popover, sort select and alert dialog unchanged.
+2. M4 push — present the file plan (migration 27 SQL shown, never applied), wait for approval.
 3. Deployment checklist kept from the offline roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
@@ -164,11 +188,11 @@ each phase, then a user check on a real phone.
   components/common/app/*.tsx · hook/layout/admin.hook.ts · styles/admin/admin.layout.styles.ts
 - touch/form (M2): styles/common/theme.css (coarse rule) · hook/app/keyboard.hook.ts · components/common/button/PrimaryAction.tsx · utils/field.utils.ts
 - modal on phones: components/common/modal/AppModal.tsx (Sheet below md) · form/EntityFormModal.tsx
-- tables on phones: components/common/table/{DataTable,DataTableCards}.tsx
+- tables on phones: components/common/table/{DataTable,DataTableCards,LoadMoreSentinel}.tsx · hook/common/load.more.hook.ts
 - PWA: vite.config.ts · public/{admin.webmanifest,splash,screenshots} · hook/app/update.hook.ts
 - install: hook/common/install.hook.ts · store/common/install.store.ts
 - offline (must survive M4): store/common/{sync,query}.store.ts · utils/{write,idb}.utils.ts
 - harness: .claude/state/audit/ (drive.mjs, BASE default :5199; signed-in profiles are gone — run login.mjs first)
 
 ## State
-Branch mobilel-app-native. M0 committed (v2.02); M1 + M2 uncommitted. Migrations through 26 applied.
+Branch mobilel-app-native. M0 v2.02, M1 + M2 v2.03 committed; M3 uncommitted. Migrations through 26 applied.

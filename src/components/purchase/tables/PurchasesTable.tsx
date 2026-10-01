@@ -364,6 +364,8 @@ const PurchasesTable = () => {
           onRetry={retry}
           pagination={pagination}
           detachedPagination
+          totalCount={totalCount}
+          onPageChange={goToPage}
           expansionKey={disbursementExpansionKey(purchaseListKey)}
           pendingKeysOf={disbursementLinkedIds}
           detailSections={detailSections}

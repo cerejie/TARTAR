@@ -73,7 +73,7 @@ export const usePaymentListHook = (
         ...pagination,
         sort: sortOption,
       }),
-    { enabled: !party }
+    { enabled: !party, keepPrevious: true }
   );
 
   const partyFilter: IPartyFilter = party

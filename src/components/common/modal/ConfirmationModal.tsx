@@ -9,7 +9,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
+import { useIsMobile } from "@/hook/use-mobile";
+import { cn } from "@/utils/cn.utils";
 import type { ConfirmKind } from "../../../models/common/modal.model";
 import {
   selectConfirm,
@@ -21,6 +30,10 @@ import {
   confirmContent,
   confirmFooter,
   confirmMedia,
+  confirmSheetFooter,
+  confirmSheetHeader,
+  confirmSheetMedia,
+  drawerContent,
 } from "../../../styles/modal/modal.styles";
 
 const defaultTitles: Record<ConfirmKind, string> = {
@@ -42,16 +55,59 @@ const defaultMessage = (kind: ConfirmKind, itemName?: string) => {
 };
 
 const ConfirmationModal = () => {
+  const isMobile = useIsMobile();
   const confirm = useConfirmStore(selectConfirm);
   const running = useConfirmStore(selectConfirmRunning);
   const closeConfirm = useConfirmStore((state) => state.closeConfirm);
   const runConfirm = useConfirmStore((state) => state.runConfirm);
 
   const kind = confirm.kind ?? "confirm";
+  const title = confirm.title ?? defaultTitles[kind];
+  const message = confirm.message ?? defaultMessage(kind, confirm.itemName);
+  const icon = kind === "delete" ? <Trash2 /> : <CircleAlert />;
 
   const handleOpenChange = (next: boolean) => {
     if (!next && !running) closeConfirm();
   };
+
+  const okButton = (
+    <Button
+      className={confirmAction({ kind })}
+      isDisabled={running}
+      onPress={() => void runConfirm()}
+    >
+      {running ? <Spinner /> : null}
+      {confirm.okText ?? defaultOkTexts[kind]}
+    </Button>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet
+        side="bottom"
+        isOpen={confirm.visible}
+        onOpenChange={handleOpenChange}
+        isDismissable={!running}
+        showCloseButton={false}
+        className={drawerContent}
+      >
+        <SheetHeader className={confirmSheetHeader}>
+          <span className={cn(confirmSheetMedia, confirmMedia({ kind }))} aria-hidden="true">
+            {icon}
+          </span>
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription>{message}</SheetDescription>
+        </SheetHeader>
+
+        <SheetFooter className={confirmSheetFooter}>
+          {okButton}
+          <Button variant="outline" isDisabled={running} onPress={closeConfirm}>
+            {confirm.cancelText ?? "Cancel"}
+          </Button>
+        </SheetFooter>
+      </Sheet>
+    );
+  }
 
   return (
     <AlertDialog
@@ -60,27 +116,16 @@ const ConfirmationModal = () => {
       className={confirmContent}
     >
       <AlertDialogHeader>
-        <AlertDialogMedia className={confirmMedia({ kind })}>
-          {kind === "delete" ? <Trash2 /> : <CircleAlert />}
-        </AlertDialogMedia>
-        <AlertDialogTitle>{confirm.title ?? defaultTitles[kind]}</AlertDialogTitle>
-        <AlertDialogDescription>
-          {confirm.message ?? defaultMessage(kind, confirm.itemName)}
-        </AlertDialogDescription>
+        <AlertDialogMedia className={confirmMedia({ kind })}>{icon}</AlertDialogMedia>
+        <AlertDialogTitle>{title}</AlertDialogTitle>
+        <AlertDialogDescription>{message}</AlertDialogDescription>
       </AlertDialogHeader>
 
       <AlertDialogFooter className={confirmFooter}>
         <AlertDialogCancel isDisabled={running}>
           {confirm.cancelText ?? "Cancel"}
         </AlertDialogCancel>
-        <Button
-          className={confirmAction({ kind })}
-          isDisabled={running}
-          onPress={() => void runConfirm()}
-        >
-          {running ? <Spinner /> : null}
-          {confirm.okText ?? defaultOkTexts[kind]}
-        </Button>
+        {okButton}
       </AlertDialogFooter>
     </AlertDialog>
   );

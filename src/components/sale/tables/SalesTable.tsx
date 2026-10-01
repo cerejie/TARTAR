@@ -351,6 +351,8 @@ const SalesTable = () => {
           onRetry={retry}
           pagination={pagination}
           detachedPagination
+          totalCount={totalCount}
+          onPageChange={goToPage}
           expansionKey={saleExpansionKey}
           detailSections={detailSections}
           emptyText="No sales match the current filters"

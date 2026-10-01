@@ -309,6 +309,8 @@ const VouchersTable = () => {
           onRetry={retry}
           pagination={pagination}
           detachedPagination
+          totalCount={totalCount}
+          onPageChange={goToPage}
           expansionKey={voucherExpansionKey}
           detailSections={detailSections}
           emptyText="No vouchers match the current filters"

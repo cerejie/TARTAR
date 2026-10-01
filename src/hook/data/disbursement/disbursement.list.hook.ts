@@ -139,7 +139,8 @@ export const useDisbursementListHook = (
       sortKey
     ),
     () =>
-      transactionServices.getDisbursementList(kind, effectiveFilters, pageRequest)
+      transactionServices.getDisbursementList(kind, effectiveFilters, pageRequest),
+    { keepPrevious: true }
   );
 
   const summaryQuery = useQuery<IDisbursement[]>(

@@ -52,3 +52,7 @@ export const filterSortTrigger =
 
 export const filterSortValue =
   "inline-flex items-center gap-2 max-md:[&_[data-slot=select-value]]:sr-only";
+
+export const sortSheetList = "flex flex-col gap-1 py-2";
+
+export const sortSheetOption = "w-full justify-between";

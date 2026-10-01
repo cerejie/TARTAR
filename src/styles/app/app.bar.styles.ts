@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const appBar = cva(
-  "box-content flex h-14 shrink-0 items-center gap-2 border-b bg-panel px-3 pt-safe transition-[border-color,box-shadow] select-none md:h-16 md:gap-3 md:rounded-panel md:border md:border-border md:px-6 md:pt-0 md:shadow-panel motion-reduce:transition-none",
+  "box-content flex h-14 shrink-0 items-center gap-2 border-b bg-panel px-3 pt-safe transition-[border-color,box-shadow] select-none [view-transition-name:app-bar] md:h-16 md:gap-3 md:rounded-panel md:border md:border-border md:px-6 md:pt-0 md:shadow-panel motion-reduce:transition-none",
   {
     variants: {
       scrolled: {
@@ -19,7 +19,7 @@ export const appBarTitle =
 export const appBarActions = "ml-auto flex shrink-0 items-center gap-1 md:gap-2";
 
 export const appTabBar =
-  "order-last shrink-0 px-3 pt-2 pb-safe select-none md:order-first md:w-24 md:rounded-panel md:bg-panel md:p-0 md:py-3 md:shadow-panel";
+  "order-last shrink-0 px-3 pt-2 pb-safe select-none [view-transition-name:app-tab-bar] md:order-first md:w-24 md:rounded-panel md:bg-panel md:p-0 md:py-3 md:shadow-panel";
 
 export const appTabList =
   "mx-auto grid max-w-xl auto-cols-fr grid-flow-col overflow-hidden rounded-panel bg-panel shadow-panel md:flex md:flex-col md:gap-1 md:overflow-visible md:rounded-none md:bg-transparent md:px-2 md:shadow-none";

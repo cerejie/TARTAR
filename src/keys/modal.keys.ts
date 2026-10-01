@@ -54,3 +54,7 @@ export const periodPrintModalKey = (scope: string) => `${scope}-print`;
 export const salePrintModalKey = "sale-print";
 
 export const confirmOverlayKey = "confirm-dialog";
+
+export const rowDetailSheetModalKey = (scope: string) => `${scope}-detail`;
+export const filterSheetModalKey = (scope: string) => `${scope}-filters`;
+export const sortSheetModalKey = (scope: string) => `${scope}-sort`;

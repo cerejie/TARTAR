@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { ReactNode } from "react";
 import { ChevronDown, Eraser, SlidersHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -10,13 +11,13 @@ import {
 } from "@/components/ui/popover";
 import {
   Sheet,
-  SheetClose,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hook/use-mobile";
+import { useModal } from "../../../hook/common/modal.hook";
+import { filterSheetModalKey } from "../../../keys/modal.keys";
 import {
   filterPill,
   filterPopover,
@@ -38,9 +39,18 @@ type IProps = {
 
 const FilterPopover = ({ activeCount, onReset, children }: IProps) => {
   const isMobile = useIsMobile();
+  const sheet = useModal(filterSheetModalKey(useId()));
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) sheet.closeModal();
+  };
 
   const trigger = (
-    <Button variant="outline" className={filterPill}>
+    <Button
+      variant="outline"
+      className={filterPill}
+      onPress={isMobile ? () => sheet.openModal() : undefined}
+    >
       <SlidersHorizontal />
       Filters
       {activeCount > 0 ? <Badge>{activeCount}</Badge> : null}
@@ -57,19 +67,24 @@ const FilterPopover = ({ activeCount, onReset, children }: IProps) => {
 
   if (isMobile) {
     return (
-      <SheetTrigger>
+      <>
         {trigger}
-        <Sheet side="bottom" className={drawerContent}>
+        <Sheet
+          side="bottom"
+          isOpen={sheet.modal.visible}
+          onOpenChange={handleOpenChange}
+          className={drawerContent}
+        >
           <SheetHeader className={drawerHeaderRuled}>
             <SheetTitle>Filters</SheetTitle>
           </SheetHeader>
           <div className={drawerBody}>{children}</div>
           <SheetFooter className={filterSheetFooter}>
             {resetButton("outline", "default")}
-            <SheetClose variant="default">Show results</SheetClose>
+            <Button onPress={sheet.closeModal}>Show results</Button>
           </SheetFooter>
         </Sheet>
-      </SheetTrigger>
+      </>
     );
   }
 

@@ -145,6 +145,8 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
         onRetry={retry}
         pagination={pagination}
         detachedPagination
+        totalCount={totalCount}
+        onPageChange={goToPage}
         emptyText="No payments match the current filters"
       />
     </TablePanel>

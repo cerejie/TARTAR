@@ -102,7 +102,8 @@ export const useSaleListHook = () => {
       pagination.pageSize,
       sortKey
     ),
-    () => saleServices.getList(effectiveFilters, pageRequest)
+    () => saleServices.getList(effectiveFilters, pageRequest),
+    { keepPrevious: true }
   );
 
   const summaryQuery = useQuery<ISale[]>(

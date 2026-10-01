@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type {
   IQueryOptions,
   IQueryState,
@@ -18,6 +18,7 @@ export const useQuery = <T>(
   const watch = useQueryStore((state) => state.watch);
   const unwatch = useQueryStore((state) => state.unwatch);
   const entry = useQueryStore(selectEntry<T>(key));
+  const previousData = useRef<T | undefined>(undefined);
 
   useEffect(() => {
     if (!enabled) return;
@@ -27,12 +28,22 @@ export const useQuery = <T>(
     return () => unwatch(key);
   }, [key, enabled]);
 
-  const hasData = entry.data !== undefined;
+  useEffect(() => {
+    if (entry.data !== undefined) previousData.current = entry.data;
+  }, [entry.data]);
+
+  const placeholder =
+    options.keepPrevious && entry.data === undefined && entry.error === null
+      ? previousData.current
+      : undefined;
+  const data = entry.data ?? placeholder;
+  const hasData = data !== undefined;
 
   return {
     ...entry,
+    data,
     isInitialLoading: enabled && !hasData && entry.error === null,
-    isRefreshing: entry.loading && hasData,
+    isRefreshing: hasData && (entry.loading || placeholder !== undefined),
     refetch: () => void run(key, fetcher),
   };
 };

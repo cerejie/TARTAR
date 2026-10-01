@@ -252,6 +252,8 @@ const TransactionsTable = () => {
           onRetry={retry}
           pagination={pagination}
           detachedPagination
+          totalCount={totalCount}
+          onPageChange={goToPage}
           expansionKey={transactionExpansionKey}
           detailSections={detailSections}
           emptyText="No transactions match the current filters"

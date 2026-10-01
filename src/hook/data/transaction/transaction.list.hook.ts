@@ -119,7 +119,8 @@ export const useTransactionListHook = () => {
       pagination.pageSize,
       sortKey
     ),
-    () => transactionServices.getList(effectiveFilters, pageRequest)
+    () => transactionServices.getList(effectiveFilters, pageRequest),
+    { keepPrevious: true }
   );
 
   const summaryQuery = useQuery<IDisbursement[]>(

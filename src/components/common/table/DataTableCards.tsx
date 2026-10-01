@@ -5,10 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn.utils";
-import {
-  rowExpansionPersistProps,
-  type useRowExpansion,
-} from "../../../hook/common/expansion.hook";
+import { useModal } from "../../../hook/common/modal.hook";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import type {
   IColumnMobileRole,
@@ -18,7 +15,6 @@ import type {
 import {
   dataCard,
   dataCardAmount,
-  dataCardDetail,
   dataCardField,
   dataCardFoot,
   dataCardHead,
@@ -41,6 +37,7 @@ import {
   dataTableBodyRefreshing,
   expandTrigger,
 } from "../../../styles/table/table.styles";
+import AppSheet from "../app/AppSheet";
 import ErrorState from "../status/ErrorState";
 import RowDetailPanel from "./RowDetailPanel";
 import TableEmptyState from "./TableEmptyState";
@@ -68,8 +65,9 @@ type IProps<T> = {
   onRowClick?: (row: T) => void;
   rowClassName?: (row: T) => string;
   rowSelection?: IDataTableSelection<T>;
-  expansion?: ReturnType<typeof useRowExpansion>;
+  detailSheetKey: string;
   detailSections?: IDetailSection<T>[];
+  detailTitle?: (row: T) => string;
 };
 
 const mobileRoleOf = <T,>(column: IDataTableColumn<T>, index: number): IColumnMobileRole => {
@@ -103,9 +101,13 @@ const DataTableCards = <T,>({
   onRowClick,
   rowClassName,
   rowSelection,
-  expansion,
+  detailSheetKey,
   detailSections,
+  detailTitle,
 }: IProps<T>) => {
+  const detailSheet = useModal<string>(detailSheetKey);
+  const hasDetail = Boolean(detailSections?.length);
+
   if (loading) {
     return (
       <ul className={dataCardList} aria-busy>
@@ -157,8 +159,9 @@ const DataTableCards = <T,>({
     const actions = fieldsOf("actions");
 
     const isSelected = rowSelection?.selectedRowKeys.includes(key) ?? false;
-    const isExpanded = expansion?.expandedRow === key;
-    const isOpen = isExpanded || expansion?.collapsingRow === key;
+    const openDetail = () => detailSheet.openModal(key);
+    const detailPress = hasDetail ? openDetail : undefined;
+    const pressTitle = onRowClick ? () => onRowClick(row) : detailPress;
     const titleContent = titles.map((field) => (
       <span key={field.id}>{field.content}</span>
     ));
@@ -180,8 +183,8 @@ const DataTableCards = <T,>({
           ) : null}
 
           <div className={dataCardHeading}>
-            {onRowClick ? (
-              <PressArea className={dataCardTitlePress} onPress={() => onRowClick(row)}>
+            {pressTitle ? (
+              <PressArea className={dataCardTitlePress} onPress={pressTitle}>
                 {titleContent}
               </PressArea>
             ) : (
@@ -220,7 +223,7 @@ const DataTableCards = <T,>({
           </dl>
         ) : null}
 
-        {statuses.length > 0 || (expansion && detailSections) ? (
+        {statuses.length > 0 || hasDetail ? (
           <div className={dataCardFoot}>
             <div className={dataCardTags}>
               {statuses.map((field) => (
@@ -228,44 +231,53 @@ const DataTableCards = <T,>({
               ))}
             </div>
 
-            {expansion && detailSections ? (
+            {hasDetail ? (
               <Button
                 variant="secondary"
                 size="icon-sm"
                 className={dataCardToggle}
-                aria-label={isExpanded ? "Hide details" : "Show details"}
-                aria-expanded={isExpanded}
-                onPress={() => expansion.toggleRow(key)}
-                {...rowExpansionPersistProps}
+                aria-label="Show details"
+                aria-haspopup="dialog"
+                onPress={openDetail}
               >
-                <ChevronRight className={expandTrigger({ open: isExpanded })} />
+                <ChevronRight className={expandTrigger({ open: false })} />
               </Button>
             ) : null}
-          </div>
-        ) : null}
-
-        {isOpen && expansion && detailSections ? (
-          <div className={dataCardDetail}>
-            <RowDetailPanel<T>
-              record={row}
-              sections={detailSections}
-              collapsing={expansion.collapsingRow === key}
-              onCollapsed={() => expansion.endCollapse(key)}
-            />
           </div>
         ) : null}
       </li>
     );
   };
 
+  const detailRow = rows.find((row) => resolveRowKey(row) === detailSheet.modal.data);
+
   return (
-    <ul
-      className={cn(dataCardList, refreshing && dataTableBodyRefreshing)}
-      aria-label={label}
-      aria-busy={refreshing}
-    >
-      {rows.map(renderCard)}
-    </ul>
+    <>
+      <ul
+        className={cn(dataCardList, refreshing && dataTableBodyRefreshing)}
+        aria-label={label}
+        aria-busy={refreshing}
+      >
+        {rows.map(renderCard)}
+      </ul>
+
+      {detailSections ? (
+        <AppSheet
+          open={detailSheet.modal.visible && detailRow !== undefined}
+          title={detailRow && detailTitle ? detailTitle(detailRow) : "Details"}
+          onClose={detailSheet.closeModal}
+        >
+          {detailRow ? (
+            <RowDetailPanel<T>
+              record={detailRow}
+              sections={detailSections}
+              collapsing={false}
+              onCollapsed={detailSheet.closeModal}
+            />
+          ) : null}
+        </AppSheet>
+      ) : null}
+    </>
   );
 };
 

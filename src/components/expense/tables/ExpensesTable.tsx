@@ -339,6 +339,8 @@ const ExpensesTable = () => {
           onRetry={retry}
           pagination={pagination}
           detachedPagination
+          totalCount={totalCount}
+          onPageChange={goToPage}
           expansionKey={disbursementExpansionKey(expenseListKey)}
           pendingKeysOf={disbursementLinkedIds}
           detailSections={detailSections}

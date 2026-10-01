@@ -22,7 +22,10 @@ import { usePagination } from "../../../hook/common/pagination.hook";
 import { usePendingIds } from "../../../hook/common/pending.hook";
 import { useSort } from "../../../hook/common/sort.hook";
 import type { IDetailSection } from "../../../models/common/detail.model";
-import type { IPaginationRequest } from "../../../models/common/pagination.model";
+import {
+  grownPageSize,
+  type IPaginationRequest,
+} from "../../../models/common/pagination.model";
 import type {
   IDataTableColumn,
   IDataTableSelection,
@@ -57,7 +60,9 @@ import {
 } from "../../../styles/table/table.styles";
 import ErrorState from "../status/ErrorState";
 import StatusTag from "../status/StatusTag";
+import { rowDetailSheetModalKey } from "../../../keys/modal.keys";
 import DataTableCards from "./DataTableCards";
+import LoadMoreSentinel from "./LoadMoreSentinel";
 import RowDetailPanel from "./RowDetailPanel";
 import TableEmptyState from "./TableEmptyState";
 import TablePagination from "./TablePagination";
@@ -82,6 +87,7 @@ type IProps<T> = {
   onRowClick?: (row: T) => void;
   expansionKey?: string;
   detailSections?: IDetailSection<T>[];
+  detailTitle?: (row: T) => string;
   emptyText?: string;
   rowSelection?: IDataTableSelection<T>;
   rowClassName?: (row: T) => string;
@@ -127,6 +133,7 @@ const DataTable = <T extends object>({
   onRowClick,
   expansionKey,
   detailSections,
+  detailTitle,
   emptyText = "No records",
   rowSelection,
   rowClassName,
@@ -415,8 +422,9 @@ const DataTable = <T extends object>({
           onRowClick={onRowClick}
           rowClassName={rowClassOf}
           rowSelection={rowSelection}
-          expansion={isExpandable ? expansion : undefined}
-          detailSections={detailSections}
+          detailSheetKey={rowDetailSheetModalKey(expansionKey ?? tableId)}
+          detailSections={isExpandable ? detailSections : undefined}
+          detailTitle={detailTitle}
         />
       ) : (
         renderTable()
@@ -428,7 +436,18 @@ const DataTable = <T extends object>({
         </p>
       ) : null}
 
-      {pagination && !detachedPagination ? (
+      {isMobile && pagination && onPageChange && !loading && rows.length > 0 ? (
+        <LoadMoreSentinel
+          loadedCount={rows.length}
+          totalCount={totalCount}
+          loading={refreshing}
+          error={error}
+          onRetry={onRetry}
+          onLoadMore={() => onPageChange(1, grownPageSize(pagination))}
+        />
+      ) : null}
+
+      {!isMobile && pagination && !detachedPagination ? (
         <TablePagination
           pagination={pagination}
           totalCount={totalCount}
@@ -442,6 +461,7 @@ const DataTable = <T extends object>({
           totalCount={sortedRows.length}
           onPageChange={(pageNumber) => setClientPagination({ pageNumber })}
           showSizeChanger={false}
+          visibleOnPhone
         />
       ) : null}
     </div>

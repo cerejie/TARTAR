@@ -112,8 +112,6 @@ export const dataCardValue = "min-w-0 break-words text-foreground";
 
 export const dataCardToggle = "relative z-10 ml-auto shrink-0 rounded-full";
 
-export const dataCardDetail = "-mx-3.5 -mb-3.5 border-t border-border";
-
 export const dataCardSkeletonHead = "flex items-center justify-between gap-3";
 
 export const dataCardSkeletonTitle = "h-4 w-2/5";
@@ -162,6 +160,9 @@ export const tablePanel = "flex min-w-0 flex-col gap-3";
 export const tablePanelBody = "min-w-0";
 
 export const tablePanelTitle = "font-heading text-base font-semibold text-foreground";
+
+export const tableLoadMore =
+  "flex min-h-11 items-center justify-center gap-2 pt-2 text-xs text-muted-foreground tabular-nums";
 
 export const tablePagination = "flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-2";
 

@@ -13,6 +13,7 @@ export interface IQueryState<T> extends IQueryEntry<T> {
 
 export interface IQueryOptions {
   enabled?: boolean;
+  keepPrevious?: boolean;
 }
 
 export interface IMutationOptions<TResult> {

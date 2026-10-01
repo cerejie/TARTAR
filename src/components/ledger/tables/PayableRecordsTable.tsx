@@ -193,6 +193,8 @@ const PayableRecordsTable = () => {
         onRetry={retry}
         pagination={pagination}
         detachedPagination
+        totalCount={totalCount}
+        onPageChange={goToPage}
         expansionKey={ledgerExpansionKey("payables")}
         detailSections={detailSections}
         emptyText="No payables match the current filters"

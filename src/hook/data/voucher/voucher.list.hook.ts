@@ -111,7 +111,8 @@ export const useVoucherListHook = () => {
       pagination.pageSize,
       sortKey
     ),
-    () => voucherServices.getList(effectiveFilters, pageRequest)
+    () => voucherServices.getList(effectiveFilters, pageRequest),
+    { keepPrevious: true }
   );
 
   const vouchers = useWithPendingRows(

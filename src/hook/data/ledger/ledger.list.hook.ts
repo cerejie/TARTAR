@@ -173,7 +173,8 @@ export const useLedgerListHook = <
       config.services.getList(effectiveFilters, {
         ...pagination,
         sort: sortOption,
-      })
+      }),
+    { keepPrevious: true }
   );
 
   const summaryQuery = useQuery<Row[]>(

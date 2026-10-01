@@ -32,6 +32,11 @@ export const pageRange = (pagination: IPaginationRequest) => {
   return { from, to: from + pagination.pageSize - 1 };
 };
 
+export const loadMoreStep = 20;
+
+export const grownPageSize = (pagination: IPaginationRequest) =>
+  pagination.pageNumber * pagination.pageSize + loadMoreStep;
+
 export const emptyPage = <T>(
   pagination: IPaginationRequest
 ): IPaginationResponse<T> => ({

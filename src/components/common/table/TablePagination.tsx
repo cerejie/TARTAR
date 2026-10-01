@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useIsMobile } from "@/hook/use-mobile";
 import {
   pageItems,
   type IPaginationRequest,
@@ -37,6 +38,7 @@ type IProps = {
   totalCount: number;
   onPageChange: (pageNumber: number, pageSize: number) => void;
   showSizeChanger?: boolean;
+  visibleOnPhone?: boolean;
 };
 
 const pageSizes = [8, 16, 32, 64] as const;
@@ -46,7 +48,9 @@ const TablePagination = ({
   totalCount,
   onPageChange,
   showSizeChanger = true,
+  visibleOnPhone = false,
 }: IProps) => {
+  const isMobile = useIsMobile();
   const { pageNumber, pageSize } = pagination;
   const lastPage = Math.max(1, Math.ceil(totalCount / pageSize));
   const firstItem = (pageNumber - 1) * pageSize + 1;
@@ -58,6 +62,8 @@ const TablePagination = ({
     const size = pageSizes.find((item) => String(item) === key);
     if (size) onPageChange(1, size);
   };
+
+  if (isMobile && !visibleOnPhone) return null;
 
   return (
     <div className={tablePagination}>
