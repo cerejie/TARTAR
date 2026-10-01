@@ -5,6 +5,15 @@ import { registerSW } from "virtual:pwa-register";
 const updateToastId = "app-update";
 const updateCheckIntervalMs = 60 * 60 * 1000;
 
+const reloadIntoUpdate = (updateServiceWorker: (reloadPage?: boolean) => Promise<void>) => {
+  if (!navigator.serviceWorker.controller) {
+    window.location.reload();
+    return;
+  }
+
+  void updateServiceWorker(true);
+};
+
 export const useAppUpdateHook = () => {
   useEffect(() => {
     const listeners = new AbortController();
@@ -18,7 +27,7 @@ export const useAppUpdateHook = () => {
           duration: Infinity,
           action: {
             label: "Reload",
-            onClick: () => void updateServiceWorker(true),
+            onClick: () => reloadIntoUpdate(updateServiceWorker),
           },
         }),
       onRegisteredSW: (_swUrl, registration) => {

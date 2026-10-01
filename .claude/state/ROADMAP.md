@@ -1,5 +1,5 @@
 # ROADMAP — Native-feel mobile PWA (branch mobilel-app-native)
-Updated: 2026-10-01 (M0 v2.02, M1 + M2 v2.03, M3 v2.04 committed; M4 done, not committed, migration 27 not applied; M5 next)
+Updated: 2026-10-01 (M0 v2.02, M1 + M2 v2.03, M3 v2.04, M4 v2.05 committed; M5 automated pass DONE, not committed; fix roadmap in Next)
 
 ## Goal
 The MAIN app feels like a native app on phones (iOS + Android), installs as an app on iOS,
@@ -20,6 +20,9 @@ each phase, then a user check on a real phone.
 ## Decisions locked (2026-10-01)
 - D1 Delivery = installable PWA with native feel. No Capacitor, no React Native.
 - D2 The MAIN app becomes native on phones (< 768px). Tablets/desktop keep the sidebar shell.
+  REVISED 2026-10-01 (user): the main app on phones keeps the collapsible sidebar (menu button in the
+  app bar opens it as a drawer) instead of a bottom tab bar. Only /admin (4 tabs) keeps the native
+  bottom tab bar.
 - D3 Platforms: iOS + Android + Windows installs, and a plain browser.
 - D4 Push notifications: yes — all four events: daily 8 AM due digest (managers, accountants),
   voucher needs approval (managers), payment needs verification (managers), your record was
@@ -32,7 +35,7 @@ each phase, then a user check on a real phone.
   tokens only in theme.css, useConfirm, writes through runWrite, Transactions is reference).
 
 ## Standards checklist (from the 2026-10-01 analysis; tick as phases land)
-- Bottom tab bar per role + More (M1) · large title collapsing (M1) · back on detail (M3) · per-tab scroll restore (M1)
+- Phone nav = sidebar drawer from the app bar menu button (main app, D2 revised); bottom tab bar = /admin only · large title collapsing (M1) · back on detail (M3) · per-tab scroll restore (M1)
 - Android Back closes the open sheet/modal (M1) · toasts clear of the tab bar (M1)
 - Touch targets >= 44px on coarse pointers · primary action in thumb reach (FAB)
 - Forms as full-height sheets, Save above the keyboard, enterKeyHint/inputMode per field
@@ -133,7 +136,7 @@ each phase, then a user check on a real phone.
     Sales, Expenses, Purchases, Vouchers, LedgerRecords tables and Branch/User/BankAccount/
     ExpenseCategory/IncomeSource/Supplier create buttons.
 
-- M4 DONE 2026-10-01, NOT committed. Build + lint clean; precache 88 entries (4 manifest icons listed twice,
+- M4 DONE 2026-10-01, committed as Development v2.05. Build + lint clean; precache 88 entries (4 manifest icons listed twice,
   same revision). Migration 27 written, NOT applied; Edge Function not deployed; nothing checked on a device.
   - supabase/migrations/20261015000027_push_notifications.sql: push_subscriptions (owner select/delete RLS,
     endpoint unique, user_id index); save_push_subscription (endpoint moves to the signed-in user) +
@@ -189,44 +192,104 @@ each phase, then a user check on a real phone.
   - View Transitions: RouteRoot navigate passes `viewTransition` on phones; theme.css root crossfade
     180ms, off under prefers-reduced-motion; app bar + tab bar carry their own view-transition-name.
 
+- M5 automated pass DONE 2026-10-01, NOT committed. Build + lint clean (precache 86). Chrome harness on a
+  production build (vite preview :5199), phone 390x844 touch, tablet 820x1180, desktop 1440, landscape 844x390.
+  - Phone shell change (D2 revised): PhoneShell = SidebarProvider + AppBar(leading SidebarToggle, trailing
+    InboxBell with dueCount) + ProtectedSider account (drawer; pinned group + AccountSheetItems inside the
+    scrolling content). Removed AppTabBar from the main app, PhoneMoreSheet, phone tab helpers in
+    route.utils, moreSheet* styles; key sidebarMenuModalKey syncs the drawer with Android Back
+    (useSidebarToggleHook in protected.hook). FAB dock now 1rem above the safe area.
+  - Fixed while testing: (1) M1 regression: 768-1023px had an offcanvas sidebar with no trigger -> SidebarToggle
+    in ProtectedHeader; (2) form sheet taller than the screen (title/close off-screen): drawerContentFill height
+    lost to the registry's data-[side=bottom]:h-auto -> same variant; (3) update toast Reload did nothing on a
+    first-visit (uncontrolled) tab -> reloadIntoUpdate in update.hook; (4) Sync panel was a popover on
+    phones/tablets, Back left the page -> AppSheet via syncSheetModalKey; (5) push copy promised employees
+    approvals + the digest -> pushSummaryOf(permissions); (6) .env.example carried the VAPID private key ->
+    removed (key is in git history, see Next P0-1).
+  - Passed: emp/acc/admin phone (every menu page renders, no x-overflow, drawer Back, Back after menu
+    navigation, alerts sheet, FAB collapse, collapsing title, full-height form 831px, enterkeyhint/inputmode,
+    Filters/Sort/detail sheets + Back, load more 8 -> 59/66, confirm action sheet, dark mode); tablet (menu
+    button, drawer, Back); desktop admin + accountant (every route, primary dialog opens/fits/closes, dark,
+    0 page errors); /admin phone (4 tabs, bottom bar) + desktop (side rail); landscape (no overflow).
+  - Offline (new SW): o11-emp, o11-admin, o12-acc/emp/admin, o6 replay all green: offline reloads served by the
+    SW, offline sale/expense/payment/master-data writes queued and replayed, failed list empty. Phone offline:
+    Pending sync tag, "You are offline", Sync sheet lists the write, queue flushes on reconnect.
+  - PWA: update toast + Reload (controlled and first-visit), manifest main + /admin found, no manifest errors.
+  - Push client: SW push handler shows JSON / text / empty / admin-url payloads; subscribe in a real Chrome
+    profile -> FCM endpoint + save_push_subscription 204; Turn off -> delete 204; sign-out releases the device;
+    employee "Get a notification when it is decided?" toast after recording a sale. Account card shows
+    "not set up" without VITE_VAPID_PUBLIC_KEY.
+  - Static review: migrations 27/28 + send-push consistent with app.branch_access (empty array = no branch,
+    superadmin/developer = all); actor skipped; RLS owner-only; digest 00:00 UTC = 08:00 Manila.
+  - QA rows created this pass (add to reset): sales 911, 913, 341 (deposited), 520, 914 x2 (qaemp2);
+    expense 904 "OFFLINE O6" + voucher; receivable payment 51 QA Customer A (PMT-QAT-2610-0005, pending);
+    expense category "QA O12 Type" (QOT); bank "QA O12 Bank" again. Test push subscription already deleted.
+
 ## Next
-1. User check of M0 + M1 + M2 on devices. M2: inputs/buttons 44px on a phone, form opens full height,
-   Save stays above the keyboard on iOS and Android, keyboard Next/Done, tel/email keypads, FAB above
-   the tab bar shrinking on scroll and hidden under sheets, desktop buttons unchanged. M1: each role's tabs, More lists the remaining pages + account,
-   Alerts badge/sheet (manager), title collapses into the app bar on scroll, scroll position kept per
-   tab, pull to refresh, Android Back closes sheet -> modal -> confirm in order and then leaves the
-   page normally, toasts below the notch, admin app unchanged (tabs, side rail, user sheet).
-   M0: install on Android (Chrome), iOS (Safari -> Add to Home Screen:
-   splash light/dark, status bar), Windows (Edge -> Install; shortcuts on the taskbar icon);
-   landscape iPhone keeps content out of the notch; deploy twice to see the update toast.
-   M3: phone lists load the next rows at the bottom ("n of N", spinner, Retry offline) without
-   skeleton flashes; tap a card title/chevron -> detail sheet, Back closes it; Filters and Sort sheets
-   close on Back; delete/confirm shows as a bottom action sheet; tab switches crossfade (none with
-   reduced motion); desktop paging, popover, sort select and alert dialog unchanged.
-2. M4 setup by the user: apply migration 27, then 28; `npx web-push generate-vapid-keys`; put the public key in
-   .env as VITE_VAPID_PUBLIC_KEY (and the host's env); set function secrets VAPID_PUBLIC_KEY,
-   VAPID_PRIVATE_KEY, VAPID_SUBJECT (mailto:), PUSH_SECRET; `supabase functions deploy send-push
-   --no-verify-jwt`; `update app.settings set push_function_url = '<url>/functions/v1/send-push',
-   push_secret = '<PUSH_SECRET>'`. Then check: Account switch on/off, Alerts prompt, employee toast offer,
-   voucher submit -> manager push, approve -> employee push, sale verify/reject, payment pending,
-   `select app.send_due_digest()` by hand, tap opens the right page, sign-out stops pushes, offline
-   precache still works after the SW change.
-3. M5 verification matrix — present the plan, wait for approval.
-4. Deployment checklist kept from the offline roadmap: user resets data (all QA rows incl.
-   offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
-   purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
-   bank "QA O12 Bank" (no delete in the UI); 2026-10-01 concurrency rows: sales 701, 702 (now
-   ₱7,022), 711, 721, 801, 802, 803, 932, 933, 941, 943, 944-948, 951 (931 deleted, 942 lost), expense
-   712, purchases 811-818 payee "QA Race Payee" + their vouchers, receivables reference "C-RACE-*"
-   + their payments; C2 rows: sales 1251 (deposited), 1253; C3: sale 961 on branch HARDWARE,
-   auto-verified because admin recorded it — not deletable in the UI; C4: sale 953; C5: sale 963 verified, expense 964 + its rejected voucher; V3: expense 931, purchase 932 + vouchers,
-   bank "QA V3 Bank" + accounts "QA V3 One"/"QA V3 Two"), adds Banks + branch legal_name/address.
-   Then ask before deleting `.claude/state/audit/` and the old scratchpad audit dir
-   (f7-approve.json there holds the superadmin password in plain text).
+Fix roadmap to 100% deployable. P0 = blocks deploy, P1 = fix before go-live, P2 = soon after, P3 = polish.
+
+P0 — user actions (cannot be done from this machine: no Supabase CLI or service credentials)
+1. VAPID key leak: commit d3382c5 (pushed to origin/mobilel-app-native) has VITE_VAPID_PRIVATE_KEY in
+   .env.example. Treat that pair as burned: `npx web-push generate-vapid-keys` for a NEW pair; public key ->
+   host env + .env.local VITE_VAPID_PUBLIC_KEY; private key -> function secret only. Working tree is cleaned.
+2. DONE 2026-10-01: migration 28 applied (cron job 2 = tartar-notification-cleanup). Verified: inbox loads
+   ("No updates yet"), offline banner back to "showing data saved ...". Was: apply 28 before deploying. Without it every page shows the
+   inbox error in the bell/Alerts and the offline banner says "this page was not saved for offline".
+3. Deploy push: secrets VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT (mailto:), PUSH_SECRET;
+   `supabase functions deploy send-push --no-verify-jwt`; `update app.settings set push_function_url =
+   '<url>/functions/v1/send-push', push_secret = '<PUSH_SECRET>'`. First call: read the function log —
+   npm:web-push needs node ECDH under Deno; if it throws, switch to jsr:@negrel/webpush.
+4. Server push checks (2 devices): employee submits voucher -> manager push + inbox; approve/reject ->
+   employee; employee payment -> manager; sale verify/reject -> employee; `select app.send_due_digest()`;
+   tap opens the right page (main vs /admin window); sign-out stops pushes.
+5. Real devices: iOS Safari -> Add to Home Screen (splash light/dark, status bar, push only when installed),
+   Android Chrome install, Windows Edge install (taskbar shortcuts); keyboard keeps Save visible on iOS;
+   drawer + Android Back; landscape notch.
+6. Reset QA data (Done M5 list + the deployment checklist below), then deploy.
+
+P1 — code, next session
+7. Push key rotation: subscribeThisDevice reuses an existing subscription even if it was made with another
+   VAPID key (devices subscribed before P0-1 would fail silently with 403). Compare
+   subscription.options.applicationServerKey with vapidPublicKey and resubscribe when different
+   (hook/common/push.hook.ts).
+8. Offline banner: every mounted query counts (selectHasUnsavedWatched), so one failing shell query (inbox
+   bell, due alerts) marks every page "not saved for offline". Let shell-level queries opt out of the
+   page's offline status (query.hook option + query.store watchers).
+
+P2 — UX
+9. Master Data lists are client-paged at 8 with no search: a new category lands on page 2 out of sight.
+   Add SearchInput + newest-first or a larger page (design plan item).
+10. Touch: listbox/menu options are ~32px on coarse pointers; extend the theme.css coarse rule to select,
+    combobox and menu items (>= 44px).
+11. Dashboard "Sales Overview" head on phones: title wraps beside four pills, the last pill is clipped;
+    stack the pills under the title below md.
+12. ErrorState shows raw PostgREST text ("Could not find the table ... in the schema cache"); map server
+    errors to plain copy, keep detail for the developer.
+
+P3 — polish / tech debt
+13. React Router view transitions throw "Transition was skipped" (unhandled rejection) on rapid navigation;
+    harmless, but noisy in error tracking.
+14. Tablet (768-1023): header InboxBell + other popovers are not in the modal registry, so Back leaves the page.
+15. Landscape phones (>= 768 wide) get the tablet header shell; content height ~280px.
+16. notifications retention deletes only read rows; unread rows grow forever.
+17. Harness: o12-acc.json uses qaacc2 (no Dashboard/Vouchers, read-only) — align steps with the account.
+
+Deployment checklist kept from the offline roadmap: user resets data (all QA rows incl.
+offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
+purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
+bank "QA O12 Bank" (no delete in the UI); 2026-10-01 concurrency rows: sales 701, 702 (now
+₱7,022), 711, 721, 801, 802, 803, 932, 933, 941, 943, 944-948, 951 (931 deleted, 942 lost), expense
+712, purchases 811-818 payee "QA Race Payee" + their vouchers, receivables reference "C-RACE-*"
++ their payments; C2 rows: sales 1251 (deposited), 1253; C3: sale 961 on branch HARDWARE,
+auto-verified because admin recorded it — not deletable in the UI; C4: sale 953; C5: sale 963 verified,
+expense 964 + its rejected voucher; V3: expense 931, purchase 932 + vouchers,
+bank "QA V3 Bank" + accounts "QA V3 One"/"QA V3 Two"), adds Banks + branch legal_name/address.
+Then ask before deleting `.claude/state/audit/` and the old scratchpad audit dir
+(f7-approve.json there holds the superadmin password in plain text).
 
 ## Path map
-- phone shell: components/common/layout/{PhoneShell,AppBar,AppTabBar,PhoneMoreSheet,
-  PhoneAlertsSheet,AccountSheetItems}.tsx · hook/layout/{protected.phone,app.bar}.hook.ts ·
+- phone shell: components/common/layout/{PhoneShell,AppBar,SidebarToggle,ProtectedSider,
+  PhoneAlertsSheet,AccountSheetItems}.tsx (AppTabBar = /admin only) · hook/layout/{protected.phone,app.bar}.hook.ts ·
   styles/app/app.bar.styles.ts · styles/layout/shell.styles.ts (phone*) · hook/app/back.hook.ts
 - admin shell: src/layouts/AdminAppLayout.tsx · components/common/layout/Admin*.tsx ·
   components/common/app/*.tsx · hook/layout/admin.hook.ts · styles/admin/admin.layout.styles.ts
@@ -240,5 +303,6 @@ each phase, then a user check on a real phone.
 - harness: .claude/state/audit/ (drive.mjs, BASE default :5199; signed-in profiles are gone — run login.mjs first)
 
 ## State
-Branch mobilel-app-native. M0 v2.02, M1 + M2 v2.03, M3 v2.04 committed; M4 uncommitted. Migrations through
-26 applied; 27 + 28 written, not applied.
+Branch mobilel-app-native. M0-M4 committed through v2.05; M5 automated pass + its fixes uncommitted.
+Migrations 27 and 28 are applied (28 verified in the app 2026-10-01). Edge Function send-push not deployed; app.settings push_* unset. Harness for this pass lives in the
+session scratchpad (m5/*.mjs, playwright-core installed there); the repo harness is .claude/state/audit.

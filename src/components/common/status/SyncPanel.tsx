@@ -28,9 +28,10 @@ import EmptyState from "./EmptyState";
 
 type IProps = {
   description: string;
+  withHeading?: boolean;
 };
 
-const SyncPanel = ({ description }: IProps) => {
+const SyncPanel = ({ description, withHeading = true }: IProps) => {
   const {
     online,
     flushing,
@@ -45,10 +46,12 @@ const SyncPanel = ({ description }: IProps) => {
 
   return (
     <>
-      <div className={headerNotificationsHead}>
-        Sync
-        <span className={syncHeadHint}>{description}</span>
-      </div>
+      {withHeading ? (
+        <div className={headerNotificationsHead}>
+          Sync
+          <span className={syncHeadHint}>{description}</span>
+        </div>
+      ) : null}
       <div className={headerNotificationsBody}>
         {isEmpty ? (
           <EmptyState icon={<CloudCheck />} description="Every change is saved." />

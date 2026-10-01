@@ -18,6 +18,7 @@ import { usePermissions } from "../account/account.permission.hook";
 import { isAppleTouchDevice } from "./install.hook";
 import { useMutation } from "./mutation.hook";
 
+import type { IPermissions } from "../../models/common/permission.model";
 import type { PushMode } from "../../models/common/push.model";
 
 const offerDurationMs = 10_000;
@@ -26,6 +27,16 @@ const blockedMessage =
 const noWorkerMessage =
   "Notifications need the installed app or the published site. Reload and try again.";
 const incompleteMessage = "This device returned an incomplete push subscription.";
+
+const pushSummaryOf = ({ isManager, encodeTransactions }: IPermissions): string => {
+  if (isManager) {
+    return "Vouchers and payments waiting for your approval, and a due digest every morning at 8.";
+  }
+  if (encodeTransactions) {
+    return "Your vouchers and sales as soon as they are approved, verified or rejected.";
+  }
+  return "A digest every morning at 8 of the receivables and payables due today or overdue.";
+};
 
 const isPushSupported = (): boolean =>
   typeof window !== "undefined" &&
@@ -107,6 +118,7 @@ export const usePushNotifications = () => {
   const permission = usePushStore(selectPushPermission);
   const subscribed = usePushStore(selectPushSubscribed);
   const installed = useInstallStore(selectInstalled);
+  const permissions = usePermissions();
 
   const enableMutation = useMutation(subscribeThisDevice, {
     successMessage: "Notifications are on for this device",
@@ -126,6 +138,7 @@ export const usePushNotifications = () => {
 
   return {
     mode: modeOf(),
+    summary: pushSummaryOf(permissions),
     enable: () => void enableMutation.mutate(),
     disable: () => void disableMutation.mutate(),
     enabling: enableMutation.loading,
@@ -134,12 +147,13 @@ export const usePushNotifications = () => {
 };
 
 export const usePushPrompt = () => {
-  const { mode, enable, enabling } = usePushNotifications();
+  const { mode, summary, enable, enabling } = usePushNotifications();
   const promptDismissed = usePushStore(selectPushPromptDismissed);
   const dismissPrompt = usePushStore((state) => state.dismissPrompt);
 
   return {
     pushPromptVisible: mode === "off" && !promptDismissed,
+    pushSummary: summary,
     enablePush: enable,
     enablingPush: enabling,
     dismissPushPrompt: dismissPrompt,

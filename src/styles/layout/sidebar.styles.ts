@@ -12,4 +12,6 @@ export const sidebarGroupLabel =
 export const sidebarMenuButton =
   "h-11 gap-3 rounded-xl [@media(max-height:860px)]:h-9 px-3 font-medium text-muted-foreground hover:bg-muted hover:text-foreground data-active:bg-brand data-active:text-on-brand data-active:hover:bg-brand data-active:hover:text-on-brand [&_svg]:size-5";
 
+export const sidebarAccount = "mt-2 border-t border-sidebar-border px-2 pt-3";
+
 export const sidebarFooter = "border-t border-sidebar-border p-1 empty:hidden max-md:px-3";

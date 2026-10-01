@@ -57,17 +57,3 @@ export const accountSheetName = "truncate font-heading text-base font-semibold";
 export const accountSheetRole = "truncate text-sm text-muted-foreground";
 
 export const accountSheetText = "flex min-w-0 flex-col";
-
-export const moreSheetGroup = "flex flex-col gap-1 border-b border-border pb-3 mb-3";
-
-export const moreSheetGroupLabel = "px-3 pt-1 pb-1 text-xs font-medium text-muted-foreground";
-
-export const moreSheetItem = cva(accountSheetItem, {
-  variants: {
-    active: {
-      true: "bg-brand-soft font-semibold text-brand",
-      false: "",
-    },
-  },
-  defaultVariants: { active: false },
-});

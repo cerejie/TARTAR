@@ -10,15 +10,17 @@ import type { ReactNode } from "react";
 
 type IProps = {
   title: string;
+  leading?: ReactNode;
   trailing?: ReactNode;
 };
 
-const AppBar = ({ title, trailing }: IProps) => {
+const AppBar = ({ title, leading, trailing }: IProps) => {
   const { scrolled, compact } = useAppBarHook();
   const { showSheet, sheetOpen, openSheet, closeSheet } = useBranchSheetHook();
 
   return (
     <header className={appBar({ scrolled })}>
+      {leading}
       <ProtectedBranchScope compact={compact} onPress={showSheet ? openSheet : undefined} />
       {compact ? <span className={appBarTitle}>{title}</span> : null}
       <div className={appBarActions}>

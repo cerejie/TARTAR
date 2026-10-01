@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useSidebar } from "@/components/ui/sidebar";
 import { effectiveRoleLabels } from "../../enums/role.enum";
+import { sidebarMenuModalKey } from "../../keys/modal.keys";
 import { dashboardAlertsKey, scopedKey } from "../../keys/query.keys";
 import { dueAlertCount } from "../../models/data/dashboard/dashboard.response";
 import { protectedViewsRoutes } from "../../routes/protected.view.routes";
@@ -24,8 +25,10 @@ import { usePermissions } from "../account/account.permission.hook";
 import { useAccountLogoutHook } from "../account/account.logout.hook";
 import { backdropThemeColorToken, useThemeColorHook } from "../app/theme.color.hook";
 import { useIsTabletUp } from "../common/breakpoint.hook";
+import { useModal, useModalActions } from "../common/modal.hook";
 import { useNetwork } from "../common/network.hook";
 import { useQuery } from "../common/query.hook";
+import { useCloseOnNavigate } from "../common/sheet.hook";
 import { useBranchScopeHook } from "../data/branch/branch.scope.hook";
 import type { IDueAlerts } from "../../models/data/dashboard/dashboard.response";
 
@@ -40,6 +43,34 @@ export const useProtectedSiderHook = () => {
   const { isMobile } = useSidebar();
 
   return { collapsible: isMobile ? "offcanvas" : "none" } as const;
+};
+
+export const useSidebarToggleHook = () => {
+  const { isMobile, openMobile, setOpenMobile } = useSidebar();
+  const { modal } = useModal(sidebarMenuModalKey);
+  const { openModal, closeModal } = useModalActions();
+  const previous = useRef({ openMobile, visible: modal.visible });
+
+  useEffect(() => {
+    const before = previous.current;
+    previous.current = { openMobile, visible: modal.visible };
+
+    if (openMobile !== before.openMobile) {
+      if (openMobile) openModal(sidebarMenuModalKey);
+      else closeModal(sidebarMenuModalKey);
+      return;
+    }
+
+    if (before.visible && !modal.visible) setOpenMobile(false);
+  }, [openMobile, modal.visible]);
+
+  useCloseOnNavigate(openMobile, () => setOpenMobile(false));
+
+  return {
+    showToggle: isMobile,
+    menuOpen: openMobile,
+    openMenu: () => setOpenMobile(true),
+  };
 };
 
 export const useProtectedMenuHook = (pinned: boolean) => {

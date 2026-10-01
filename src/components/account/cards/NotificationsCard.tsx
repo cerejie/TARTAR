@@ -28,18 +28,15 @@ const notificationNotes: Record<Exclude<PushMode, "on" | "off">, string> = {
   unconfigured: "Ask your administrator to finish the notification setup.",
 };
 
-const notificationsSummary =
-  "Vouchers and payments waiting for approval, decisions on the records you submitted, and a due digest every morning at 8.";
-
 const NotificationsCard = () => {
-  const { mode, enable, disable, enabling, disabling } = usePushNotifications();
+  const { mode, summary, enable, disable, enabling, disabling } = usePushNotifications();
 
   return (
     <SectionCard title="Notifications" subtitle={notificationSubtitles[mode]}>
       <div className={notificationsBody}>
         {mode === "on" || mode === "off" ? (
           <>
-            <p className={notificationsText}>{notificationsSummary}</p>
+            <p className={notificationsText}>{summary}</p>
             <div className={notificationsActions}>
               {mode === "off" ? (
                 <AppButton loading={enabling} onPress={enable}>

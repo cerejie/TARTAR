@@ -1,6 +1,8 @@
 export const headerRoot =
   "flex h-16 shrink-0 items-center gap-2 rounded-panel border border-border bg-panel px-3 shadow-panel md:gap-3 md:px-4";
 
+export const headerMenuButton = "-ml-1 rounded-full";
+
 export const headerBrand = "flex shrink-0 items-center gap-2.5 max-md:hidden";
 
 export const headerLogoMark =

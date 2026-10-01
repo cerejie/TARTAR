@@ -14,7 +14,7 @@ import AppButton from "../button/AppButton";
 import AccountAvatar from "./AccountAvatar";
 
 type IProps = {
-  onToggleMode: () => void;
+  onToggleMode?: () => void;
 };
 
 const AccountSheetItems = ({ onToggleMode }: IProps) => {
@@ -31,7 +31,7 @@ const AccountSheetItems = ({ onToggleMode }: IProps) => {
 
   const handleToggleMode = () => {
     toggleMode();
-    onToggleMode();
+    onToggleMode?.();
   };
 
   return (

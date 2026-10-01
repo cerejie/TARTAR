@@ -8,14 +8,20 @@ import { useProtectedSiderHook } from "../../../hook/layout/protected.hook";
 import { headerLogoMark } from "../../../styles/layout/header.styles";
 import { shellSidebar } from "../../../styles/layout/shell.styles";
 import {
+  sidebarAccount,
   sidebarContent,
   sidebarFooter,
   sidebarHeader,
   sidebarWordmark,
 } from "../../../styles/layout/sidebar.styles";
+import AccountSheetItems from "./AccountSheetItems";
 import ProtectedMenu from "./ProtectedMenu";
 
-const ProtectedSider = () => {
+type IProps = {
+  account?: boolean;
+};
+
+const ProtectedSider = ({ account = false }: IProps) => {
   const { collapsible } = useProtectedSiderHook();
 
   return (
@@ -29,11 +35,21 @@ const ProtectedSider = () => {
 
       <SidebarContent className={sidebarContent}>
         <ProtectedMenu />
+        {account ? (
+          <>
+            <ProtectedMenu pinned />
+            <div className={sidebarAccount}>
+              <AccountSheetItems />
+            </div>
+          </>
+        ) : null}
       </SidebarContent>
 
-      <SidebarFooter className={sidebarFooter}>
-        <ProtectedMenu pinned />
-      </SidebarFooter>
+      {account ? null : (
+        <SidebarFooter className={sidebarFooter}>
+          <ProtectedMenu pinned />
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 };

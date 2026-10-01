@@ -13,11 +13,13 @@ import InboxFeed from "../lists/InboxFeed";
 
 type IProps = {
   onPress?: () => void;
+  dueCount?: number;
 };
 
-const InboxBell = ({ onPress }: IProps) => {
+const InboxBell = ({ onPress, dueCount = 0 }: IProps) => {
   const { unreadCount } = useInboxListHook();
-  const label = unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications";
+  const count = unreadCount + dueCount;
+  const label = count ? `Notifications, ${count} new` : "Notifications";
 
   const button = (
     <AppButton
@@ -28,7 +30,7 @@ const InboxBell = ({ onPress }: IProps) => {
       onPress={onPress}
     >
       <Bell />
-      {unreadCount ? <span className={countBadge}>{unreadCount}</span> : null}
+      {count ? <span className={countBadge}>{count}</span> : null}
     </AppButton>
   );
 

@@ -8,7 +8,7 @@ import {
 import AppButton from "../button/AppButton";
 
 const PushPromptNotice = () => {
-  const { pushPromptVisible, enablePush, enablingPush, dismissPushPrompt } =
+  const { pushPromptVisible, pushSummary, enablePush, enablingPush, dismissPushPrompt } =
     usePushPrompt();
 
   if (!pushPromptVisible) return null;
@@ -18,7 +18,7 @@ const PushPromptNotice = () => {
       <BellRing />
       <AlertTitle>Get these as notifications</AlertTitle>
       <AlertDescription>
-        Vouchers and payments waiting for you, and a due digest every morning at 8.
+        {pushSummary}
         <div className={pushPromptActions}>
           <AppButton size="sm" loading={enablingPush} onPress={enablePush}>
             Turn on

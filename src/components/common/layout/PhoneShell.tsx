@@ -1,8 +1,6 @@
 import { Outlet } from "react-router-dom";
-import {
-  usePhoneShellHook,
-  usePhoneTabBarHook,
-} from "../../../hook/layout/protected.phone.hook";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { usePhoneShellHook } from "../../../hook/layout/protected.phone.hook";
 import {
   phoneColumn,
   phoneContent,
@@ -11,19 +9,23 @@ import {
 import InboxBell from "../../inbox/menus/InboxBell";
 import PullIndicator from "../app/PullIndicator";
 import AppBar from "./AppBar";
-import AppTabBar from "./AppTabBar";
 import PhoneAlertsSheet from "./PhoneAlertsSheet";
-import PhoneMoreSheet from "./PhoneMoreSheet";
+import ProtectedSider from "./ProtectedSider";
 import RouteProgress from "./RouteProgress";
+import SidebarToggle from "./SidebarToggle";
 
 const PhoneShell = () => {
-  const { pathname, scrollRef, handleScroll, pullHandlers, title } = usePhoneShellHook();
-  const { tabs, showAlerts, openAlerts } = usePhoneTabBarHook();
+  const { pathname, scrollRef, handleScroll, pullHandlers, title, dueCount, openAlerts } =
+    usePhoneShellHook();
 
   return (
-    <div className={phoneShell}>
+    <SidebarProvider className={phoneShell}>
       <RouteProgress />
-      <AppBar title={title} trailing={showAlerts ? null : <InboxBell onPress={openAlerts} />} />
+      <AppBar
+        title={title}
+        leading={<SidebarToggle />}
+        trailing={<InboxBell onPress={openAlerts} dueCount={dueCount} />}
+      />
 
       <main
         id="main-content"
@@ -38,10 +40,9 @@ const PhoneShell = () => {
         </div>
       </main>
 
-      <AppTabBar label="Main" tabs={tabs} />
-      <PhoneMoreSheet />
+      <ProtectedSider account />
       <PhoneAlertsSheet />
-    </div>
+    </SidebarProvider>
   );
 };
 

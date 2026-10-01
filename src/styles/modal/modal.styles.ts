@@ -29,7 +29,7 @@ export const drawerContent =
   "max-h-[calc(92dvh-var(--keyboard-inset))] rounded-t-panel bg-panel data-[side=bottom]:bottom-(--keyboard-inset)";
 
 export const drawerContentFill =
-  "h-[calc(100dvh-var(--keyboard-inset)-max(env(safe-area-inset-top),0.75rem))] max-h-none";
+  "data-[side=bottom]:h-[calc(100dvh-var(--keyboard-inset)-max(env(safe-area-inset-top),0.75rem))] max-h-none";
 
 export const drawerHeaderRuled =
   "border-b border-border pr-14 [&_[data-slot=sheet-title]]:text-base [&_[data-slot=sheet-title]]:font-semibold [&_[data-slot=sheet-title]]:leading-8";
