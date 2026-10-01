@@ -11,6 +11,7 @@ import referenceServices from "../../../services/data/reference.services";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
+import { useWithPendingRows } from "../../common/pending.hook";
 import { useExpenseCategoryListHook } from "./expense.category.list.hook";
 
 export const expenseCategoryFormFields: IFieldConfig<IExpenseCategoryInput>[] =
@@ -120,8 +121,14 @@ export const useExpenseCategoryManageHook = () => {
     sort: editing?.sort ?? nextSort,
   };
 
-  return {
+  const rows = useWithPendingRows(
     expenseCategories,
+    referenceServices.pendingExpenseCategoryOf,
+    { enabled: true, keyOf: (category) => category.slug }
+  );
+
+  return {
+    expenseCategories: rows,
     loading: isInitialLoading,
     refreshing: isRefreshing,
     error,

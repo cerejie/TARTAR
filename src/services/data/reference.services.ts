@@ -1,3 +1,5 @@
+import type { IMutationResult } from "../../models/common/query.model";
+import type { IQueuedWrite } from "../../models/common/write.model";
 import type { IBranchInput } from "../../models/data/branch/branch.request";
 import type {
   IBranch,
@@ -10,6 +12,7 @@ import type { IIncomeSource } from "../../models/data/income-source/income.sourc
 import { runWrite } from "../../store/common/sync.store";
 import { slugify } from "../../utils/slug.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
+import { queuedAtOf, queuedInsertOf } from "../../utils/write.utils";
 
 const branchTable = "branches";
 const farmSectionTable = "farm_sections";
@@ -40,12 +43,19 @@ const orderedIncomeSources = () =>
     .order("sort", { ascending: true })
     .order("name", { ascending: true });
 
-const categoryConflict = (code: string, message: string): Error =>
-  new Error(
-    message.includes("code")
-      ? `Voucher code ${code} is already used by another category`
-      : "A category with a similar name already exists"
-  );
+const branchErrors: Record<string, string> = {
+  "23505": "A branch with a similar name already exists",
+};
+
+const categoryErrors: Record<string, string> = {
+  "23505": "That voucher code or a similar name is already used by another category",
+  "23503": "This category is used by existing expenses — archive it instead",
+};
+
+const incomeSourceErrors: Record<string, string> = {
+  "23505": "An income source with a similar name already exists",
+  "23503": "This income source is used by existing sales — archive it instead",
+};
 
 const referenceServices = {
   getBranches: async (): Promise<IBranch[]> => {
@@ -62,13 +72,17 @@ const referenceServices = {
     return (data ?? []) as IBranch[];
   },
 
-  createBranch: async (values: IBranchInput): Promise<IBranch> => {
+  createBranch: async (
+    values: IBranchInput
+  ): Promise<IMutationResult & { slug: string }> => {
     const slug = slugify(values.name);
     if (!slug) throw new Error("Branch name must contain letters or numbers");
 
-    const { data, error } = await supabase
-      .from(branchTable)
-      .insert({
+    const result = await runWrite({
+      label: `New branch "${values.name.trim()}"`,
+      kind: "insert",
+      table: branchTable,
+      values: {
         slug,
         name: values.name.trim(),
         sort: values.sort,
@@ -76,45 +90,39 @@ const referenceServices = {
         voucher_prefix: values.voucher_prefix,
         legal_name: values.legal_name ?? null,
         address: values.address ?? null,
-      })
-      .select(branchColumns)
-      .single();
+      },
+      errors: branchErrors,
+    });
 
-    if (error) {
-      if (error.code === "23505")
-        throw new Error("A branch with a similar name already exists");
-      throw toError(error);
-    }
-
-    return data as IBranch;
+    return { ...result, slug };
   },
 
-  updateBranch: async (
-    slug: string,
-    values: IBranchInput
-  ): Promise<void> => {
-    const { error } = await supabase
-      .from(branchTable)
-      .update({
+  updateBranch: (slug: string, values: IBranchInput) =>
+    runWrite({
+      label: `Update branch "${values.name.trim()}"`,
+      kind: "update",
+      table: branchTable,
+      values: {
         name: values.name.trim(),
         sort: values.sort,
         voucher_prefix: values.voucher_prefix,
         legal_name: values.legal_name ?? null,
         address: values.address ?? null,
-      })
-      .eq("slug", slug);
+      },
+      match: { slug },
+    }),
 
-    if (error) throw toError(error);
-  },
+  setBranchActive: (slug: string, active: boolean) =>
+    runWrite({
+      label: active ? "Restore branch" : "Archive branch",
+      kind: "update",
+      table: branchTable,
+      values: { active },
+      match: { slug },
+    }),
 
-  setBranchActive: async (slug: string, active: boolean): Promise<void> => {
-    const { error } = await supabase
-      .from(branchTable)
-      .update({ active })
-      .eq("slug", slug);
-
-    if (error) throw toError(error);
-  },
+  pendingBranchOf: (write: IQueuedWrite): IBranch | null =>
+    queuedInsertOf(write, branchTable) as IBranch | null,
 
   getFarmSections: async (): Promise<IFarmSection[]> => {
     const { data, error } = await supabase
@@ -141,31 +149,23 @@ const referenceServices = {
     return (data ?? []) as IExpenseCategory[];
   },
 
-  createExpenseCategory: async (
-    values: IExpenseCategoryInput
-  ): Promise<IExpenseCategory> => {
+  createExpenseCategory: async (values: IExpenseCategoryInput) => {
     const slug = slugify(values.name);
     if (!slug) throw new Error("Category name must contain letters or numbers");
 
-    const { data, error } = await supabase
-      .from(expenseCategoryTable)
-      .insert({
+    return runWrite({
+      label: `New expense type "${values.name.trim()}"`,
+      kind: "insert",
+      table: expenseCategoryTable,
+      values: {
         slug,
         name: values.name.trim(),
         code: values.code,
         sort: values.sort,
         active: true,
-      })
-      .select(expenseCategoryColumns)
-      .single();
-
-    if (error) {
-      if (error.code === "23505")
-        throw categoryConflict(values.code, error.message);
-      throw toError(error);
-    }
-
-    return data as IExpenseCategory;
+      },
+      errors: categoryErrors,
+    });
   },
 
   ensureExpenseCategory: async (name: string): Promise<string> => {
@@ -182,51 +182,43 @@ const referenceServices = {
     return slug;
   },
 
-  updateExpenseCategory: async (
-    slug: string,
-    values: IExpenseCategoryInput
-  ): Promise<void> => {
-    const { error } = await supabase
-      .from(expenseCategoryTable)
-      .update({
+  updateExpenseCategory: (slug: string, values: IExpenseCategoryInput) =>
+    runWrite({
+      label: `Update expense type "${values.name.trim()}"`,
+      kind: "update",
+      table: expenseCategoryTable,
+      values: {
         name: values.name.trim(),
         code: values.code,
         sort: values.sort,
-      })
-      .eq("slug", slug);
+      },
+      match: { slug },
+      errors: categoryErrors,
+    }),
 
-    if (error) {
-      if (error.code === "23505")
-        throw categoryConflict(values.code, error.message);
-      throw toError(error);
-    }
-  },
+  setExpenseCategoryActive: (slug: string, active: boolean) =>
+    runWrite({
+      label: active ? "Restore expense type" : "Archive expense type",
+      kind: "update",
+      table: expenseCategoryTable,
+      values: { active },
+      match: { slug },
+    }),
 
-  setExpenseCategoryActive: async (
-    slug: string,
-    active: boolean
-  ): Promise<void> => {
-    const { error } = await supabase
-      .from(expenseCategoryTable)
-      .update({ active })
-      .eq("slug", slug);
+  deleteExpenseCategory: (slug: string) =>
+    runWrite({
+      label: "Delete expense type",
+      kind: "delete",
+      table: expenseCategoryTable,
+      match: { slug },
+      errors: categoryErrors,
+    }),
 
-    if (error) throw toError(error);
-  },
+  pendingExpenseCategoryOf: (write: IQueuedWrite): IExpenseCategory | null => {
+    const values = queuedInsertOf(write, expenseCategoryTable);
+    if (!values) return null;
 
-  deleteExpenseCategory: async (slug: string): Promise<void> => {
-    const { error } = await supabase
-      .from(expenseCategoryTable)
-      .delete()
-      .eq("slug", slug);
-
-    if (error) {
-      if (error.code === "23503")
-        throw new Error(
-          "This category is used by existing expenses — archive it instead"
-        );
-      throw toError(error);
-    }
+    return { created_at: queuedAtOf(write), ...values } as IExpenseCategory;
   },
 
   getAllIncomeSources: async (): Promise<IIncomeSource[]> => {
@@ -236,62 +228,57 @@ const referenceServices = {
     return (data ?? []) as IIncomeSource[];
   },
 
-  createIncomeSource: async (values: IIncomeSourceInput): Promise<void> => {
+  createIncomeSource: async (values: IIncomeSourceInput) => {
     const slug = slugify(values.name);
     if (!slug)
       throw new Error("Income source name must contain letters or numbers");
 
-    const { error } = await supabase.from(incomeSourceTable).insert({
-      slug,
-      name: values.name.trim(),
-      sort: values.sort,
-      active: true,
+    return runWrite({
+      label: `New income source "${values.name.trim()}"`,
+      kind: "insert",
+      table: incomeSourceTable,
+      values: {
+        slug,
+        name: values.name.trim(),
+        sort: values.sort,
+        active: true,
+      },
+      errors: incomeSourceErrors,
     });
-
-    if (error) {
-      if (error.code === "23505")
-        throw new Error("An income source with a similar name already exists");
-      throw toError(error);
-    }
   },
 
-  updateIncomeSource: async (
-    slug: string,
-    values: IIncomeSourceInput
-  ): Promise<void> => {
-    const { error } = await supabase
-      .from(incomeSourceTable)
-      .update({ name: values.name.trim(), sort: values.sort })
-      .eq("slug", slug);
+  updateIncomeSource: (slug: string, values: IIncomeSourceInput) =>
+    runWrite({
+      label: `Update income source "${values.name.trim()}"`,
+      kind: "update",
+      table: incomeSourceTable,
+      values: { name: values.name.trim(), sort: values.sort },
+      match: { slug },
+    }),
 
-    if (error) throw toError(error);
-  },
+  setIncomeSourceActive: (slug: string, active: boolean) =>
+    runWrite({
+      label: active ? "Restore income source" : "Archive income source",
+      kind: "update",
+      table: incomeSourceTable,
+      values: { active },
+      match: { slug },
+    }),
 
-  setIncomeSourceActive: async (
-    slug: string,
-    active: boolean
-  ): Promise<void> => {
-    const { error } = await supabase
-      .from(incomeSourceTable)
-      .update({ active })
-      .eq("slug", slug);
+  deleteIncomeSource: (slug: string) =>
+    runWrite({
+      label: "Delete income source",
+      kind: "delete",
+      table: incomeSourceTable,
+      match: { slug },
+      errors: incomeSourceErrors,
+    }),
 
-    if (error) throw toError(error);
-  },
+  pendingIncomeSourceOf: (write: IQueuedWrite): IIncomeSource | null => {
+    const values = queuedInsertOf(write, incomeSourceTable);
+    if (!values) return null;
 
-  deleteIncomeSource: async (slug: string): Promise<void> => {
-    const { error } = await supabase
-      .from(incomeSourceTable)
-      .delete()
-      .eq("slug", slug);
-
-    if (error) {
-      if (error.code === "23503")
-        throw new Error(
-          "This income source is used by existing sales — archive it instead"
-        );
-      throw toError(error);
-    }
+    return { created_at: queuedAtOf(write), ...values } as IIncomeSource;
   },
 };
 

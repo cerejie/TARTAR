@@ -1,0 +1,453 @@
+[
+ {
+  "note": "login admin",
+  "login": [
+   "qaadmin2@qa.test",
+   "QaTest#2026"
+  ],
+  "stop": true
+ },
+ {
+  "note": "warm dashboard",
+  "goto": "/",
+  "settle": 5000
+ },
+ {
+  "note": "warm Dashboard",
+  "nav": "Dashboard",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Transactions",
+  "nav": "Transactions",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Sales",
+  "nav": "Sales",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Purchases",
+  "nav": "Purchases",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Expenses",
+  "nav": "Expenses",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Vouchers",
+  "nav": "Vouchers",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Receivables",
+  "nav": "Receivables",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Payables",
+  "nav": "Payables",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Reports",
+  "nav": "Reports",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Branch Monitoring",
+  "nav": "Branch Monitoring",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Master Data",
+  "nav": "Master Data",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Users",
+  "nav": "Users",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Account settings",
+  "always": true,
+  "settle": 3000,
+  "goto": "/account"
+ },
+ {
+  "note": "warm md expense-categories",
+  "goto": "/master-data?section=expense-categories",
+  "settle": 2500,
+  "always": true
+ },
+ {
+  "note": "warm md income-sources",
+  "goto": "/master-data?section=income-sources",
+  "settle": 2500,
+  "always": true
+ },
+ {
+  "note": "warm md banks",
+  "goto": "/master-data?section=banks",
+  "settle": 2500,
+  "always": true
+ },
+ {
+  "note": "GO OFFLINE + RELOAD",
+  "offline": true,
+  "goto": "/",
+  "settle": 2500,
+  "text": "header",
+  "max": 200
+ },
+ {
+  "note": "OFF Dashboard",
+  "nav": "Dashboard",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Transactions",
+  "nav": "Transactions",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Sales",
+  "nav": "Sales",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Purchases",
+  "nav": "Purchases",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Expenses",
+  "nav": "Expenses",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Vouchers",
+  "nav": "Vouchers",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Receivables",
+  "nav": "Receivables",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Payables",
+  "nav": "Payables",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Reports",
+  "nav": "Reports",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Branch Monitoring",
+  "nav": "Branch Monitoring",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Master Data",
+  "nav": "Master Data",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Users",
+  "nav": "Users",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Account settings",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong",
+  "goto": "/account"
+ },
+ {
+  "note": "OFF income source create",
+  "goto": "/master-data?section=income-sources",
+  "always": true
+ },
+ {
+  "note": "recorder",
+  "always": true,
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "button": "Add income source",
+  "page": true,
+  "wait": 900,
+  "fill": {
+   "name": "QA O12 Source"
+  },
+  "always": true
+ },
+ {
+  "submit": "Add income source",
+  "always": true
+ },
+ {
+  "note": "income source pending",
+  "always": true,
+  "expect": "QA O12 Source",
+  "text": "main tbody",
+  "max": 400,
+  "name": "o12-src-pending"
+ },
+ {
+  "note": "OFF category create",
+  "goto": "/master-data?section=expense-categories",
+  "always": true
+ },
+ {
+  "note": "recorder",
+  "always": true,
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "button": "Add category",
+  "page": true,
+  "wait": 900,
+  "fill": {
+   "name": "QA O12 Type",
+   "code": "QOT"
+  },
+  "always": true
+ },
+ {
+  "submit": "Add category",
+  "always": true
+ },
+ {
+  "note": "category pending",
+  "always": true,
+  "expect": "QA O12 Type",
+  "name": "o12-cat-pending"
+ },
+ {
+  "note": "pending category menu locked",
+  "always": true,
+  "row": "QA O12 Type",
+  "item": "Archive category"
+ },
+ {
+  "note": "OFF bank account create (new bank)",
+  "goto": "/master-data?section=banks",
+  "always": true
+ },
+ {
+  "note": "recorder",
+  "always": true,
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "button": "Add bank account",
+  "page": true,
+  "wait": 900,
+  "pick": {
+   "Bank": "QA O12 Bank"
+  },
+  "always": true
+ },
+ {
+  "fill": {
+   "account_name": "QA O12 Ops",
+   "account_number": "O12-0001"
+  },
+  "always": true
+ },
+ {
+  "submit": "Add account",
+  "always": true
+ },
+ {
+  "note": "bank account pending",
+  "always": true,
+  "expect": "QA O12 Ops",
+  "text": "main tbody",
+  "max": 400,
+  "name": "o12-bank-pending"
+ },
+ {
+  "note": "OFF change password -> needs internet",
+  "always": true,
+  "goto": "/account"
+ },
+ {
+  "note": "recorder",
+  "always": true,
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "fill": {
+   "input[name=current_password]": "QaTest#2026",
+   "input[name=password]": "QaTest#2027x",
+   "input[name=confirm_password]": "QaTest#2027x"
+  },
+  "button": "Update password",
+  "page": true,
+  "always": true,
+  "wait": 2000
+ },
+ {
+  "note": "pw toast",
+  "always": true,
+  "js": "window.__t",
+  "name": "o12-pw-offline"
+ },
+ {
+  "note": "queue before reconnect",
+  "always": true,
+  "queue": true
+ },
+ {
+  "note": "BACK ONLINE",
+  "offline": false,
+  "always": true,
+  "wait": 9000
+ },
+ {
+  "note": "recorder",
+  "always": true,
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "note": "sync toasts",
+  "always": true,
+  "js": "window.__t"
+ },
+ {
+  "note": "queue after",
+  "always": true,
+  "queue": true
+ },
+ {
+  "note": "failed list",
+  "always": true,
+  "js": "JSON.stringify(JSON.parse(localStorage.getItem(\"tartar-sync-queue\")||\"{}\").state?.failed?.map(f=>f.reason))"
+ },
+ {
+  "note": "ON income sources",
+  "goto": "/master-data?section=income-sources",
+  "always": true,
+  "expect": "QA O12 Source"
+ },
+ {
+  "note": "ON categories",
+  "goto": "/master-data?section=expense-categories",
+  "always": true,
+  "expect": "QA O12 Type"
+ },
+ {
+  "note": "ON banks",
+  "goto": "/master-data?section=banks",
+  "always": true,
+  "expect": "QA O12 Ops",
+  "text": "main tbody",
+  "max": 400,
+  "name": "o12-bank-synced"
+ },
+ {
+  "note": "cleanup account",
+  "row": "QA O12 Ops",
+  "item": "Delete account",
+  "always": true
+ },
+ {
+  "confirmOnly": "Delete",
+  "always": true
+ },
+ {
+  "note": "cleanup category",
+  "goto": "/master-data?section=expense-categories",
+  "row": "QA O12 Type",
+  "item": "Delete category",
+  "always": true
+ },
+ {
+  "confirmOnly": "Delete",
+  "always": true
+ },
+ {
+  "note": "cleanup source",
+  "goto": "/master-data?section=income-sources",
+  "row": "QA O12 Source",
+  "item": "Delete income source",
+  "always": true
+ },
+ {
+  "confirmOnly": "Delete",
+  "always": true,
+  "absent": "QA O12 Source"
+ }
+]

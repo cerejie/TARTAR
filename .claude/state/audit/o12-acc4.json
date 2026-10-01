@@ -1,0 +1,34 @@
+[
+ {
+  "note": "login acc",
+  "login": [
+   "qaacc2@qa.test",
+   "QaTest#2026"
+  ],
+  "stop": true
+ },
+ {
+  "note": "failed list carried?",
+  "js": "localStorage.getItem(\"tartar-sync-queue\")"
+ },
+ {
+  "note": "receivables online",
+  "goto": "/receivables",
+  "settle": 4000
+ },
+ {
+  "row": "QA Customer A",
+  "item": "Record payment",
+  "wait": 1000,
+  "dump": true
+ },
+ {
+  "fill": {
+   "[role=dialog] input[name^='amounts.']": "54"
+  }
+ },
+ {
+  "submit": "Record payment",
+  "toasts": true
+ }
+]

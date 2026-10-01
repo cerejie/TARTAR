@@ -5,6 +5,8 @@ import type {
 } from "../../models/data/account/account.request";
 import type { ICustomLoginResponse } from "../../models/data/account/account.response";
 import {
+  assertOnline,
+  onlineOnly,
   onSessionExpired,
   setCustomToken,
   supabase,
@@ -47,10 +49,12 @@ const accountServices = {
   login: async (values: ILoginInput): Promise<ICustomLoginResponse | null> => {
     setCustomToken(null);
 
-    const { data, error } = await supabase.rpc("login_email", {
-      p_email: values.email,
-      p_password: values.password,
-    });
+    const { data, error } = await onlineOnly(
+      supabase.rpc("login_email", {
+        p_email: values.email,
+        p_password: values.password,
+      })
+    );
     if (error?.code === invalidCredentialsCode) {
       await loginDeveloper(values);
       return null;
@@ -68,18 +72,22 @@ const accountServices = {
     onSessionExpired(handler),
 
   register: async (values: IRegisterInput): Promise<void> => {
-    const { error } = await supabase.rpc("register_email", {
-      p_email: values.email,
-      p_full_name: values.full_name,
-      p_password: values.password,
-    });
+    const { error } = await onlineOnly(
+      supabase.rpc("register_email", {
+        p_email: values.email,
+        p_full_name: values.full_name,
+        p_password: values.password,
+      })
+    );
     if (error) throw toError(error);
   },
 
   emailExists: async (email: string): Promise<boolean> => {
-    const { data, error } = await supabase.rpc("account_email_exists", {
-      p_email: email,
-    });
+    const { data, error } = await onlineOnly(
+      supabase.rpc("account_email_exists", {
+        p_email: email,
+      })
+    );
     if (error) throw toError(error);
 
     return data === true;
@@ -89,10 +97,12 @@ const accountServices = {
     email: string,
     password: string
   ): Promise<void> => {
-    const { error } = await supabase.rpc("request_password_reset", {
-      p_email: email,
-      p_password: password,
-    });
+    const { error } = await onlineOnly(
+      supabase.rpc("request_password_reset", {
+        p_email: email,
+        p_password: password,
+      })
+    );
     if (error) throw toError(error);
   },
 
@@ -100,10 +110,12 @@ const accountServices = {
     currentPassword: string,
     newPassword: string
   ): Promise<void> => {
-    const { error } = await supabase.rpc("change_own_password", {
-      p_current_password: currentPassword,
-      p_new_password: newPassword,
-    });
+    const { error } = await onlineOnly(
+      supabase.rpc("change_own_password", {
+        p_current_password: currentPassword,
+        p_new_password: newPassword,
+      })
+    );
     if (error) throw toError(error);
   },
 
@@ -112,6 +124,8 @@ const accountServices = {
     currentPassword: string,
     newPassword: string
   ): Promise<void> => {
+    assertOnline();
+
     const { error: verifyError } = await supabase.auth.signInWithPassword({
       email,
       password: currentPassword,
@@ -128,14 +142,16 @@ const accountServices = {
   },
 
   createUser: async (values: ICreateUserInput): Promise<string> => {
-    const { data, error } = await supabase.rpc("admin_create_user_email", {
-      p_email: values.email,
-      p_password: values.password,
-      p_full_name: values.full_name,
-      p_role: values.role,
-      p_branch_access: values.branch_access,
-      p_access_flags: values.access_flags,
-    });
+    const { data, error } = await onlineOnly(
+      supabase.rpc("admin_create_user_email", {
+        p_email: values.email,
+        p_password: values.password,
+        p_full_name: values.full_name,
+        p_role: values.role,
+        p_branch_access: values.branch_access,
+        p_access_flags: values.access_flags,
+      })
+    );
     if (error) throw toError(error);
 
     return data as string;
@@ -145,10 +161,12 @@ const accountServices = {
     userId: string,
     password: string
   ): Promise<void> => {
-    const { error } = await supabase.rpc("admin_set_password", {
-      p_user_id: userId,
-      p_password: password,
-    });
+    const { error } = await onlineOnly(
+      supabase.rpc("admin_set_password", {
+        p_user_id: userId,
+        p_password: password,
+      })
+    );
     if (error) throw toError(error);
   },
 };

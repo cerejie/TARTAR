@@ -1,0 +1,62 @@
+[
+ {
+  "note": "login admin",
+  "login": [
+   "qaadmin2@qa.test",
+   "QaTest#2026"
+  ],
+  "stop": true
+ },
+ {
+  "note": "categories online",
+  "goto": "/master-data?section=expense-categories",
+  "settle": 3000,
+  "text": "main",
+  "max": 2500
+ },
+ {
+  "note": "warm account",
+  "goto": "/account",
+  "settle": 2000
+ },
+ {
+  "note": "GO OFFLINE",
+  "offline": true,
+  "always": true
+ },
+ {
+  "note": "recorder",
+  "always": true,
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "fill": {
+   "input[name=current_password]": "QaTest#2026",
+   "input[name=password]": "QaTest#2027x",
+   "input[name=confirm_password]": "QaTest#2027x"
+  },
+  "always": true
+ },
+ {
+  "button": "Update password",
+  "page": true,
+  "always": true,
+  "wait": 2500
+ },
+ {
+  "note": "pw toast",
+  "always": true,
+  "js": "window.__t",
+  "name": "o12-pw-offline"
+ },
+ {
+  "note": "queue empty",
+  "always": true,
+  "queue": true
+ },
+ {
+  "note": "BACK ONLINE",
+  "offline": false,
+  "always": true
+ }
+]

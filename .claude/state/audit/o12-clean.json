@@ -1,0 +1,1 @@
+[{"note":"login admin","login":["qaadmin2@qa.test","QaTest#2026"],"stop":true},{"note":"categories p2","goto":"/master-data?section=expense-categories","settle":3000,"click":"button:text-is(\"2\")","wait":1500},{"note":"delete QA O12 Type","row":"QA O12 Type","item":"Delete category"},{"confirmOnly":"Delete","absent":"QA O12 Type","text":"main tbody","max":400}]

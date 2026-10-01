@@ -1,0 +1,71 @@
+[
+ {
+  "note": "login acc",
+  "login": [
+   "qaacc2@qa.test",
+   "QaTest#2026"
+  ],
+  "stop": true
+ },
+ {
+  "note": "warm expenses",
+  "goto": "/expenses",
+  "settle": 4000
+ },
+ {
+  "note": "buttons online",
+  "js": "[...document.querySelectorAll(\"main button\")].map(b=>b.innerText.trim()).filter(Boolean).slice(0,15).join(\" | \")"
+ },
+ {
+  "note": "GO OFFLINE + RELOAD",
+  "offline": true,
+  "goto": "/expenses",
+  "settle": 2500
+ },
+ {
+  "button": "Record expense",
+  "page": true,
+  "wait": 900,
+  "fill": {
+   "amount": "914",
+   "particulars": "OFFLINE O12"
+  },
+  "pick": {
+   "Expense type": "QA Utilities",
+   "Payee": "QA Power Co"
+  },
+  "always": true
+ },
+ {
+  "submit": "Record",
+  "always": true
+ },
+ {
+  "note": "pending",
+  "always": true,
+  "expect": "Pending sync"
+ },
+ {
+  "note": "queue",
+  "always": true,
+  "queue": true
+ },
+ {
+  "note": "BACK ONLINE",
+  "offline": false,
+  "always": true,
+  "wait": 9000
+ },
+ {
+  "note": "queue after",
+  "always": true,
+  "queue": true,
+  "js": "JSON.stringify(JSON.parse(localStorage.getItem(\"tartar-sync-queue\")||\"{}\").state?.failed?.length)"
+ },
+ {
+  "note": "914 listed",
+  "always": true,
+  "expect": "914.00",
+  "absent": "Pending sync"
+ }
+]

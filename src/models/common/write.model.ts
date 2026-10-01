@@ -3,6 +3,7 @@ type IWriteBase = {
   label: string;
   owner: string | null;
   queuedAt?: number;
+  errors?: Record<string, string>;
 };
 
 export type IQueuedWrite =

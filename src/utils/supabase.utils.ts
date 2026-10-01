@@ -13,6 +13,7 @@ let customToken: string | null = null;
 let sessionExpiredHandler: (() => void) | null = null;
 
 const unauthorizedStatus = 401;
+const networkStatus = 0;
 const authEndpoint = "/auth/v1/";
 
 export const setCustomToken = (token: string | null): void => {
@@ -78,4 +79,23 @@ export const toError = (error: unknown): Error => {
   }
 
   return new Error("Unexpected error");
+};
+
+const needsInternetMessage =
+  "This needs an internet connection. Try again once you are back online.";
+
+export const assertOnline = (): void => {
+  const offline = typeof navigator !== "undefined" && !navigator.onLine;
+  if (offline) throw new Error(needsInternetMessage);
+};
+
+export const onlineOnly = async <TResult extends { status: number }>(
+  request: PromiseLike<TResult>
+): Promise<TResult> => {
+  assertOnline();
+
+  const result = await request;
+  if (result.status === networkStatus) throw new Error(needsInternetMessage);
+
+  return result;
 };

@@ -1,5 +1,5 @@
 # ROADMAP — Offline hardening (live offline test, 2026-09-30)
-Updated: 2026-09-30
+Updated: 2026-10-01
 
 ## Goal
 Offline, every write is kept on the device and reaches the database once back online, nothing is
@@ -37,8 +37,8 @@ merged into main).
   (no migration), plus migration 24 adding an idempotency key to the RPC writes
   (create_transaction_with_voucher, record_ledger_payment, mark_payable_paid,
   mark_sale_deposited, verify/reject) — or inserts only for now.
-- OQ3 (O4) Banks, expense types, income sources and other setup writes: queue offline too, or
-  keep them online-only with a clear "needs internet" message.
+- OQ3 (O4, ANSWERED: Hybrid) setup data (banks, accounts, branches, expense types, income sources)
+  queues offline with pending rows; account/auth RPCs stay online-only with a "needs internet" error.
 
 ## Bugs (evidence: harness runs o1-o5, 2026-09-30, shots in shots/drive/o1-* .. o5-*)
 - OB1 CRITICAL stuck queue: one refused write blocks every write behind it forever, silently.
@@ -67,6 +67,10 @@ merged into main).
 - OB8 Not queued at all: bank.services (all writes), reference.services expense types / income
   sources / most setup writes, account.services (login, register, passwords),
   user.services.decidePasswordReset. See OQ3.
+- OB10 NOT OFFLINE, pre-existing (o12-acc4, 2026-10-01): accountant sees "Record payment" on
+  Receivables but record_ledger_payment is refused online too: 42501 RLS on table payments. Either
+  hide the action for accountants or widen the payments policy — business decision, ask the user.
+  Offline the refused write lands in the sync panel's failed list as designed (L4).
 - OB9 UNTESTED: flush after a long offline period (expired access token -> 401). Must refresh the
   session and retry, never discard; test in O1.
 
@@ -152,11 +156,28 @@ merged into main).
   useOfflineNotice; src/hook/app/prime.hook.ts (usePrimeLookupsHook in app.hook: on online+user ->
   refetchAll + prime lookups); src/components/common/status/OfflineNotice.tsx in ContentView.
 
+- O4 DONE, harness-verified 2026-10-01 on the production build (o12-*): admin offline reload ->
+  all 13 pages serve saved data, no crash; offline income source, expense type, new bank + account
+  queued as "Pending sync" rows (pending category row menu locked), reconnect synced 4, 0 failed,
+  rows listed, then deleted again; offline change password and offline login show "This needs an
+  internet connection…" and queue nothing. Employee: every allowed page offline after reload, sale
+  913 pending -> synced. Accountant: every allowed page offline after reload; offline receivable
+  payment 53 queued -> refused on sync (OB10, also refused online) -> failed list, not lost.
+- O4 code: write.model `errors` (code -> message, used online and in the failed reason);
+  write.utils (slug-keyed inserts get no stamped id and no pkey-replay success; writeTargetsOf
+  tracks slug); supabase.utils assertOnline/onlineOnly; bank.services + reference.services writes
+  via runWrite (+ pendingAccountOf/pendingBranchOf/pendingExpenseCategoryOf/pendingIncomeSourceOf,
+  createBranch returns { queued, slug }); account.services + user.decidePasswordReset via onlineOnly;
+  pending.hook useWithPendingRows keyOf; merged in bank.account/branch/expense.category/income.source
+  manage hooks. Known gaps: pending bank account row shows "—" bank until synced; a second offline
+  account under the same NEW bank name creates the bank twice.
+
 ## Next (one conversation, in order)
-1. O4 (one conversation). Ask OQ3 first.
+1. Ask the user about OB10 (accountant Record payment: hide it or widen RLS).
 2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
-   purchase 393, payments 50/51/52, voucher approvals 908/909), adds Banks + branch
+   purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
+   bank "QA O12 Bank" (no delete in the UI)), adds Banks + branch
    legal_name/address.
 3. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
    (f7-approve.json there holds the superadmin password in plain text).
@@ -204,4 +225,5 @@ merged into main).
 ## State
 Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
 committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
-committed v1.87 · O3 done and verified, not committed yet (suggested as v1.88) · O4 next.
+committed v1.87 · O3 committed v1.88 · O4 done and verified, not committed yet (suggested
+as v1.89) · roadmap phases O1-O4 complete; OB10 open.

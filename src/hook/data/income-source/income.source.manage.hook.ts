@@ -7,6 +7,7 @@ import referenceServices from "../../../services/data/reference.services";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
+import { useWithPendingRows } from "../../common/pending.hook";
 import { useIncomeSourceListHook } from "./income.source.list.hook";
 import type { DefaultValues } from "react-hook-form";
 import type { IFieldConfig } from "../../../models/common/field.model";
@@ -102,8 +103,14 @@ export const useIncomeSourceManageHook = () => {
     sort: editing?.sort ?? nextSort,
   };
 
-  return {
+  const rows = useWithPendingRows(
     incomeSources,
+    referenceServices.pendingIncomeSourceOf,
+    { enabled: true, keyOf: (source) => source.slug }
+  );
+
+  return {
+    incomeSources: rows,
     loading: isInitialLoading,
     refreshing: isRefreshing,
     error,

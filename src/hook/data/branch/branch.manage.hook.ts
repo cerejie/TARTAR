@@ -19,6 +19,7 @@ import { useAccountStore } from "../../../store/data/account/account.store";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
+import { useWithPendingRows } from "../../common/pending.hook";
 import { useQuery } from "../../common/query.hook";
 import { useBranchListHook } from "./branch.list.hook";
 import { useBranchScopeHook } from "./branch.scope.hook";
@@ -75,8 +76,8 @@ export const useBranchManageHook = () => {
     {
       successMessage: "Branch added",
       invalidate,
-      onSuccess: (branch) => {
-        addBranchAccess(branch.slug);
+      onSuccess: (created) => {
+        addBranchAccess(created.slug);
         createModal.closeModal();
       },
     }
@@ -145,8 +146,14 @@ export const useBranchManageHook = () => {
     address: editing?.address ?? "",
   };
 
-  return {
+  const rows = useWithPendingRows(
     allBranches,
+    referenceServices.pendingBranchOf,
+    { enabled: true, keyOf: (branch) => branch.slug }
+  );
+
+  return {
+    allBranches: rows,
     loading: listQuery.isInitialLoading,
     refreshing: listQuery.isRefreshing,
     error: listQuery.error,

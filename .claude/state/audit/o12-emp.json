@@ -1,0 +1,196 @@
+[
+ {
+  "note": "login",
+  "login": [
+   "qaemp2@qa.test",
+   "QaTest#2026"
+  ],
+  "stop": true
+ },
+ {
+  "note": "warm dashboard",
+  "goto": "/",
+  "settle": 5000,
+  "always": true
+ },
+ {
+  "note": "warm Dashboard",
+  "nav": "Dashboard",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Transactions",
+  "nav": "Transactions",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Sales",
+  "nav": "Sales",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Purchases",
+  "nav": "Purchases",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Expenses",
+  "nav": "Expenses",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Receivables",
+  "nav": "Receivables",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Payables",
+  "nav": "Payables",
+  "always": true,
+  "settle": 3000
+ },
+ {
+  "note": "warm Account settings",
+  "always": true,
+  "settle": 3000,
+  "goto": "/account"
+ },
+ {
+  "note": "GO OFFLINE + RELOAD",
+  "offline": true,
+  "goto": "/",
+  "settle": 2500,
+  "text": "header",
+  "max": 200,
+  "always": true
+ },
+ {
+  "note": "OFF Dashboard",
+  "nav": "Dashboard",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Transactions",
+  "nav": "Transactions",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Sales",
+  "nav": "Sales",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Purchases",
+  "nav": "Purchases",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Expenses",
+  "nav": "Expenses",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Receivables",
+  "nav": "Receivables",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Payables",
+  "nav": "Payables",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "OFF Account settings",
+  "settle": 1800,
+  "always": true,
+  "text": "main",
+  "max": 220,
+  "absent": "Something went wrong",
+  "goto": "/account"
+ },
+ {
+  "note": "OFF sale 913",
+  "nav": "Sales",
+  "always": true
+ },
+ {
+  "button": "Record sale",
+  "page": true,
+  "fill": {
+   "amount": "913"
+  },
+  "pick": {
+   "Cash account": "Cash Drawer"
+  },
+  "always": true
+ },
+ {
+  "submit": "Record",
+  "always": true
+ },
+ {
+  "note": "sale pending",
+  "always": true,
+  "expect": "Pending sync"
+ },
+ {
+  "note": "queue before reconnect",
+  "always": true,
+  "queue": true
+ },
+ {
+  "note": "BACK ONLINE",
+  "offline": false,
+  "always": true,
+  "wait": 9000
+ },
+ {
+  "note": "recorder",
+  "always": true,
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "note": "sync toasts",
+  "always": true,
+  "js": "window.__t"
+ },
+ {
+  "note": "queue after",
+  "always": true,
+  "queue": true
+ }
+]

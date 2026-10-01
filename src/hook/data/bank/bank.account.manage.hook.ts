@@ -8,6 +8,7 @@ import { nameKey } from "../../../utils/fuzzy.utils";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
+import { useWithPendingRows } from "../../common/pending.hook";
 import { useBankAccountListHook } from "./bank.account.list.hook";
 import type { DefaultValues } from "react-hook-form";
 import type { IFieldConfig } from "../../../models/common/field.model";
@@ -146,8 +147,14 @@ export const useBankAccountManageHook = () => {
     sort: editing?.sort ?? nextSort,
   };
 
-  return {
+  const rows = useWithPendingRows(
     bankAccounts,
+    bankServices.pendingAccountOf,
+    { enabled: true }
+  );
+
+  return {
+    bankAccounts: rows,
     loading,
     refreshing,
     error,

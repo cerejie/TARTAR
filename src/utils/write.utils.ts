@@ -44,13 +44,21 @@ type IPostgrestResult = {
   status: number;
 };
 
+const hasStampedId = (values: unknown): boolean =>
+  !!values && typeof values === "object" && "id" in values && !!values.id;
+
 const isReplayedInsert = (write: IQueuedWrite, result: IPostgrestResult) =>
   write.kind === "insert" &&
+  hasStampedId(write.values) &&
   result.error?.code === uniqueViolationCode &&
   result.error.message.includes(`${write.table}_pkey`);
 
-const toWriteError = (result: IPostgrestResult): WriteError => {
-  const message = toError(result.error).message;
+const toWriteError = (
+  write: IQueuedWrite,
+  result: IPostgrestResult
+): WriteError => {
+  const code = result.error?.code ?? "";
+  const message = write.errors?.[code] ?? toError(result.error).message;
   if (result.status === networkStatus) return new WriteError("network", message);
   if (result.status === unauthorizedStatus) return new WriteError("session", message);
   return new WriteError("refused", message);
@@ -76,7 +84,7 @@ export const executeWrite = async (write: IQueuedWrite): Promise<void> => {
 
   const result = await run();
   if (isReplayedInsert(write, result)) return;
-  if (result.error) throw toWriteError(result);
+  if (result.error) throw toWriteError(write, result);
 
   const matched = write.kind === "update" || write.kind === "delete";
   if (matched && Array.isArray(result.data) && result.data.length === 0) {
@@ -91,7 +99,7 @@ const newWriteId = (): string => crypto.randomUUID();
 
 const withRecordId = (values: unknown): unknown => {
   if (!values || typeof values !== "object" || Array.isArray(values)) return values;
-  if ("id" in values && values.id) return values;
+  if (hasStampedId(values) || "slug" in values) return values;
   return { id: newWriteId(), ...values };
 };
 
@@ -125,6 +133,9 @@ const stringsOf = (values: readonly unknown[]): string[] =>
 const idOf = (record: unknown): unknown =>
   record && typeof record === "object" && "id" in record ? record.id : undefined;
 
+const slugOf = (record: unknown): unknown =>
+  record && typeof record === "object" && "slug" in record ? record.slug : undefined;
+
 const allocationTargetsOf = (allocations: unknown): unknown[] =>
   Array.isArray(allocations)
     ? allocations.map((allocation: unknown) =>
@@ -137,10 +148,10 @@ const allocationTargetsOf = (allocations: unknown): unknown[] =>
 export const writeTargetsOf = (write: IQueuedWrite): string[] => {
   switch (write.kind) {
     case "insert":
-      return stringsOf([idOf(write.values)]);
+      return stringsOf([idOf(write.values), slugOf(write.values)]);
     case "update":
     case "delete":
-      return stringsOf([write.match.id]);
+      return stringsOf([write.match.id, write.match.slug]);
     case "rpc":
       return stringsOf([
         write.id,

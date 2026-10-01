@@ -1,9 +1,12 @@
+import type { IQueuedWrite } from "../../models/common/write.model";
 import type { IBankAccountInput } from "../../models/data/bank/bank.request";
 import type {
   IBank,
   IBankAccount,
 } from "../../models/data/bank/bank.response";
+import { runWrite } from "../../store/common/sync.store";
 import { supabase, toError } from "../../utils/supabase.utils";
+import { queuedAtOf, queuedInsertOf } from "../../utils/write.utils";
 
 const bankTable = "banks";
 const bankAccountTable = "bank_accounts";
@@ -12,8 +15,10 @@ const bankColumns = "id, name, created_at";
 const bankAccountColumns =
   "id, bank_id, account_name, account_number, sort, active, created_at, bank:banks(name)";
 
-const accountConflict = (): Error =>
-  new Error("This bank already has an account with that number");
+const accountErrors: Record<string, string> = {
+  "23505": "This bank already has an account with that number",
+  "23503": "This account is used by existing transactions — archive it instead",
+};
 
 const toAccountValues = (bankId: string, values: IBankAccountInput) => ({
   bank_id: bankId,
@@ -34,13 +39,13 @@ const bankServices = {
     return (data ?? []) as IBank[];
   },
 
-  createBank: async (id: string, name: string): Promise<void> => {
-    const { error } = await supabase
-      .from(bankTable)
-      .insert({ id, name: name.trim() });
-
-    if (error) throw toError(error);
-  },
+  createBank: (id: string, name: string) =>
+    runWrite({
+      label: `New bank "${name.trim()}"`,
+      kind: "insert",
+      table: bankTable,
+      values: { id, name: name.trim() },
+    }),
 
   getAccounts: async (): Promise<IBankAccount[]> => {
     const { data, error } = await supabase
@@ -54,58 +59,52 @@ const bankServices = {
     return (data ?? []) as unknown as IBankAccount[];
   },
 
-  createAccount: async (
-    bankId: string,
-    values: IBankAccountInput
-  ): Promise<void> => {
-    const { error } = await supabase
-      .from(bankAccountTable)
-      .insert({ ...toAccountValues(bankId, values), active: true });
+  createAccount: (bankId: string, values: IBankAccountInput) =>
+    runWrite({
+      label: `New bank account "${values.account_name.trim()}"`,
+      kind: "insert",
+      table: bankAccountTable,
+      values: { ...toAccountValues(bankId, values), active: true },
+      errors: accountErrors,
+    }),
 
-    if (error) {
-      if (error.code === "23505") throw accountConflict();
-      throw toError(error);
-    }
-  },
+  updateAccount: (id: string, bankId: string, values: IBankAccountInput) =>
+    runWrite({
+      label: `Update bank account "${values.account_name.trim()}"`,
+      kind: "update",
+      table: bankAccountTable,
+      values: toAccountValues(bankId, values),
+      match: { id },
+      errors: accountErrors,
+    }),
 
-  updateAccount: async (
-    id: string,
-    bankId: string,
-    values: IBankAccountInput
-  ): Promise<void> => {
-    const { error } = await supabase
-      .from(bankAccountTable)
-      .update(toAccountValues(bankId, values))
-      .eq("id", id);
+  setAccountActive: (id: string, active: boolean) =>
+    runWrite({
+      label: active ? "Restore bank account" : "Archive bank account",
+      kind: "update",
+      table: bankAccountTable,
+      values: { active },
+      match: { id },
+    }),
 
-    if (error) {
-      if (error.code === "23505") throw accountConflict();
-      throw toError(error);
-    }
-  },
+  deleteAccount: (id: string) =>
+    runWrite({
+      label: "Delete bank account",
+      kind: "delete",
+      table: bankAccountTable,
+      match: { id },
+      errors: accountErrors,
+    }),
 
-  setAccountActive: async (id: string, active: boolean): Promise<void> => {
-    const { error } = await supabase
-      .from(bankAccountTable)
-      .update({ active })
-      .eq("id", id);
+  pendingAccountOf: (write: IQueuedWrite): IBankAccount | null => {
+    const values = queuedInsertOf(write, bankAccountTable);
+    if (!values) return null;
 
-    if (error) throw toError(error);
-  },
-
-  deleteAccount: async (id: string): Promise<void> => {
-    const { error } = await supabase
-      .from(bankAccountTable)
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      if (error.code === "23503")
-        throw new Error(
-          "This account is used by existing transactions — archive it instead"
-        );
-      throw toError(error);
-    }
+    return {
+      bank: null,
+      created_at: queuedAtOf(write),
+      ...values,
+    } as unknown as IBankAccount;
   },
 };
 

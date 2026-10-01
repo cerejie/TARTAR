@@ -5,7 +5,7 @@ import type {
   IUserDisplayName,
 } from "../../models/data/account/account.response";
 import { runWrite } from "../../store/common/sync.store";
-import { supabase, toError } from "../../utils/supabase.utils";
+import { onlineOnly, supabase, toError } from "../../utils/supabase.utils";
 
 const table = "users";
 
@@ -33,10 +33,12 @@ const userServices = {
   },
 
   decidePasswordReset: async (id: string, approve: boolean): Promise<void> => {
-    const { error } = await supabase.rpc("decide_password_reset", {
-      p_user_id: id,
-      p_approve: approve,
-    });
+    const { error } = await onlineOnly(
+      supabase.rpc("decide_password_reset", {
+        p_user_id: id,
+        p_approve: approve,
+      })
+    );
     if (error) throw toError(error);
   },
 

@@ -1,0 +1,59 @@
+[
+ {
+  "note": "login acc",
+  "login": [
+   "qaacc2@qa.test",
+   "QaTest#2026"
+  ],
+  "stop": true
+ },
+ {
+  "note": "warm receivables",
+  "goto": "/receivables",
+  "settle": 4000
+ },
+ {
+  "note": "GO OFFLINE + RELOAD",
+  "offline": true,
+  "goto": "/receivables",
+  "settle": 2500
+ },
+ {
+  "row": "QA Customer A",
+  "item": "Record payment",
+  "wait": 1000
+ },
+ {
+  "fill": {
+   "[role=dialog] input[name^='amounts.']": "53"
+  }
+ },
+ {
+  "submit": "Record payment"
+ },
+ {
+  "note": "after pay",
+  "always": true,
+  "wait": 1500,
+  "text": "main",
+  "max": 300,
+  "absent": "Something went wrong"
+ },
+ {
+  "note": "queue",
+  "always": true,
+  "queue": true
+ },
+ {
+  "note": "BACK ONLINE",
+  "offline": false,
+  "always": true,
+  "wait": 9000
+ },
+ {
+  "note": "queue after",
+  "always": true,
+  "queue": true,
+  "js": "JSON.stringify(JSON.parse(localStorage.getItem(\"tartar-sync-queue\")||\"{}\").state?.failed?.length)"
+ }
+]

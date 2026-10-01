@@ -1,0 +1,37 @@
+[
+ {
+  "note": "open login online",
+  "goto": "/login",
+  "settle": 3000
+ },
+ {
+  "note": "GO OFFLINE + reload login",
+  "offline": true,
+  "goto": "/login",
+  "settle": 2000
+ },
+ {
+  "note": "recorder",
+  "js": "window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"
+ },
+ {
+  "fill": {
+   "Email": "qaadmin2@qa.test",
+   "Password": "QaTest#2026"
+  }
+ },
+ {
+  "button": "Sign in",
+  "page": true,
+  "wait": 2500,
+  "always": true
+ },
+ {
+  "note": "login toasts/text",
+  "always": true,
+  "js": "window.__t",
+  "text": "form",
+  "max": 400,
+  "name": "o12-login-offline"
+ }
+]
