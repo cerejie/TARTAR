@@ -2,7 +2,7 @@ import { BookOpen } from "lucide-react";
 import AppButton from "../../common/button/AppButton";
 import { useModal } from "../../../hook/common/modal.hook";
 import { supplierLedgerModalKey } from "../../../keys/modal.keys";
-import { ledgerButton, ledgerButtonLabel } from "../../../styles/ledger/ledger.styles";
+import { ledgerIconButton, ledgerIconLabel } from "../../../styles/ledger/ledger.styles";
 
 const SupplierLedgerButton = () => {
   const ledgerModal = useModal(supplierLedgerModalKey);
@@ -10,11 +10,11 @@ const SupplierLedgerButton = () => {
   return (
     <AppButton
       variant="outline"
-      className={ledgerButton}
+      className={ledgerIconButton}
       onPress={() => ledgerModal.openModal()}
     >
       <BookOpen />
-      <span className={ledgerButtonLabel}>Supplier ledger</span>
+      <span className={ledgerIconLabel}>Supplier ledger</span>
     </AppButton>
   );
 };

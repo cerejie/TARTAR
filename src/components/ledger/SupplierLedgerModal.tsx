@@ -46,12 +46,14 @@ const SupplierLedgerModal = () => {
     },
     {
       title: "Unpaid payables",
+      mobile: "hidden",
       dataIndex: "unpaidCount",
       align: "right",
       sorter: (a, b) => a.unpaidCount - b.unpaidCount,
     },
     {
       title: "Last transaction",
+      mobile: "hidden",
       dataIndex: "lastTransactionAt",
       sorter: (a, b) =>
         (a.lastTransactionAt ?? "").localeCompare(b.lastTransactionAt ?? ""),
@@ -79,7 +81,7 @@ const SupplierLedgerModal = () => {
               data={suppliers}
               loading={loading}
               rowKey={partyKeyOf}
-              pageSize={8}
+              pageSize={5}
               onRowClick={openSupplier}
               emptyText="No suppliers with payables"
             />

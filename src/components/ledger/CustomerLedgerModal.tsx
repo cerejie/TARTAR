@@ -68,12 +68,14 @@ const CustomerLedgerModal = () => {
     },
     {
       title: "Unpaid transactions",
+      mobile: "hidden",
       dataIndex: "unpaidCount",
       align: "right",
       sorter: (a, b) => a.unpaidCount - b.unpaidCount,
     },
     {
       title: "Last transaction",
+      mobile: "hidden",
       dataIndex: "lastTransactionAt",
       sorter: (a, b) =>
         (a.lastTransactionAt ?? "").localeCompare(b.lastTransactionAt ?? ""),
@@ -81,6 +83,7 @@ const CustomerLedgerModal = () => {
     },
     {
       title: "Information",
+      mobile: "status",
       key: "info",
       width: 130,
       render: (_, customer) => (
@@ -120,7 +123,7 @@ const CustomerLedgerModal = () => {
               data={customers}
               loading={loading}
               rowKey={ledgerKeyOf}
-              pageSize={8}
+              pageSize={5}
               onRowClick={(customer) =>
                 openCustomer({
                   customerId: customer.customerId,

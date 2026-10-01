@@ -1,6 +1,14 @@
-import { ArrowLeft, CircleDollarSign, Info, Printer } from "lucide-react";
+import {
+  ArrowLeft,
+  CircleDollarSign,
+  FileText,
+  Info,
+  Printer,
+} from "lucide-react";
+import type { IDetailSection } from "../../models/common/detail.model";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import { customerDetailsModalKey } from "../../keys/modal.keys";
+import { ledgerExpansionKey } from "../../keys/table.keys";
 import {
   ledgerStatusColors,
   ledgerStatusLabels,
@@ -17,6 +25,9 @@ import {
   ledgerHead,
   ledgerHeadActions,
   ledgerHeadStart,
+  ledgerIconButton,
+  ledgerIconLabel,
+  ledgerPayButton,
   ledgerSectionTitle,
   ledgerTitle,
 } from "../../styles/ledger/ledger.styles";
@@ -25,6 +36,7 @@ import { formatDate, formatMoney } from "../../utils/format.utils";
 import { printStatement } from "../../utils/print.utils";
 import AppButton from "../common/button/AppButton";
 import StatCard from "../common/card/StatCard";
+import FilterToolbar from "../common/filter/FilterToolbar";
 import LedgerFilterBar from "../common/filter/LedgerFilterBar";
 import RequirePermission from "../common/guard/RequirePermission";
 import DataTable from "../common/table/DataTable";
@@ -69,25 +81,33 @@ const CustomerLedgerView = () => {
     },
     {
       title: "Due date",
-      mobile: "subtitle",
+      mobile: "hidden",
       dataIndex: "due_date",
       width: 120,
       render: (value: string) => formatDate(value),
     },
-    { title: "Branch", dataIndex: "branch", render: branchName },
+    {
+      title: "Branch",
+      mobile: "hidden",
+      dataIndex: "branch",
+      render: branchName,
+    },
     {
       title: "Reference",
+      mobile: "hidden",
       dataIndex: "reference_number",
       render: (value: string | null) => value || "—",
     },
     {
       title: "Amount",
+      mobile: "hidden",
       dataIndex: "amount",
       align: "right",
       render: (value: number) => formatMoney(value),
     },
     {
       title: "Paid",
+      mobile: "hidden",
       dataIndex: "paid_amount",
       align: "right",
       render: (value: number) => formatMoney(value),
@@ -115,6 +135,7 @@ const CustomerLedgerView = () => {
           {
             title: "Created by",
             key: "created_by",
+            mobile: "hidden" as const,
             render: (_: unknown, row: IReceivable) =>
               userNameOf(row.created_by),
           },
@@ -122,13 +143,57 @@ const CustomerLedgerView = () => {
       : []),
   ];
 
+  const detailSections: IDetailSection<IReceivable>[] = [
+    {
+      key: "record",
+      title: "Record",
+      icon: <FileText />,
+      items: [
+        {
+          key: "due_date",
+          label: "Due date",
+          render: (row) => formatDate(row.due_date),
+        },
+        {
+          key: "reference",
+          label: "Reference",
+          render: (row) => row.reference_number || "—",
+        },
+        {
+          key: "branch",
+          label: "Branch",
+          render: (row) => branchName(row.branch),
+        },
+        {
+          key: "paid",
+          label: "Paid",
+          render: (row) =>
+            `${formatMoney(row.paid_amount)} of ${formatMoney(row.amount)}`,
+        },
+      ...(permissions.isManager
+        ? [
+            {
+              key: "recorded_by",
+              label: "Recorded by",
+              render: (row: IReceivable) => userNameOf(row.created_by),
+            },
+          ]
+        : []),
+      ],
+    },
+  ];
+
   return (
     <>
       <div className={ledgerHead}>
         <div className={ledgerHeadStart}>
-          <AppButton variant="outline" onPress={closeLedgerDetail}>
+          <AppButton
+            variant="outline"
+            className={ledgerIconButton}
+            onPress={closeLedgerDetail}
+          >
             <ArrowLeft />
-            Back to customers
+            <span className={ledgerIconLabel}>Back to customers</span>
           </AppButton>
           <h2 className={ledgerTitle}>{customer.customerName}</h2>
         </div>
@@ -144,6 +209,7 @@ const CustomerLedgerView = () => {
           </AppButton>
           <AppButton
             variant="outline"
+            className={ledgerIconButton}
             onPress={() =>
               printStatement(
                 "receivable",
@@ -156,16 +222,18 @@ const CustomerLedgerView = () => {
             }
           >
             <Printer />
-            Print statement
+            <span className={ledgerIconLabel}>Print statement</span>
           </AppButton>
           <RequirePermission can="encodeTransactions" fallback={null}>
             <AppButton
+              variant={selectedRows.length === 0 ? "outline" : "default"}
+              className={ledgerPayButton}
               disabled={selectedRows.length === 0}
               onPress={() => paymentModal.openModal()}
             >
               <CircleDollarSign />
               {selectedRows.length === 0
-                ? "Tick receivables to pay"
+                ? "Select receivables to pay"
                 : "Record payment"}
             </AppButton>
           </RequirePermission>
@@ -209,13 +277,22 @@ const CustomerLedgerView = () => {
         </BentoCell>
       </BentoGrid>
 
-      <LedgerFilterBar scope="customer-ledger" showStatus showOverdue />
+      <FilterToolbar>
+        <LedgerFilterBar
+          scope="customer-ledger"
+          showStatus
+          showOverdue
+          layout="popover"
+        />
+      </FilterToolbar>
 
       <DataTable<IReceivable>
         columns={columns}
         data={rows}
         loading={listLoading}
-        pageSize={8}
+        pageSize={5}
+        expansionKey={ledgerExpansionKey("customer-ledger")}
+        detailSections={detailSections}
         emptyText="No receivables match the filters"
         rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
         rowSelection={{

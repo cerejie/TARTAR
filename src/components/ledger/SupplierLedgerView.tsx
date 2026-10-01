@@ -1,10 +1,12 @@
-import { ArrowLeft, CircleCheck, Printer } from "lucide-react";
+import { ArrowLeft, CircleCheck, FileText, Printer } from "lucide-react";
+import type { IDetailSection } from "../../models/common/detail.model";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   payableStatusColors,
   payableStatusLabels,
   payableStatusValues,
 } from "../../enums/ledger.enum";
+import { ledgerExpansionKey } from "../../keys/table.keys";
 import { useSupplierDetailHook } from "../../hook/data/ledger/supplier.detail.hook";
 import type { IRowAction } from "../../models/common/action.model";
 import {
@@ -17,6 +19,8 @@ import {
   ledgerHead,
   ledgerHeadActions,
   ledgerHeadStart,
+  ledgerIconButton,
+  ledgerIconLabel,
   ledgerSectionTitle,
   ledgerTitle,
 } from "../../styles/ledger/ledger.styles";
@@ -28,6 +32,7 @@ import { formatDate, formatMoney } from "../../utils/format.utils";
 import { printStatement } from "../../utils/print.utils";
 import AppButton from "../common/button/AppButton";
 import StatCard from "../common/card/StatCard";
+import FilterToolbar from "../common/filter/FilterToolbar";
 import LedgerFilterBar from "../common/filter/LedgerFilterBar";
 import StatusTag from "../common/status/StatusTag";
 import DataTable from "../common/table/DataTable";
@@ -77,14 +82,20 @@ const SupplierLedgerView = () => {
     },
     {
       title: "Due date",
-      mobile: "subtitle",
+      mobile: "hidden",
       dataIndex: "due_date",
       width: 120,
       render: (value: string) => formatDate(value),
     },
-    { title: "Branch", dataIndex: "branch", render: branchName },
+    {
+      title: "Branch",
+      mobile: "hidden",
+      dataIndex: "branch",
+      render: branchName,
+    },
     {
       title: "Reference",
+      mobile: "hidden",
       dataIndex: "reference_number",
       render: (value: string | null) => value || "—",
     },
@@ -114,6 +125,7 @@ const SupplierLedgerView = () => {
           {
             title: "Created by",
             key: "created_by",
+            mobile: "hidden" as const,
             render: (_: unknown, row: IPayable) => userNameOf(row.created_by),
           },
         ]
@@ -127,19 +139,58 @@ const SupplierLedgerView = () => {
     },
   ];
 
+  const detailSections: IDetailSection<IPayable>[] = [
+    {
+      key: "record",
+      title: "Record",
+      icon: <FileText />,
+      items: [
+        {
+          key: "due_date",
+          label: "Due date",
+          render: (row) => formatDate(row.due_date),
+        },
+        {
+          key: "reference",
+          label: "Reference",
+          render: (row) => row.reference_number || "—",
+        },
+        {
+          key: "branch",
+          label: "Branch",
+          render: (row) => branchName(row.branch),
+        },
+      ...(permissions.isManager
+        ? [
+            {
+              key: "recorded_by",
+              label: "Recorded by",
+              render: (row: IPayable) => userNameOf(row.created_by),
+            },
+          ]
+        : []),
+      ],
+    },
+  ];
+
   return (
     <>
       <div className={ledgerHead}>
         <div className={ledgerHeadStart}>
-          <AppButton variant="outline" onPress={closeSupplierDetail}>
+          <AppButton
+            variant="outline"
+            className={ledgerIconButton}
+            onPress={closeSupplierDetail}
+          >
             <ArrowLeft />
-            Back to suppliers
+            <span className={ledgerIconLabel}>Back to suppliers</span>
           </AppButton>
           <h2 className={ledgerTitle}>{supplier.partyName}</h2>
         </div>
         <div className={ledgerHeadActions}>
           <AppButton
             variant="outline"
+            className={ledgerIconButton}
             onPress={() =>
               printStatement(
                 "payable",
@@ -152,7 +203,7 @@ const SupplierLedgerView = () => {
             }
           >
             <Printer />
-            Print statement
+            <span className={ledgerIconLabel}>Print statement</span>
           </AppButton>
         </div>
       </div>
@@ -194,17 +245,22 @@ const SupplierLedgerView = () => {
         </BentoCell>
       </BentoGrid>
 
-      <LedgerFilterBar
-        scope="supplier-ledger"
-        showStatus
-        statusValues={payableStatusValues}
-      />
+      <FilterToolbar>
+        <LedgerFilterBar
+          scope="supplier-ledger"
+          showStatus
+          statusValues={payableStatusValues}
+          layout="popover"
+        />
+      </FilterToolbar>
 
       <DataTable<IPayable>
         columns={columns}
         data={rows}
         loading={listLoading}
-        pageSize={8}
+        pageSize={5}
+        expansionKey={ledgerExpansionKey("supplier-ledger")}
+        detailSections={detailSections}
         emptyText="No payables match the filters"
         rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
       />
