@@ -226,7 +226,12 @@ each phase, then a user check on a real phone.
     expense category "QA O12 Type" (QOT); bank "QA O12 Bank" again. Test push subscription already deleted.
 
 ## Next
-NEXT SESSION STARTS HERE (2026-10-01): the user commits Development v2.06 and pushes mobilel-app-native
+PROGRESS 2026-10-01 (v2.08 pushed): step a done (notifications On at the preview URL); P0-4 event 1
+(voucher needs approval) and event 2 (approved + rejected, realtime) PASSED. Continue at b event 3.
+NEW WORK QUEUED: .claude/state/ROADMAP-VOUCHER-VAT.md (resubmit from Vouchers, admin auto-approve, VAT
+checkbox; migration 29). Run it on this branch after b events 3-4 and BEFORE d (merge/production).
+
+Previously: the user commits Development v2.06 and pushes mobilel-app-native
 (check `git log -1` and `git status`; if not pushed, offer to commit + push). Preview URL for testing:
 https://tartar-git-mobilel-app-native-ejieworx.vercel.app (Vercel branch alias of mobilel-app-native;
 VITE_VAPID_PUBLIC_KEY must be enabled for Preview). Walk the user through, one step at a time:
