@@ -196,7 +196,9 @@ export const useDisbursementListHook = (
       transactionServices.updateDisbursement(
         payload.id,
         kind,
-        await prepare(payload.values)
+        await prepare(payload.values),
+        editRow?.version ?? 0,
+        editRow?.voucher?.status ?? null
       ),
     {
       successMessage: editRejected

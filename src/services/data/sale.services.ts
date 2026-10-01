@@ -25,7 +25,7 @@ const defaultSort: ISortState = { column: "txn_date", direction: "descending" };
 const columns = `
   id, type, branch, farm_section, txn_date, amount, reference_number, description,
   customer_id, supplier_id, cash_account, bank_account_id, income_source, expense_type, due_date,
-  created_by, created_at,
+  created_by, created_at, version,
   sale_status, deposit_date, deposited_by, deposited_at, verified_by, verified_at,
   rejection_reason,
   customer:customers(name)
@@ -97,13 +97,13 @@ const saleServices = {
       values: { ...saleValues(values), type: "sale", created_by: createdBy },
     }),
 
-  update: (id: string, values: ISaleInput) =>
+  update: (id: string, version: number, values: ISaleInput) =>
     runWrite({
       label: "Edit sale",
       kind: "update",
       table,
       values: saleValues(values),
-      match: { id },
+      match: { id, version },
     }),
 
   markDeposited: (id: string, depositDate: string) =>
@@ -130,8 +130,12 @@ const saleServices = {
       args: { p_transaction_id: id, p_reason: reason },
     }),
 
-  resubmit: async (id: string, values: ISaleResubmitInput) => {
-    await saleServices.update(id, values);
+  resubmit: async (
+    id: string,
+    version: number,
+    values: ISaleResubmitInput
+  ) => {
+    await saleServices.update(id, version, values);
     return saleServices.markDeposited(id, values.deposit_date);
   },
 

@@ -3,7 +3,7 @@ import {
   transactionTypeLabels,
   type DisbursementKind,
 } from "../../enums/transaction.enum";
-import { withholdingRates } from "../../enums/voucher.enum";
+import { withholdingRates, type VoucherStatus } from "../../enums/voucher.enum";
 import type { ILedgerFilters } from "../../models/common/filter.model";
 import {
   pageRange,
@@ -43,7 +43,7 @@ const defaultSort: ISortState = { column: "txn_date", direction: "descending" };
 const columns = `
   id, type, branch, farm_section, txn_date, amount, reference_number, description,
   customer_id, supplier_id, cash_account, bank_account_id, income_source, expense_type, due_date,
-  sale_status, created_by, created_at,
+  sale_status, created_by, created_at, version,
   customer:customers(name), supplier:suppliers(name)
 `;
 
@@ -346,13 +346,17 @@ const transactionServices = {
   updateDisbursement: (
     id: string,
     kind: DisbursementKind,
-    values: IDisbursementInput
+    values: IDisbursementInput,
+    version: number,
+    voucherStatus: VoucherStatus | null
   ) =>
     runWrite({
       label: `Edit ${transactionTypeLabels[kind].toLowerCase()}`,
       kind: "rpc",
       fn: "update_transaction_with_voucher",
       args: {
+        p_expected_version: version,
+        p_expected_voucher_status: voucherStatus,
         p_transaction_id: id,
         p_branch: values.branch,
         p_txn_date: values.txn_date,

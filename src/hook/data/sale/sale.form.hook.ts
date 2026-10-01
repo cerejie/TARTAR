@@ -98,7 +98,7 @@ export const useSaleFormHook = () => {
 
   const updateMutation = useMutation(
     (payload: { id: string; values: ISaleInput }) =>
-      saleServices.update(payload.id, payload.values),
+      saleServices.update(payload.id, editRow?.version ?? 0, payload.values),
     {
       successMessage: "Sale updated",
       invalidate: saleInvalidateKeys,
@@ -128,7 +128,11 @@ export const useSaleFormHook = () => {
 
   const resubmitMutation = useMutation(
     (payload: { id: string; values: ISaleResubmitInput }) =>
-      saleServices.resubmit(payload.id, payload.values),
+      saleServices.resubmit(
+        payload.id,
+        resubmitRow?.version ?? 0,
+        payload.values
+      ),
     {
       successMessage: "Sale resubmitted — awaiting verification",
       invalidate: saleInvalidateKeys,

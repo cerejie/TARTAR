@@ -180,6 +180,16 @@ merged into main).
   syncFlushLockKey ifAvailable; rehydrateSync); src/keys/storage.keys.ts syncFlushLockKey;
   src/hook/common/network.hook.ts `storage` listener -> rehydrateSync.
 
+- C2 CODE DONE 2026-10-01 (OQ4 = version column; voucher status change refuses too), NOT verified:
+  waits for the user to apply migration 25, then rerun c1 -> admin2's 702 edit in the failed list.
+  supabase/migrations/20261013000025_transaction_version.sql (transactions.version + BEFORE UPDATE
+  transactions_zz_version bump, audit skips version, update_transaction_with_voucher overload with
+  p_expected_version + p_expected_voucher_status; approve/print were already locked by
+  transactions_guard, reject is caught by the voucher status check); transaction.response version;
+  sale.services update/resubmit match { id, version }; transaction.services updateDisbursement sends
+  both; write.utils 0-row versioned update -> "someone else changed this record"; sale.form.hook +
+  disbursement.list.hook pass editRow version / voucher status. Client REQUIRES migration 25.
+
 ## Verification phases (added 2026-10-01, user-approved; V1 and V2 results below)
 - V1 DONE 2026-10-01: accountant read-only. Harness o13/o13b/o13c (qaacc1): Receivables and Payables
   Records + By customer/By supplier show no write action ("Show details", "View ledger" only).
@@ -251,7 +261,7 @@ Broken, to fix (phases C1-C5 below).
   Ask at C5 whether it is wanted.
 
 ## Next (one conversation, in order)
-1. C2 (ask OQ4) -> C3 -> C4 -> C5 (ask) -> V3 -> V4 (user visual pass).
+1. User applies migration 25 -> C2 harness verify (c1 rerun) -> C3 -> C4 -> C5 (ask) -> V3 -> V4 (user visual pass).
 2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
@@ -309,5 +319,5 @@ Broken, to fix (phases C1-C5 below).
 Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
 committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
 committed v1.87 · O3 committed v1.88 · O4 committed v1.89 · roadmap phases O1-O4 complete;
-OB10 UI fix committed. C1 done, not committed (suggested v1.92). LedgerPartiesTable IS
+OB10 UI fix committed. C1 committed v1.92. C2 code done, migration 25 written NOT applied, not committed. LedgerPartiesTable IS
 mounted (LedgerRecordsSection, view "parties").

@@ -88,12 +88,14 @@ export const executeWrite = async (write: IQueuedWrite): Promise<void> => {
 
   const matched = write.kind === "update" || write.kind === "delete";
   if (matched && Array.isArray(result.data) && result.data.length === 0) {
-    throw new WriteError(
-      "refused",
-      `${write.label} changed nothing — the record is gone or you lack permission for it.`
-    );
+    throw new WriteError("refused", unmatchedReasonOf(write));
   }
 };
+
+const unmatchedReasonOf = (write: IQueuedWrite): string =>
+  write.kind === "update" && "version" in write.match
+    ? `${write.label} was refused — someone else changed this record after you opened it. Reopen it and edit again.`
+    : `${write.label} changed nothing — the record is gone or you lack permission for it.`;
 
 const newWriteId = (): string => crypto.randomUUID();
 

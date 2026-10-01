@@ -28,6 +28,7 @@ export interface ITransaction {
   sale_status?: SaleStatus | null;
   created_by: string | null;
   created_at: string;
+  version: number;
   customer?: { name: string } | null;
   supplier?: { name: string } | null;
 }
@@ -44,6 +45,7 @@ export const blankTransactionFields = {
   expense_type: null,
   due_date: null,
   created_by: null,
+  version: 0,
   customer: null,
   supplier: null,
 } satisfies Partial<ITransaction>;
