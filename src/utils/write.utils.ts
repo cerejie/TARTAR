@@ -47,11 +47,41 @@ type IPostgrestResult = {
 const hasStampedId = (values: unknown): boolean =>
   !!values && typeof values === "object" && "id" in values && !!values.id;
 
+const isPkeyConflict = (table: string, result: IPostgrestResult): boolean =>
+  result.error?.code === uniqueViolationCode &&
+  result.error.message.includes(`${table}_pkey`);
+
 const isReplayedInsert = (write: IQueuedWrite, result: IPostgrestResult) =>
   write.kind === "insert" &&
   hasStampedId(write.values) &&
-  result.error?.code === uniqueViolationCode &&
-  result.error.message.includes(`${write.table}_pkey`);
+  isPkeyConflict(write.table, result);
+
+const findStoredRow = async (
+  write: IQueuedWrite,
+  table: string,
+  match: Record<string, unknown>
+): Promise<IRecordValues | null> => {
+  const result = await supabase.from(table).select().match(match).limit(1);
+  if (result.error) throw toWriteError(write, result);
+  const [row] = Array.isArray(result.data) ? result.data : [];
+  return isRecordValues(row) ? row : null;
+};
+
+const holdsValues = (stored: IRecordValues, values: IRecordValues): boolean =>
+  Object.entries(values).every(
+    ([key, value]) => JSON.stringify(stored[key]) === JSON.stringify(value)
+  );
+
+const isReplayedSlugInsert = async (
+  write: IQueuedWrite,
+  result: IPostgrestResult
+): Promise<boolean> => {
+  if (write.kind !== "insert" || !isPkeyConflict(write.table, result)) return false;
+  const values = write.values;
+  if (!isRecordValues(values) || typeof values.slug !== "string") return false;
+  const stored = await findStoredRow(write, write.table, { slug: values.slug });
+  return !!stored && holdsValues(stored, values);
+};
 
 const toWriteError = (
   write: IQueuedWrite,
@@ -84,10 +114,14 @@ export const executeWrite = async (write: IQueuedWrite): Promise<void> => {
 
   const result = await run();
   if (isReplayedInsert(write, result)) return;
+  if (await isReplayedSlugInsert(write, result)) return;
   if (result.error) throw toWriteError(write, result);
 
   const matched = write.kind === "update" || write.kind === "delete";
   if (matched && Array.isArray(result.data) && result.data.length === 0) {
+    if (write.kind === "delete" && !(await findStoredRow(write, write.table, write.match))) {
+      return;
+    }
     throw new WriteError("refused", unmatchedReasonOf(write));
   }
 };

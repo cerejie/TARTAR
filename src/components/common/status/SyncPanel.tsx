@@ -34,6 +34,7 @@ const SyncPanel = ({ description }: IProps) => {
     flushing,
     pendingWrites,
     failedWrites,
+    othersWaiting,
     handleRetry,
     handleDiscard,
   } = useSyncPanelHook();
@@ -119,6 +120,12 @@ const SyncPanel = ({ description }: IProps) => {
               </Item>
             ))}
           </section>
+        ) : null}
+
+        {othersWaiting > 0 ? (
+          <span className={syncSectionTitle}>
+            {othersWaiting} change(s) waiting for another user to sign in on this device
+          </span>
         ) : null}
       </div>
     </>

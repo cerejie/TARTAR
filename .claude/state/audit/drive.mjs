@@ -91,6 +91,9 @@ for (const s of steps) {
       log(`  sync ${s.sync} @ ${new Date().toISOString().slice(11, 23)}`);
     }
     if (s.offline !== undefined) { await context.setOffline(s.offline); await page.waitForTimeout(s.offline ? 1200 : 6000); }
+    const restApi = (u) => u.href.includes("/rest/v1/");
+    if (s.dropReply) { let armed = true; await page.route(restApi, async (r) => { if (!armed || r.request().method() === "GET") return r.continue(); armed = false; const res = await r.fetch(); log(`  server applied ${r.request().method()} ${res.status()} -> reply dropped`); return r.abort("connectionreset"); }); }
+    if (s.dropReply === false) await page.unroute(restApi);
     if (s.blockApi !== undefined) { if (s.blockApi) await page.route(/supabase\.co/, (r) => r.abort("internetdisconnected")); else await page.unroute(/supabase\.co/); }
     if (s.nav) { await page.getByRole("link", { name: s.nav, exact: true }).first().click({ timeout: 6000 }); await page.waitForTimeout(s.settle ?? 2500); }
     if (s.js) log(`  js: ${JSON.stringify(await page.evaluate(s.js)).slice(0, 1500)}`);

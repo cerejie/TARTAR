@@ -1,0 +1,10 @@
+import { login, get, rpc } from "./rest.mjs";
+const { token } = await login("qaadmin1");
+const [t] = await get("transactions?select=id,branch,txn_date,amount,version,vouchers(status)&type=eq.expense&amount=eq.712&limit=1", token);
+console.log(JSON.stringify(t));
+const base = { p_transaction_id: t.id, p_branch: t.branch, p_txn_date: t.txn_date, p_amount: 99999 };
+const st = t.vouchers?.[0]?.status ?? t.vouchers?.status;
+const other = st === "rejected" ? "pending" : "rejected";
+console.log("stale version:", JSON.stringify(await rpc("update_transaction_with_voucher", { ...base, p_expected_version: t.version + 5, p_expected_voucher_status: st }, token)));
+console.log("stale voucher status:", JSON.stringify(await rpc("update_transaction_with_voucher", { ...base, p_expected_version: t.version, p_expected_voucher_status: other }, token)));
+console.log(JSON.stringify(await get(`transactions?select=amount,version&id=eq.${t.id}`, token)));

@@ -76,13 +76,14 @@ const useOwnWrites = () => {
   const queue = useSyncStore((state) => state.queue);
   const failed = useSyncStore((state) => state.failed);
 
-  return useMemo(
-    () => ({
-      pendingWrites: queue.filter((write) => isOwnWrite(write, owner)),
+  return useMemo(() => {
+    const pendingWrites = queue.filter((write) => isOwnWrite(write, owner));
+    return {
+      pendingWrites,
       failedWrites: failed.filter((item) => isOwnWrite(item.write, owner)),
-    }),
-    [owner, queue, failed]
-  );
+      othersWaiting: queue.length - pendingWrites.length,
+    };
+  }, [owner, queue, failed]);
 };
 
 export const useSyncStatus = () => {
@@ -121,7 +122,7 @@ export const useSyncPanelHook = () => {
   const retry = useSyncStore((state) => state.retry);
   const discard = useSyncStore((state) => state.discard);
   const openConfirm = useConfirm();
-  const { pendingWrites, failedWrites } = useOwnWrites();
+  const { pendingWrites, failedWrites, othersWaiting } = useOwnWrites();
 
   const handleRetry = (write: IQueuedWrite) => {
     retry(write.id);
@@ -142,6 +143,7 @@ export const useSyncPanelHook = () => {
     flushing,
     pendingWrites,
     failedWrites,
+    othersWaiting,
     handleRetry,
     handleDiscard,
   };

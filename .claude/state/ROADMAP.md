@@ -180,8 +180,14 @@ merged into main).
   syncFlushLockKey ifAvailable; rehydrateSync); src/keys/storage.keys.ts syncFlushLockKey;
   src/hook/common/network.hook.ts `storage` listener -> rehydrateSync.
 
-- C2 CODE DONE 2026-10-01 (OQ4 = version column; voucher status change refuses too), NOT verified:
-  waits for the user to apply migration 25, then rerun c1 -> admin2's 702 edit in the failed list.
+- C2 DONE, committed v1.93, harness-verified 2026-10-01 (migration 25 applied; c2/*.json, 3 parallel
+  browsers, RUN=c2 PARTIES=3): emp2 recorded 1251 + 1252; admin2 opened Sales then went offline;
+  emp2 deposited 1251 (status change), admin1 edited 1252 -> 1253 (same status, version only);
+  admin2 offline edits 1251 -> 12511 and 1252 -> 12522 -> reconnect: queue 0, BOTH in failed
+  "someone else changed this record"; DB 1251 deposited v2, 1253 undeposited v2, no 12511/12522.
+  REST probe probe25b.mjs on expense 712: overload with stale p_expected_version, and with stale
+  p_expected_voucher_status -> both P0001 "changed by someone else", 712 unchanged (v1).
+  (c1 not rerun literally: old 702 is ₱7,022 from the pre-fix run, so its row no longer matches.)
   supabase/migrations/20261013000025_transaction_version.sql (transactions.version + BEFORE UPDATE
   transactions_zz_version bump, audit skips version, update_transaction_with_voucher overload with
   p_expected_version + p_expected_voucher_status; approve/print were already locked by
@@ -189,6 +195,33 @@ merged into main).
   sale.services update/resubmit match { id, version }; transaction.services updateDisbursement sends
   both; write.utils 0-row versioned update -> "someone else changed this record"; sale.form.hook +
   disbursement.list.hook pass editRow version / voucher status. Client REQUIRES migration 25.
+
+- C3 DONE 2026-10-01, NOT committed, harness-verified on the production build (drive.mjs new step
+  `dropReply: true|false` = server applies the next non-GET REST call, browser gets connectionreset;
+  specs from c3.mjs): emp1 recorded 962 on QA Test; admin1 "Delete sale" 962 with reply dropped ->
+  queued "Delete transaction" -> retry deleted 0 rows -> existence read: gone -> success, 0 failed,
+  962 not in list or DB. Add category "QA C3 Type" (QCT) with reply dropped -> queued -> retry 23505
+  expense_categories_pkey -> stored row equals sent values -> success, 0 failed, one row. Negative:
+  same name, code QCX, online -> refused, dialog stays open, stored code still QCT. Category deleted.
+  Code: src/utils/write.utils.ts (isPkeyConflict, findStoredRow, holdsValues, isReplayedSlugInsert;
+  0-row delete reads the row by match: gone = success, still there = refused, read error = network).
+- C4 DONE 2026-10-01, NOT committed, harness-verified (c4-shared.mjs, production build): emp1
+  offline sale 953, signs out; emp2 signs in -> 0 rows of 953, sync button "Online — all changes
+  saved" with no badge (badge was already owner-scoped via useOwnWrites), panel shows "1 change(s)
+  waiting for another user to sign in on this device"; emp1 back -> synced, 953 listed once.
+  Code: pending.hook useOwnQueue (usePendingIds + useWithPendingRows own writes only);
+  network.hook useOwnWrites/useSyncPanelHook othersWaiting; SyncPanel note. Accepted trade-off:
+  another user's queued deposit no longer locks the row for emp2; the server refuses the duplicate.
+- C5 PART 1 DONE 2026-10-01, NOT committed (OQ5 answered: Supabase realtime). Root cause: realtime on
+  transactions already existed (migration 16, hook/app/realtime.hook.ts) but subscribed for managers
+  only, so employees never refreshed. realtime.hook now subscribes for selectIsAuthenticated (RLS
+  limits rows per role). Verified c5/gen.mjs (2 browsers): emp2 recorded + deposited 963 on Sales;
+  admin1 verified -> emp2's row "Verified" 5s later, no navigation.
+- C5 PART 2 WAITING: migration supabase/migrations/20261014000026_realtime_vouchers_payments.sql
+  written (vouchers + payments into supabase_realtime, idempotent, nothing dropped), NOT applied.
+  After the user applies it: add "vouchers", "payments" to liveTables in
+  src/services/data/realtime.services.ts (not before — a table outside the publication can fail the
+  channel), build + lint, verify admin1 on Vouchers while admin2 rejects a voucher -> list updates.
 
 ## Verification phases (added 2026-10-01, user-approved; V1 and V2 results below)
 - V1 DONE 2026-10-01: accountant read-only. Harness o13/o13b/o13c (qaacc1): Receivables and Payables
@@ -261,14 +294,16 @@ Broken, to fix (phases C1-C5 below).
   Ask at C5 whether it is wanted.
 
 ## Next (one conversation, in order)
-1. User applies migration 25 -> C2 harness verify (c1 rerun) -> C3 -> C4 -> C5 (ask) -> V3 -> V4 (user visual pass).
+1. User applies migration 26 -> C5 part 2 (liveTables + voucher reject live check) -> V3 -> V4
+   (user visual pass).
 2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
    bank "QA O12 Bank" (no delete in the UI); 2026-10-01 concurrency rows: sales 701, 702 (now
    ₱7,022), 711, 721, 801, 802, 803, 932, 933, 941, 943, 944-948, 951 (931 deleted, 942 lost), expense
    712, purchases 811-818 payee "QA Race Payee" + their vouchers, receivables reference "C-RACE-*"
-   + their payments), adds Banks + branch legal_name/address.
+   + their payments; C2 rows: sales 1251 (deposited), 1253; C3: sale 961 on branch HARDWARE,
+   auto-verified because admin recorded it — not deletable in the UI; C4: sale 953; C5: sale 963 verified), adds Banks + branch legal_name/address.
 3. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
    (f7-approve.json there holds the superadmin password in plain text).
 
@@ -319,5 +354,7 @@ Broken, to fix (phases C1-C5 below).
 Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
 committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
 committed v1.87 · O3 committed v1.88 · O4 committed v1.89 · roadmap phases O1-O4 complete;
-OB10 UI fix committed. C1 committed v1.92. C2 code done, migration 25 written NOT applied, not committed. LedgerPartiesTable IS
+OB10 UI fix committed. C1 committed v1.92. C2 committed v1.93, migration 25 applied, verified.
+C3 + C4 + C5 part 1 done + verified, not committed. Migration 26 written, NOT applied. Harness rule: test sales are recorded by qaemp1/2 (QA Test
+branch, undeposited); an admin-recorded sale goes to its default branch already verified. LedgerPartiesTable IS
 mounted (LedgerRecordsSection, view "parties").

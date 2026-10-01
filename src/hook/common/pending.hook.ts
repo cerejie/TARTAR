@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { useSyncStore } from "../../store/common/sync.store";
-import { writeTargetsOf } from "../../utils/write.utils";
+import { selectSessionOwner, useSyncStore } from "../../store/common/sync.store";
+import { useAccountStore } from "../../store/data/account/account.store";
+import { isOwnWrite, writeTargetsOf } from "../../utils/write.utils";
 import type { IQueuedWrite } from "../../models/common/write.model";
 
 type IPendingOptions<T> = {
@@ -14,8 +15,15 @@ const idKeyOf = (row: object): string => ("id" in row ? String(row.id) : "");
 const branchOf = (row: object): unknown =>
   "branch" in row ? row.branch : undefined;
 
-export const usePendingIds = (): ReadonlySet<string> => {
+const useOwnQueue = (): readonly IQueuedWrite[] => {
+  const owner = useAccountStore(selectSessionOwner);
   const queue = useSyncStore((state) => state.queue);
+
+  return useMemo(() => queue.filter((write) => isOwnWrite(write, owner)), [owner, queue]);
+};
+
+export const usePendingIds = (): ReadonlySet<string> => {
+  const queue = useOwnQueue();
 
   return useMemo(() => new Set(queue.flatMap(writeTargetsOf)), [queue]);
 };
@@ -25,7 +33,7 @@ export const useWithPendingRows = <T extends object>(
   toRow: (write: IQueuedWrite) => T | null,
   { enabled, branch, keyOf = idKeyOf }: IPendingOptions<T>
 ): readonly T[] => {
-  const queue = useSyncStore((state) => state.queue);
+  const queue = useOwnQueue();
 
   if (!enabled) return rows;
 

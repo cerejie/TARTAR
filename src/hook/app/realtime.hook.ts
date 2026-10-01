@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { liveRefreshKeys } from "../../keys/query.keys";
 import realtimeServices from "../../services/data/realtime.services";
 import {
-  selectIsManager,
+  selectIsAuthenticated,
   useAccountStore,
 } from "../../store/data/account/account.store";
 import { useInvalidate } from "../common/query.hook";
@@ -10,11 +10,11 @@ import { useInvalidate } from "../common/query.hook";
 const liveRefreshDelayMs = 500;
 
 export const useRealtimeRefreshHook = () => {
-  const isManager = useAccountStore(selectIsManager);
+  const isAuthenticated = useAccountStore(selectIsAuthenticated);
   const invalidate = useInvalidate();
 
   useEffect(() => {
-    if (!isManager) return;
+    if (!isAuthenticated) return;
 
     let pending: ReturnType<typeof setTimeout> | undefined;
 
@@ -32,5 +32,5 @@ export const useRealtimeRefreshHook = () => {
       clearTimeout(pending);
       unsubscribe();
     };
-  }, [isManager, invalidate]);
+  }, [isAuthenticated, invalidate]);
 };
