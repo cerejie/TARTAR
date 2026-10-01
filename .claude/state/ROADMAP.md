@@ -1,311 +1,101 @@
-# ROADMAP — Offline hardening (live offline test, 2026-09-30)
-Updated: 2026-10-01 (C1-C5, V3 done; V4 next)
+# ROADMAP — Native-feel mobile PWA (branch mobilel-app-native)
+Updated: 2026-10-01 (M0 done, not committed; M1 next)
 
 ## Goal
-Offline, every write is kept on the device and reaches the database once back online, nothing is
-lost or silently stuck, and every page shows the last data it had while online, never a blank
-page or an endless skeleton. `yarn build` + `yarn lint` clean after each phase, each phase
-harness-verified offline. Replaces the finished pre-deployment QA roadmap (F1-F7, Q7, v1.83,
-merged into main).
+The MAIN app feels like a native app on phones (iOS + Android), installs as an app on iOS,
+Android and Windows, still works in a plain browser, keeps every offline guarantee of the
+offline-hardening roadmap, and sends push notifications. `yarn build` + `yarn lint` clean after
+each phase, then a user check on a real phone.
 
 ## Session protocol
 1. New conversation: read this file, `git status --short`, start `Next` item 1. Load `build`
    (+ `tartar-shadcn` and `shadcn` docs for UI). Present the phase's file plan and WAIT for
    approval (global CLAUDE.md) before editing.
-2. Work on branch `offline-hardening` cut from `main` (create it in O1). Never commit or merge
-   unless asked; the user merges.
+2. One phase per conversation. Never commit or merge unless asked.
 3. Migrations: write the SQL file, show it, never apply it. Never drop/rename a column.
-   Dev and production are the SAME Supabase project: every harness write lands in production.
-4. Close a phase: build + lint clean, harness offline run for that phase, tick Done with paths,
-   rewrite Next, suggest commit (`git log --oneline --grep="^Development v" -1` + 0.1), tell the
-   user to open a new conversation.
+   Dev and production are the SAME Supabase project.
+4. Close a phase: build + lint clean, tick Done with paths, rewrite Next, suggest commit
+   (`git log --oneline --grep="^Development v" -1` + 0.1), tell the user to open a new conversation.
 
-## Decisions locked
+## Decisions locked (2026-10-01)
+- D1 Delivery = installable PWA with native feel. No Capacitor, no React Native.
+- D2 The MAIN app becomes native on phones (< 768px). Tablets/desktop keep the sidebar shell.
+- D3 Platforms: iOS + Android + Windows installs, and a plain browser.
+- D4 Push notifications: yes — all four events: daily 8 AM due digest (managers, accountants),
+  voucher needs approval (managers), payment needs verification (managers), your record was
+  decided (employee: voucher approved/rejected, sale verified).
+- D5 `/admin` app is KEPT as a separate install (own manifest, scope /admin). Its primitives move
+  to `components/common/` and both shells use them. One push subscription per device serves both.
+- D6 Phone lists load the next server page on scroll; desktop keeps TablePagination.
+- D7 Offline-hardening roadmap parked as done; its V4 visual pass folds into M5.
 - L1 Every CLAUDE.md convention holds (no comments, no useState, class strings in *.styles.ts,
   tokens only in theme.css, useConfirm, writes through runWrite, Transactions is reference).
-- L2 QA rows may be created freely in QA Test; the user resets all data after this roadmap.
-- L3 Offline test runs against the PRODUCTION BUILD (`yarn build` then `yarn preview --port 4199
-  --strictPort`), never the dev server: the service worker only exists in the build.
-- L4 A write refused by the server is never deleted silently: it is kept as "failed" with its
-  reason until the user retries or discards it.
 
-## Open decisions (ask at the start of the phase that needs them)
-- OQ1 (O3) Read cache: extend the hand-rolled `store/common/query.store.ts` with IndexedDB
-  persistence (small, no migration of hooks) — RECOMMENDED — or do the planned TanStack Query
-  switch now with its persister (touches every data hook, much larger).
-- OQ2 (O1, ANSWERED: b — client uuid on inserts AND migration 24 for the RPCs) Duplicate protection for retried writes: client-generated uuid on queued inserts
-  (no migration), plus migration 24 adding an idempotency key to the RPC writes
-  (create_transaction_with_voucher, record_ledger_payment, mark_payable_paid,
-  mark_sale_deposited, verify/reject) — or inserts only for now.
-- OQ3 (O4, ANSWERED: Hybrid) setup data (banks, accounts, branches, expense types, income sources)
-  queues offline with pending rows; account/auth RPCs stay online-only with a "needs internet" error.
-
-## Bugs (evidence: harness runs o1-o5, 2026-09-30, shots in shots/drive/o1-* .. o5-*)
-- OB1 CRITICAL stuck queue: one refused write blocks every write behind it forever, silently.
-  Run o4: two offline "Mark deposited" on sale P333 both queued; on reconnect the 2nd got
-  P0001 "This sale is already deposited", flush `break`s, so "Expense · 902" and "Payment 50 ·
-  QA Customer A" NEVER reached the database. No toast; `lastError` and `discard` exist in
-  sync.store but nothing in the UI reads them; reload online retries and fails the same way.
-- OB2 Duplicate actions offline: a queued action does not change the row, so the same row
-  action can be queued again (cause of OB1 in o4).
-- OB3 Queued entries are invisible: offline sale P901 got "Saved offline" toast + header badge,
-  but was not in the Sales list or the summary cards until sync.
-- OB4 Reads are not kept offline: query.store is memory only (no persist). Pages opened before
-  going offline keep data; an offline RELOAD or a page not opened yet (Purchases, Vouchers,
-  Payables, Reports, Sales after reload) shows skeleton rows + skeleton cards FOREVER (no error,
-  no empty state), and the top-bar branch picker is blank (o1-off-reload-sales,
-  o1-off-rep). Forms then have no lookups (branches, customers, banks), so nothing can be
-  recorded after an offline reload. Root cause of "never settles" not yet found — O3 step 1.
-- OB5 Weak connection (navigator says online, API unreachable): write fails with raw toast
-  "TypeError: Failed to fetch", not queued, dialog stays open (o5-w5). runWrite only checks
-  navigator.onLine.
-- OB6 Crash: after recording a receivable payment offline the Receivables page went to
-  "Something went wrong" — console "Cannot change the id of an item" (React Aria collection)
-  (o4-w4-pay). Payment itself was queued. Reproduce online too before fixing.
-- OB7 After a flush nothing refreshes and nothing is announced: no "Synced N changes" toast,
-  the open page keeps pre-sync data until navigated away.
-- OB8 Not queued at all: bank.services (all writes), reference.services expense types / income
-  sources / most setup writes, account.services (login, register, passwords),
-  user.services.decidePasswordReset. See OQ3.
-- OB10 DECIDED 2026-10-01: the accountant role is fully READ-ONLY (no record, create, update,
-  delete, approve). RLS already refuses accountant payment inserts (42501), so no migration. UI fix:
-  "Record payment" in LedgerRecordsTable and "Record payment" + "Customer details" in
-  LedgerPartiesTable now gated on encodeTransactions (every other write was already gated).
-- OB9 UNTESTED: flush after a long offline period (expired access token -> 401). Must refresh the
-  session and retry, never discard; test in O1.
-
-## Verified working (do not re-test unless touched)
-- Service worker installs and precaches 86 files; the app shell and session survive an offline
-  reload (o1). Harness quirk, NOT an app bug: persistent Playwright profiles here throw
-  "Failed to execute 'open' on 'CacheStorage'", so run with EPHEMERAL=1.
-- Queue persists across an offline reload (o4: 5 items kept) and flushes on reconnect and on
-  app start; sync icon shows the pending count while offline.
-- Queued inserts/RPCs that do reach the server apply correctly (sale P901, deposit of P333).
+## Standards checklist (from the 2026-10-01 analysis; tick as phases land)
+- Bottom tab bar per role + More · large title collapsing · back on detail · per-tab scroll restore
+- Android Back closes the open sheet/modal · toasts clear of the tab bar
+- Touch targets >= 44px on coarse pointers · primary action in thumb reach (FAB)
+- Forms as full-height sheets, Save above the keyboard, enterKeyHint/inputMode per field
+- Detail in bottom sheet · filters/sort as sheets · confirm as action sheet · View Transitions
+- Edge-to-edge + safe areas (M0) · status bar colour (M0) · splash (M0) · install UI (M0)
+- Update prompt (M0) · push (M4)
 
 ## Phases
-- O1 Write safety (OB1, OB5, OB7, OB9, OQ2): sync.store keeps a `failed` list — server
-  refusal (PostgREST/P0001/4xx) moves the item there and flush CONTINUES; network errors stop
-  and retry later; 401/JWT expired -> supabase.auth.refreshSession() then retry. runWrite
-  queues on network failure (TypeError fetch) as well as navigator offline. Flush end:
-  invalidate all queries + toast "Synced N" / "N changes need attention". Sync panel
-  (popover on SyncIndicator): pending + failed items with reason, Retry / Discard (useConfirm).
-  Client uuid on queued inserts (+ migration 24 if OQ2 says so).
-  Verify: o4 duplicate-deposit replay, o5 weak wifi, expired-token run.
-- O2 Pending visibility + no duplicates (OB2, OB3, OB6): list hooks merge queued writes as
-  "Pending sync" rows (tag), row actions on a row with a queued write are disabled; summary
-  cards unchanged but show "+ pending" hint only if cheap. Fix OB6. Verify offline sale,
-  expense, purchase, payment, deposit, voucher approve each show pending and cannot repeat.
-- O3 Offline reads (OB4, OQ1): find why offline fetches never settle; persist the query cache
-  to IndexedDB with `updatedAt`; offline = serve cached data + "Offline — showing data from
-  <time>" notice in ContentView; prime the cache on sign-in and on every reconnect for every
-  page the role can open (first page of each list, summaries, lookups, branch scope, reports
-  default period); a view never loaded shows an explicit "Not saved for offline" state, never a
-  skeleton. Verify: sign in, go offline, reload, open every page per role.
-- O4 Setup writes (OB8, OQ3) + full offline matrix per role (admin, accountant, employee):
-  every page, every write, reload, reconnect. Then remove QA leftovers from the tests.
+- M0 Platform baseline — DONE (see Done).
+- M1 Phone shell (< 768px): role tab bar (manager Home·Transactions·Vouchers·Alerts; employee
+  Sales·Expenses·Vouchers·Receivables; accountant Transactions·Receivables·Payables·Reports) +
+  More (other pages, branch scope, theme, account, sign out); app bar with collapsing title, back,
+  branch picker, sync; pull to refresh; per-tab scroll restore; Android Back closes sheets (history
+  entry per open modal); sonner top with safe-area offset. Generalise AdminTabBar / AppSheet /
+  ListCard / pull / swipe into components/common + hook/common; admin keeps using them.
+- M2 Touch + forms: coarse-pointer sizing (inputs, buttons, icon buttons, pager >= 44px) via a
+  `coarse` custom variant in theme.css applied from common wrappers (never edit components/ui);
+  EntityFormModal as full-height sheet with sticky footer above the keyboard (visualViewport);
+  enterKeyHint; extended FAB for the page primary action that shrinks on scroll.
+- M3 Lists + detail: ListCard rows on phones; detail in AppSheet; FilterPopover/SortSelect as
+  sheets; ConfirmationModal as bottom action sheet; View Transitions (reduced-motion safe);
+  load-more on scroll over the existing server paging (D6).
+- M4 Push: migration 27 `push_subscriptions` (user_id, endpoint unique, keys, user_agent,
+  created_at; RLS owner-only; index on user_id); Edge Function `send-push` (web-push, VAPID keys
+  as secrets set by the user); DB triggers for the event pushes + pg_cron 08:00 Asia/Manila digest
+  via pg_net; switch vite-plugin-pwa to injectManifest (custom SW: precache + push +
+  notificationclick deep link, scope-aware for /admin) — offline precache must survive; opt-in
+  switch in Account settings + contextual prompt, never on load; iOS needs the app installed.
+  New deps: workbox-precaching/routing (SW build). Show SQL, never apply.
+- M5 Verification matrix: each role on iOS installed, Android installed, Windows Edge installed,
+  plain browser; offline harness re-run (o11/o12 reads+writes, o6 replay) after the SW change;
+  old V4 items (Pending sync tag, OfflineNotice, Sync panel, failed list, light + dark, phone).
 
 ## Done
-- Evidence runs o1-o5 done 2026-09-30.
-- O1 DONE, harness-verified 2026-09-30 on the production build (v1.85 code + migration 24 applied):
-  o6-replay (online sale 341, offline deposit x2 + Expense 904 + Payment 51: 2nd deposit refused
-  "already deposited" -> sync panel "Needs attention (1)" with reason, the rest synced, list
-  refreshed without reload); o7-weak (blocked API: sale 906 queued, dialog closed, 30s retry synced,
-  "Synced 1 change"); o8-expiry (tampered token + offline reload: 401 stops flush, "session expired"
-  sign-out, queue kept, 0 failed; sign in again -> "Synced 1 change", expense 908 listed).
-  OB6 crash reproduced again in o6 (payment still queued and synced) -> O2.
-- O1 code: supabase/migrations/20261012000024_write_idempotency.sql
-  (write_receipts + app.claim_write + key-first overloads of the 8 RPCs, originals untouched);
-  src/utils/write.utils.ts (WriteError network|session|refused by status 0/401, prepareWrite stamps
-  insert id + p_idempotency_key, replayed insert pkey 23505 = success); src/store/common/sync.store.ts
-  (failed list persisted, refusal moves on, network/session stop, owner-scoped flush, retry/discard,
-  runWrite queues on network failure); src/store/common/query.store.ts refetchAll;
-  src/hook/common/network.hook.ts (flushAndReport toasts + refetch, 30s retry while queued,
-  useSyncPanelHook); src/components/common/status/{SyncIndicator,SyncPanel}.tsx.
-- OB9 decided: custom 8h JWT has no refresh, so 401 stops the flush, keeps the queue, the existing
-  expiry handler signs out, and the flush resumes on next sign-in (sync store is not in resetAllStores).
+- Offline hardening (O1-O4, C1-C5, V1-V3) done and verified 2026-09-30..10-01, committed through
+  v1.94 + later; details in git history (Development v1.85-v1.94). Not done: V4 visual pass -> M5.
+- M0 DONE 2026-10-01, NOT committed. Build + lint clean; precache 87 entries (splash/screenshots
+  excluded); built SW waits for SKIP_WAITING (prompt mode). Not yet checked on a device.
+  - index.html: viewport `viewport-fit=cover, interactive-widget=resizes-content`; theme-color
+    #eef2fb (was red #c1121f); 32 apple-touch-startup-image tags (16 iPhone/iPad portrait sizes,
+    light + dark) -> public/splash/*.png.
+  - vite.config.ts: registerType prompt; manifest id/scope/start_url/lang/dir, display_override,
+    categories, launch_handler navigate-existing, shortcuts Sales + Vouchers, screenshots
+    (public/screenshots/narrow.png 780x1688, wide.png 1280x800 — the login page); globIgnores.
+  - theme.css `p-safe-*` utility (max(spacing, env(safe-area-inset-*))); shell.styles shellRoot
+    p-safe-3 / md:p-safe-4; public.styles authPage p-safe-0, errorPage p-safe-6.
+  - src/hook/app/theme.color.hook.ts (useThemeColorHook(token), follows .dark): protected.hook +
+    PublicLayout use --backdrop, admin.hook uses --panel; admin.manifest.hook lost its theme-color
+    and viewport swaps (index.html carries the viewport now).
+  - src/hook/app/update.hook.ts: registerSW prompt -> persistent toast "A new version of TARTAR is
+    ready" + Reload; update check hourly and on return to the app.
+  - Install: models/common/install.model.ts, store/common/install.store.ts,
+    hook/common/install.hook.ts (useInstallPromptListener in app.hook, useInstallApp),
+    components/account/cards/InstallAppCard.tsx in AccountView (install button / iOS steps /
+    browser-menu note / installed), styles in account.styles.ts.
+  - Splash + screenshots were rendered with the harness Chrome (scratchpad assets/gen.mjs), no dep.
 
-- O2 DONE, harness-verified 2026-09-30 on the production build: o9-pending (emp: offline deposit
-  on sale 391 -> row "Pending sync", 2nd "Mark deposited" not reachable; expense 909 and purchase
-  393 listed as pending rows; receivable payment 52 -> no crash, record row locked, payment listed;
-  reconnect synced 4, 0 failed), o9b-emp (offline sale 392 listed pending, menu not reachable),
-  o9c/o9d-admin (offline voucher approve 909/908 -> voucher row and the Expenses row locked via
-  voucher id, synced as Approved).
-- O2 code: DataTable (OB6: key on the error/empty state rows — same-slot unkeyed TableRows changed
-  id; pending row class + "Pending sync" tag in the `actions` column, `pendingKeysOf` prop);
-  write.utils (writeTargetsOf, queuedInsertOf, queuedRpcArgsOf, queuedAtOf; prepareWrite stamps
-  queuedAt); src/hook/common/pending.hook.ts (usePendingIds, useWithPendingRows: page 1, status
-  filter compatible, branch scope, deduped by id); pendingOf mappers in sale/payment/voucher
-  services + transactionServices.pendingDisbursementOf; merged in sale/disbursement/payment/voucher
-  list hooks; transaction.response blankTransactionFields + disbursementLinkedIds.
-  Known gap: pending expense/purchase rows show "—" payee until synced (no join offline).
-
-- O3 DONE, harness-verified 2026-09-30 on the production build (OQ1 = IndexedDB on query.store;
-  priming = lookups + visited pages). Root cause of OB4 "never settles": postgrest-js 2.110 retries
-  every GET 3x on a network error (1s/2s/4s), and run() reset error to null each attempt, so each
-  offline read sat ~7s+ in skeleton; plus the cache was memory only. o11 (admin): warm dash/txn/
-  sales/expenses -> 19 keys in IDB; offline: visited pages show data + "Offline — showing data saved
-  <time>" in ~1.5s, unvisited Purchases/Vouchers/Reports show "Not saved for offline" (no skeleton);
-  offline RELOAD sales/expenses/dashboard serve cache, branch picker filled; online refetches.
-  o11b (emp): offline reload sales -> cached; offline sale 911 recorded with Cash Drawer lookup,
-  "Pending sync", synced on reconnect. NOT harness-tested: sign-out clears the IDB cache.
-- O3 code: src/utils/idb.utils.ts (readAllQueries/putQuery/clearQueries, DB queryCacheStorageKey
-  "tartar-query-cache" in keys/storage.keys.ts); src/store/common/query.store.ts (cacheReady
-  hydration, offline = no network + cache or "Not saved for offline" error, successful fetch -> IDB,
-  network failure keeps cached data, prime(), watch/unwatch + selectOfflineSavedAt /
-  selectHasUnsavedWatched, reset clears IDB); query.hook watch/unwatch; network.hook
-  useOfflineNotice; src/hook/app/prime.hook.ts (usePrimeLookupsHook in app.hook: on online+user ->
-  refetchAll + prime lookups); src/components/common/status/OfflineNotice.tsx in ContentView.
-
-- O4 DONE, harness-verified 2026-10-01 on the production build (o12-*): admin offline reload ->
-  all 13 pages serve saved data, no crash; offline income source, expense type, new bank + account
-  queued as "Pending sync" rows (pending category row menu locked), reconnect synced 4, 0 failed,
-  rows listed, then deleted again; offline change password and offline login show "This needs an
-  internet connection…" and queue nothing. Employee: every allowed page offline after reload, sale
-  913 pending -> synced. Accountant: every allowed page offline after reload; offline receivable
-  payment 53 queued -> refused on sync (OB10, also refused online) -> failed list, not lost.
-- O4 code: write.model `errors` (code -> message, used online and in the failed reason);
-  write.utils (slug-keyed inserts get no stamped id and no pkey-replay success; writeTargetsOf
-  tracks slug); supabase.utils assertOnline/onlineOnly; bank.services + reference.services writes
-  via runWrite (+ pendingAccountOf/pendingBranchOf/pendingExpenseCategoryOf/pendingIncomeSourceOf,
-  createBranch returns { queued, slug }); account.services + user.decidePasswordReset via onlineOnly;
-  pending.hook useWithPendingRows keyOf; merged in bank.account/branch/expense.category/income.source
-  manage hooks. Known gaps: pending bank account row shows "—" bank until synced; a second offline
-  account under the same NEW bank name creates the bank twice.
-
-- C1 DONE, harness-verified 2026-10-01 on the production build (tabs3.mjs, qaemp1): tab A 944, tab B
-  945, tab A 946 offline -> storage holds all 3, B closed, A reload keeps 3, reconnect -> 0 queued,
-  944/945/946 listed once; then 2 tabs queue 947 + 948 and reconnect together -> each listed once,
-  0 failed. Code: src/store/common/sync.store.ts (persistedSync reads localStorage before every
-  enqueue/retry/discard/flush removal, merged by write id; flush under navigator.locks
-  syncFlushLockKey ifAvailable; rehydrateSync); src/keys/storage.keys.ts syncFlushLockKey;
-  src/hook/common/network.hook.ts `storage` listener -> rehydrateSync.
-
-- C2 DONE, committed v1.93, harness-verified 2026-10-01 (migration 25 applied; c2/*.json, 3 parallel
-  browsers, RUN=c2 PARTIES=3): emp2 recorded 1251 + 1252; admin2 opened Sales then went offline;
-  emp2 deposited 1251 (status change), admin1 edited 1252 -> 1253 (same status, version only);
-  admin2 offline edits 1251 -> 12511 and 1252 -> 12522 -> reconnect: queue 0, BOTH in failed
-  "someone else changed this record"; DB 1251 deposited v2, 1253 undeposited v2, no 12511/12522.
-  REST probe probe25b.mjs on expense 712: overload with stale p_expected_version, and with stale
-  p_expected_voucher_status -> both P0001 "changed by someone else", 712 unchanged (v1).
-  (c1 not rerun literally: old 702 is ₱7,022 from the pre-fix run, so its row no longer matches.)
-  supabase/migrations/20261013000025_transaction_version.sql (transactions.version + BEFORE UPDATE
-  transactions_zz_version bump, audit skips version, update_transaction_with_voucher overload with
-  p_expected_version + p_expected_voucher_status; approve/print were already locked by
-  transactions_guard, reject is caught by the voucher status check); transaction.response version;
-  sale.services update/resubmit match { id, version }; transaction.services updateDisbursement sends
-  both; write.utils 0-row versioned update -> "someone else changed this record"; sale.form.hook +
-  disbursement.list.hook pass editRow version / voucher status. Client REQUIRES migration 25.
-
-- C3 DONE 2026-10-01, NOT committed, harness-verified on the production build (drive.mjs new step
-  `dropReply: true|false` = server applies the next non-GET REST call, browser gets connectionreset;
-  specs from c3.mjs): emp1 recorded 962 on QA Test; admin1 "Delete sale" 962 with reply dropped ->
-  queued "Delete transaction" -> retry deleted 0 rows -> existence read: gone -> success, 0 failed,
-  962 not in list or DB. Add category "QA C3 Type" (QCT) with reply dropped -> queued -> retry 23505
-  expense_categories_pkey -> stored row equals sent values -> success, 0 failed, one row. Negative:
-  same name, code QCX, online -> refused, dialog stays open, stored code still QCT. Category deleted.
-  Code: src/utils/write.utils.ts (isPkeyConflict, findStoredRow, holdsValues, isReplayedSlugInsert;
-  0-row delete reads the row by match: gone = success, still there = refused, read error = network).
-- C4 DONE 2026-10-01, NOT committed, harness-verified (c4-shared.mjs, production build): emp1
-  offline sale 953, signs out; emp2 signs in -> 0 rows of 953, sync button "Online — all changes
-  saved" with no badge (badge was already owner-scoped via useOwnWrites), panel shows "1 change(s)
-  waiting for another user to sign in on this device"; emp1 back -> synced, 953 listed once.
-  Code: pending.hook useOwnQueue (usePendingIds + useWithPendingRows own writes only);
-  network.hook useOwnWrites/useSyncPanelHook othersWaiting; SyncPanel note. Accepted trade-off:
-  another user's queued deposit no longer locks the row for emp2; the server refuses the duplicate.
-- C5 PART 1 DONE 2026-10-01, NOT committed (OQ5 answered: Supabase realtime). Root cause: realtime on
-  transactions already existed (migration 16, hook/app/realtime.hook.ts) but subscribed for managers
-  only, so employees never refreshed. realtime.hook now subscribes for selectIsAuthenticated (RLS
-  limits rows per role). Verified c5/gen.mjs (2 browsers): emp2 recorded + deposited 963 on Sales;
-  admin1 verified -> emp2's row "Verified" 5s later, no navigation.
-- C5 PART 2 DONE 2026-10-01, NOT committed (migration 26 applied, committed v1.94):
-  src/services/data/realtime.services.ts liveTables + "vouchers", "payments" (their list keys were
-  already in liveRefreshKeys). Verified c5/gen2.mjs (3 browsers, RUN=c5v): emp2 recorded expense
-  964 (voucher QAT-QAU-2026-00000007, Pending); admin1 on Vouchers; admin2 rejected it -> admin1's
-  row "Rejected" 5s later, no navigation.
-
-## Verification phases (added 2026-10-01, user-approved; V1 and V2 results below)
-- V1 DONE 2026-10-01: accountant read-only. Harness o13/o13b/o13c (qaacc1): Receivables and Payables
-  Records + By customer/By supplier show no write action ("Show details", "View ledger" only).
-  RLS static audit of supabase/migrations: manager policies use is_manager() (superadmin|admin),
-  employee policies use user_role()='employee', accountant has SELECT policies only, security-
-  definer RPCs check is_manager()/employee in-function. DB refuses every accountant write.
-  Live probe (races.mjs R7, qaacc1/2 tokens): insert sale / purchase RPC / customer / bank -> 403
-  RLS; update + delete sale, update vouchers -> 200 [] (0 rows); deposit/verify RPC -> refused.
-- V2 DONE 2026-10-01 (v2-signout.json): admin warm -> 17 IDB keys; Sign out -> 0 keys, still 0 after
-  reload; emp offline reload afterwards shows only emp data. Owner-scoped queue: see C4.
-- V3 Known gaps to close: (a) pending expense/purchase payee "—" -> resolve payee name from the
-  cached suppliers/customers lookups in the pending mapper; (b) pending bank account "—" bank ->
-  resolve from cached/pending banks; (c) two offline accounts under the same NEW bank name create
-  the bank twice -> dedupe by slug at enqueue time and in the flush.
-- V3 DONE 2026-10-01, NOT committed, harness-verified on the production build (v3-emp.json,
-  v3-admin.json): emp2 offline expense 931 -> pending row payee "QA Power Co", purchase 932 -> "QA
-  Supplier One", reconnect 0 queued 0 failed. admin2 offline 2 accounts under NEW bank "QA V3 Bank"
-  -> both pending rows show the bank, queue holds ONE bank insert + 2 accounts, "Synced 3 changes",
-  0 failed, both listed under one bank. Code: transaction.services pendingDisbursementOf supplier
-  from p_payee; bank.services pendingBankOf + pendingAccountOf(write, banks); bank.account.manage
-  hook knownBanks (fetched + pending) feeds options, resolveBankId, pendingAccountOf. Not done by
-  choice: flush-time bank dedupe; a same-name bank made on ANOTHER device first -> 23505 banks_name_key
-  -> failed list (kept, L4).
-- V4 Visual pass (user): Pending sync tag, OfflineNotice, Sync panel, failed list in light + dark and
-  at phone width. Build proves compile only.
-- C Concurrency and worst cases: see "Concurrency findings".
-
-## Concurrency findings (2026-10-01, production build + live DB, 6 users at once)
-Runs: c1/*.json (6 parallel browsers qaemp1/2, qaadmin1/2, qaacc1/2 with file barriers, `sync`
-step in drive.mjs, env RUN/PARTIES), races.mjs + races2.mjs (parallel REST with real user tokens),
-tabs.mjs/tabs2.mjs (same user, 2 tabs), shared.mjs (2 users, 1 device), lost.mjs (reply dropped).
-Held up (no change needed):
-- 6 parallel "Mark deposited" on one sale (2 emp + 2 admin x) -> exactly 1 ok, 5 "already deposited".
-- verify x2 + reject x2 in parallel -> 1 verify wins, rest refused; final verified.
-- Same idempotency key x6 in parallel -> applied once; same insert id x4 -> 1 row (pkey replay ok).
-- 4 users pay 600 of a 1000 receivable in parallel -> 1 ok, 3 "exceeds remaining (pending incl.)".
-  Employee pending 700 + admin 300 + verify race -> paid exactly 1000; +1 refused. Verify vs
-  reject of one payment in parallel -> 1 wins.
-- 8 parallel purchases from 4 users -> PUR-QAT-2610-0001..0008, unique, no gaps.
-- c1 offline replays: emp1 offline deposit of a sale emp2 deposited + admin1 verified -> failed list
-  "already verified", rest of emp1 queue (sale 711, expense 712) synced; admin2 offline edit of the
-  verified sale -> failed "verified sale is locked". Accountants offline: no write controls, empty
-  queues. No page errors in any of the 6 browsers.
-- Shared device: emp2 signing in never flushes emp1's queued sale 951; it syncs when emp1 returns.
-Broken, to fix (phases C1-C5 below).
-
-## Fix phases (one per conversation, plan + approval first)
-- C1 CRITICAL multi-tab queue loss (tabs2.mjs): same user, 2 tabs, offline. Tab B queues sale 942
-  ("Saved offline"), tab A then queues 943 and its persist overwrites localStorage with A's memory
-  queue [941, 943]; B closes -> 942 is gone forever, never reaches the DB. Fix in
-  src/store/common/sync.store.ts: rehydrate on the `storage` event (persist.rehydrate) so every tab
-  shares one queue; enqueue/remove re-read the persisted queue before writing (merge by write id,
-  never replace); serialise flush across tabs with navigator.locks.request("tartar-sync-flush").
-  Verify: tabs2.mjs -> 941, 942, 943 all listed; two tabs reconnecting together -> each write once,
-  0 failed.
-- C2 HIGH stale offline edit overwrites newer data (c1, DB-confirmed): emp2 deposited sale 702 at
-  ₱702 online; admin2, offline with the old page, edited 702 -> on reconnect amount became ₱7,022
-  on a DEPOSITED sale, silently (deposit slip no longer matches). Updates are last-write-wins:
-  sale.services.update matches only { id }; update_transaction_with_voucher has no version check.
-  OQ4 (ask at C2): (a) no migration — queued updates also match the status the user saw
-  (sale: sale_status "undeposited"; disbursement: voucher status pending) -> 0 rows -> failed
-  "changed by someone else"; or (b) RECOMMENDED migration 25 — `version int` on transactions +
-  bump trigger; updates match { id, version } and the RPC takes p_expected_version, so two
-  same-status edits also conflict. Never drop/rename; show SQL, never apply.
-  Verify: rerun c1 -> admin2's 702 edit lands in the failed list, 702 stays ₱702.
-- C3 MEDIUM false "Needs attention" after a lost reply (lost.mjs): admin deletes sale 931, the server
-  applies it, the reply is dropped -> retry deletes 0 rows -> failed "changed nothing — the record
-  is gone". Same path when two tabs flush one delete. Fix in src/utils/write.utils.ts: a queued
-  delete that matches 0 rows is success (the row is gone, which was the goal); slug-keyed insert
-  23505 replay where the row exists -> success. Verify: lost.mjs -> 0 failed.
-- C4 LOW shared device: emp2 sees emp1's queued sale 951 as a "Pending sync" row and it counts in
-  the badge; emp1's writes wait until emp1 signs in on that device again, invisibly. Fix:
-  src/hook/common/pending.hook.ts filters by owner; SyncPanel shows "N changes waiting for
-  another user to sign in on this device". Verify: shared.mjs -> emp2 sees 0 rows of 951.
-- C5 LOW open pages do not show other users' changes until refetch (emp2 kept 701 "Deposited"
-  after admin1 verified it). Option: refetch watched queries on window focus + every 60s while
-  online (query.store), or Supabase realtime on transactions like migration 17 did for ledger.
-  Ask at C5 whether it is wanted.
-
-## Next (one conversation, in order)
-1. V4 (user visual pass): Pending sync tag, OfflineNotice, Sync panel, failed list, light + dark,
-   phone width.
-2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
+## Next
+1. User check of M0 on devices: install on Android (Chrome), iOS (Safari -> Add to Home Screen:
+   splash light/dark, status bar), Windows (Edge -> Install; shortcuts on the taskbar icon);
+   landscape iPhone keeps content out of the notch; deploy twice to see the update toast.
+2. M1 phone shell — present the file plan, wait for approval.
+3. Deployment checklist kept from the offline roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
    bank "QA O12 Bank" (no delete in the UI); 2026-10-01 concurrency rows: sales 701, 702 (now
@@ -314,58 +104,21 @@ Broken, to fix (phases C1-C5 below).
    + their payments; C2 rows: sales 1251 (deposited), 1253; C3: sale 961 on branch HARDWARE,
    auto-verified because admin recorded it — not deletable in the UI; C4: sale 953; C5: sale 963 verified, expense 964 + its rejected voucher; V3: expense 931, purchase 932 + vouchers,
    bank "QA V3 Bank" + accounts "QA V3 One"/"QA V3 Two"), adds Banks + branch legal_name/address.
-3. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
+   Then ask before deleting `.claude/state/audit/` and the old scratchpad audit dir
    (f7-approve.json there holds the superadmin password in plain text).
 
 ## Path map
-- queue: src/store/common/sync.store.ts (runWrite, enqueue, flush, discard, lastError)
-- write executor: src/utils/write.utils.ts · types: src/models/common/write.model.ts
-- read cache: src/store/common/query.store.ts · src/hook/common/query.hook.ts · src/utils/idb.utils.ts
-  · src/hook/app/prime.hook.ts · src/components/common/status/OfflineNotice.tsx
-- mutation toasts: src/hook/common/mutation.hook.ts (queued -> "Saved offline")
-- online/flush triggers: src/hook/common/network.hook.ts · src/store/common/network.store.ts
-- sync UI: src/components/common/status/SyncIndicator.tsx
-- storage keys: src/keys/storage.keys.ts (syncStorageKey "tartar-sync-queue")
-- chunk-load error screen: src/components/common/status/RouteErrorView.tsx
-- OB6: src/components/ledger/modal/RecordPaymentModal.tsx
-- queued services: src/services/data/{transaction,sale,voucher,payment,ledger,party,user}.services.ts
-- not queued: src/services/data/{bank,reference,account}.services.ts
-- PWA: vite.config.ts (VitePWA generateSW, autoUpdate, globPatterns)
-
-## Audit harness (drives the real app, live Supabase = production)
-- Dir: `C:/Users/CCLISO~1/AppData/Local/Temp/claude/c--Users-cclisondato-Documents-MyProgramming-
-  Ejie-Business-TARTAR/fdf908ac-a5f4-4224-a10c-c56eaf659eb9/scratchpad/audit` (playwright-core
-  installed; copy scripts from `.claude/state/audit/` if it is gone).
-- Offline runs: `yarn build`, `yarn preview --port 4199 --strictPort` (background), then
-  `EPHEMERAL=1 BASE=http://localhost:4199 TAG=<t> node drive.mjs <spec>`. EPHEMERAL = fresh
-  context, so every spec starts with a login step.
-- `drive.mjs` step keys: login [user,pw], goto, reload, nav "<sidebar label>" (in-app click, no
-  page load), offline true|false (context.setOffline), blockApi true|false (aborts supabase.co
-  = weak wifi), queue (logs the persisted sync queue), js "<expr>" (page.evaluate), button
-  (+page), click, row (+item menu, expand), fill, pick, date, submit (+confirm, keepOpen),
-  confirmOnly, dump, text, count, expect, absent, url, toasts, name (screenshot), stop, always.
-  `queue` runs before `submit` in a step, so put it on the NEXT step to see that submit's item.
-- Specs: o11-admin/o11-emp (O3 offline reads + offline-reload write), o9-pending/o9b-emp/o9c-admin/o9d-admin (O2 pending rows + locks),
-  o1-read.json (offline reads, admin), o4-write.json (offline writes + sync, employee),
-  o5-weak.json (weak wifi), o6-replay.json (refused replay + sync panel), o7-weak.json (weak wifi
-  + 30s retry + toast recorder), o8-expiry.json (tampered token, re-login keeps storage).
-  Shots in shots/drive/. Within one step the driver runs goto -> button -> click -> row -> fill ->
-  pick -> submit, so a click that must follow a fill goes on the next step. Toasts fade in ~4s:
-  catch them with the MutationObserver recorder `js` step from o7 (window.__t), not `toasts`.
-- A leftover `yarn preview` may already hold :4199 (strictPort then fails); it serves dist/ from
-  disk, so a fresh `yarn build` is still what it serves.
-- Concurrency: `RUN=<id> PARTIES=6 EPHEMERAL=1 BASE=... TAG=c1-<user> node drive.mjs c1/<user>.json`
-  for all six in parallel (`&` + `wait`); `sync: "<name>"` steps are barriers (bar/<RUN>/), mark them
-  `always`. REST races: `ENVFILE=<repo>/.env node races.mjs` (rest.mjs logs in via login_email).
-- QA logins `<name>@qa.test` / `QaTest#2026` (qaadmin1/2, qaacc1/2, qaemp1/2). Developer and
-  superadmin passwords are never written to disk.
+- phone shell today: src/layouts/ProtectedLayout.tsx · styles/layout/shell.styles.ts ·
+  components/common/layout/Protected*.tsx · hook/layout/protected.hook.ts
+- admin shell (primitives to generalise): src/layouts/AdminAppLayout.tsx · components/common/layout/
+  Admin*.tsx · components/common/app/*.tsx · hook/layout/admin.hook.ts · hook/common/{pull,swipe,
+  breakpoint}.hook.ts · styles/admin/admin.layout.styles.ts · styles/app/app.styles.ts
+- modal on phones: components/common/modal/AppModal.tsx (Sheet below md) · form/EntityFormModal.tsx
+- tables on phones: components/common/table/{DataTable,DataTableCards}.tsx
+- PWA: vite.config.ts · public/{admin.webmanifest,splash,screenshots} · hook/app/update.hook.ts
+- install: hook/common/install.hook.ts · store/common/install.store.ts
+- offline (must survive M4): store/common/{sync,query}.store.ts · utils/{write,idb}.utils.ts
+- harness: .claude/state/audit/ (drive.mjs; run against `yarn preview --port 4199 --strictPort`)
 
 ## State
-Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
-committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
-committed v1.87 · O3 committed v1.88 · O4 committed v1.89 · roadmap phases O1-O4 complete;
-OB10 UI fix committed. C1 committed v1.92. C2 committed v1.93, migration 25 applied, verified.
-C3 + C4 + C5 part 1 + migration 26 committed v1.94; migration 26 applied. C5 part 2 + V3 done +
-verified, not committed. Fix phases C1-C5 complete. Harness rule: test sales are recorded by qaemp1/2 (QA Test
-branch, undeposited); an admin-recorded sale goes to its default branch already verified. LedgerPartiesTable IS
-mounted (LedgerRecordsSection, view "parties").
+Branch mobilel-app-native (= main at v2.01). M0 uncommitted. Migrations through 26 applied.

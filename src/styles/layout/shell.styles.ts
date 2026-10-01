@@ -1,5 +1,5 @@
 export const shellRoot =
-  "h-dvh flex-col gap-3 overflow-hidden bg-app p-3 font-sans text-foreground md:gap-4 md:p-4";
+  "h-dvh flex-col gap-3 overflow-hidden bg-app p-safe-3 font-sans text-foreground md:gap-4 md:p-safe-4";
 
 export const shellBody = "flex min-h-0 flex-1 gap-4";
 

@@ -206,6 +206,13 @@
   padding-top: env(safe-area-inset-top, 0px);
 }
 
+@utility p-safe-* {
+  padding-top: max(calc(var(--spacing) * --value(integer)), env(safe-area-inset-top, 0px));
+  padding-right: max(calc(var(--spacing) * --value(integer)), env(safe-area-inset-right, 0px));
+  padding-bottom: max(calc(var(--spacing) * --value(integer)), env(safe-area-inset-bottom, 0px));
+  padding-left: max(calc(var(--spacing) * --value(integer)), env(safe-area-inset-left, 0px));
+}
+
 @utility bg-auth-hero {
   background:
     radial-gradient(120% 90% at 110% -10%, color-mix(in oklab, var(--color-info) 38%, transparent), transparent 55%),

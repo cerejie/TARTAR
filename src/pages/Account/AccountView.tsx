@@ -1,4 +1,5 @@
 import AccountProfileCard from "../../components/account/cards/AccountProfileCard";
+import InstallAppCard from "../../components/account/cards/InstallAppCard";
 import ChangePasswordCard from "../../components/account/forms/ChangePasswordCard";
 import BentoCell from "../../components/common/view/BentoCell";
 import ContentView from "../../components/common/view/ContentView";
@@ -11,6 +12,9 @@ const AccountView = () => {
       </BentoCell>
       <BentoCell span="half">
         <ChangePasswordCard />
+      </BentoCell>
+      <BentoCell span="half">
+        <InstallAppCard />
       </BentoCell>
     </ContentView>
   );

@@ -15,6 +15,7 @@ import {
   navigableRoutes,
 } from "../../utils/route.utils";
 import { usePermissions } from "../account/account.permission.hook";
+import { panelThemeColorToken, useThemeColorHook } from "../app/theme.color.hook";
 import { useIsTabletUp } from "../common/breakpoint.hook";
 import { useModal } from "../common/modal.hook";
 import { useNetwork } from "../common/network.hook";
@@ -34,6 +35,7 @@ const isActiveAdminPath = (pathname: string, path: string): boolean =>
 export const useAdminLayoutHook = () => {
   useNetwork();
   useAdminManifestHook();
+  useThemeColorHook(panelThemeColorToken);
 
   const { pathname } = useLocation();
   const scrollRef = useRef<HTMLElement>(null);

@@ -1,4 +1,4 @@
-export const authPage = "flex min-h-dvh flex-1 bg-app font-sans text-foreground";
+export const authPage = "flex min-h-dvh flex-1 bg-app p-safe-0 font-sans text-foreground";
 
 export const authHero =
   "relative my-4 ml-4 hidden w-[clamp(360px,42vw,560px)] flex-col overflow-hidden rounded-panel bg-auth-hero p-12 text-on-brand shadow-panel min-[960px]:flex";
@@ -67,6 +67,6 @@ export const authAlt =
 
 export const authAltLink = "h-auto p-0 font-semibold";
 
-export const errorPage = "flex min-h-dvh items-center justify-center bg-app p-6 font-sans text-foreground";
+export const errorPage = "flex min-h-dvh items-center justify-center bg-app p-safe-6 font-sans text-foreground";
 
 export const errorCard = "w-full max-w-[560px] rounded-panel bg-panel py-12 shadow-panel";

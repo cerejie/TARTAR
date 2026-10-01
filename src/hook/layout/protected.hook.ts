@@ -22,6 +22,7 @@ import {
 } from "../../utils/route.utils";
 import { usePermissions } from "../account/account.permission.hook";
 import { useAccountLogoutHook } from "../account/account.logout.hook";
+import { backdropThemeColorToken, useThemeColorHook } from "../app/theme.color.hook";
 import { useNetwork } from "../common/network.hook";
 import { useQuery } from "../common/query.hook";
 import { useBranchScopeHook } from "../data/branch/branch.scope.hook";
@@ -29,6 +30,7 @@ import type { IDueAlerts } from "../../models/data/dashboard/dashboard.response"
 
 export const useProtectedLayoutHook = () => {
   useNetwork();
+  useThemeColorHook(backdropThemeColorToken);
 };
 
 export const useProtectedSiderHook = () => {

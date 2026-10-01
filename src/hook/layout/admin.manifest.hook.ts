@@ -12,14 +12,6 @@ const adminAppTitle = "TARTAR Admin";
 const adminManifestHref = "/admin.webmanifest";
 const adminTouchIconHref = "/apple-touch-icon-admin.png";
 const adminFaviconHref = "/admin-icon.svg";
-const themeColorToken = "--panel";
-const adminViewport = "width=device-width, initial-scale=1.0, viewport-fit=cover";
-const themeColorSelector = 'meta[name="theme-color"]';
-
-const readThemeColor = (): string =>
-  getComputedStyle(document.documentElement)
-    .getPropertyValue(themeColorToken)
-    .trim();
 
 const swapHeadEntry = ({
   tag,
@@ -78,20 +70,6 @@ export const useAdminManifestHook = (enabled = true) => {
       swapHeadEntry({
         tag: "meta",
         key: "name",
-        keyValue: "theme-color",
-        attribute: "content",
-        value: readThemeColor(),
-      }),
-      swapHeadEntry({
-        tag: "meta",
-        key: "name",
-        keyValue: "viewport",
-        attribute: "content",
-        value: adminViewport,
-      }),
-      swapHeadEntry({
-        tag: "meta",
-        key: "name",
         keyValue: "apple-mobile-web-app-title",
         attribute: "content",
         value: adminAppTitle,
@@ -100,16 +78,7 @@ export const useAdminManifestHook = (enabled = true) => {
 
     document.title = adminAppTitle;
 
-    const syncThemeColor = () =>
-      document.head.querySelector(themeColorSelector)?.setAttribute("content", readThemeColor());
-    const modeObserver = new MutationObserver(syncThemeColor);
-    modeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
     return () => {
-      modeObserver.disconnect();
       restorers.forEach((restore) => restore());
       document.title = previousTitle;
     };
