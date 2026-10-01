@@ -1,0 +1,20 @@
+[
+ {"note":"login admin","login":["qaadmin2@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm md banks","goto":"/master-data?section=banks","settle":4000},
+ {"note":"GO OFFLINE","offline":true,"always":true},
+ {"note":"recorder","js":"window.__t=[];new MutationObserver(()=>document.querySelectorAll(\"[data-sonner-toast]\").forEach(t=>{const s=t.innerText.split(String.fromCharCode(10)).join(\" \");if(!window.__t.includes(s))window.__t.push(s)})).observe(document.body,{childList:true,subtree:true});1"},
+ {"note":"account 1 under new bank","button":"Add bank account","page":true,"wait":900,"pick":{"Bank":"QA V3 Bank"}},
+ {"fill":{"account_name":"QA V3 One","account_number":"V3-0001"}},
+ {"submit":"Add account"},
+ {"note":"account 1 pending with bank name","always":true,"expect":"QA V3 Bank","text":"main tbody","max":600,"name":"v3-acc1-pending"},
+ {"note":"account 2 same new bank","always":true,"button":"Add bank account","page":true,"wait":900,"pick":{"Bank":"QA V3 Bank"}},
+ {"fill":{"account_name":"QA V3 Two","account_number":"V3-0002"}},
+ {"submit":"Add account"},
+ {"note":"both pending","always":true,"expect":"QA V3 Two","text":"main tbody","max":800,"name":"v3-acc2-pending"},
+ {"note":"queue: expect ONE bank insert","always":true,"queue":true},
+ {"note":"BACK ONLINE","offline":false,"always":true,"wait":9000},
+ {"note":"sync toasts","always":true,"js":"window.__t"},
+ {"note":"queue after","always":true,"queue":true},
+ {"note":"failed list","always":true,"js":"JSON.stringify(JSON.parse(localStorage.getItem('tartar-sync-queue')||'{}').state?.failed?.map(f=>f.write.label+' => '+f.reason))"},
+ {"note":"banks after flush","always":true,"goto":"/master-data?section=banks","settle":3000,"text":"main tbody","max":800,"name":"v3-acc-synced"}
+]

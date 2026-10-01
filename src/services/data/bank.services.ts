@@ -96,12 +96,24 @@ const bankServices = {
       errors: accountErrors,
     }),
 
-  pendingAccountOf: (write: IQueuedWrite): IBankAccount | null => {
+  pendingBankOf: (write: IQueuedWrite): IBank | null => {
+    const values = queuedInsertOf(write, bankTable);
+    if (!values) return null;
+
+    return { created_at: queuedAtOf(write), ...values } as unknown as IBank;
+  },
+
+  pendingAccountOf: (
+    write: IQueuedWrite,
+    banks: readonly IBank[]
+  ): IBankAccount | null => {
     const values = queuedInsertOf(write, bankAccountTable);
     if (!values) return null;
 
+    const bank = banks.find((known) => known.id === values.bank_id);
+
     return {
-      bank: null,
+      bank: bank ? { name: bank.name } : null,
       created_at: queuedAtOf(write),
       ...values,
     } as unknown as IBankAccount;

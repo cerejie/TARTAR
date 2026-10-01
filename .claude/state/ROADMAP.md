@@ -1,5 +1,5 @@
 # ROADMAP — Offline hardening (live offline test, 2026-09-30)
-Updated: 2026-10-01 (C1-C5 done; V3 next)
+Updated: 2026-10-01 (C1-C5, V3 done; V4 next)
 
 ## Goal
 Offline, every write is kept on the device and reaches the database once back online, nothing is
@@ -237,6 +237,15 @@ merged into main).
   cached suppliers/customers lookups in the pending mapper; (b) pending bank account "—" bank ->
   resolve from cached/pending banks; (c) two offline accounts under the same NEW bank name create
   the bank twice -> dedupe by slug at enqueue time and in the flush.
+- V3 DONE 2026-10-01, NOT committed, harness-verified on the production build (v3-emp.json,
+  v3-admin.json): emp2 offline expense 931 -> pending row payee "QA Power Co", purchase 932 -> "QA
+  Supplier One", reconnect 0 queued 0 failed. admin2 offline 2 accounts under NEW bank "QA V3 Bank"
+  -> both pending rows show the bank, queue holds ONE bank insert + 2 accounts, "Synced 3 changes",
+  0 failed, both listed under one bank. Code: transaction.services pendingDisbursementOf supplier
+  from p_payee; bank.services pendingBankOf + pendingAccountOf(write, banks); bank.account.manage
+  hook knownBanks (fetched + pending) feeds options, resolveBankId, pendingAccountOf. Not done by
+  choice: flush-time bank dedupe; a same-name bank made on ANOTHER device first -> 23505 banks_name_key
+  -> failed list (kept, L4).
 - V4 Visual pass (user): Pending sync tag, OfflineNotice, Sync panel, failed list in light + dark and
   at phone width. Build proves compile only.
 - C Concurrency and worst cases: see "Concurrency findings".
@@ -294,8 +303,8 @@ Broken, to fix (phases C1-C5 below).
   Ask at C5 whether it is wanted.
 
 ## Next (one conversation, in order)
-1. V3 known gaps (a) pending payee name, (b) pending bank name, (c) duplicate new bank -> then V4
-   (user visual pass).
+1. V4 (user visual pass): Pending sync tag, OfflineNotice, Sync panel, failed list, light + dark,
+   phone width.
 2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
@@ -303,7 +312,8 @@ Broken, to fix (phases C1-C5 below).
    ₱7,022), 711, 721, 801, 802, 803, 932, 933, 941, 943, 944-948, 951 (931 deleted, 942 lost), expense
    712, purchases 811-818 payee "QA Race Payee" + their vouchers, receivables reference "C-RACE-*"
    + their payments; C2 rows: sales 1251 (deposited), 1253; C3: sale 961 on branch HARDWARE,
-   auto-verified because admin recorded it — not deletable in the UI; C4: sale 953; C5: sale 963 verified, expense 964 + its rejected voucher), adds Banks + branch legal_name/address.
+   auto-verified because admin recorded it — not deletable in the UI; C4: sale 953; C5: sale 963 verified, expense 964 + its rejected voucher; V3: expense 931, purchase 932 + vouchers,
+   bank "QA V3 Bank" + accounts "QA V3 One"/"QA V3 Two"), adds Banks + branch legal_name/address.
 3. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
    (f7-approve.json there holds the superadmin password in plain text).
 
@@ -355,7 +365,7 @@ Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1
 committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
 committed v1.87 · O3 committed v1.88 · O4 committed v1.89 · roadmap phases O1-O4 complete;
 OB10 UI fix committed. C1 committed v1.92. C2 committed v1.93, migration 25 applied, verified.
-C3 + C4 + C5 part 1 + migration 26 committed v1.94; migration 26 applied. C5 part 2 done +
+C3 + C4 + C5 part 1 + migration 26 committed v1.94; migration 26 applied. C5 part 2 + V3 done +
 verified, not committed. Fix phases C1-C5 complete. Harness rule: test sales are recorded by qaemp1/2 (QA Test
 branch, undeposited); an admin-recorded sale goes to its default branch already verified. LedgerPartiesTable IS
 mounted (LedgerRecordsSection, view "parties").

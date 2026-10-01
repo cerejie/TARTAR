@@ -407,6 +407,7 @@ const transactionServices = {
       due_date: args.p_due_date,
       created_by: args.p_created_by,
       created_at: queuedAtOf(write),
+      supplier: args.p_payee ? { name: args.p_payee } : null,
       voucher: null,
       payable: null,
     } as unknown as IDisbursement;

@@ -21,6 +21,9 @@ export const useBankAccountManageHook = () => {
   const openConfirm = useConfirm();
   const { banks, bankAccounts, loading, refreshing, error, retry } =
     useBankAccountListHook();
+  const knownBanks = useWithPendingRows(banks, bankServices.pendingBankOf, {
+    enabled: true,
+  });
 
   const invalidate = [bankListKey, bankAccountListKey];
   const editing = editModal.modal.data;
@@ -34,7 +37,7 @@ export const useBankAccountManageHook = () => {
       type: "creatable",
       required: true,
       placeholder: "e.g. BDO",
-      options: banks.map((bank) => ({ value: bank.id, label: bank.name })),
+      options: knownBanks.map((bank) => ({ value: bank.id, label: bank.name })),
     },
     {
       name: "account_name",
@@ -60,7 +63,7 @@ export const useBankAccountManageHook = () => {
   ];
 
   const resolveBankId = async (typed: string) => {
-    const existing = banks.find(
+    const existing = knownBanks.find(
       (bank) => nameKey(bank.name) === nameKey(typed)
     );
     if (existing) return existing.id;
@@ -149,7 +152,7 @@ export const useBankAccountManageHook = () => {
 
   const rows = useWithPendingRows(
     bankAccounts,
-    bankServices.pendingAccountOf,
+    (write) => bankServices.pendingAccountOf(write, knownBanks),
     { enabled: true }
   );
 

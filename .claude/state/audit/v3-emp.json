@@ -1,0 +1,17 @@
+[
+ {"note":"login emp","login":["qaemp2@qa.test","QaTest#2026"],"stop":true},
+ {"note":"warm expenses","goto":"/expenses","settle":3000},
+ {"note":"warm purchases","nav":"Purchases","settle":3000},
+ {"note":"GO OFFLINE","offline":true},
+ {"note":"expense 931 offline","nav":"Expenses","always":true},
+ {"button":"Record expense","page":true,"wait":900,"fill":{"amount":"931","particulars":"OFFLINE V3"},"pick":{"Expense type":"QA Utilities","Payee":"QA Power Co"}},
+ {"submit":"Record","toasts":true},
+ {"note":"931 pending with payee","always":true,"expect":"QA Power Co","text":"main tbody","max":500,"name":"v3-exp-pending"},
+ {"note":"purchase 932 offline","nav":"Purchases","always":true},
+ {"button":"Record purchase","page":true,"wait":900,"fill":{"amount":"932"},"pick":{"Supplier":"QA Supplier One"}},
+ {"submit":"Record","toasts":true},
+ {"note":"932 pending with payee","always":true,"expect":"QA Supplier One","text":"main tbody","max":500,"name":"v3-pur-pending"},
+ {"note":"BACK ONLINE","offline":false,"always":true,"wait":9000,"toasts":true,"queue":true},
+ {"note":"failed list","always":true,"js":"JSON.parse(localStorage.getItem('tartar-sync-queue')||'{}').state?.failed?.map(f=>f.write.label+' => '+f.reason)"},
+ {"note":"purchases after flush","always":true,"text":"main tbody","max":500,"name":"v3-pur-synced"}
+]
