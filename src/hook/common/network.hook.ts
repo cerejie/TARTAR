@@ -8,9 +8,11 @@ import {
   useQueryStore,
 } from "../../store/common/query.store";
 import {
+  rehydrateSync,
   selectSessionOwner,
   useSyncStore,
 } from "../../store/common/sync.store";
+import { syncStorageKey } from "../../keys/storage.keys";
 import { formatDateTime } from "../../utils/format.utils";
 import { isOwnWrite } from "../../utils/write.utils";
 import { useConfirm } from "./confirmation.hook";
@@ -21,6 +23,10 @@ const retryIntervalMs = 30_000;
 const flushWhenWaiting = () => {
   const { queue, flushing } = useSyncStore.getState();
   if (navigator.onLine && !flushing && queue.length > 0) void flushAndReport();
+};
+
+const syncFromOtherTab = (event: StorageEvent) => {
+  if (event.key === syncStorageKey) rehydrateSync();
 };
 
 const changesLabel = (count: number): string =>
@@ -51,6 +57,7 @@ export const useNetwork = () => {
 
     window.addEventListener("online", goOnline);
     window.addEventListener("offline", goOffline);
+    window.addEventListener("storage", syncFromOtherTab);
 
     if (navigator.onLine) void flushAndReport();
     const retryTimer = window.setInterval(flushWhenWaiting, retryIntervalMs);
@@ -59,6 +66,7 @@ export const useNetwork = () => {
       window.clearInterval(retryTimer);
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
+      window.removeEventListener("storage", syncFromOtherTab);
     };
   }, [setOnline]);
 };

@@ -1,5 +1,5 @@
 # ROADMAP — Offline hardening (live offline test, 2026-09-30)
-Updated: 2026-10-01 (V1, V2 done; concurrency run; fix phases C1-C5 queued)
+Updated: 2026-10-01 (V1, V2, C1 done; fix phases C2-C5 queued)
 
 ## Goal
 Offline, every write is kept on the device and reaches the database once back online, nothing is
@@ -172,6 +172,14 @@ merged into main).
   manage hooks. Known gaps: pending bank account row shows "—" bank until synced; a second offline
   account under the same NEW bank name creates the bank twice.
 
+- C1 DONE, harness-verified 2026-10-01 on the production build (tabs3.mjs, qaemp1): tab A 944, tab B
+  945, tab A 946 offline -> storage holds all 3, B closed, A reload keeps 3, reconnect -> 0 queued,
+  944/945/946 listed once; then 2 tabs queue 947 + 948 and reconnect together -> each listed once,
+  0 failed. Code: src/store/common/sync.store.ts (persistedSync reads localStorage before every
+  enqueue/retry/discard/flush removal, merged by write id; flush under navigator.locks
+  syncFlushLockKey ifAvailable; rehydrateSync); src/keys/storage.keys.ts syncFlushLockKey;
+  src/hook/common/network.hook.ts `storage` listener -> rehydrateSync.
+
 ## Verification phases (added 2026-10-01, user-approved; V1 and V2 results below)
 - V1 DONE 2026-10-01: accountant read-only. Harness o13/o13b/o13c (qaacc1): Receivables and Payables
   Records + By customer/By supplier show no write action ("Show details", "View ledger" only).
@@ -243,12 +251,12 @@ Broken, to fix (phases C1-C5 below).
   Ask at C5 whether it is wanted.
 
 ## Next (one conversation, in order)
-1. C1 (critical) -> C2 (ask OQ4) -> C3 -> C4 -> C5 (ask) -> V3 -> V4 (user visual pass).
+1. C2 (ask OQ4) -> C3 -> C4 -> C5 (ask) -> V3 -> V4 (user visual pass).
 2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
    bank "QA O12 Bank" (no delete in the UI); 2026-10-01 concurrency rows: sales 701, 702 (now
-   ₱7,022), 711, 721, 801, 802, 803, 932, 933, 941, 943, 951 (931 deleted, 942 lost), expense
+   ₱7,022), 711, 721, 801, 802, 803, 932, 933, 941, 943, 944-948, 951 (931 deleted, 942 lost), expense
    712, purchases 811-818 payee "QA Race Payee" + their vouchers, receivables reference "C-RACE-*"
    + their payments), adds Banks + branch legal_name/address.
 3. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
@@ -301,5 +309,5 @@ Broken, to fix (phases C1-C5 below).
 Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1.83) · O1 code
 committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
 committed v1.87 · O3 committed v1.88 · O4 committed v1.89 · roadmap phases O1-O4 complete;
-OB10 UI fix done, not committed (suggested v1.90), not harness-checked. LedgerPartiesTable IS
+OB10 UI fix committed. C1 done, not committed (suggested v1.92). LedgerPartiesTable IS
 mounted (LedgerRecordsSection, view "parties").

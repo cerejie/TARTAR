@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { syncStorageKey } from "../../keys/storage.keys";
+import { syncFlushLockKey, syncStorageKey } from "../../keys/storage.keys";
 import { useAccountStore } from "../data/account/account.store";
 import type {
   IFailedWrite,
@@ -30,6 +30,8 @@ type Actions = {
   discard: (id: string) => void;
 };
 
+type IPersistedSync = Pick<States, "queue" | "failed">;
+
 const initialValues: States = {
   queue: [],
   failed: [],
@@ -45,74 +47,145 @@ export const selectSessionOwner = (
 const currentOwner = (): string | null =>
   selectSessionOwner(useAccountStore.getState());
 
+const isPersistedSync = (value: unknown): value is IPersistedSync =>
+  typeof value === "object" &&
+  value !== null &&
+  "queue" in value &&
+  "failed" in value &&
+  Array.isArray(value.queue) &&
+  Array.isArray(value.failed);
+
+const persistedSync = (fallback: IPersistedSync): IPersistedSync => {
+  try {
+    const raw = localStorage.getItem(syncStorageKey);
+    const stored: unknown = raw ? JSON.parse(raw) : null;
+    const state =
+      typeof stored === "object" && stored !== null && "state" in stored
+        ? stored.state
+        : null;
+    if (!isPersistedSync(state)) return fallback;
+    return { queue: state.queue, failed: state.failed };
+  } catch {
+    return fallback;
+  }
+};
+
+const withoutWrite = (queue: IQueuedWrite[], id: string): IQueuedWrite[] =>
+  queue.filter((write) => write.id !== id);
+
+const withoutFailed = (failed: IFailedWrite[], id: string): IFailedWrite[] =>
+  failed.filter((item) => item.write.id !== id);
+
+const withFlushLock = async (
+  drain: () => Promise<IFlushResult>
+): Promise<IFlushResult> => {
+  if (typeof navigator === "undefined" || !("locks" in navigator)) {
+    return drain();
+  }
+  return navigator.locks.request(
+    syncFlushLockKey,
+    { ifAvailable: true },
+    async (lock) => (lock ? drain() : noChanges)
+  );
+};
+
 export const useSyncStore = create<States & Actions>()(
   persist(
-    (set, get) => ({
-      ...initialValues,
-
-      enqueue: (write) =>
-        set((state) => ({ queue: [...state.queue, write] })),
-
-      flush: async () => {
-        const owner = currentOwner();
-        if (get().flushing || !owner) return noChanges;
-        set({ flushing: true });
-
+    (set, get) => {
+      const drain = async (owner: string): Promise<IFlushResult> => {
         const result = { ...noChanges };
 
-        try {
-          for (;;) {
-            const next = get().queue.find((write) => isOwnWrite(write, owner));
-            if (!next) break;
+        for (;;) {
+          const next = persistedSync(get()).queue.find((write) =>
+            isOwnWrite(write, owner)
+          );
+          if (!next) break;
 
-            try {
-              await executeWrite(next);
-              result.synced += 1;
-              set((state) => ({
-                queue: state.queue.filter((write) => write.id !== next.id),
-              }));
-            } catch (error) {
-              if (failureKindOf(error) !== "refused") break;
+          try {
+            await executeWrite(next);
+            result.synced += 1;
+            set((state) => {
+              const saved = persistedSync(state);
+              return {
+                queue: withoutWrite(saved.queue, next.id),
+                failed: saved.failed,
+              };
+            });
+          } catch (error) {
+            if (failureKindOf(error) !== "refused") break;
 
-              result.failed += 1;
-              set((state) => ({
-                queue: state.queue.filter((write) => write.id !== next.id),
+            result.failed += 1;
+            set((state) => {
+              const saved = persistedSync(state);
+              return {
+                queue: withoutWrite(saved.queue, next.id),
                 failed: [
-                  ...state.failed,
+                  ...withoutFailed(saved.failed, next.id),
                   { write: next, reason: messageOf(error), failedAt: Date.now() },
                 ],
-              }));
-            }
+              };
+            });
           }
-        } finally {
-          set({ flushing: false });
         }
 
         return result;
-      },
+      };
 
-      retry: (id) =>
-        set((state) => {
-          const item = state.failed.find((failed) => failed.write.id === id);
-          if (!item) return state;
-          return {
-            failed: state.failed.filter((failed) => failed.write.id !== id),
-            queue: [...state.queue, item.write],
-          };
-        }),
+      return {
+        ...initialValues,
 
-      discard: (id) =>
-        set((state) => ({
-          queue: state.queue.filter((write) => write.id !== id),
-          failed: state.failed.filter((failed) => failed.write.id !== id),
-        })),
-    }),
+        enqueue: (write) =>
+          set((state) => {
+            const saved = persistedSync(state);
+            return {
+              queue: [...withoutWrite(saved.queue, write.id), write],
+              failed: saved.failed,
+            };
+          }),
+
+        flush: async () => {
+          const owner = currentOwner();
+          if (get().flushing || !owner) return noChanges;
+          set({ flushing: true });
+
+          try {
+            return await withFlushLock(() => drain(owner));
+          } finally {
+            set({ flushing: false });
+          }
+        },
+
+        retry: (id) =>
+          set((state) => {
+            const saved = persistedSync(state);
+            const item = saved.failed.find((failed) => failed.write.id === id);
+            if (!item) return saved;
+            return {
+              failed: withoutFailed(saved.failed, id),
+              queue: [...withoutWrite(saved.queue, id), item.write],
+            };
+          }),
+
+        discard: (id) =>
+          set((state) => {
+            const saved = persistedSync(state);
+            return {
+              queue: withoutWrite(saved.queue, id),
+              failed: withoutFailed(saved.failed, id),
+            };
+          }),
+      };
+    },
     {
       name: syncStorageKey,
       partialize: (state) => ({ queue: state.queue, failed: state.failed }),
     }
   )
 );
+
+export const rehydrateSync = (): void => {
+  void useSyncStore.persist.rehydrate();
+};
 
 export const runWrite = async (
   input: IQueuedWriteInput
