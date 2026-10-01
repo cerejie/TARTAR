@@ -115,12 +115,14 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
   const columns: IDataTableColumn<ILedgerRecord>[] = [
     {
       title: "Due date",
+      mobile: "subtitle",
       dataIndex: "due_date",
       className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     {
       title: partyLabel,
+      mobile: "title",
       key: "party",
       skeleton: "avatar",
       render: (_, row) => (
