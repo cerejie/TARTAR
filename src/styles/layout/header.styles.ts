@@ -4,7 +4,7 @@ export const headerRoot =
 
 export const headerMenuButton = "-ml-1 rounded-full";
 
-export const headerBrand = "flex shrink-0 items-center gap-2.5";
+export const headerBrand = "flex shrink-0 items-center gap-2.5 max-md:hidden";
 
 export const headerLogoMark =
   "flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand font-heading text-lg font-bold text-on-brand";

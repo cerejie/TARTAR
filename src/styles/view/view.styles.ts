@@ -8,15 +8,16 @@ export const viewTitle =
   "min-w-0 flex-1 truncate font-heading text-2xl font-semibold tracking-tight text-foreground md:text-[1.625rem] lg:min-w-fit";
 
 export const viewHeadActions =
-  "flex min-w-0 flex-wrap items-center gap-2 max-lg:has-data-[slot=view-tabs]:w-full lg:flex-nowrap";
+  "flex min-w-0 flex-wrap items-center gap-2 max-lg:contents lg:flex-nowrap";
 
 export const viewTabs =
-  "-mx-1 min-w-0 basis-full overflow-x-auto overscroll-x-contain px-1 py-0.5 [scrollbar-width:none] empty:hidden lg:basis-auto";
+  "-mx-1 min-w-0 basis-full overflow-x-auto overscroll-x-contain px-1 py-0.5 [scrollbar-width:none] empty:hidden max-lg:order-last lg:basis-auto";
 
 export const viewHeadDivider =
   "mx-1 hidden h-6 self-center! lg:block [[data-slot=view-tabs]:empty+&]:hidden";
 
-export const viewToolbar = "flex min-w-0 flex-wrap items-center gap-2";
+export const viewToolbar =
+  "flex min-w-0 flex-wrap items-center gap-2 max-lg:[&>[data-slot=toggle-group]]:grid max-lg:[&>[data-slot=toggle-group]]:w-full max-lg:[&>[data-slot=toggle-group]]:auto-cols-fr max-lg:[&>[data-slot=toggle-group]]:grid-flow-col";
 
 export const viewMeta = "text-sm text-muted-foreground";
 
@@ -29,20 +30,23 @@ export const viewFooter = "flex flex-col gap-4";
 
 export const bentoGrid = "grid grid-cols-2 gap-3 md:grid-cols-12 md:gap-4";
 
-export const bentoCell = cva("col-span-2 min-w-0 has-[>[data-stat]]:max-md:col-span-1", {
-  variants: {
-    span: {
-      quarter: "md:col-span-6 xl:col-span-3",
-      third: "md:col-span-6 xl:col-span-4",
-      half: "md:col-span-6",
-      twoThirds: "md:col-span-12 xl:col-span-8",
-      full: "md:col-span-12",
-      main: "md:col-span-12 xl:col-span-9",
-      aside: "md:col-span-12 xl:col-span-3",
+export const bentoCell = cva(
+  "col-span-2 min-w-0 has-[>[data-stat]]:max-md:col-span-1 has-[>[data-stat]]:max-md:first:nth-last-[2n+1]:col-span-2",
+  {
+    variants: {
+      span: {
+        quarter: "md:col-span-6 xl:col-span-3",
+        third: "md:col-span-6 xl:col-span-4",
+        half: "md:col-span-6",
+        twoThirds: "md:col-span-12 xl:col-span-8",
+        full: "md:col-span-12",
+        main: "md:col-span-12 xl:col-span-9",
+        aside: "md:col-span-12 xl:col-span-3",
+      },
     },
-  },
-  defaultVariants: { span: "quarter" },
-});
+    defaultVariants: { span: "quarter" },
+  }
+);
 
 export const pageSkeletonTitle = "h-8 w-48 flex-1 md:max-w-64";
 

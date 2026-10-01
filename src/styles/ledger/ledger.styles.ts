@@ -27,3 +27,7 @@ export const ledgerSectionTitle = "font-heading text-base font-semibold";
 export const paymentTotal = "text-right text-sm text-muted-foreground";
 
 export const paymentTotalValue = "font-semibold text-foreground tabular-nums";
+
+export const ledgerButton = "max-lg:size-10 max-lg:gap-0 max-lg:rounded-full max-lg:px-0";
+
+export const ledgerButtonLabel = "max-lg:sr-only";
