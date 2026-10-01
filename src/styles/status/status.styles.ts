@@ -53,6 +53,8 @@ export const syncPendingIcon = "text-muted-foreground";
 
 export const syncReason = "text-danger";
 
+export const syncFailedActions = "justify-end";
+
 export const permissionDenied = "border";
 
 export const emptyState = "min-h-56 p-6";

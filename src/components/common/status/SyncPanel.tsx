@@ -4,6 +4,7 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
+  ItemFooter,
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
@@ -13,6 +14,7 @@ import {
   headerNotificationsHead,
 } from "../../../styles/layout/header.styles";
 import {
+  syncFailedActions,
   syncFailedIcon,
   syncHeadHint,
   syncPendingIcon,
@@ -20,7 +22,7 @@ import {
   syncSection,
   syncSectionTitle,
 } from "../../../styles/status/status.styles";
-import { formatDateTime } from "../../../utils/format.utils";
+import { formatChangeCount, formatDateTime } from "../../../utils/format.utils";
 import AppButton from "../button/AppButton";
 import EmptyState from "./EmptyState";
 
@@ -69,25 +71,27 @@ const SyncPanel = ({ description }: IProps) => {
                     {formatDateTime(new Date(failedAt).toISOString())}
                   </ItemDescription>
                 </ItemContent>
-                <ItemActions>
+                <ItemFooter className={syncFailedActions}>
+                  <AppButton
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Discard ${write.label}`}
+                    onPress={() => handleDiscard(write)}
+                  >
+                    <Trash2 />
+                    Discard
+                  </AppButton>
                   <AppButton
                     variant="outline"
-                    size="icon-sm"
+                    size="sm"
                     aria-label={`Retry ${write.label}`}
                     disabled={!online || flushing}
                     onPress={() => handleRetry(write)}
                   >
                     <RotateCcw />
+                    Retry
                   </AppButton>
-                  <AppButton
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Discard ${write.label}`}
-                    onPress={() => handleDiscard(write)}
-                  >
-                    <Trash2 />
-                  </AppButton>
-                </ItemActions>
+                </ItemFooter>
               </Item>
             ))}
           </section>
@@ -124,7 +128,7 @@ const SyncPanel = ({ description }: IProps) => {
 
         {othersWaiting > 0 ? (
           <span className={syncSectionTitle}>
-            {othersWaiting} change(s) waiting for another user to sign in on this device
+            {formatChangeCount(othersWaiting)} waiting for another user to sign in on this device
           </span>
         ) : null}
       </div>

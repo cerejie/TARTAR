@@ -62,3 +62,6 @@ export const formatInitials = (name: string): string =>
     .slice(0, 2)
     .map((word) => word.charAt(0).toUpperCase())
     .join("");
+
+export const formatChangeCount = (count: number): string =>
+  count === 1 ? "1 change" : `${count} changes`;

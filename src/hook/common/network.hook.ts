@@ -13,7 +13,7 @@ import {
   useSyncStore,
 } from "../../store/common/sync.store";
 import { syncStorageKey } from "../../keys/storage.keys";
-import { formatDateTime } from "../../utils/format.utils";
+import { formatChangeCount, formatDateTime } from "../../utils/format.utils";
 import { isOwnWrite } from "../../utils/write.utils";
 import { useConfirm } from "./confirmation.hook";
 import type { IQueuedWrite } from "../../models/common/write.model";
@@ -29,17 +29,14 @@ const syncFromOtherTab = (event: StorageEvent) => {
   if (event.key === syncStorageKey) rehydrateSync();
 };
 
-const changesLabel = (count: number): string =>
-  count === 1 ? "1 change" : `${count} changes`;
-
 const flushAndReport = async (): Promise<void> => {
   const { synced, failed } = await useSyncStore.getState().flush();
   if (synced === 0 && failed === 0) return;
 
   useQueryStore.getState().refetchAll();
-  if (synced > 0) toast.success(`Synced ${changesLabel(synced)}`);
+  if (synced > 0) toast.success(`Synced ${formatChangeCount(synced)}`);
   if (failed > 0) {
-    toast.error(`${changesLabel(failed)} could not sync`, {
+    toast.error(`${formatChangeCount(failed)} could not sync`, {
       description: "Open the sync panel to retry or discard them.",
     });
   }

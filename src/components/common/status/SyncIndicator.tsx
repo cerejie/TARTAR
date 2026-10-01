@@ -14,6 +14,7 @@ import {
   offlineDot,
   syncSpin,
 } from "../../../styles/status/status.styles";
+import { formatChangeCount } from "../../../utils/format.utils";
 import AppButton from "../button/AppButton";
 import SyncPanel from "./SyncPanel";
 
@@ -25,14 +26,14 @@ type IProps = {
 };
 
 const describeSync = ({ online, pending, failedCount, flushing }: IProps) => {
-  if (failedCount > 0) return `${failedCount} change(s) could not sync`;
+  if (failedCount > 0) return `${formatChangeCount(failedCount)} could not sync`;
   if (!online) {
     return pending
-      ? `Offline — ${pending} change(s) will sync when back online`
+      ? `Offline — ${formatChangeCount(pending)} will sync when back online`
       : "You are offline";
   }
   if (flushing) return "Syncing queued changes…";
-  if (pending > 0) return `${pending} change(s) waiting to sync`;
+  if (pending > 0) return `${formatChangeCount(pending)} waiting to sync`;
   return "Online — all changes saved";
 };
 
