@@ -1,10 +1,23 @@
+import type { ReactNode } from "react";
 import { useAdminTitleHook } from "../../../hook/layout/admin.hook";
-import { adminPageTitle } from "../../../styles/admin/admin.layout.styles";
+import {
+  adminPageTitle,
+  adminPageTitleRow,
+} from "../../../styles/admin/admin.layout.styles";
 
-const AdminPageTitle = () => {
+type IProps = {
+  action?: ReactNode;
+};
+
+const AdminPageTitle = ({ action }: IProps) => {
   const { title } = useAdminTitleHook();
 
-  return <h1 className={adminPageTitle}>{title}</h1>;
+  return (
+    <div className={adminPageTitleRow}>
+      <h1 className={adminPageTitle}>{title}</h1>
+      {action}
+    </div>
+  );
 };
 
 export default AdminPageTitle;

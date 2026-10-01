@@ -63,7 +63,7 @@ export interface IAdminReceivableRow {
   record: IReceivable;
 }
 
-const dayCountLabel = (days: number) => (days === 1 ? "1 day" : `${days} days`);
+export const dayCountLabel = (days: number) => (days === 1 ? "1 day" : `${days} days`);
 
 export const daysUntil = (dueDate: string): number =>
   dayjs(dueDate).startOf("day").diff(dayjs().startOf("day"), "day");

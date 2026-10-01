@@ -18,6 +18,7 @@ type Actions = {
   unwatch: (key: string) => void;
   invalidate: (keyPrefix: string) => void;
   refetchAll: () => void;
+  refetchWatched: () => Promise<void>;
   reset: () => void;
 };
 
@@ -172,6 +173,18 @@ export const useQueryStore = create<States & Actions>((set, get) => ({
 
   refetchAll: () => {
     for (const [key, fetcher] of fetchers) void get().run(key, fetcher);
+  },
+
+  refetchWatched: async () => {
+    const watchedKeys = Object.entries(get().watchers)
+      .filter(([, count]) => count > 0)
+      .map(([key]) => key);
+    await Promise.all(
+      watchedKeys.flatMap((key) => {
+        const fetcher = fetchers.get(key);
+        return fetcher ? [get().run(key, fetcher)] : [];
+      })
+    );
   },
 
   reset: () => {

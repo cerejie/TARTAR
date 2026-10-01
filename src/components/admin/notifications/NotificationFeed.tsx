@@ -60,7 +60,7 @@ const NotificationFeed = ({
               name={item.name}
               meta={item.description}
               amount={item.amount}
-              badge={item.unread ? <StatusTag label="New" color="brand" /> : null}
+              unread={item.unread}
               onPress={() => onOpen(item)}
             />
           ))}

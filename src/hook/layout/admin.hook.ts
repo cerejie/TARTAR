@@ -1,9 +1,10 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hook/use-mobile";
-import { adminBranchSheetModalKey } from "../../keys/modal.keys";
+import { adminBranchSheetModalKey, adminUserSheetModalKey } from "../../keys/modal.keys";
 import { adminViewRoutes } from "../../routes/admin.view.routes";
 import {
+  selectIsScrolledPast,
   selectScrollPosition,
   useScrollStore,
 } from "../../store/common/scroll.store";
@@ -14,12 +15,16 @@ import {
   navigableRoutes,
 } from "../../utils/route.utils";
 import { usePermissions } from "../account/account.permission.hook";
+import { useIsTabletUp } from "../common/breakpoint.hook";
 import { useModal } from "../common/modal.hook";
 import { useNetwork } from "../common/network.hook";
+import { usePullToRefresh } from "../common/pull.hook";
 import { useAdminNotificationCountHook } from "../data/admin/admin.notifications.hook";
 import { useAdminManifestHook } from "./admin.manifest.hook";
 
 import type { UIEvent } from "react";
+
+const compactTitleOffset = 44;
 
 const isActiveAdminPath = (pathname: string, path: string): boolean =>
   path === adminBasePath
@@ -42,7 +47,9 @@ export const useAdminLayoutHook = () => {
   const handleScroll = (event: UIEvent<HTMLElement>) =>
     setPosition(pathname, event.currentTarget.scrollTop);
 
-  return { pathname, scrollRef, handleScroll };
+  const pullHandlers = usePullToRefresh();
+
+  return { pathname, scrollRef, handleScroll, pullHandlers };
 };
 
 export const useAdminTabBarHook = () => {
@@ -70,6 +77,27 @@ export const useAdminTitleHook = () => {
   );
 
   return { title: matched?.label ?? "" };
+};
+
+export const useAdminAppBarHook = () => {
+  const { pathname } = useLocation();
+  const isPhone = !useIsTabletUp();
+  const scrolled = useScrollStore(selectIsScrolledPast(pathname, compactTitleOffset));
+  const { title } = useAdminTitleHook();
+
+  return { scrolled, compact: isPhone && scrolled, title };
+};
+
+export const useAdminUserSheetHook = () => {
+  const isPhone = !useIsTabletUp();
+  const { modal, openModal, closeModal } = useModal(adminUserSheetModalKey);
+
+  return {
+    showSheet: isPhone,
+    sheetOpen: modal.visible,
+    openSheet: () => openModal(),
+    closeSheet: closeModal,
+  };
 };
 
 export const useAdminBranchSheetHook = () => {

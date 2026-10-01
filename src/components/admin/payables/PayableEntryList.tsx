@@ -12,6 +12,7 @@ type IProps = {
   refreshing: boolean;
   error: string | null;
   onRetry: () => void;
+  isSelected: (row: IAdminPayableRow) => boolean;
   onOpen: (row: IAdminPayableRow) => void;
 };
 
@@ -22,6 +23,7 @@ const PayableEntryList = ({
   refreshing,
   error,
   onRetry,
+  isSelected,
   onOpen,
 }: IProps) => {
   return (
@@ -42,6 +44,7 @@ const PayableEntryList = ({
           meta={row.meta}
           amount={row.amount}
           badge={<StatusTag label={row.due.label} color={row.due.color} />}
+          selected={isSelected(row)}
           onPress={() => onOpen(row)}
         />
       ))}

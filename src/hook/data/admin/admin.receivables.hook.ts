@@ -11,6 +11,7 @@ import {
 } from "../../../models/data/admin/admin.response";
 import { ledgerBalance } from "../../../models/data/ledger/ledger.response";
 import dashboardServices from "../../../services/data/dashboard.services";
+import { useIsTabletUp } from "../../common/breakpoint.hook";
 import { useModal } from "../../common/modal.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSegment } from "../../common/segment.hook";
@@ -55,6 +56,7 @@ const isDueToday = (receivable: IReceivable) => daysUntil(receivable.due_date) =
 export const useAdminReceivablesHook = () => {
   const { branch } = useBranchScopeHook();
   const { customers } = useCustomerListHook();
+  const isTabletUp = useIsTabletUp();
   const { segment, setSegment } = useSegment(
     adminReceivablesSegmentKey,
     adminReceivableSegmentValues
@@ -102,6 +104,9 @@ export const useAdminReceivablesHook = () => {
     customer: customer ?? null,
     phoneHref: phoneHrefOf(customer?.contact),
     sheetOpen: modal.visible,
+    split: isTabletUp,
+    isSelected: (row: IAdminReceivableRow) =>
+      modal.visible && row.record.id === selected?.id,
     openRow: (row: IAdminReceivableRow) => openModal(row.record),
     closeSheet: closeModal,
   };

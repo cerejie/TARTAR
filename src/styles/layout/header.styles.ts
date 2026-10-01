@@ -17,6 +17,11 @@ export const headerScope = "min-w-0 flex-1 lg:ml-6 lg:flex-none";
 export const headerScopeTrigger =
   "h-10 w-full justify-start gap-2 rounded-pill bg-muted px-4 font-normal text-muted-foreground hover:bg-accent lg:w-72";
 
+export const headerScopeCompact = "flex-none";
+
+export const headerScopeTriggerCompact =
+  "size-10 rounded-pill bg-muted text-muted-foreground hover:bg-accent";
+
 export const headerScopeSkeleton = "h-10 w-full rounded-pill lg:w-72";
 
 export const headerScopeLabel ="min-w-0 flex-1 truncate text-left text-foreground";

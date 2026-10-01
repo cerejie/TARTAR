@@ -19,6 +19,7 @@ export const branchCreateModalKey = "branch-create";
 export const branchEditModalKey = "branch-edit";
 export const branchScopeSearchKey = "branch-scope-search";
 export const adminBranchSheetModalKey = "admin-branch-sheet";
+export const adminUserSheetModalKey = "admin-user-sheet";
 export const adminPayableSheetModalKey = "admin-payable-sheet";
 export const adminReceivableSheetModalKey = "admin-receivable-sheet";
 

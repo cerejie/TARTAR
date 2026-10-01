@@ -20,3 +20,6 @@ export const useScrollStore = create<States & Actions>()((set) => ({
 
 export const selectScrollPosition = (key: string) => (state: States) =>
   state.positions[key] ?? 0;
+
+export const selectIsScrolledPast = (key: string, top: number) => (state: States) =>
+  (state.positions[key] ?? 0) > top;

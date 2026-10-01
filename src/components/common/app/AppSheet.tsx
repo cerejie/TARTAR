@@ -8,9 +8,13 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/utils/cn.utils";
 import { useIsDesktop } from "../../../hook/common/breakpoint.hook";
+import { useSwipeToClose } from "../../../hook/common/swipe.hook";
 import {
   appSheetBody,
   appSheetContent,
+  appSheetDragHeader,
+  appSheetGrabHandle,
+  appSheetGrabZone,
   appSheetSide,
 } from "../../../styles/app/app.styles";
 import {
@@ -37,6 +41,8 @@ const AppSheet = ({
   children,
 }: IProps) => {
   const isDesktop = useIsDesktop();
+  const swipeHandlers = useSwipeToClose(onClose);
+  const dragHandlers = isDesktop ? {} : swipeHandlers;
 
   const handleOpenChange = (next: boolean) => {
     if (!next) onClose();
@@ -49,7 +55,16 @@ const AppSheet = ({
       onOpenChange={handleOpenChange}
       className={cn(appSheetContent, isDesktop ? appSheetSide : drawerContent)}
     >
-      <SheetHeader className={drawerHeaderRuled}>
+      {isDesktop ? null : (
+        <div className={appSheetGrabZone} aria-hidden="true" {...swipeHandlers}>
+          <span className={appSheetGrabHandle} />
+        </div>
+      )}
+
+      <SheetHeader
+        className={cn(drawerHeaderRuled, !isDesktop && appSheetDragHeader)}
+        {...dragHandlers}
+      >
         <SheetTitle>{title}</SheetTitle>
         {description ? <SheetDescription>{description}</SheetDescription> : null}
       </SheetHeader>

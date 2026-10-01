@@ -12,6 +12,7 @@ type IProps = {
   refreshing: boolean;
   error: string | null;
   onRetry: () => void;
+  isSelected: (row: IAdminReceivableRow) => boolean;
   onOpen: (row: IAdminReceivableRow) => void;
 };
 
@@ -22,6 +23,7 @@ const ReceivableEntryList = ({
   refreshing,
   error,
   onRetry,
+  isSelected,
   onOpen,
 }: IProps) => {
   return (
@@ -42,6 +44,7 @@ const ReceivableEntryList = ({
           meta={row.meta}
           amount={row.amount}
           badge={<StatusTag label={row.due.label} color={row.due.color} />}
+          selected={isSelected(row)}
           onPress={() => onOpen(row)}
         />
       ))}

@@ -202,6 +202,10 @@
   padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
 }
 
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
 @utility bg-auth-hero {
   background:
     radial-gradient(120% 90% at 110% -10%, color-mix(in oklab, var(--color-info) 38%, transparent), transparent 55%),
@@ -227,6 +231,10 @@
     margin: 0;
     padding: 0;
     height: 100%;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {

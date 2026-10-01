@@ -5,14 +5,17 @@ import {
   adminNotificationSegmentLabels,
   adminNotificationSegmentValues,
   checkDueDateOf,
+  dayCountLabel,
   dueHorizonDays,
   dueStatusOf,
 } from "../../../models/data/admin/admin.response";
+import { notificationKindLabels } from "../../../models/data/dashboard/dashboard.response";
 import dashboardServices from "../../../services/data/dashboard.services";
 import {
   selectReadIds,
   useNotificationReadStore,
 } from "../../../store/data/admin/notification.read.store";
+import { daysBetween, formatDate, todayIso } from "../../../utils/format.utils";
 import { notificationBankOf, notificationGroups } from "../../../utils/notification.utils";
 import { adminPayablesPath, adminReceivablesPath } from "../../../utils/route.utils";
 import { useQuery } from "../../common/query.hook";
@@ -32,6 +35,13 @@ import type {
 } from "../../../models/data/dashboard/dashboard.response";
 import type { IVoucher } from "../../../models/data/voucher/voucher.response";
 
+const briefOf = (groupKey: string, row: INotificationRow): string => {
+  const kind = notificationKindLabels[row.kind];
+  if (groupKey === "overdue") return `${kind} · ${dayCountLabel(daysBetween(row.dueDate, todayIso()))}`;
+  if (groupKey === "week") return `${kind} · ${formatDate(row.dueDate)}`;
+  return kind;
+};
+
 const readIdOf = (rowId: string, dueDate: string) => `${rowId}-${dueDate}`;
 
 const alertGroupsOf = (
@@ -49,7 +59,7 @@ const alertGroupsOf = (
       return {
         id,
         name: row.name,
-        description: bank ? `${group.describe(row)} · ${bank}` : group.describe(row),
+        description: [briefOf(group.key, row), bank].filter(Boolean).join(" · "),
         amount: row.amount,
         path: row.ledger === "receivable" ? adminReceivablesPath : adminPayablesPath,
         unread: !readIds.has(id),

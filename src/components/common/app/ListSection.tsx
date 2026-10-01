@@ -3,7 +3,9 @@ import { Inbox } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn.utils";
 import {
-  listCardSkeleton,
+  listCardSkeletonAvatar,
+  listCardSkeletonRow,
+  listCardSkeletonText,
   listSection,
   listSectionHead,
   listSectionItems,
@@ -46,7 +48,10 @@ const ListSection = ({
       return (
         <div className={listSectionItems} aria-busy="true">
           {skeletonRows.map((row) => (
-            <Skeleton key={row} className={listCardSkeleton} />
+            <div key={row} className={listCardSkeletonRow}>
+              <Skeleton className={listCardSkeletonAvatar} />
+              <Skeleton className={listCardSkeletonText} />
+            </div>
           ))}
         </div>
       );

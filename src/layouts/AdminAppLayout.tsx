@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import AdminAppBar from "../components/common/layout/AdminAppBar";
-import AdminPageTitle from "../components/common/layout/AdminPageTitle";
 import AdminTabBar from "../components/common/layout/AdminTabBar";
+import PullIndicator from "../components/common/app/PullIndicator";
 import RouteProgress from "../components/common/layout/RouteProgress";
 import { useAdminLayoutHook } from "../hook/layout/admin.hook";
 import {
@@ -12,7 +12,7 @@ import {
 } from "../styles/admin/admin.layout.styles";
 
 const AdminAppLayout = () => {
-  const { pathname, scrollRef, handleScroll } = useAdminLayoutHook();
+  const { pathname, scrollRef, handleScroll, pullHandlers } = useAdminLayoutHook();
 
   return (
     <div className={adminShell}>
@@ -27,9 +27,10 @@ const AdminAppLayout = () => {
           ref={scrollRef}
           onScroll={handleScroll}
           className={adminContent}
+          {...pullHandlers}
         >
+          <PullIndicator />
           <div key={pathname} className={adminColumn}>
-            <AdminPageTitle />
             <Outlet />
           </div>
         </main>
