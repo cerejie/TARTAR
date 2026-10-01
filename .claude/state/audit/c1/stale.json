@@ -1,0 +1,5 @@
+[{"login":["qaemp2@qa.test","QaTest#2026"],"stop":true},
+ {"goto":"/sales","settle":3000,"js":"[...document.querySelectorAll('tbody tr')].slice(0,5).map(r=>r.innerText.split(String.fromCharCode(10)).join(' ')).join(' || ')"},
+ {"wait":8000,"js":"[...document.querySelectorAll('tbody tr')].slice(0,5).map(r=>r.innerText.split(String.fromCharCode(10)).join(' ')).join(' || ')"},
+ {"js":"[...document.querySelectorAll('main button,[role=radio],[role=tab]')].map(b=>b.innerText.trim()+(b.getAttribute('aria-checked')==='true'||b.getAttribute('aria-selected')==='true'?'*':'')).filter(Boolean).slice(0,20).join(',')"}
+]

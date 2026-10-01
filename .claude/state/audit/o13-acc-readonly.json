@@ -1,0 +1,11 @@
+[
+ {"note":"login","login":["qaacc1@qa.test","QaTest#2026"],"stop":true},
+ {"goto":"/receivables","settle":4000,"name":"o13-rec-records"},
+ {"js":"JSON.stringify({rows:document.querySelectorAll('tbody tr').length,actionBtns:[...document.querySelectorAll('tbody button')].map(b=>b.getAttribute('aria-label')||b.textContent.trim()).slice(0,6),hasRecord:/Record payment/.test(document.body.innerText)})"},
+ {"button":"By customer","settle":3000,"name":"o13-rec-parties"},
+ {"js":"JSON.stringify({rows:document.querySelectorAll('tbody tr').length,actionBtns:[...document.querySelectorAll('tbody button')].map(b=>b.getAttribute('aria-label')||b.textContent.trim()).slice(0,6),hasRecord:/Record payment|Customer details/.test(document.body.innerText)})"},
+ {"goto":"/payables","settle":4000,"name":"o13-pay-records"},
+ {"js":"JSON.stringify({rows:document.querySelectorAll('tbody tr').length,actionBtns:[...document.querySelectorAll('tbody button')].map(b=>b.getAttribute('aria-label')||b.textContent.trim()).slice(0,6),hasWrite:/Record payment|Mark paid/.test(document.body.innerText)})"},
+ {"button":"By supplier","settle":3000,"name":"o13-pay-parties"},
+ {"js":"JSON.stringify({rows:document.querySelectorAll('tbody tr').length,actionBtns:[...document.querySelectorAll('tbody button')].map(b=>b.getAttribute('aria-label')||b.textContent.trim()).slice(0,6),hasWrite:/Record payment|Supplier details|Mark paid/.test(document.body.innerText)})"}
+]

@@ -1,5 +1,5 @@
 # ROADMAP — Offline hardening (live offline test, 2026-09-30)
-Updated: 2026-10-01 (OB10)
+Updated: 2026-10-01 (V1, V2 done; concurrency run; fix phases C1-C5 queued)
 
 ## Goal
 Offline, every write is kept on the device and reaches the database once back online, nothing is
@@ -172,14 +172,85 @@ merged into main).
   manage hooks. Known gaps: pending bank account row shows "—" bank until synced; a second offline
   account under the same NEW bank name creates the bank twice.
 
+## Verification phases (added 2026-10-01, user-approved; V1 and V2 results below)
+- V1 DONE 2026-10-01: accountant read-only. Harness o13/o13b/o13c (qaacc1): Receivables and Payables
+  Records + By customer/By supplier show no write action ("Show details", "View ledger" only).
+  RLS static audit of supabase/migrations: manager policies use is_manager() (superadmin|admin),
+  employee policies use user_role()='employee', accountant has SELECT policies only, security-
+  definer RPCs check is_manager()/employee in-function. DB refuses every accountant write.
+  Live probe (races.mjs R7, qaacc1/2 tokens): insert sale / purchase RPC / customer / bank -> 403
+  RLS; update + delete sale, update vouchers -> 200 [] (0 rows); deposit/verify RPC -> refused.
+- V2 DONE 2026-10-01 (v2-signout.json): admin warm -> 17 IDB keys; Sign out -> 0 keys, still 0 after
+  reload; emp offline reload afterwards shows only emp data. Owner-scoped queue: see C4.
+- V3 Known gaps to close: (a) pending expense/purchase payee "—" -> resolve payee name from the
+  cached suppliers/customers lookups in the pending mapper; (b) pending bank account "—" bank ->
+  resolve from cached/pending banks; (c) two offline accounts under the same NEW bank name create
+  the bank twice -> dedupe by slug at enqueue time and in the flush.
+- V4 Visual pass (user): Pending sync tag, OfflineNotice, Sync panel, failed list in light + dark and
+  at phone width. Build proves compile only.
+- C Concurrency and worst cases: see "Concurrency findings".
+
+## Concurrency findings (2026-10-01, production build + live DB, 6 users at once)
+Runs: c1/*.json (6 parallel browsers qaemp1/2, qaadmin1/2, qaacc1/2 with file barriers, `sync`
+step in drive.mjs, env RUN/PARTIES), races.mjs + races2.mjs (parallel REST with real user tokens),
+tabs.mjs/tabs2.mjs (same user, 2 tabs), shared.mjs (2 users, 1 device), lost.mjs (reply dropped).
+Held up (no change needed):
+- 6 parallel "Mark deposited" on one sale (2 emp + 2 admin x) -> exactly 1 ok, 5 "already deposited".
+- verify x2 + reject x2 in parallel -> 1 verify wins, rest refused; final verified.
+- Same idempotency key x6 in parallel -> applied once; same insert id x4 -> 1 row (pkey replay ok).
+- 4 users pay 600 of a 1000 receivable in parallel -> 1 ok, 3 "exceeds remaining (pending incl.)".
+  Employee pending 700 + admin 300 + verify race -> paid exactly 1000; +1 refused. Verify vs
+  reject of one payment in parallel -> 1 wins.
+- 8 parallel purchases from 4 users -> PUR-QAT-2610-0001..0008, unique, no gaps.
+- c1 offline replays: emp1 offline deposit of a sale emp2 deposited + admin1 verified -> failed list
+  "already verified", rest of emp1 queue (sale 711, expense 712) synced; admin2 offline edit of the
+  verified sale -> failed "verified sale is locked". Accountants offline: no write controls, empty
+  queues. No page errors in any of the 6 browsers.
+- Shared device: emp2 signing in never flushes emp1's queued sale 951; it syncs when emp1 returns.
+Broken, to fix (phases C1-C5 below).
+
+## Fix phases (one per conversation, plan + approval first)
+- C1 CRITICAL multi-tab queue loss (tabs2.mjs): same user, 2 tabs, offline. Tab B queues sale 942
+  ("Saved offline"), tab A then queues 943 and its persist overwrites localStorage with A's memory
+  queue [941, 943]; B closes -> 942 is gone forever, never reaches the DB. Fix in
+  src/store/common/sync.store.ts: rehydrate on the `storage` event (persist.rehydrate) so every tab
+  shares one queue; enqueue/remove re-read the persisted queue before writing (merge by write id,
+  never replace); serialise flush across tabs with navigator.locks.request("tartar-sync-flush").
+  Verify: tabs2.mjs -> 941, 942, 943 all listed; two tabs reconnecting together -> each write once,
+  0 failed.
+- C2 HIGH stale offline edit overwrites newer data (c1, DB-confirmed): emp2 deposited sale 702 at
+  ₱702 online; admin2, offline with the old page, edited 702 -> on reconnect amount became ₱7,022
+  on a DEPOSITED sale, silently (deposit slip no longer matches). Updates are last-write-wins:
+  sale.services.update matches only { id }; update_transaction_with_voucher has no version check.
+  OQ4 (ask at C2): (a) no migration — queued updates also match the status the user saw
+  (sale: sale_status "undeposited"; disbursement: voucher status pending) -> 0 rows -> failed
+  "changed by someone else"; or (b) RECOMMENDED migration 25 — `version int` on transactions +
+  bump trigger; updates match { id, version } and the RPC takes p_expected_version, so two
+  same-status edits also conflict. Never drop/rename; show SQL, never apply.
+  Verify: rerun c1 -> admin2's 702 edit lands in the failed list, 702 stays ₱702.
+- C3 MEDIUM false "Needs attention" after a lost reply (lost.mjs): admin deletes sale 931, the server
+  applies it, the reply is dropped -> retry deletes 0 rows -> failed "changed nothing — the record
+  is gone". Same path when two tabs flush one delete. Fix in src/utils/write.utils.ts: a queued
+  delete that matches 0 rows is success (the row is gone, which was the goal); slug-keyed insert
+  23505 replay where the row exists -> success. Verify: lost.mjs -> 0 failed.
+- C4 LOW shared device: emp2 sees emp1's queued sale 951 as a "Pending sync" row and it counts in
+  the badge; emp1's writes wait until emp1 signs in on that device again, invisibly. Fix:
+  src/hook/common/pending.hook.ts filters by owner; SyncPanel shows "N changes waiting for
+  another user to sign in on this device". Verify: shared.mjs -> emp2 sees 0 rows of 951.
+- C5 LOW open pages do not show other users' changes until refetch (emp2 kept 701 "Deposited"
+  after admin1 verified it). Option: refetch watched queries on window focus + every 60s while
+  online (query.store), or Supabase realtime on transactions like migration 17 did for ledger.
+  Ask at C5 whether it is wanted.
+
 ## Next (one conversation, in order)
-1. Harness-check accountant (qaacc1) Receivables/Payables records + parties views: no write
-   actions anywhere. Optionally audit RLS so the DB refuses every accountant write, not only payments.
+1. C1 (critical) -> C2 (ask OQ4) -> C3 -> C4 -> C5 (ask) -> V3 -> V4 (user visual pass).
 2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
    purchase 393, payments 50/51/52, voucher approvals 908/909, emp sale 913,
-   bank "QA O12 Bank" (no delete in the UI)), adds Banks + branch
-   legal_name/address.
+   bank "QA O12 Bank" (no delete in the UI); 2026-10-01 concurrency rows: sales 701, 702 (now
+   ₱7,022), 711, 721, 801, 802, 803, 932, 933, 941, 943, 951 (931 deleted, 942 lost), expense
+   712, purchases 811-818 payee "QA Race Payee" + their vouchers, receivables reference "C-RACE-*"
+   + their payments), adds Banks + branch legal_name/address.
 3. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
    (f7-approve.json there holds the superadmin password in plain text).
 
@@ -220,6 +291,9 @@ merged into main).
   catch them with the MutationObserver recorder `js` step from o7 (window.__t), not `toasts`.
 - A leftover `yarn preview` may already hold :4199 (strictPort then fails); it serves dist/ from
   disk, so a fresh `yarn build` is still what it serves.
+- Concurrency: `RUN=<id> PARTIES=6 EPHEMERAL=1 BASE=... TAG=c1-<user> node drive.mjs c1/<user>.json`
+  for all six in parallel (`&` + `wait`); `sync: "<name>"` steps are barriers (bar/<RUN>/), mark them
+  `always`. REST races: `ENVFILE=<repo>/.env node races.mjs` (rest.mjs logs in via login_email).
 - QA logins `<name>@qa.test` / `QaTest#2026` (qaadmin1/2, qaacc1/2, qaemp1/2). Developer and
   superadmin passwords are never written to disk.
 

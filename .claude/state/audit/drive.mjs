@@ -1,5 +1,5 @@
 import { chromium } from "playwright-core";
-import { mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 
 const base = process.env.BASE ?? "http://localhost:5199";
 const dir = new URL(".", import.meta.url).pathname.slice(1);
@@ -17,7 +17,7 @@ const browser = process.env.EPHEMERAL ? await chromium.launch({ channel: "chrome
 const context = browser ? await browser.newContext({ viewport: launchOptions[1].viewport }) : await chromium.launchPersistentContext(...launchOptions);
 const page = context.pages()[0] ?? (await context.newPage());
 const out = [];
-const log = (s) => { out.push(s); console.log(s); };
+const log = (s) => { out.push(s); console.log(`[${tag}] ${s}`); };
 page.on("pageerror", (e) => log(`  !! pageerror ${e.message.split("\n")[0]}`));
 page.on("console", (m) => m.type() === "error" && !/favicon|Download the React DevTools|ERR_INTERNET_DISCONNECTED/.test(m.text()) && log(`  !! console ${m.text().slice(0, 300)}`));
 page.on("response", async (r) => {
@@ -81,6 +81,14 @@ for (const s of steps) {
       await page.locator("button[type=submit]").click();
       await page.waitForURL((u) => !/\/login$/.test(u.pathname), { timeout: 15000 });
       await page.waitForTimeout(2500);
+    }
+    if (s.sync) {
+      const barDir = `${dir}bar/${process.env.RUN}`;
+      mkdirSync(barDir, { recursive: true });
+      writeFileSync(`${barDir}/${s.sync}--${tag}`, "");
+      const parties = Number(process.env.PARTIES ?? 1);
+      for (let i = 0; i < 600 && readdirSync(barDir).filter((f) => f.startsWith(`${s.sync}--`)).length < parties; i++) await page.waitForTimeout(500);
+      log(`  sync ${s.sync} @ ${new Date().toISOString().slice(11, 23)}`);
     }
     if (s.offline !== undefined) { await context.setOffline(s.offline); await page.waitForTimeout(s.offline ? 1200 : 6000); }
     if (s.blockApi !== undefined) { if (s.blockApi) await page.route(/supabase\.co/, (r) => r.abort("internetdisconnected")); else await page.unroute(/supabase\.co/); }
