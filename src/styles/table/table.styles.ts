@@ -75,10 +75,10 @@ export const dataTableEmpty = "py-8";
 
 export const dataTableLoadingAnnounce = "sr-only";
 
-export const dataCardList = "flex flex-col gap-3";
+export const dataCardList = "flex flex-col gap-2.5";
 
 export const dataCard =
-  "relative flex flex-col gap-3 rounded-xl border border-border bg-card p-4 text-sm has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring";
+  "relative flex flex-col gap-2.5 rounded-2xl border border-border/60 bg-card p-3.5 text-sm shadow-xs has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring";
 
 export const dataCardSelected = "border-brand bg-brand-mist";
 
@@ -86,20 +86,23 @@ export const dataCardHead = "flex items-start gap-3";
 
 export const dataCardHeading = "flex min-w-0 flex-1 flex-col gap-0.5";
 
-export const dataCardTitle = "min-w-0 text-left font-medium break-words text-foreground";
+export const dataCardTitle = "min-w-0 text-left font-semibold break-words text-foreground";
 
 export const dataCardTitlePress =
-  "min-w-0 text-left font-medium break-words text-foreground outline-none after:absolute after:inset-0 after:rounded-xl";
+  "min-w-0 text-left font-semibold break-words text-foreground outline-none after:absolute after:inset-0 after:rounded-2xl";
 
 export const dataCardSubtitle = "text-xs text-muted-foreground";
 
-export const dataCardAmount = "flex shrink-0 flex-col items-end gap-0.5 font-semibold tabular-nums";
+export const dataCardAmount =
+  "flex shrink-0 flex-col items-end gap-0.5 font-heading text-base font-semibold tabular-nums";
 
 export const dataCardRaised = "relative z-10";
 
-export const dataCardTags = "flex flex-wrap items-center gap-2";
+export const dataCardFoot = "flex items-center justify-between gap-2";
 
-export const dataCardMeta = "grid grid-cols-2 gap-x-4 gap-y-2";
+export const dataCardTags = "flex min-w-0 flex-wrap items-center gap-1.5";
+
+export const dataCardMeta = "grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs";
 
 export const dataCardField = "flex min-w-0 flex-col gap-0.5";
 
@@ -107,9 +110,9 @@ export const dataCardLabel = "text-xs text-muted-foreground";
 
 export const dataCardValue = "min-w-0 break-words text-foreground";
 
-export const dataCardToggle = "relative z-10 self-start";
+export const dataCardToggle = "relative z-10 ml-auto shrink-0 rounded-full";
 
-export const dataCardDetail = "-mx-4 -mb-4 border-t border-border";
+export const dataCardDetail = "-mx-3.5 -mb-3.5 border-t border-border";
 
 export const dataCardSkeletonHead = "flex items-center justify-between gap-3";
 

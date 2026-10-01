@@ -20,6 +20,7 @@ import {
   dataCardAmount,
   dataCardDetail,
   dataCardField,
+  dataCardFoot,
   dataCardHead,
   dataCardHeading,
   dataCardLabel,
@@ -208,14 +209,6 @@ const DataTableCards = <T,>({
           ))}
         </div>
 
-        {statuses.length > 0 ? (
-          <div className={dataCardTags}>
-            {statuses.map((field) => (
-              <span key={field.id}>{field.content}</span>
-            ))}
-          </div>
-        ) : null}
-
         {metas.length > 0 ? (
           <dl className={dataCardMeta}>
             {metas.map((field) => (
@@ -227,18 +220,28 @@ const DataTableCards = <T,>({
           </dl>
         ) : null}
 
-        {expansion && detailSections ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            className={dataCardToggle}
-            aria-expanded={isExpanded}
-            onPress={() => expansion.toggleRow(key)}
-            {...rowExpansionPersistProps}
-          >
-            <ChevronRight className={expandTrigger({ open: isExpanded })} />
-            {isExpanded ? "Hide details" : "Details"}
-          </Button>
+        {statuses.length > 0 || (expansion && detailSections) ? (
+          <div className={dataCardFoot}>
+            <div className={dataCardTags}>
+              {statuses.map((field) => (
+                <span key={field.id}>{field.content}</span>
+              ))}
+            </div>
+
+            {expansion && detailSections ? (
+              <Button
+                variant="secondary"
+                size="icon-sm"
+                className={dataCardToggle}
+                aria-label={isExpanded ? "Hide details" : "Show details"}
+                aria-expanded={isExpanded}
+                onPress={() => expansion.toggleRow(key)}
+                {...rowExpansionPersistProps}
+              >
+                <ChevronRight className={expandTrigger({ open: isExpanded })} />
+              </Button>
+            ) : null}
+          </div>
         ) : null}
 
         {isOpen && expansion && detailSections ? (

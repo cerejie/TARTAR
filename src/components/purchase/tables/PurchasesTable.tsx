@@ -170,12 +170,14 @@ const PurchasesTable = () => {
     { title: "Payee", mobile: "title", key: "payee", render: (_, row) => payeeOf(row) },
     {
       title: "Branch",
+      mobile: "hidden",
       dataIndex: "branch",
       collapse: "xl",
       render: (value: string) => <TruncateCell text={branchName(value)} />,
     },
     {
       title: "Voucher",
+      mobile: "status",
       key: "voucher_status",
       className: nowrapCell,
       render: (_, row) =>
@@ -194,6 +196,7 @@ const PurchasesTable = () => {
     },
     {
       title: "Amount",
+      mobile: "hidden",
       dataIndex: "amount",
       collapse: "2xl",
       align: "right",
@@ -218,6 +221,7 @@ const PurchasesTable = () => {
       ? [
           {
             title: "Recorded by",
+            mobile: "hidden" as const,
             key: "user",
             collapse: "2xl" as const,
             skeleton: "avatar" as const,

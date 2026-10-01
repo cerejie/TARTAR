@@ -105,6 +105,7 @@ const TransactionsTable = () => {
     },
     {
       title: "Branch",
+      mobile: "hidden",
       dataIndex: "branch",
       collapse: "xl",
       render: branchName,
@@ -113,6 +114,7 @@ const TransactionsTable = () => {
       ? [
           {
             title: "Recorded by",
+            mobile: "hidden" as const,
             key: "user",
             collapse: "2xl" as const,
             skeleton: "avatar" as const,

@@ -96,6 +96,7 @@ const PayableRecordsTable = () => {
     },
     {
       title: "Branch",
+      mobile: "hidden",
       dataIndex: "branch",
       collapse: "xl",
       className: branchCell,

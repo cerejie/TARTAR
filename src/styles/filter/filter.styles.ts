@@ -1,11 +1,12 @@
 import { cva } from "class-variance-authority";
 
-export const filterToolbar = "flex flex-wrap items-center gap-2";
+export const filterToolbar = "flex flex-wrap items-center gap-2 max-md:data-compact:flex-nowrap";
 
-export const filterToolbarStart = "flex min-w-0 flex-auto flex-wrap items-center gap-2";
+export const filterToolbarStart =
+  "flex min-w-0 flex-auto flex-wrap items-center gap-2 max-md:in-data-compact:flex-none max-md:in-data-compact:flex-nowrap max-md:in-data-compact:[&>[data-slot=button]]:relative max-md:in-data-compact:[&>[data-slot=button]]:size-10 max-md:in-data-compact:[&>[data-slot=button]]:gap-0 max-md:in-data-compact:[&>[data-slot=button]]:rounded-full max-md:in-data-compact:[&>[data-slot=button]]:px-0 max-md:in-data-compact:[&>[data-slot=button]]:text-[0px] max-md:in-data-compact:[&>[data-slot=button]>svg:not(:first-child)]:hidden max-md:in-data-compact:[&_[data-slot=badge]]:absolute max-md:in-data-compact:[&_[data-slot=badge]]:-top-1 max-md:in-data-compact:[&_[data-slot=badge]]:-right-1";
 
 export const filterToolbarActions =
-  "ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2";
+  "ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 max-md:in-data-compact:flex-nowrap max-md:in-data-compact:[&>[data-slot=button]]:h-10 max-md:in-data-compact:[&>[data-slot=button]]:rounded-full max-md:in-data-compact:[&>[data-slot=button]]:px-4";
 
 export const filterBar = cva("flex gap-2", {
   variants: {
@@ -42,8 +43,12 @@ export const filterField = "gap-1.5 *:w-full!";
 
 export const filterSort = "flex items-center gap-2";
 
-export const filterSortLabel = "hidden text-sm whitespace-nowrap text-muted-foreground sm:inline";
+export const filterSortLabel = "hidden text-sm whitespace-nowrap text-muted-foreground md:inline";
 
-export const filterSortSelect = "w-36 sm:w-44";
+export const filterSortSelect = "w-auto md:w-44";
 
-export const filterSortValue = "inline-flex items-center gap-2";
+export const filterSortTrigger =
+  "rounded-full max-md:size-10 max-md:justify-center max-md:px-0 max-md:[&>svg]:hidden";
+
+export const filterSortValue =
+  "inline-flex items-center gap-2 max-md:[&_[data-slot=select-value]]:sr-only";

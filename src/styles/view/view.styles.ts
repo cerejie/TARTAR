@@ -27,9 +27,9 @@ export const viewBody = "flex min-w-0 flex-col gap-4";
 
 export const viewFooter = "flex flex-col gap-4";
 
-export const bentoGrid = "grid grid-cols-1 gap-4 md:grid-cols-12";
+export const bentoGrid = "grid grid-cols-2 gap-3 md:grid-cols-12 md:gap-4";
 
-export const bentoCell = cva("min-w-0", {
+export const bentoCell = cva("col-span-2 min-w-0 has-[>[data-stat]]:max-md:col-span-1", {
   variants: {
     span: {
       quarter: "md:col-span-6 xl:col-span-3",

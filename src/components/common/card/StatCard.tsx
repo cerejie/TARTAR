@@ -53,7 +53,7 @@ const StatCard = ({
 }: IProps) => {
   if (loading) {
     return (
-      <Card size="sm" className={statCard}>
+      <Card size="sm" className={statCard} data-stat>
         <CardContent className={statBody}>
           <Skeleton className={statSkeletonTitle} />
           <Skeleton className={statSkeletonValue} />
@@ -64,7 +64,7 @@ const StatCard = ({
 
   if (error) {
     return (
-      <Card size="sm" className={statCard}>
+      <Card size="sm" className={statCard} data-stat>
         <CardContent className={statBody}>
           <ErrorState
             compact
@@ -78,7 +78,7 @@ const StatCard = ({
   }
 
   return (
-    <Card size="sm" className={statCard}>
+    <Card size="sm" className={statCard} data-stat>
       <CardContent className={statBody}>
         <div className={statHead}>
           <div className={statHeading}>

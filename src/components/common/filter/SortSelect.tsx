@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/select";
 import type { ISortOption } from "../../../models/common/table.model";
 import {
-  filterPill,
   filterSort,
   filterSortLabel,
   filterSortSelect,
+  filterSortTrigger,
   filterSortValue,
 } from "../../../styles/filter/filter.styles";
 
@@ -37,7 +37,7 @@ const SortSelect = ({ value, options, onChange }: IProps) => {
         onChange={selectOption}
         className={filterSortSelect}
       >
-        <SelectTrigger className={filterPill}>
+        <SelectTrigger className={filterSortTrigger}>
           <span className={filterSortValue}>
             <ArrowUpDown />
             <SelectValue />

@@ -7,10 +7,10 @@ export const shellSidebar =
   "h-auto shrink-0 overflow-hidden rounded-panel border border-border py-2 shadow-panel";
 
 export const shellInset =
-  "min-h-0 min-w-0 overflow-hidden rounded-panel border border-border bg-panel py-3 shadow-panel md:py-4";
+  "min-h-0 min-w-0 overflow-hidden rounded-panel border border-border bg-panel py-3 shadow-panel max-md:border-transparent max-md:bg-transparent max-md:py-0 max-md:shadow-none md:py-4";
 
 export const shellContent =
-  "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-1 [scrollbar-gutter:stable] md:px-6 md:py-2";
+  "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-1 py-1 [scrollbar-gutter:stable] md:px-6 md:py-2";
 
 export const routeProgress =
   "pointer-events-none fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-brand-soft";

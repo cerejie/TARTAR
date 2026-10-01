@@ -159,6 +159,7 @@ const SalesTable = () => {
     },
     {
       title: "Branch",
+      mobile: "hidden",
       dataIndex: "branch",
       collapse: "xl",
       render: branchName,
@@ -186,6 +187,7 @@ const SalesTable = () => {
     },
     {
       title: "Deposit date",
+      mobile: "hidden",
       dataIndex: "deposit_date",
       collapse: "2xl",
       className: nowrapCell,
@@ -195,6 +197,7 @@ const SalesTable = () => {
       ? [
           {
             title: "Recorded by",
+            mobile: "hidden" as const,
             key: "user",
             collapse: "2xl" as const,
             skeleton: "avatar" as const,

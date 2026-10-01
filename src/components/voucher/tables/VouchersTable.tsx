@@ -135,6 +135,7 @@ const VouchersTable = () => {
     },
     {
       title: "Branch",
+      mobile: "hidden",
       dataIndex: "branch",
       collapse: "xl",
       className: branchCell,
@@ -160,6 +161,7 @@ const VouchersTable = () => {
     },
     {
       title: "Created",
+      mobile: "hidden",
       dataIndex: "created_at",
       collapse: "2xl",
       className: nowrapCell,

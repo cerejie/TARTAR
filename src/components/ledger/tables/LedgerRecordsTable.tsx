@@ -132,6 +132,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     },
     {
       title: "Branch",
+      mobile: "hidden",
       dataIndex: "branch",
       collapse: "xl",
       className: branchCell,
@@ -139,6 +140,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
     },
     {
       title: "Paid",
+      mobile: "hidden",
       key: "paid",
       collapse: "2xl",
       render: (_, row) => (

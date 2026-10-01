@@ -12,8 +12,10 @@ type IProps = {
 };
 
 const FilterToolbar = ({ actions, sort, children }: IProps) => {
+  const isCompact = Boolean(actions || sort);
+
   return (
-    <div className={filterToolbar}>
+    <div className={filterToolbar} data-compact={isCompact || undefined}>
       <div className={filterToolbarStart}>{children}</div>
 
       {actions || sort ? (
