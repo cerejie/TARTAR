@@ -2,7 +2,13 @@ import { supabase } from "../../utils/supabase.utils";
 
 const liveChannelName = "ledger-live";
 
-const liveTables: readonly string[] = ["transactions", "receivables", "payables"];
+const liveTables: readonly string[] = [
+  "transactions",
+  "receivables",
+  "payables",
+  "vouchers",
+  "payments",
+];
 
 const realtimeServices = {
   subscribeLedgerChanges: (onChange: () => void): (() => void) => {

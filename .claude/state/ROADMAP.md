@@ -1,5 +1,5 @@
 # ROADMAP — Offline hardening (live offline test, 2026-09-30)
-Updated: 2026-10-01 (V1, V2, C1 done; fix phases C2-C5 queued)
+Updated: 2026-10-01 (C1-C5 done; V3 next)
 
 ## Goal
 Offline, every write is kept on the device and reaches the database once back online, nothing is
@@ -217,11 +217,11 @@ merged into main).
   only, so employees never refreshed. realtime.hook now subscribes for selectIsAuthenticated (RLS
   limits rows per role). Verified c5/gen.mjs (2 browsers): emp2 recorded + deposited 963 on Sales;
   admin1 verified -> emp2's row "Verified" 5s later, no navigation.
-- C5 PART 2 WAITING: migration supabase/migrations/20261014000026_realtime_vouchers_payments.sql
-  written (vouchers + payments into supabase_realtime, idempotent, nothing dropped), NOT applied.
-  After the user applies it: add "vouchers", "payments" to liveTables in
-  src/services/data/realtime.services.ts (not before — a table outside the publication can fail the
-  channel), build + lint, verify admin1 on Vouchers while admin2 rejects a voucher -> list updates.
+- C5 PART 2 DONE 2026-10-01, NOT committed (migration 26 applied, committed v1.94):
+  src/services/data/realtime.services.ts liveTables + "vouchers", "payments" (their list keys were
+  already in liveRefreshKeys). Verified c5/gen2.mjs (3 browsers, RUN=c5v): emp2 recorded expense
+  964 (voucher QAT-QAU-2026-00000007, Pending); admin1 on Vouchers; admin2 rejected it -> admin1's
+  row "Rejected" 5s later, no navigation.
 
 ## Verification phases (added 2026-10-01, user-approved; V1 and V2 results below)
 - V1 DONE 2026-10-01: accountant read-only. Harness o13/o13b/o13c (qaacc1): Receivables and Payables
@@ -294,7 +294,7 @@ Broken, to fix (phases C1-C5 below).
   Ask at C5 whether it is wanted.
 
 ## Next (one conversation, in order)
-1. User applies migration 26 -> C5 part 2 (liveTables + voucher reject live check) -> V3 -> V4
+1. V3 known gaps (a) pending payee name, (b) pending bank name, (c) duplicate new bank -> then V4
    (user visual pass).
 2. Deployment checklist left from the previous roadmap: user resets data (all QA rows incl.
    offline test sales P901, P333, P341, P905, P906, P391, P392, P911, expenses 902/904/907/908/909,
@@ -303,7 +303,7 @@ Broken, to fix (phases C1-C5 below).
    ₱7,022), 711, 721, 801, 802, 803, 932, 933, 941, 943, 944-948, 951 (931 deleted, 942 lost), expense
    712, purchases 811-818 payee "QA Race Payee" + their vouchers, receivables reference "C-RACE-*"
    + their payments; C2 rows: sales 1251 (deposited), 1253; C3: sale 961 on branch HARDWARE,
-   auto-verified because admin recorded it — not deletable in the UI; C4: sale 953; C5: sale 963 verified), adds Banks + branch legal_name/address.
+   auto-verified because admin recorded it — not deletable in the UI; C4: sale 953; C5: sale 963 verified, expense 964 + its rejected voucher), adds Banks + branch legal_name/address.
 3. Ask, then delete this file, `.claude/state/audit/` and the old scratchpad audit dir
    (f7-approve.json there holds the superadmin password in plain text).
 
@@ -355,6 +355,7 @@ Branch: offline-hardening (cut from development-overhaul at v1.84; main is at v1
 committed in v1.85 and verified · Migrations through 24 applied · O2 done and verified,
 committed v1.87 · O3 committed v1.88 · O4 committed v1.89 · roadmap phases O1-O4 complete;
 OB10 UI fix committed. C1 committed v1.92. C2 committed v1.93, migration 25 applied, verified.
-C3 + C4 + C5 part 1 done + verified, not committed. Migration 26 written, NOT applied. Harness rule: test sales are recorded by qaemp1/2 (QA Test
+C3 + C4 + C5 part 1 + migration 26 committed v1.94; migration 26 applied. C5 part 2 done +
+verified, not committed. Fix phases C1-C5 complete. Harness rule: test sales are recorded by qaemp1/2 (QA Test
 branch, undeposited); an admin-recorded sale goes to its default branch already verified. LedgerPartiesTable IS
 mounted (LedgerRecordsSection, view "parties").
