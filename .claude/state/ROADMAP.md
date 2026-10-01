@@ -226,6 +226,24 @@ each phase, then a user check on a real phone.
     expense category "QA O12 Type" (QOT); bank "QA O12 Bank" again. Test push subscription already deleted.
 
 ## Next
+NEXT SESSION STARTS HERE (2026-10-01): the user commits Development v2.06 and pushes mobilel-app-native
+(check `git log -1` and `git status`; if not pushed, offer to commit + push). Preview URL for testing:
+https://tartar-git-mobilel-app-native-ejieworx.vercel.app (Vercel branch alias of mobilel-app-native;
+VITE_VAPID_PUBLIC_KEY must be enabled for Preview). Walk the user through, one step at a time:
+  a. Deployment Ready on Vercel; open the URL; sign in; Account settings -> Turn on notifications (new origin,
+     earlier subscriptions do not apply). Push only works on this production build, never on yarn dev.
+  b. P0-4 two-browser event checks: A = qaadmin2@qa.test (manager), B = qaemp2@qa.test (employee), password
+     QaTest#2026, both with notifications on at the same URL. B records expense -> A "Voucher needs approval";
+     A approves -> B "Voucher approved"; B records receivable payment -> A "Payment needs verification";
+     B deposits a sale, A verifies -> B "Sale verified"; tap opens the right page; each event also lands in the
+     bell Updates list; sign out B -> B gets nothing. Debug with
+     `select id, status_code, content, created from net._http_response order by id desc limit 5;`
+  c. P0-5 phone/desktop installs (iPhone Add to Home Screen, Android Chrome, Windows Edge) + phone sidebar
+     drawer, Back, keyboard, landscape. If Vercel Deployment Protection blocks phones, sign in to Vercel or
+     relax it for Previews.
+  d. Then P0-6 QA reset (include public.notifications rows created by QA events — the superadmin and developer
+     receive inbox rows for every branch), merge to main, Production deploy, users turn notifications on again.
+
 Fix roadmap to 100% deployable. P0 = blocks deploy, P1 = fix before go-live, P2 = soon after, P3 = polish.
 
 P0 — user actions (cannot be done from this machine: no Supabase CLI or service credentials)
