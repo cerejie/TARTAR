@@ -107,7 +107,7 @@ const EntityFormModal = <TValues extends FieldValues>({
       open={open}
       title={title}
       size={size}
-      fill
+      kind="form"
       onClose={onClose}
       footer={
         <>

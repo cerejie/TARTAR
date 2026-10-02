@@ -130,11 +130,27 @@ export const recordHeroAmount = moneyLevel({ level: "primary" });
 export const detailRows =
   "flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border";
 
-export const detailRow = "flex items-center justify-between gap-4 px-4 py-3 text-sm";
+export const detailRow = "flex items-start justify-between gap-4 px-4 py-3 text-sm";
 
 export const detailRowLabel = "shrink-0 text-muted-foreground";
 
-export const detailRowValue = "min-w-0 truncate text-right font-medium text-foreground";
+export const detailRowValue = "min-w-0 text-right font-medium break-words text-foreground";
+
+export const recordHeroTags = "flex flex-wrap items-center justify-center gap-1.5";
+
+export const recordSheet = "flex flex-col gap-5 pb-4";
+
+export const recordSheetSection = "flex flex-col gap-1.5";
+
+export const recordSheetSectionTitle =
+  "flex items-center gap-1.5 px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase [&_svg]:size-3.5";
+
+export const sheetActions =
+  "flex w-full flex-col gap-2 [&_[data-slot=button][data-variant=default]]:h-12 [&_[data-slot=button][data-variant=default]]:w-full [&_[data-slot=button][data-size^=icon]]:size-11 [&_[data-slot=button][data-size^=icon]]:px-0";
+
+export const sheetActionsRow = "flex items-center gap-2";
+
+export const sheetActionsDanger = "ml-auto flex items-center gap-2";
 
 export const branchSheetList = "max-h-[60dvh]";
 

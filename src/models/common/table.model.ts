@@ -36,6 +36,21 @@ export interface IDataTableColumn<T> {
   render?(value: unknown, row: T, index: number): ReactNode;
 }
 
+export interface ICardField {
+  id: string;
+  title: ReactNode;
+  content: ReactNode;
+}
+
+export interface ICardFields {
+  titles: ICardField[];
+  subtitles: ICardField[];
+  amounts: ICardField[];
+  statuses: ICardField[];
+  metas: ICardField[];
+  actions: ICardField[];
+}
+
 export interface IDataTableSelection<T> {
   selectedRowKeys: readonly string[];
   onChange: (keys: string[]) => void;

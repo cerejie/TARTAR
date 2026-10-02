@@ -71,6 +71,7 @@ const DetailModal = <TRecord,>({
       open={open}
       title={title}
       size={size}
+      kind="detail"
       footer={footer}
       onClose={onClose}
     >

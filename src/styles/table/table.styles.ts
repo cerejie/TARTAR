@@ -118,7 +118,7 @@ export const dataCardLabel = "text-xs text-muted-foreground";
 
 export const dataCardValue = "min-w-0 break-words text-foreground";
 
-export const dataCardToggle = "relative z-10 ml-auto shrink-0 rounded-full";
+export const dataCardChevron = "ml-auto size-4 shrink-0 text-muted-foreground/60";
 
 export const dataCardSkeletonHead = "flex items-center justify-between gap-3";
 

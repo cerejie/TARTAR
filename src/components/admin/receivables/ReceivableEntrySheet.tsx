@@ -59,7 +59,13 @@ const ReceivableEntrySheet = ({
   }
 
   return (
-    <AppSheet open={open} title="Receivable" onClose={onClose} footer={footer}>
+    <AppSheet
+      open={open}
+      kind="detail"
+      title="Receivable"
+      onClose={onClose}
+      footer={footer}
+    >
       {detail}
     </AppSheet>
   );

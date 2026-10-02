@@ -13,3 +13,19 @@
 - AttentionList home → moved admin/home → dashboard/ (shared by main + admin); item.meta replaces hard-coded "accounts"
 - Admin Home dominance → AttentionList moved above period switch + tiles
 - Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed
+
+## 2026-10-03 — leftovers → Development v2.27
+- Uncommitted autopilot conductor/worker rewrite + CLAUDE.md → committed as its own version (Worker step 3); build + lint clean
+
+## 2026-10-03 — D4 Record cards + detail sheets → Development v2.28
+- Card layout → keep generic DataTableCards, cap meta at 2 (audit's dedicated transaction summary not needed; role mapping already right)
+- Overflow meta → shown in the detail sheet's core meta list; sheet opens whenever there is overflow, sections or actions (no data lost on phone)
+- Cap when onRowClick is set → no cap (card opens a different record, so no sheet holds the overflow)
+- Whole-card press → existing title overlay press; separate "Show details" button replaced by a decorative chevron (one tap target)
+- Sheet footer actions → DataTable `detailActions` + IRowAction `priority` (reuses the row-action shape; destructive keeps useConfirm)
+- Confirm from sheet → keep the sheet open under the confirmation (cancel returns to the record; delete closes it as the row leaves)
+- Sheet types → SheetKind action/detail/form/flow via one drawerKind cva; AppModal `fill` → kind "form"; default action = no visual change for existing sheets
+- Transactions balance impact / debit-credit → not added (would invent an accounting rule); sections regrouped Details → Financial details → Audit
+- Detail rows → wrap long values instead of truncating (description was cut off in sheets)
+- Primary CTA height → 48px through sheetActions selector (beats drawerFooter's 44px), other footers unchanged until D9
+- Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed

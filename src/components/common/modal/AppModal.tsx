@@ -14,13 +14,13 @@ import {
 import { cn } from "@/utils/cn.utils";
 import AppButton from "../button/AppButton";
 import { useIsCompact } from "../../../hook/common/breakpoint.hook";
-import type { ModalSize } from "../../../models/common/view.model";
+import type { ModalSize, SheetKind } from "../../../models/common/view.model";
 import {
   drawerBody,
   drawerContent,
-  drawerContentFill,
   drawerFooter,
   drawerHeaderRuled,
+  drawerKind,
   modalBody,
   modalContent,
   modalFooter,
@@ -32,7 +32,7 @@ type IProps = {
   open: boolean;
   title: string;
   size?: ModalSize;
-  fill?: boolean;
+  kind?: SheetKind;
   footer?: ReactNode;
   onClose: () => void;
   children: ReactNode;
@@ -42,7 +42,7 @@ const AppModal = ({
   open,
   title,
   size = "md",
-  fill = false,
+  kind = "action",
   footer,
   onClose,
   children,
@@ -65,7 +65,7 @@ const AppModal = ({
         side="bottom"
         isOpen={open}
         onOpenChange={handleOpenChange}
-        className={cn(drawerContent, fill && drawerContentFill)}
+        className={cn(drawerContent, drawerKind({ kind }))}
       >
         <SheetHeader className={drawerHeaderRuled}>
           <SheetTitle>{title}</SheetTitle>

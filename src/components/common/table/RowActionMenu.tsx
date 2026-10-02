@@ -17,9 +17,10 @@ import type { IRowAction } from "../../../models/common/action.model";
 
 type IProps = {
   actions: readonly IRowAction[];
+  label?: string;
 };
 
-const RowActionMenu = ({ actions }: IProps) => {
+const RowActionMenu = ({ actions, label = "Row actions" }: IProps) => {
   if (actions.length === 0) return null;
 
   const firstDangerIndex = actions.findIndex((action) => action.danger);
@@ -30,13 +31,13 @@ const RowActionMenu = ({ actions }: IProps) => {
         variant="outline"
         size="icon-sm"
         className={rowActionTrigger}
-        aria-label="Row actions"
+        aria-label={label}
       >
         <EllipsisVertical />
       </Button>
       <DropdownMenu
         placement="bottom end"
-        aria-label="Row actions"
+        aria-label={label}
         className={rowActionMenu}
       >
         {actions.map((action, index) => (

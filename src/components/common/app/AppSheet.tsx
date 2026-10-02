@@ -10,6 +10,7 @@ import { cn } from "@/utils/cn.utils";
 import { useIsDesktop } from "../../../hook/common/breakpoint.hook";
 import { useCloseOnNavigate } from "../../../hook/common/sheet.hook";
 import { useSwipeToClose } from "../../../hook/common/swipe.hook";
+import type { SheetKind } from "../../../models/common/view.model";
 import {
   appSheetBody,
   appSheetContent,
@@ -22,12 +23,14 @@ import {
   drawerContent,
   drawerFooter,
   drawerHeaderRuled,
+  drawerKind,
 } from "../../../styles/modal/modal.styles";
 
 type IProps = {
   open: boolean;
   title: string;
   description?: string;
+  kind?: SheetKind;
   footer?: ReactNode;
   onClose: () => void;
   children: ReactNode;
@@ -37,6 +40,7 @@ const AppSheet = ({
   open,
   title,
   description,
+  kind = "action",
   footer,
   onClose,
   children,
@@ -55,7 +59,10 @@ const AppSheet = ({
       side={isDesktop ? "right" : "bottom"}
       isOpen={open}
       onOpenChange={handleOpenChange}
-      className={cn(appSheetContent, isDesktop ? appSheetSide : drawerContent)}
+      className={cn(
+        appSheetContent,
+        isDesktop ? appSheetSide : cn(drawerContent, drawerKind({ kind }))
+      )}
     >
       {isDesktop ? null : (
         <div className={appSheetGrabZone} aria-hidden="true" {...swipeHandlers}>

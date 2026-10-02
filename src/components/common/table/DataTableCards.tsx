@@ -1,14 +1,16 @@
 import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import { Button as PressArea } from "react-aria-components";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn.utils";
 import { focusedRowProps } from "../../../hook/common/focus.hook";
 import { useModal } from "../../../hook/common/modal.hook";
+import type { IRowAction } from "../../../models/common/action.model";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import type {
+  ICardField,
+  ICardFields,
   IColumnMobileRole,
   IDataTableColumn,
   IDataTableSelection,
@@ -16,6 +18,7 @@ import type {
 import {
   dataCard,
   dataCardAmount,
+  dataCardChevron,
   dataCardField,
   dataCardFocused,
   dataCardFoot,
@@ -34,23 +37,15 @@ import {
   dataCardTags,
   dataCardTitle,
   dataCardTitlePress,
-  dataCardToggle,
   dataCardValue,
   dataTableBodyRefreshing,
-  expandTrigger,
 } from "../../../styles/table/table.styles";
-import AppSheet from "../app/AppSheet";
 import ErrorState from "../status/ErrorState";
-import RowDetailPanel from "./RowDetailPanel";
+import RecordDetailSheet from "./RecordDetailSheet";
 import TableEmptyState from "./TableEmptyState";
 
 const skeletonCards = 5;
-
-type IRenderedField = {
-  id: string;
-  title: ReactNode;
-  content: ReactNode;
-};
+const cardMetaLimit = 2;
 
 type IProps<T> = {
   columns: readonly IDataTableColumn<T>[];
@@ -71,6 +66,7 @@ type IProps<T> = {
   detailSheetKey: string;
   detailSections?: IDetailSection<T>[];
   detailTitle?: (row: T) => string;
+  detailActions?: (row: T) => readonly IRowAction[];
 };
 
 const mobileRoleOf = <T,>(column: IDataTableColumn<T>, index: number): IColumnMobileRole => {
@@ -108,9 +104,16 @@ const DataTableCards = <T,>({
   detailSheetKey,
   detailSections,
   detailTitle,
+  detailActions,
 }: IProps<T>) => {
   const detailSheet = useModal<string>(detailSheetKey);
-  const hasDetail = Boolean(detailSections?.length);
+  const sections = detailSections ?? [];
+  const metaCount = columns.filter(
+    (column, index) => mobileRoleOf(column, index) === "meta"
+  ).length;
+  const opensDetail =
+    !onRowClick &&
+    (sections.length > 0 || metaCount > cardMetaLimit || detailActions !== undefined);
 
   if (loading) {
     return (
@@ -140,9 +143,8 @@ const DataTableCards = <T,>({
     rowSelection.onChange(selected ? [...others, key] : others);
   };
 
-  const renderCard = (row: T, rowIndex: number) => {
-    const key = resolveRowKey(row);
-    const fieldsOf = (role: IColumnMobileRole): IRenderedField[] =>
+  const cardFieldsOf = (row: T, rowIndex: number): ICardFields => {
+    const fieldsOf = (role: IColumnMobileRole): ICardField[] =>
       columns.flatMap((column, index) =>
         mobileRoleOf(column, index) === role
           ? [
@@ -155,18 +157,33 @@ const DataTableCards = <T,>({
           : []
       );
 
-    const titles = fieldsOf("title");
-    const subtitles = fieldsOf("subtitle");
-    const amounts = fieldsOf("amount");
-    const statuses = fieldsOf("status");
-    const metas = fieldsOf("meta");
-    const actions = fieldsOf("actions");
+    return {
+      titles: fieldsOf("title"),
+      subtitles: fieldsOf("subtitle"),
+      amounts: fieldsOf("amount"),
+      statuses: fieldsOf("status"),
+      metas: fieldsOf("meta"),
+      actions: fieldsOf("actions"),
+    };
+  };
+
+  const pressOf = (row: T, key: string) => {
+    if (onRowClick) return () => onRowClick(row);
+    if (opensDetail) return () => detailSheet.openModal(key);
+    return undefined;
+  };
+
+  const renderCard = (row: T, rowIndex: number) => {
+    const key = resolveRowKey(row);
+    const { titles, subtitles, amounts, statuses, metas, actions } = cardFieldsOf(
+      row,
+      rowIndex
+    );
+    const cardMetas = opensDetail ? metas.slice(0, cardMetaLimit) : metas;
 
     const isSelected = rowSelection?.selectedRowKeys.includes(key) ?? false;
     const focused = isFocusedRow(key);
-    const openDetail = () => detailSheet.openModal(key);
-    const detailPress = hasDetail ? openDetail : undefined;
-    const pressTitle = onRowClick ? () => onRowClick(row) : detailPress;
+    const pressTitle = pressOf(row, key);
     const titleContent = titles.map((field) => (
       <span key={field.id}>{field.content}</span>
     ));
@@ -223,9 +240,9 @@ const DataTableCards = <T,>({
           ))}
         </div>
 
-        {metas.length > 0 ? (
+        {cardMetas.length > 0 ? (
           <dl className={dataCardMeta}>
-            {metas.map((field) => (
+            {cardMetas.map((field) => (
               <div key={field.id} className={dataCardField}>
                 <dt className={dataCardLabel}>{field.title}</dt>
                 <dd className={dataCardValue}>{field.content}</dd>
@@ -234,7 +251,7 @@ const DataTableCards = <T,>({
           </dl>
         ) : null}
 
-        {statuses.length > 0 || hasDetail ? (
+        {statuses.length > 0 || pressTitle ? (
           <div className={dataCardFoot}>
             <div className={dataCardTags}>
               {statuses.map((field) => (
@@ -242,17 +259,8 @@ const DataTableCards = <T,>({
               ))}
             </div>
 
-            {hasDetail ? (
-              <Button
-                variant="secondary"
-                size="icon-sm"
-                className={dataCardToggle}
-                aria-label="Show details"
-                aria-haspopup="dialog"
-                onPress={openDetail}
-              >
-                <ChevronRight className={expandTrigger({ open: false })} />
-              </Button>
+            {pressTitle ? (
+              <ChevronRight className={dataCardChevron} aria-hidden="true" />
             ) : null}
           </div>
         ) : null}
@@ -260,7 +268,10 @@ const DataTableCards = <T,>({
     );
   };
 
-  const detailRow = rows.find((row) => resolveRowKey(row) === detailSheet.modal.data);
+  const detailIndex = rows.findIndex(
+    (row) => resolveRowKey(row) === detailSheet.modal.data
+  );
+  const detailRow = detailIndex === -1 ? undefined : rows[detailIndex];
 
   return (
     <>
@@ -272,21 +283,16 @@ const DataTableCards = <T,>({
         {rows.map(renderCard)}
       </ul>
 
-      {detailSections ? (
-        <AppSheet
-          open={detailSheet.modal.visible && detailRow !== undefined}
+      {opensDetail ? (
+        <RecordDetailSheet<T>
+          open={detailSheet.modal.visible}
           title={detailRow && detailTitle ? detailTitle(detailRow) : "Details"}
+          record={detailRow}
+          fields={detailRow ? cardFieldsOf(detailRow, detailIndex) : undefined}
+          sections={sections}
+          actions={detailRow && detailActions ? detailActions(detailRow) : []}
           onClose={detailSheet.closeModal}
-        >
-          {detailRow ? (
-            <RowDetailPanel<T>
-              record={detailRow}
-              sections={detailSections}
-              collapsing={false}
-              onCollapsed={detailSheet.closeModal}
-            />
-          ) : null}
-        </AppSheet>
+        />
       ) : null}
     </>
   );

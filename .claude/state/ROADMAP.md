@@ -1,5 +1,5 @@
 # ROADMAP — Mobile-native design improvements
-Updated: 2026-10-03 (D3 done)
+Updated: 2026-10-03 (D4 done)
 
 ## Goal
 Move the main app from "desktop architecture with mobile components" to "shared business logic with
@@ -216,15 +216,34 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
   (tap presets Vouchers status=pending), sales awaiting verification (presets Sales status=deposited). Quick
   actions via route.utils quickActionRoutesOf(filterRoutesByPermission). Admin Home: Needs attention first.
 
+- [x] D4 Record cards + detail sheets (2026-10-03, autopilot). common/table/DataTableCards: priority layout —
+  title/subtitle + amount + status + ≤ 2 meta (`cardMetaLimit`); overflow metas move to the sheet; whole card
+  opens the record (title PressArea overlay; onRowClick wins), decorative chevron replaces the "Show details"
+  button (`dataCardChevron`; `dataCardToggle` removed). New common/table/RecordDetailSheet (AppSheet kind
+  detail: hero = title · subtitle, amount, status chips → all meta columns as detailRows → each IDetailSection
+  as a titled DetailRows group → SheetActions footer). New common/app/SheetActions (IRowAction `priority`
+  primary = full-width 48px, secondary = inline outline, unprioritised = "More actions" RowActionMenu, danger =
+  separated destructive, its onSelect still opens useConfirm). DataTable `detailActions` prop → cards sheet.
+  Sheet types: models/common/view.model `SheetKind` (action | detail | form | flow) → modal.styles `drawerKind`
+  cva (detail min 60dvh, form = old fill, flow full-screen); AppSheet + AppModal take `kind` (AppModal `fill`
+  removed; EntityFormModal form, DetailModal + admin Payable/ReceivableEntrySheet detail). models/common/table
+  ICardField/ICardFields; RowActionMenu `label`. detailRow wraps (items-start, break-words) instead of truncate.
+  Transactions (reference): sections Details (reference, branch, description, farm section) → Financial
+  details (cash account, income source, party) → Audit (recorded by [manager], recorded at); detailTitle
+  "<Type> transaction"; detailActions = delete for managers.
+
 ## Next
-1. D4 Record cards + detail sheets (see Phases).
-2. D5 → D10 in order.
+1. D5 Sales + Vouchers action-first (see Phases). SheetActions + DataTable `detailActions` + IRowAction
+   `priority` are ready for the Verify / Record deposit / Approve / Resubmit footers.
+2. D6 → D10 in order.
 
 ## Open
 - (none)
 
 ## State
 Branch mobile-app-native-newlook · Uncommitted: none ·
-Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.26 (D3, autopilot).
+Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.28 (D4, autopilot).
 D9 note: phone dashboard section labels reuse ListSection's small-caps head; desktop attention list sits in the
-bento main column (ListSection panel) — check visually.
+bento main column (ListSection panel) — check visually. D4: confirm-from-sheet stacks the confirmation over
+the open detail sheet (React Aria nested overlay) — check on a phone; tables with > 2 meta columns now open a
+sheet even without detailSections.

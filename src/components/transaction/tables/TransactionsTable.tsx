@@ -1,4 +1,4 @@
-import { FileText, Plus, Tag, Trash2 } from "lucide-react";
+import { FileText, History, Plus, Trash2, Wallet } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import PrimaryAction from "../../common/button/PrimaryAction";
 import FilterToolbar from "../../common/filter/FilterToolbar";
@@ -27,7 +27,12 @@ import {
 } from "../../../models/data/transaction/transaction.request";
 import type { ITransaction } from "../../../models/data/transaction/transaction.response";
 import { nowrapCell } from "../../../styles/table/table.styles";
-import { formatDate, formatMoney, formatTime } from "../../../utils/format.utils";
+import {
+  formatDate,
+  formatDateTime,
+  formatMoney,
+  formatTime,
+} from "../../../utils/format.utils";
 
 const TransactionsTable = () => {
   const {
@@ -152,7 +157,7 @@ const TransactionsTable = () => {
   const detailSections: IDetailSection<ITransaction>[] = [
     {
       key: "transaction",
-      title: "Transaction",
+      title: "Details",
       icon: <FileText />,
       items: [
         {
@@ -165,26 +170,22 @@ const TransactionsTable = () => {
           label: "Branch",
           render: (row) => branchName(row.branch),
         },
-        ...(permissions.isManager
-          ? [
-              {
-                key: "recorded_by",
-                label: "Recorded by",
-                render: (row: ITransaction) => userNameOf(row.created_by),
-              },
-            ]
-          : []),
         {
           key: "description",
           label: "Description",
           render: (row) => row.description || "—",
         },
+        {
+          key: "farm_section",
+          label: "Farm section",
+          render: (row) => row.farm_section || "—",
+        },
       ],
     },
     {
-      key: "classification",
-      title: "Classification",
-      icon: <Tag />,
+      key: "financial",
+      title: "Financial details",
+      icon: <Wallet />,
       items: [
         {
           key: "cash_account",
@@ -201,10 +202,26 @@ const TransactionsTable = () => {
           label: "Customer or supplier",
           render: (row) => row.customer?.name || row.supplier?.name || "—",
         },
+      ],
+    },
+    {
+      key: "audit",
+      title: "Audit",
+      icon: <History />,
+      items: [
+        ...(permissions.isManager
+          ? [
+              {
+                key: "recorded_by",
+                label: "Recorded by",
+                render: (row: ITransaction) => userNameOf(row.created_by),
+              },
+            ]
+          : []),
         {
-          key: "farm_section",
-          label: "Farm section",
-          render: (row) => row.farm_section || "—",
+          key: "recorded_at",
+          label: "Recorded at",
+          render: (row) => formatDateTime(row.created_at),
         },
       ],
     },
@@ -256,6 +273,8 @@ const TransactionsTable = () => {
           onPageChange={goToPage}
           expansionKey={transactionExpansionKey}
           detailSections={detailSections}
+          detailTitle={(row) => `${transactionTypeLabels[row.type]} transaction`}
+          detailActions={permissions.isManager ? actionsOf : undefined}
           emptyText="No transactions match the current filters"
         />
       </TablePanel>

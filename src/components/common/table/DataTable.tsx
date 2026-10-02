@@ -22,6 +22,7 @@ import { focusedRowProps, useRowFocus } from "../../../hook/common/focus.hook";
 import { usePagination } from "../../../hook/common/pagination.hook";
 import { usePendingIds } from "../../../hook/common/pending.hook";
 import { useSort } from "../../../hook/common/sort.hook";
+import type { IRowAction } from "../../../models/common/action.model";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import {
   grownPageSize,
@@ -90,6 +91,7 @@ type IProps<T> = {
   expansionKey?: string;
   detailSections?: IDetailSection<T>[];
   detailTitle?: (row: T) => string;
+  detailActions?: (row: T) => readonly IRowAction[];
   emptyText?: string;
   rowSelection?: IDataTableSelection<T>;
   rowClassName?: (row: T) => string;
@@ -136,6 +138,7 @@ const DataTable = <T extends object>({
   expansionKey,
   detailSections,
   detailTitle,
+  detailActions,
   emptyText = "No records",
   rowSelection,
   rowClassName,
@@ -433,6 +436,7 @@ const DataTable = <T extends object>({
           detailSheetKey={rowDetailSheetModalKey(expansionKey ?? tableId)}
           detailSections={isExpandable ? detailSections : undefined}
           detailTitle={detailTitle}
+          detailActions={detailActions}
         />
       ) : (
         renderTable()

@@ -39,7 +39,13 @@ const PayableEntrySheet = ({ open, entry, openPath, split, onClose }: IProps) =>
   }
 
   return (
-    <AppSheet open={open} title={title} onClose={onClose} footer={footer}>
+    <AppSheet
+      open={open}
+      kind="detail"
+      title={title}
+      onClose={onClose}
+      footer={footer}
+    >
       {detail}
     </AppSheet>
   );

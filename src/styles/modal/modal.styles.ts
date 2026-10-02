@@ -28,8 +28,17 @@ export const modalFooter = `flex-wrap -mx-6 -mb-6 rounded-b-sheet border-t borde
 export const drawerContent =
   "max-h-[calc(92dvh-var(--keyboard-inset))] rounded-t-sheet bg-panel data-[side=bottom]:bottom-(--keyboard-inset)";
 
-export const drawerContentFill =
-  "data-[side=bottom]:h-[calc(100dvh-var(--keyboard-inset)-max(env(safe-area-inset-top),0.75rem))] max-h-none";
+export const drawerKind = cva("", {
+  variants: {
+    kind: {
+      action: "",
+      detail: "data-[side=bottom]:min-h-[60dvh]",
+      form: "data-[side=bottom]:h-[calc(100dvh-var(--keyboard-inset)-max(env(safe-area-inset-top),0.75rem))] max-h-none",
+      flow: "data-[side=bottom]:h-[calc(100dvh-var(--keyboard-inset))] max-h-none rounded-t-none",
+    },
+  },
+  defaultVariants: { kind: "action" },
+});
 
 export const drawerHeaderRuled =
   "border-b border-border pr-14 [&_[data-slot=sheet-title]]:text-base [&_[data-slot=sheet-title]]:font-semibold [&_[data-slot=sheet-title]]:leading-8";
