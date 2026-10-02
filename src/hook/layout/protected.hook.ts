@@ -103,7 +103,7 @@ export const useProtectedNotificationsHook = (enabled: boolean) => {
   const alertsQuery = useQuery<IDueAlerts>(
     scopedKey(dashboardAlertsKey, branch),
     () => dashboardServices.getDueAlerts(7, branch),
-    { enabled }
+    { enabled, ignoreOfflineStatus: true }
   );
 
   return {

@@ -14,6 +14,7 @@ export const useQuery = <T>(
   options: IQueryOptions = {}
 ): IQueryState<T> => {
   const enabled = options.enabled ?? true;
+  const countsTowardStatus = !options.ignoreOfflineStatus;
   const run = useQueryStore((state) => state.run);
   const watch = useQueryStore((state) => state.watch);
   const unwatch = useQueryStore((state) => state.unwatch);
@@ -23,10 +24,10 @@ export const useQuery = <T>(
   useEffect(() => {
     if (!enabled) return;
 
-    watch(key);
+    watch(key, countsTowardStatus);
     void run(key, fetcher);
-    return () => unwatch(key);
-  }, [key, enabled]);
+    return () => unwatch(key, countsTowardStatus);
+  }, [key, enabled, countsTowardStatus]);
 
   useEffect(() => {
     if (entry.data !== undefined) previousData.current = entry.data;

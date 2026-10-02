@@ -27,7 +27,7 @@ export const useInboxListHook = () => {
   const inboxQuery = useQuery<IInboxItem[]>(
     scopedKey(inboxListKey, userId),
     () => inboxServices.getList(),
-    { enabled: isAuthenticated }
+    { enabled: isAuthenticated, ignoreOfflineStatus: true }
   );
 
   const markReadMutation = useMutation(
