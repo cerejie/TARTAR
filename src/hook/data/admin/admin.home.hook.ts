@@ -17,8 +17,8 @@ import {
   overviewPeriodValues,
   overviewSalesPeriods,
 } from "../../../models/data/dashboard/dashboard.response";
-import { ledgerBalance } from "../../../models/data/ledger/ledger.response";
 import dashboardServices from "../../../services/data/dashboard.services";
+import { balancesOf, toAttentionItem } from "../../../utils/attention.utils";
 import { todayIso } from "../../../utils/format.utils";
 import { adminPayablesPath, adminReceivablesPath } from "../../../utils/route.utils";
 import { useQuery } from "../../common/query.hook";
@@ -31,7 +31,6 @@ import type {
   IDailySalesPoint,
   IDashboardOverview,
   IDueAlerts,
-  NotificationTone,
   OverviewPeriod,
 } from "../../../models/data/dashboard/dashboard.response";
 import type { IVoucher } from "../../../models/data/voucher/voucher.response";
@@ -41,24 +40,6 @@ const periodOptions: readonly ISegmentOption<OverviewPeriod>[] =
     key: value,
     label: overviewPeriodLabels[value],
   }));
-
-const toAttentionItem = (
-  key: string,
-  name: string,
-  amounts: readonly number[],
-  tone: NotificationTone,
-  path: string
-): IAttentionItem => ({
-  key,
-  name,
-  count: amounts.length,
-  amount: amounts.reduce((total, amount) => total + amount, 0),
-  tone,
-  path,
-});
-
-const balancesOf = (rows: readonly { amount: number; paid_amount: number }[]) =>
-  rows.map(ledgerBalance);
 
 const checkAmountsOf = (checks: readonly IVoucher[], pastDated: boolean) =>
   checks

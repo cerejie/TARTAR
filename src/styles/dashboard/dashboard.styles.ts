@@ -53,3 +53,13 @@ export const notificationAmount = cva("whitespace-nowrap text-sm font-bold tabul
 });
 
 export const notificationDate = "whitespace-nowrap text-xs text-muted-foreground";
+
+export const quickActions = "grid grid-cols-4 gap-2";
+
+export const quickAction =
+  "flex min-w-0 flex-col items-center gap-1.5 rounded-card px-1 py-2 text-caption font-medium text-foreground outline-none transition-transform select-none focus-visible:ring-[3px] focus-visible:ring-ring/50 data-pressed:scale-98 motion-reduce:transition-none";
+
+export const quickActionIcon =
+  "inline-flex size-12 items-center justify-center rounded-surface bg-brand-soft text-brand [&_svg]:size-5";
+
+export const quickActionLabel = "max-w-full truncate";

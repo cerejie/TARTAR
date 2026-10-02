@@ -1,5 +1,5 @@
 # ROADMAP — Mobile-native design improvements
-Updated: 2026-10-03 (D2 done)
+Updated: 2026-10-03 (D3 done)
 
 ## Goal
 Move the main app from "desktop architecture with mobile components" to "shared business logic with
@@ -203,13 +203,28 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
   (← clears + exits, autofocus); closed on route change. No ⋯ More (no screen has secondary toolbar actions).
   Docs: CLAUDE.md, build/stack.md, tartar-shadcn SKILL.md name ContextSwitch.
 
+- [x] D3 Dashboard (2026-10-03, autopilot). pages/Dashboard/DashboardView thin → dashboard/views/DashboardBoard
+  (useIsCompact) → DashboardPhone (Today 3 KPIs → QuickActions → AttentionList → Financial position AR/AP →
+  Performance Monthly Sales/Expenses → Trends) | DashboardDesktop (bento main: Today → Needs attention →
+  AR/AP/Monthly Sales/Monthly Expenses quarters → Sales overview + Cash flow; aside Notifications feed).
+  dashboard/cards/{Today,Position,Performance}StatCards + CashFlowCard; dashboard/{QuickActions,DashboardSection}.
+  StatCard `href` (KPI tap → /sales, /expenses, /reports, /receivables, /payables; statLink). AttentionList moved
+  admin/home → dashboard/ (item.meta); utils/attention.utils (toAttentionItem, balancesOf, dashboardAttentionItemsOf)
+  shared with admin.home.hook. dashboard.services getSummary +monthlyExpenses (expense type, same as today's),
+  getPendingReviews (vouchers status pending; sales sale_status deposited) → query key dashboardReviewsKey (live).
+  Attention items: overdue receivables, overdue payables, payables due this week, vouchers awaiting approval
+  (tap presets Vouchers status=pending), sales awaiting verification (presets Sales status=deposited). Quick
+  actions via route.utils quickActionRoutesOf(filterRoutesByPermission). Admin Home: Needs attention first.
+
 ## Next
-1. D3 Dashboard (see Phases).
-2. D4 → D10 in order.
+1. D4 Record cards + detail sheets (see Phases).
+2. D5 → D10 in order.
 
 ## Open
 - (none)
 
 ## State
-Branch mobile-app-native-newlook · Uncommitted: D2 (suggested Development v2.24) ·
-Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.23 (D1).
+Branch mobile-app-native-newlook · Uncommitted: none ·
+Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.26 (D3, autopilot).
+D9 note: phone dashboard section labels reuse ListSection's small-caps head; desktop attention list sits in the
+bento main column (ListSection panel) — check visually.

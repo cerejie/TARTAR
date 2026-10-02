@@ -14,6 +14,7 @@ import type {
   IDueAlerts,
   IDuePayable,
   IPaymentAccountRef,
+  IPendingReviews,
   OverviewPeriod,
   SalesPeriod,
 } from "../../models/data/dashboard/dashboard.response";
@@ -273,6 +274,7 @@ const dashboardServices = {
       accountsPayable: outstanding((payables.data ?? []) as OutstandingRow[]),
       monthlySales: sumCountedRows(thisMonthRows.filter(isVerifiedSale)),
       monthlyPendingSales: matching(thisMonthRows, isPendingSale),
+      monthlyExpenses: sumCountedRows(thisMonthRows.filter(isExpense)),
       monthlyCashIn: ofDirection(thisMonthRows, cashInflowTypes),
       monthlyCashOut: ofDirection(thisMonthRows, cashOutflowTypes),
     };
@@ -453,6 +455,36 @@ const dashboardServices = {
       ),
       overduePayables: payableRows.filter((row) => isOverdue(row.due_date)),
       nearDuePayables: payableRows.filter((row) => !isOverdue(row.due_date)),
+    };
+  },
+
+  getPendingReviews: async (
+    branch?: string | null
+  ): Promise<IPendingReviews> => {
+    const [vouchers, sales] = await Promise.all([
+      scopeToBranch(
+        supabase.from("vouchers").select("amount").eq("status", "pending"),
+        branch
+      ),
+      scopeToBranch(
+        supabase
+          .from("transactions")
+          .select("amount")
+          .eq("type", "sale")
+          .eq("sale_status", "deposited"),
+        branch
+      ),
+    ]);
+
+    const firstError = [vouchers, sales].find((result) => result.error)?.error;
+    if (firstError) throw toError(firstError);
+
+    const amountsOf = (rows: AmountRow[] | null) =>
+      (rows ?? []).map((row) => Number(row.amount));
+
+    return {
+      pendingVouchers: amountsOf(vouchers.data as AmountRow[] | null),
+      salesToVerify: amountsOf(sales.data as AmountRow[] | null),
     };
   },
 

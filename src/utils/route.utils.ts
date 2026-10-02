@@ -40,9 +40,24 @@ export const adminPayablesPath = `${adminBasePath}/payables`;
 export const adminReceivablesPath = `${adminBasePath}/receivables`;
 export const adminNotificationsPath = `${adminBasePath}/notifications`;
 
+export const salesPath = "/sales";
+export const expensesPath = "/expenses";
 export const vouchersPath = "/vouchers";
 export const payablesPath = "/payables";
 export const receivablesPath = "/receivables";
+export const reportsPath = "/reports";
+
+const quickActionRouteKeys: readonly string[] = [
+  "sales",
+  "vouchers",
+  "receivables",
+  "payables",
+];
+
+export const quickActionRoutesOf = (routes: IRoute[]): IRoute[] =>
+  quickActionRouteKeys.flatMap((key) =>
+    routes.filter((route) => route.key === key && !!route.path && !!route.icon)
+  );
 
 export const isAdminPath = (pathname: string): boolean =>
   pathname === adminBasePath || pathname.startsWith(`${adminBasePath}/`);

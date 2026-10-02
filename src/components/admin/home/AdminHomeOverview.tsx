@@ -2,7 +2,7 @@ import { useAdminHomeHook } from "../../../hook/data/admin/admin.home.hook";
 import { adminTabStack } from "../../../styles/admin/admin.layout.styles";
 import AdminPageTitle from "../../common/layout/AdminPageTitle";
 import ContextSwitch from "../../common/view/ContextSwitch";
-import AttentionList from "./AttentionList";
+import AttentionList from "../../dashboard/AttentionList";
 import OverviewTiles from "./OverviewTiles";
 import SalesTrendCard from "./SalesTrendCard";
 
@@ -12,6 +12,14 @@ const AdminHomeOverview = () => {
   return (
     <div className={adminTabStack}>
       <AdminPageTitle />
+      <AttentionList
+        items={home.attentionItems}
+        loading={home.attentionLoading}
+        refreshing={home.attentionRefreshing}
+        error={home.attentionError}
+        onRetry={home.retryAttention}
+        onOpen={home.openAttentionItem}
+      />
       <ContextSwitch
         label="Overview period"
         value={home.period}
@@ -32,14 +40,6 @@ const AdminHomeOverview = () => {
         loading={home.overviewLoading}
         error={home.overviewError}
         onRetry={home.retryOverview}
-      />
-      <AttentionList
-        items={home.attentionItems}
-        loading={home.attentionLoading}
-        refreshing={home.attentionRefreshing}
-        error={home.attentionError}
-        onRetry={home.retryAttention}
-        onOpen={home.openAttentionItem}
       />
       <SalesTrendCard
         salesPeriod={home.salesPeriod}

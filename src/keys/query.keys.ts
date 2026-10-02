@@ -33,6 +33,7 @@ export const dashboardAlertsKey = "dashboard-alerts";
 export const dashboardOverviewKey = "dashboard-overview";
 export const dashboardChecksKey = "dashboard-checks";
 export const dashboardProfitKey = "dashboard-profit";
+export const dashboardReviewsKey = "dashboard-reviews";
 export const reportTransactionKey = "report-transactions";
 export const reportReceivableKey = "report-receivables";
 export const reportPayableKey = "report-payables";
@@ -61,6 +62,7 @@ export const liveRefreshKeys: readonly string[] = [
   dashboardAlertsKey,
   dashboardChecksKey,
   dashboardProfitKey,
+  dashboardReviewsKey,
   receivableListKey,
   payableListKey,
   paymentListKey,

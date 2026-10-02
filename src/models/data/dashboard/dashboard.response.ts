@@ -10,6 +10,7 @@ export interface IDashboardSummary {
   accountsPayable: number;
   monthlySales: number;
   monthlyPendingSales: number;
+  monthlyExpenses: number;
   monthlyCashIn: number;
   monthlyCashOut: number;
 }
@@ -164,9 +165,15 @@ export const notificationKindPaths: Record<NotificationLedger, string> = {
   payable: "/payables",
 };
 
+export interface IPendingReviews {
+  pendingVouchers: number[];
+  salesToVerify: number[];
+}
+
 export interface IAttentionItem {
   key: string;
   name: string;
+  meta: string;
   count: number;
   amount: number;
   tone: NotificationTone;

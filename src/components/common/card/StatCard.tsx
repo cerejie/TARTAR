@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-aria-components";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn.utils";
@@ -12,6 +13,7 @@ import {
   statHead,
   statHeading,
   statIcon,
+  statLink,
   statSkeletonTitle,
   statSkeletonValue,
   statTitle,
@@ -33,6 +35,7 @@ type IProps = {
   icon?: ReactNode;
   chip?: ReactNode;
   caption?: ReactNode;
+  href?: string;
   children?: ReactNode;
 };
 
@@ -49,6 +52,7 @@ const StatCard = ({
   icon,
   chip,
   caption,
+  href,
   children,
 }: IProps) => {
   if (loading) {
@@ -77,8 +81,8 @@ const StatCard = ({
     );
   }
 
-  return (
-    <Card size="sm" className={statCard} data-stat>
+  const card = (
+    <Card size="sm" className={statCard} data-stat={href ? undefined : true}>
       <CardContent className={statBody}>
         <div className={statHead}>
           <div className={statHeading}>
@@ -104,6 +108,14 @@ const StatCard = ({
         {children}
       </CardContent>
     </Card>
+  );
+
+  if (!href) return card;
+
+  return (
+    <Link href={href} className={statLink} data-stat>
+      {card}
+    </Link>
   );
 };
 
