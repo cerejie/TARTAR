@@ -1,5 +1,5 @@
 # ROADMAP — Voucher resubmit, admin auto-approve, VAT checkbox
-Updated: 2026-10-01 (planned; nothing built)
+Updated: 2026-10-01 (V1 migration 29 written, NOT applied; V2 next)
 
 ## Goal
 1. A rejected voucher is never a dead end: the employee opens "View reason" from the Vouchers page,
@@ -77,15 +77,42 @@ ticking Done with paths, rewriting Next, suggesting the commit (`git log --oneli
     row shows the manager's voucher as approved (service status from permissions; server is authoritative).
   - Existing reference: `hook/data/disbursement/disbursement.list.hook.ts` (editRejected L163, success
     message L208, rejectedByName L275), `components/common/form/RejectionIntro.tsx`.
+  - R8 inbox (needs mig 29 applied — selecting `pending` earlier breaks the inbox query):
+    `models/data/inbox/inbox.response.ts` + `services/data/inbox.services.ts` (columns) pending;
+    `components/common/app/ListCard.tsx` `pending` prop -> warning dot (`styles/app/app.styles.ts`
+    listCardUnreadDot -> cva tone); `utils/format.utils.ts` formatElapsed; `components/inbox/lists/
+    InboxFeed.tsx` meta "Waiting <elapsed>" on pending rows; `hook/data/inbox/inbox.list.hook.ts` badge
+    count unread + pending (InboxBell); minute tick `store/common/clock.store.ts` + `hook/common/clock.hook.ts`.
+    Realtime: DELETE events reach every subscriber (not RLS-filtered) -> each inbox refetches once.
 - V4 Verify on the preview: employee expense (non-VAT, 2% EWT) -> withholding = invoice x 2%; admin rejects
   -> employee Vouchers "View reason" -> prefilled -> Resubmit -> pending + manager push/inbox; admin records
   expense/purchase/manual voucher -> Approved at once, no push, purchase with due date opens a payable;
   print a VAT and a non-VAT voucher; offline create/resubmit replays.
 
-## Open (ask at the start of V1)
-- O1 Approved = locked (2026-07 decision 4, DB-enforced). With R2 an admin's own expense/purchase is locked
-  the moment it is saved, so an admin cannot fix a typo. Keep locked, or let a manager edit their own
-  auto-approved record until it is printed?
+- R6 (answers O1) An admin may edit THEIR OWN auto-approved expense/purchase/manual voucher until the
+  voucher is printed (printed = true locks it, as before). Everyone else's approved records stay locked.
+  V1: relax the approved-lock in app.guard_voucher_change (mig 21) and the transaction lock (mig 4
+  voucher_workflow) for `app.is_manager() and created_by = app.user_id() and not printed`; the voucher
+  stays approved through the edit (no re-approval, no push). V3: isDisbursementLocked in
+  hook/data/disbursement/disbursement.list.hook.ts + VouchersTable menu show Edit for that case.
+
+- R7 (answers O2) An own-edit of an approved record whose payable is open syncs the payable (amount, due
+  date, supplier, branch) while it has no payment; any payment (pending/verified) or removing the due date
+  refuses the save; adding a due date opens one. Deleting an approved record stays blocked (edit only).
+- R8 Pending requests in the inbox: "Voucher needs approval", "Payment needs verification" and the NEW
+  "Sale needs verification" (employee marks a sale deposited -> managers) are notifications.pending = true.
+  Once resolved (approved/rejected/verified/deleted) they are deleted for every manager. In the Updates
+  list a pending row has an ORANGE (warning) dot that stays after it is read, and shows the waiting time
+  ("Waiting 45 mins", "1hr 30 mins", "2d 23hrs"). The bell badge = unread + pending.
+
+## Done
+- V1 2026-10-01: `supabase/migrations/20261017000029_voucher_vat_auto_approve.sql` (written, NOT applied):
+  vouchers.vatable; app.voucher_ewt 4-arg; app.is_own_open_voucher + relaxed guard_voucher_change /
+  guard_tx_change / sync_voucher_from_tx / set_voucher_breakdown (7-arg); both create and both update
+  RPCs take p_vatable (create default true, update default null = keep stored); vouchers_auto_approve
+  BEFORE INSERT; vouchers_zz_approval_payable now INSERT OR UPDATE + app.sync_voucher_payable;
+  notifications.pending, app.notify 6-arg, app.resolve_notifications, push_* recreated, payments_push on
+  insert or update of status, *_resolve_notifications delete triggers, cleanup cron skips pending.
 
 ## Path map
 - voucher UI: components/voucher/tables/VouchersTable.tsx · hook/data/voucher/voucher.list.hook.ts ·
@@ -98,6 +125,13 @@ ticking Done with paths, rewriting Next, suggesting the commit (`git log --oneli
   guard_voucher_change, reopen_rejected_voucher) · mig 24 (latest create_transaction_with_voucher) ·
   mig 25 (latest update_transaction_with_voucher) · mig 5/7 (voucher_approval_payable) · mig 27/28 (push)
 
+## Next
+1. User reviews migration 29 and applies it (SQL editor, dev = production). Then check: admin creates an
+   expense -> Approved, no push; employee expense -> pending + manager inbox row with pending = true;
+   approve it -> the managers' pending row is gone.
+2. V2 VAT checkbox (client) — as planned above. Old clients keep working after mig 29 (p_vatable defaults).
+
 ## State
-Branch mobilel-app-native, clean at 884c122 (Development v2.08, pushed). Nothing built. The mobile
-roadmap's P0-4 event checks 3 (payment verification) and 4 (sale verified) are still to run first.
+Branch mobilel-app-native at bb84ae7 (Development v2.09). Migration 29 written, not applied, not committed.
+The mobile roadmap's P0-4 event checks 3 (payment verification) and 4 (sale verified) are still open;
+after mig 29, check 4's managers also get "Sale needs verification" on deposit.
