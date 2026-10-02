@@ -1,5 +1,7 @@
 import { cva } from "class-variance-authority";
 
+import { moneyLevel } from "../common/money.styles";
+
 export const entityForm = "flex flex-col gap-6";
 
 export const formGrid = "grid grid-cols-1 gap-4 md:grid-cols-2";
@@ -59,4 +61,4 @@ export const formSummaryLine = cva("flex items-center justify-between gap-4 text
   defaultVariants: { emphasis: false },
 });
 
-export const formSummaryValue = "tabular-nums";
+export const formSummaryValue = moneyLevel({ level: "supporting" });

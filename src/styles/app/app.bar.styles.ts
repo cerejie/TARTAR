@@ -25,7 +25,7 @@ export const appTabList =
   "mx-auto grid max-w-xl auto-cols-fr grid-flow-col overflow-hidden rounded-panel bg-panel shadow-panel md:flex md:flex-col md:gap-1 md:overflow-visible md:rounded-none md:bg-transparent md:px-2 md:shadow-none";
 
 export const appTabItem = cva(
-  "relative h-16 w-full flex-col gap-1 rounded-none px-1 text-xs hover:bg-transparent md:h-auto md:rounded-xl md:py-3 md:hover:bg-muted",
+  "relative h-16 w-full flex-col gap-1 rounded-none px-1 text-xs hover:bg-transparent md:h-auto md:rounded-control md:py-3 md:hover:bg-muted",
   {
     variants: {
       active: {

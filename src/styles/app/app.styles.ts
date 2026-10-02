@@ -1,5 +1,7 @@
 import { cva } from "class-variance-authority";
 
+import { moneyLevel } from "../common/money.styles";
+
 export const segmentedTabs =
   "grid w-full auto-cols-fr grid-flow-col gap-0 rounded-pill bg-muted p-1 lg:w-fit";
 
@@ -15,10 +17,10 @@ export const segmentedTabsCount =
   "relative rounded-pill bg-track px-1.5 text-xs tabular-nums text-muted-foreground";
 
 export const metricTileLink =
-  "block rounded-xl outline-none transition-transform select-none focus-visible:ring-[3px] focus-visible:ring-ring/50 data-pressed:scale-98 motion-reduce:transition-none";
+  "block rounded-card outline-none transition-transform select-none focus-visible:ring-[3px] focus-visible:ring-ring/50 data-pressed:scale-98 motion-reduce:transition-none";
 
 export const metricTile =
-  "h-full transition-shadow hover:shadow-raised motion-reduce:transition-none";
+  "h-full transition-shadow hover:shadow-menu motion-reduce:transition-none";
 
 export const metricTileBody = "flex flex-col gap-3";
 
@@ -45,10 +47,10 @@ export const listSectionHead = "flex items-center justify-between gap-2 px-4";
 export const listSectionTitle =
   "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
 
-export const listSectionMeta = "text-xs text-muted-foreground tabular-nums";
+export const listSectionMeta = moneyLevel({ level: "meta" });
 
 export const listSectionItems =
-  "flex flex-col overflow-hidden rounded-panel bg-panel shadow-panel transition-opacity";
+  "flex flex-col overflow-hidden rounded-surface bg-panel shadow-card transition-opacity";
 
 export const listSectionRefreshing = "opacity-60";
 
@@ -110,7 +112,7 @@ export const listCardAside = "flex shrink-0 items-center gap-1";
 
 export const listCardFigures = "flex flex-col items-end gap-1";
 
-export const listCardAmount = "font-semibold tabular-nums";
+export const listCardAmount = moneyLevel({ level: "amount" });
 
 export const listCardChevron = "size-4 shrink-0 text-muted-foreground/60";
 
@@ -137,11 +139,10 @@ export const recordHero = "flex flex-col items-center gap-2 pt-2 pb-5 text-cente
 
 export const recordHeroName = "max-w-full truncate text-sm font-medium text-muted-foreground";
 
-export const recordHeroAmount =
-  "font-heading text-3xl font-semibold tracking-tight tabular-nums";
+export const recordHeroAmount = moneyLevel({ level: "primary" });
 
 export const detailRows =
-  "flex flex-col divide-y divide-border overflow-hidden rounded-xl border border-border";
+  "flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border";
 
 export const detailRow = "flex items-center justify-between gap-4 px-4 py-3 text-sm";
 
@@ -165,7 +166,7 @@ export const appPullBadge = cva(
 );
 
 export const detailPanel =
-  "sticky top-0 flex flex-col overflow-hidden rounded-panel bg-panel shadow-panel";
+  "sticky top-0 flex flex-col overflow-hidden rounded-surface bg-panel shadow-card";
 
 export const detailPanelHead =
   "flex items-center justify-between gap-2 border-b border-border py-2 pr-2 pl-4";
@@ -180,7 +181,7 @@ export const floatingActionDock =
   "fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40";
 
 export const floatingAction = cva(
-  "h-14 rounded-pill px-5 shadow-pop transition-[width,padding] duration-200 motion-reduce:transition-none [&_svg:not([class*='size-'])]:size-5",
+  "h-14 rounded-pill px-5 shadow-overlay transition-[width,padding] duration-200 motion-reduce:transition-none [&_svg:not([class*='size-'])]:size-5",
   {
     variants: {
       collapsed: {

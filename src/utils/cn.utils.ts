@@ -6,8 +6,9 @@ import type { ClassValue } from "clsx";
 const twMerge = extendTailwindMerge({
   extend: {
     theme: {
-      shadow: ["panel", "raised", "pop"],
-      radius: ["panel", "pill"],
+      text: ["micro", "caption", "label", "body", "emphasis", "section", "page-title", "money-lg", "hero"],
+      shadow: ["panel", "card", "menu", "overlay"],
+      radius: ["control", "card", "surface", "sheet", "panel", "pill"],
     },
   },
 });

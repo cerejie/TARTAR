@@ -166,17 +166,26 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
 
 ## Done
 - [x] Plan written; old PWA roadmap suspended as `.claude/state/ROADMAP-PWA-SUSPENDED.md` (git mv).
+- [x] D0 Tokens (2026-10-03). theme.css: type scale `text-{micro,caption,label,body,emphasis,section,
+  page-title,money-lg,hero}` (`label` not `secondary` — collides with the colour); radius
+  `rounded-{control 8,card 12,surface 16,sheet 20}` + panel/pill, shadcn sm/md/lg/xl re-derived to
+  6/8/10/12; shadows `shadow-{card,menu,overlay}` (raised/pop deleted; shadcn shadow-md/lg → menu/overlay);
+  positive/positive-bright/warning moved to :root+.dark vars, light darkened to #15803d/#b45309 (user ok);
+  dark destructive=#f87171, chart-2..6 dark values. cn.utils tailwind-merge knows text/radius/shadow names.
+  + styles/common/money.styles.ts `moneyLevel` (primary/amount/supporting/meta) used by recordHeroAmount,
+  listCardAmount, listSectionMeta, dataCardAmount, formSummaryValue, paymentTotalValue. Re-pointed:
+  styles/{app/app,app/app.bar,layout/sidebar,layout/public,table/table,view/view,modal/modal}.styles.ts.
+  `rounded-panel` now only on shell + auth/error cards. Page title is 24px on every width.
+  Contrast: dark all ≥ 5.4:1; light positive/warning ≥ 4.6:1. Known leftovers (not changed, D9):
+  light destructive on muted 4.42:1; light chart-2 / chart-5 ~2:1 (non-text, below 3:1).
 
 ## Next
-1. D0 Tokens — start here (see Phases). Grep `src/styles` for `text-\[` and `rounded-panel` /
-   `shadow-panel` to size the change before presenting the file plan.
-2. D1 Breakpoints.
-3. D2 ContextSwitch + phone toolbar … then D3 → D10 in order.
+1. D1 Breakpoints (see Phases).
+2. D2 ContextSwitch + phone toolbar … then D3 → D10 in order.
 
 ## Open
-- Branch: work is on `main` (PWA branch was merged). Ask at D0 whether to cut a
-  `mobile-native-design` branch first.
+- (none)
 
 ## State
-Branch main · Uncommitted: yes (this roadmap, the rename, the two audit docs untracked) ·
-Last check: none (no code changed) · Last commit Development v2.20.
+Branch mobile-app-native-newlook · Uncommitted: D0 (suggested Development v2.22) ·
+Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.21.

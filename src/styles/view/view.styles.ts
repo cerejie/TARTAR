@@ -5,7 +5,7 @@ export const contentView = "flex min-w-0 flex-col gap-5";
 export const viewHead = "flex flex-wrap items-center gap-3";
 
 export const viewTitle =
-  "min-w-0 flex-1 truncate font-heading text-2xl font-semibold tracking-tight text-foreground md:text-[1.625rem] lg:min-w-fit";
+  "min-w-0 flex-1 truncate font-heading text-page-title font-semibold tracking-tight text-foreground lg:min-w-fit";
 
 export const viewHeadActions =
   "flex min-w-0 flex-wrap items-center gap-2 max-lg:contents lg:flex-nowrap";

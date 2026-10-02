@@ -1,5 +1,7 @@
 import { cva } from "class-variance-authority";
 
+import { moneyLevel } from "../common/money.styles";
+
 export const slidePanes = "-mx-1 overflow-hidden";
 
 export const slideTrack = cva(
@@ -29,7 +31,7 @@ export const ledgerSectionTitle = "font-heading text-base font-semibold";
 
 export const paymentTotal = "text-right text-sm text-muted-foreground";
 
-export const paymentTotalValue = "font-semibold text-foreground tabular-nums";
+export const paymentTotalValue = `${moneyLevel({ level: "amount" })} text-foreground`;
 
 export const ledgerIconButton = "max-lg:size-10 max-lg:gap-0 max-lg:rounded-full max-lg:px-0";
 

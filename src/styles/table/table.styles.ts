@@ -1,5 +1,7 @@
 import { cva } from "class-variance-authority";
 
+import { moneyLevel } from "../common/money.styles";
+
 export const dataTableRoot = "flex min-w-0 flex-col";
 
 export const dataTableGrid = "border-collapse";
@@ -7,7 +9,7 @@ export const dataTableGrid = "border-collapse";
 export const dataTableHeader = "[&_tr]:border-border";
 
 export const dataTableHead = cva(
-  "h-11 px-3 text-[0.8125rem] font-medium text-muted-foreground min-[1440px]:px-4",
+  "h-11 px-3 text-label font-medium text-muted-foreground min-[1440px]:px-4",
   {
     variants: {
       align: { left: "", center: "text-center", right: "text-right" },
@@ -81,7 +83,7 @@ export const dataTableLoadingAnnounce = "sr-only";
 export const dataCardList = "flex flex-col gap-2.5";
 
 export const dataCard =
-  "relative flex flex-col gap-2.5 rounded-2xl border border-border/60 bg-card p-3.5 text-sm shadow-xs has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring";
+  "relative flex flex-col gap-2.5 rounded-card border border-border/60 bg-card p-3.5 text-sm shadow-card has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring";
 
 export const dataCardSelected = "border-brand bg-brand-mist";
 
@@ -95,12 +97,12 @@ export const dataCardHeading = "flex min-w-0 flex-1 flex-col gap-0.5";
 export const dataCardTitle = "min-w-0 text-left font-semibold break-words text-foreground";
 
 export const dataCardTitlePress =
-  "min-w-0 text-left font-semibold break-words text-foreground outline-none after:absolute after:inset-0 after:rounded-2xl";
+  "min-w-0 text-left font-semibold break-words text-foreground outline-none after:absolute after:inset-0 after:rounded-card";
 
 export const dataCardSubtitle = "text-xs text-muted-foreground";
 
 export const dataCardAmount =
-  "flex shrink-0 flex-col items-end gap-0.5 font-heading text-base font-semibold tabular-nums";
+  `${moneyLevel({ level: "amount" })} flex shrink-0 flex-col items-end gap-0.5`;
 
 export const dataCardRaised = "relative z-10";
 
