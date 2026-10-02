@@ -101,3 +101,14 @@
 - Tablet landscape bento gap (3 thirds wrapped 2+1 below xl) → third/twoThirds from lg; tablet portrait odd stat sets lead with a full-width card (phone pattern)
 - Handoff → D10 passed: mobile ROADMAP.md deleted, ROADMAP-PWA-SUSPENDED.md renamed to ROADMAP.md with a carry-over block; its Next item 1 is the device test script → hard-stop
 - Verification: yarn build + yarn lint clean; layout fixes confirmed in emulated-viewport screenshots, physical-device visuals unconfirmed
+
+## 2026-10-03 — R0 Visual audit → Development v2.35
+- Leftover tree (conductor roadmap setup: PWA roadmap parked, STOP deleted by user) → committed with R0 as instructed by NEXT_PROMPT, not as its own version
+- Harness → playwright-core in the worker scratchpad, Chrome channel, writes faked by route interception (d10 pattern), password only via QA_PASSWORD env; admin role = qaadmin1 per dispatch
+- Search scope → Vouchers shares SearchTrigger with Receivables/Payables, so R1 converts all three to inline search (one pattern, no app-bar search mode on phone)
+- Print scope → L4 "everywhere": all print entries (Sales/Purchases/Expenses toolbar, Reports, voucher detail + row menu, ledger statements) hidden on phone in R1 — one small pattern, worker-sized
+- Customer ledger "pagination" (user item 3) → the book-icon party sheet and the party detail Records list (both paged 1–5 of 6); the Records page list already loads on scroll
+- Record-payment selection in party detail → keep behaviour, change only entry/visibility (no new rule)
+- Fix phases → R4 sheets + stat tiles, R5 phone card content, R6 tablet-portrait ledger grid (tablet-only finding, allowed by L1)
+- "9 accounts" vs "9 records" → copy fix to "records" (count is records; wording only, not a business rule)
+- Verification: no source changes; emulated-viewport checked, physical device unconfirmed

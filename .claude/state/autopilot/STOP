@@ -1,7 +1,0 @@
-Hard-stop after mobile-native D10 (Development v2.34). D10 verification passed (172 emulated route checks across 3 roles,
-4 viewports, light/dark: x-overflow 0, no errors; offline queue + replay ok) and two small layout defects were fixed. The
-mobile-native roadmap is finished and the suspended PWA roadmap is back as .claude/state/ROADMAP.md. Its Next item 1 is the
-device test script (physical phone + PC, push delivery, installs), followed by the P0-6 QA reset, the merge and the
-production deploy — all of which need the user. The user must: (1) run the device test script with Claude in a normal
-session; (2) decide the running-balance ledger rule (pending/rejected payments, filtered date windows) or drop it;
-(3) reset qaemp2@qa.test's password (it is rejected) or switch the script to qaemp1. Delete this file to resume autopilot.
