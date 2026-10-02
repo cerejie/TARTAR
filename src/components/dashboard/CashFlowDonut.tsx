@@ -51,7 +51,10 @@ const CashFlowDonut = ({ cashIn, cashOut, netCashFlow }: IProps) => {
           }
         />
       ) : (
-        <EmptyState description="No cash movement this month" />
+        <EmptyState
+          title="No cash movement yet"
+          description="Cash in and cash out recorded this month will show here."
+        />
       )}
 
       <div className={donutLegend}>

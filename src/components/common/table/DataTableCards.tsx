@@ -26,6 +26,7 @@ import {
   dataCardHeading,
   dataCardLabel,
   dataCardList,
+  dataCardListFrame,
   dataCardMeta,
   dataCardRaised,
   dataCardSelected,
@@ -38,9 +39,9 @@ import {
   dataCardTitle,
   dataCardTitlePress,
   dataCardValue,
-  dataTableBodyRefreshing,
 } from "../../../styles/table/table.styles";
 import ErrorState from "../status/ErrorState";
+import RefreshBar from "../status/RefreshBar";
 import RecordDetailSheet from "./RecordDetailSheet";
 import TableEmptyState from "./TableEmptyState";
 
@@ -56,6 +57,7 @@ type IProps<T> = {
   error?: string | null;
   onRetry?: () => void;
   emptyText: string;
+  emptyHint?: string;
   resolveRowKey: (row: T) => string;
   renderContent: (column: IDataTableColumn<T>, row: T, rowIndex: number) => ReactNode;
   columnId: (column: IDataTableColumn<T>, index: number) => string;
@@ -94,6 +96,7 @@ const DataTableCards = <T,>({
   error,
   onRetry,
   emptyText,
+  emptyHint,
   resolveRowKey,
   renderContent,
   columnId,
@@ -135,7 +138,7 @@ const DataTableCards = <T,>({
     );
   }
 
-  if (rows.length === 0) return <TableEmptyState text={emptyText} />;
+  if (rows.length === 0) return <TableEmptyState text={emptyText} hint={emptyHint} />;
 
   const toggleSelection = (key: string, selected: boolean) => {
     if (!rowSelection) return;
@@ -275,13 +278,12 @@ const DataTableCards = <T,>({
 
   return (
     <>
-      <ul
-        className={cn(dataCardList, refreshing && dataTableBodyRefreshing)}
-        aria-label={label}
-        aria-busy={refreshing}
-      >
-        {rows.map(renderCard)}
-      </ul>
+      <div className={dataCardListFrame}>
+        {refreshing ? <RefreshBar placement="above" /> : null}
+        <ul className={dataCardList} aria-label={label} aria-busy={refreshing}>
+          {rows.map(renderCard)}
+        </ul>
+      </div>
 
       {opensDetail ? (
         <RecordDetailSheet<T>

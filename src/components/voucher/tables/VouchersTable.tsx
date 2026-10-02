@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   X,
 } from "lucide-react";
+import { filteredEmptyHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import PrimaryAction from "../../common/button/PrimaryAction";
 import FilterToolbar from "../../common/filter/FilterToolbar";
@@ -446,6 +447,7 @@ const VouchersTable = () => {
           detailTitle={(voucher) => `${voucherTypeLabels[voucher.type]} voucher`}
           detailActions={actionsOf}
           emptyText="No vouchers match the current filters"
+          emptyHint={filteredEmptyHint}
         />
       </TablePanel>
 

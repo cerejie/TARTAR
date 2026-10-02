@@ -61,3 +61,9 @@ export interface ISortOption extends ISortState {
   key: string;
   label: string;
 }
+
+export const filteredEmptyHint = "Clear a filter or change the period to see more.";
+
+export const searchEmptyHint = "Check the spelling or clear the search.";
+
+export const firstRecordHint = "Add the first one and it will be available in every form that uses it.";

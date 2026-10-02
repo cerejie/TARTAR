@@ -9,6 +9,7 @@ import {
   Printer,
   Trash2,
 } from "lucide-react";
+import { filteredEmptyHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import AppButton from "../../common/button/AppButton";
 import PrimaryAction from "../../common/button/PrimaryAction";
@@ -367,6 +368,7 @@ const ExpensesTable = () => {
           detailTitle={() => "Expense"}
           detailActions={actionsOf}
           emptyText="No expenses match the current filters"
+          emptyHint={filteredEmptyHint}
         />
       </TablePanel>
 

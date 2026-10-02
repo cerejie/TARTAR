@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { RotateCw, TriangleAlert } from "lucide-react";
+import { RotateCw, TriangleAlert, WifiOff } from "lucide-react";
 import {
   Empty,
   EmptyContent,
@@ -8,6 +8,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { useIsOnline } from "../../../hook/common/network.hook";
 import { errorState, errorStateMedia } from "../../../styles/status/status.styles";
 import AppButton from "../button/AppButton";
 
@@ -20,6 +21,10 @@ type IProps = {
   compact?: boolean;
 };
 
+const offlineTitle = "You're offline";
+
+const offlineDescription = "This was not saved for offline use. Reconnect and try again.";
+
 const ErrorState = ({
   title = "Something went wrong",
   description,
@@ -28,14 +33,16 @@ const ErrorState = ({
   onAction,
   compact = false,
 }: IProps) => {
+  const online = useIsOnline();
+
   return (
     <Empty role="alert" className={errorState({ compact })}>
       <EmptyHeader>
         <EmptyMedia variant="icon" className={errorStateMedia}>
-          {icon}
+          {online ? icon : <WifiOff />}
         </EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
-        <EmptyDescription>{description}</EmptyDescription>
+        <EmptyTitle>{online ? title : offlineTitle}</EmptyTitle>
+        <EmptyDescription>{online ? description : offlineDescription}</EmptyDescription>
       </EmptyHeader>
       {onAction ? (
         <EmptyContent>

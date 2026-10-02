@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useAccountStore } from "../../store/data/account/account.store";
-import { useNetworkStore } from "../../store/common/network.store";
+import { selectOnline, useNetworkStore } from "../../store/common/network.store";
 import {
   selectHasUnsavedWatched,
   selectOfflineSavedAt,
@@ -101,6 +101,8 @@ const describeSync = ({ online, flushing, pending, failedCount }: ISyncCounts): 
   if (pending > 0) return `${formatChangeCount(pending)} waiting to sync`;
   return "Online — all changes saved";
 };
+
+export const useIsOnline = () => useNetworkStore(selectOnline);
 
 export const useSyncStatus = () => {
   const online = useNetworkStore((state) => state.online);

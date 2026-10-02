@@ -39,6 +39,21 @@ export const offlineDot =
 
 export const syncSpin = "animate-spin";
 
+export const refreshBar = cva(
+  "pointer-events-none absolute inset-x-0 z-10 h-0.5 overflow-hidden rounded-pill bg-brand-soft",
+  {
+    variants: {
+      placement: {
+        edge: "top-0",
+        above: "-top-1.5",
+      },
+    },
+  }
+);
+
+export const refreshBarFill =
+  "h-full w-1/3 bg-brand motion-safe:animate-route-progress motion-reduce:w-full motion-reduce:opacity-60";
+
 export const failedBadge = "bg-danger";
 
 export const syncHeadHint = "block text-xs font-normal text-muted-foreground";

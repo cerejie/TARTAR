@@ -1,4 +1,5 @@
 import { Pencil, Trash2, Undo2 } from "lucide-react";
+import { firstRecordHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
@@ -107,7 +108,8 @@ const BranchesTable = () => {
           error={error}
           onRetry={retry}
           rowKey="slug"
-          emptyText="No branches yet — add your first one"
+          emptyText="No branches yet"
+          emptyHint={firstRecordHint}
         />
       </TablePanel>
 

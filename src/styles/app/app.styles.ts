@@ -36,9 +36,7 @@ export const listSectionTitle =
 export const listSectionMeta = moneyLevel({ level: "meta" });
 
 export const listSectionItems =
-  "flex flex-col overflow-hidden rounded-surface bg-panel shadow-card transition-opacity";
-
-export const listSectionRefreshing = "opacity-60";
+  "relative flex flex-col overflow-hidden rounded-surface bg-panel shadow-card";
 
 export const listCard = cva(
   "relative flex-nowrap gap-3 rounded-none border-0 border-b border-border px-4 py-3 last:border-b-0 transition-colors select-none has-[[data-pressed]]:bg-muted motion-reduce:transition-none",

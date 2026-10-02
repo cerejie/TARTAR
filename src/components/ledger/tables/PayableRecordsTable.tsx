@@ -1,4 +1,5 @@
 import { CircleCheck, FileText } from "lucide-react";
+import { filteredEmptyHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
@@ -201,6 +202,7 @@ const PayableRecordsTable = () => {
         detailTitle={() => "Payable"}
         detailActions={actionsOf}
         emptyText="No payables match the current filters"
+        emptyHint={filteredEmptyHint}
         rowClassName={(row) =>
           isLedgerOverdue(row) ? dataTableRowOverdue : ""
         }

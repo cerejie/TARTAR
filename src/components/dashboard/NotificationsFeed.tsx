@@ -29,7 +29,11 @@ type IProps = {
 const NotificationsFeed = ({ data, onOpen }: IProps) => {
   const { groups, bankOf, openItem } = useNotificationListHook(data, onOpen);
 
-  if (!groups.length) return <EmptyState description="Nothing overdue or due soon" />;
+  if (!groups.length) {
+    return (
+      <EmptyState title="You're all caught up" description="Nothing is overdue or due soon." />
+    );
+  }
 
   return (
     <>

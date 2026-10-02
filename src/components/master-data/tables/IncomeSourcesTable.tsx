@@ -1,4 +1,5 @@
 import { Archive, Pencil, Trash2, Undo2 } from "lucide-react";
+import { firstRecordHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
@@ -106,7 +107,8 @@ const IncomeSourcesTable = () => {
           error={error}
           onRetry={retry}
           rowKey="slug"
-          emptyText="No income sources yet — add your first one"
+          emptyText="No income sources yet"
+          emptyHint={firstRecordHint}
         />
       </TablePanel>
 

@@ -79,3 +79,14 @@
 - Theme row → tap toggles light/dark (same as account sheet); Sync row → opens the existing AppBar sync sheet; Version → build timestamp via vite define (package version is 0.0.0, no release version exists)
 - Notifications order → already Action required → due alerts → updates in main + admin; only titles renamed ("Needs your action" → "Action required", "Updates" → "Information"); due groups keep urgency order
 - Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed
+
+## 2026-10-03 — D9 Polish → Development v2.33
+- File plan → copy (empty/error/offline), refresh without dimming, 48px drawer CTA, D0 contrast leftovers, chart title drift; motion/icons audit only (Simple tier, all reversible UI)
+- Offline error copy → centralised in ErrorState via useIsOnline (one place covers every table, card and section error)
+- Empty states → title (what happened) + hint (what next) via TableEmptyState hint / DataTable emptyHint and EmptyState title; shared hints in models/common/table.model (filtered, search, first record) — no invented business rules in copy
+- Refresh feedback → no dimming; desktop keeps the header spinner, cards/ListSection get a thin indeterminate RefreshBar positioned absolutely (zero layout shift)
+- Phone primary CTA → drawer footer primary 48px (SheetActions already 48px); FAB stays 56px
+- D0 leftovers → light destructive/danger #c81e1e (≥ 5.2:1 on muted and danger-bg), chart-2 #0891b2 and chart-5 #d97706 (≥ 3:1 non-text on panel); dark untouched
+- Charts → main "Sales Overview" renamed "Sales trend" + period subtitle, same as admin (one question: how sales moved over the period)
+- Motion / icons → already compliant (navigation fades, expansion chevrons, FAB state, focus pulse; 16/20px icons); no change
+- Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed

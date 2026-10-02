@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import type { IRowAction } from "../../models/common/action.model";
 import type { IDetailSection } from "../../models/common/detail.model";
+import { filteredEmptyHint } from "../../models/common/table.model";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import { customerDetailsModalKey } from "../../keys/modal.keys";
 import { ledgerExpansionKey } from "../../keys/table.keys";
@@ -328,6 +329,7 @@ const CustomerLedgerView = () => {
         detailTitle={() => "Receivable"}
         detailActions={rowActionsOf}
         emptyText="No receivables match the filters"
+        emptyHint={filteredEmptyHint}
         rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
         rowSelection={{
           selectedRowKeys: selection,

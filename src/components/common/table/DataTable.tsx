@@ -41,7 +41,6 @@ import {
   dataTableHead,
   dataTableHeader,
   dataTableLoadingAnnounce,
-  dataTableBodyRefreshing,
   dataTableRefreshSpinner,
   dataTableRoot,
   dataTableRow,
@@ -93,6 +92,7 @@ type IProps<T> = {
   detailTitle?: (row: T) => string;
   detailActions?: (row: T) => readonly IRowAction[];
   emptyText?: string;
+  emptyHint?: string;
   rowSelection?: IDataTableSelection<T>;
   rowClassName?: (row: T) => string;
   pendingKeysOf?: (row: T) => readonly (string | null | undefined)[];
@@ -140,6 +140,7 @@ const DataTable = <T extends object>({
   detailTitle,
   detailActions,
   emptyText = "No records",
+  emptyHint,
   rowSelection,
   rowClassName,
   pendingKeysOf,
@@ -342,7 +343,7 @@ const DataTable = <T extends object>({
       return (
         <TableRow key="empty" id="empty" className={cn(dataTableRow, dataTableRowStatic)}>
           <TableCell colSpan={columnCount} className={dataTableStateCell}>
-            <TableEmptyState text={emptyText} />
+            <TableEmptyState text={emptyText} hint={emptyHint} />
           </TableCell>
         </TableRow>
       );
@@ -405,10 +406,7 @@ const DataTable = <T extends object>({
         ))}
       </TableHeader>
 
-      <TableBody
-        aria-busy={loading || refreshing}
-        className={refreshing ? dataTableBodyRefreshing : undefined}
-      >
+      <TableBody aria-busy={loading || refreshing}>
         {renderBody()}
         </TableBody>
     </Table>
@@ -426,6 +424,7 @@ const DataTable = <T extends object>({
           error={error}
           onRetry={onRetry}
           emptyText={emptyText}
+          emptyHint={emptyHint}
           resolveRowKey={resolveRowKey}
           renderContent={renderContent}
           columnId={columnId}

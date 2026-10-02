@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Inbox } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/utils/cn.utils";
 import {
   listCardSkeletonAvatar,
   listCardSkeletonRow,
@@ -10,11 +9,11 @@ import {
   listSectionHead,
   listSectionItems,
   listSectionMeta,
-  listSectionRefreshing,
   listSectionTitle,
 } from "../../../styles/app/app.styles";
 import EmptyState from "../status/EmptyState";
 import ErrorState from "../status/ErrorState";
+import RefreshBar from "../status/RefreshBar";
 
 type IProps = {
   title?: string;
@@ -70,8 +69,9 @@ const ListSection = ({
         role="list"
         aria-label={title}
         aria-busy={refreshing}
-        className={cn(listSectionItems, refreshing && listSectionRefreshing)}
+        className={listSectionItems}
       >
+        {refreshing ? <RefreshBar placement="edge" /> : null}
         {children}
       </div>
     );

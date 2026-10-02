@@ -49,7 +49,7 @@ export const drawerBody = "min-h-0 flex-1 overflow-y-auto px-4 py-1";
 
 export const drawerPinned = "border-t border-border px-4";
 
-export const drawerFooter = `border-t border-border bg-muted/50 pb-safe ${modalActionSize}`;
+export const drawerFooter = `border-t border-border bg-muted/50 pb-safe ${modalActionSize} [&_[data-slot=button][data-variant=default]]:h-12`;
 
 export const confirmContent = "rounded-sheet bg-panel ring-border shadow-overlay";
 

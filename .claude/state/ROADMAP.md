@@ -1,5 +1,5 @@
 # ROADMAP — Mobile-native design improvements
-Updated: 2026-10-03 (D8 done)
+Updated: 2026-10-03 (D9 done)
 
 ## Goal
 Move the main app from "desktop architecture with mobile components" to "shared business logic with
@@ -288,9 +288,22 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
   `description` (describeSync moved from SyncIndicator). Notifications (main center + admin): InboxFeed titles
   "Action required" → due alerts by urgency (Overdue → Today → Tomorrow → This week, unchanged) → "Information".
 
+- [x] D9 Polish (2026-10-03, autopilot). Copy: ErrorState swaps to "You're offline" + WifiOff + "This was not saved
+  for offline use. Reconnect and try again." when offline (hook/common/network.hook useIsOnline, network.store
+  selectOnline); EmptyState `title`; TableEmptyState `text` is now the title + `hint` description; DataTable /
+  DataTableCards `emptyHint`; models/common/table.model filteredEmptyHint (Transactions, Sales, Purchases, Expenses,
+  Vouchers, Ledger records/payments, Payable records, Customer/Supplier ledger views), searchEmptyHint
+  (LedgerPartiesTable), firstRecordHint (Branches, Suppliers, Categories, Income sources, Bank accounts — titles now
+  "No <x> yet"); dashboard/admin chart + notification empties titled. Loading: no dimming on refresh — desktop body
+  keeps the header spinner only; cards + ListSection show new common/status/RefreshBar (thin indeterminate bar,
+  status.styles refreshBar/refreshBarFill, route-progress animation; dataTableBodyRefreshing + listSectionRefreshing
+  deleted). Phone CTA: drawerFooter primary button 48px (h-12). Tokens (D0 leftovers): light --destructive/--danger
+  #c81e1e (5.3:1 on muted/danger-bg), --chart-2 #0891b2 (3.7:1), --chart-5 #d97706 (3.2:1). Charts: main "Sales
+  Overview" → "Sales trend" + period subtitle (matches admin). Motion and icon sizes audited — already per rule
+  (motion only route fade, title fade, chevrons, FAB collapse, row focus; icons 16 dense / 20 nav), no change.
+
 ## Next
-1. D9 Polish (see Phases).
-2. D10 Verification.
+1. D10 Verification (see Phases).
 
 ## Open
 - D6: a true running-balance ledger (debit/credit per record and payment, cumulative balance) was NOT built —
@@ -299,8 +312,10 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
 
 ## State
 Branch mobile-app-native-newlook · Uncommitted: none ·
-Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.32 (D8, autopilot).
-D9 note: phone dashboard section labels reuse ListSection's small-caps head; desktop attention list sits in the
+Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.33 (D9, autopilot).
+D9: RefreshBar on cards sits 6px above the list (in the toolbar gap), on ListSection at the panel top edge; empty
+table titles are now EmptyTitle (text-lg) — check weight on a phone; chart-2/chart-5 hues changed (cyan, amber-600).
+D10 checklist notes: phone dashboard section labels reuse ListSection's small-caps head; desktop attention list sits in the
 bento main column (ListSection panel) — check visually. D4: confirm-from-sheet stacks the confirmation over
 the open detail sheet (React Aria nested overlay) — check on a phone; tables with > 2 meta columns now open a
 sheet even without detailSections. D6: ledger detail is a sheet stacked on the party-list sheet (customer

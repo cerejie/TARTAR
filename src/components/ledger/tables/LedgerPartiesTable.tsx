@@ -1,4 +1,5 @@
 import { BookOpen, CircleDollarSign, IdCard } from "lucide-react";
+import { searchEmptyHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import SearchInput from "../../common/filter/SearchInput";
@@ -133,6 +134,7 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
           rowKey={(party) => party.partyId ?? `name:${party.partyName}`}
           onRowClick={scope === "payables" ? openSupplierLedger : undefined}
           emptyText={`No ${partyLabel.toLowerCase()}s match the current search`}
+          emptyHint={searchEmptyHint}
         />
       </TablePanel>
 

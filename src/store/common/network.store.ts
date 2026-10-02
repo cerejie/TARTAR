@@ -16,3 +16,5 @@ export const useNetworkStore = create<States & Actions>((set) => ({
   ...initialValues,
   setOnline: (online: boolean) => set(() => ({ online })),
 }));
+
+export const selectOnline = (state: States) => state.online;

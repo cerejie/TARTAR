@@ -1,4 +1,5 @@
 import { Pencil, Trash2 } from "lucide-react";
+import { firstRecordHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import AvatarCell from "../../common/table/AvatarCell";
@@ -89,7 +90,8 @@ const SuppliersTable = () => {
           refreshing={refreshing}
           error={error}
           onRetry={retry}
-          emptyText="No suppliers yet — add your first one"
+          emptyText="No suppliers yet"
+          emptyHint={firstRecordHint}
         />
       </TablePanel>
 

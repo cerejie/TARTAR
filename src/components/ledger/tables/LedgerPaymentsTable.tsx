@@ -1,3 +1,4 @@
+import { filteredEmptyHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
@@ -148,6 +149,7 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
         totalCount={totalCount}
         onPageChange={goToPage}
         emptyText="No payments match the current filters"
+        emptyHint={filteredEmptyHint}
       />
     </TablePanel>
   );

@@ -47,7 +47,11 @@ const SalesTrendCard = ({ salesPeriod, series, loading, error, onRetry }: IProps
           highlight={(point) => point.date === latestDate}
         />
       ) : (
-        <EmptyState description="No sales recorded yet" loading={loading} />
+        <EmptyState
+          title="No sales yet"
+          description="Recorded sales for this period will chart here."
+          loading={loading}
+        />
       )}
     </SectionCard>
   );

@@ -71,14 +71,14 @@ export const dataTableSkeletonCircle = "size-8 shrink-0 rounded-full";
 
 export const dataTableSkeletonName = "h-4 w-24";
 
-export const dataTableBodyRefreshing =
-  "opacity-60 transition-opacity motion-reduce:transition-none";
 
 export const dataTableRefreshSpinner = "ml-2 inline-flex size-3.5 align-middle text-brand";
 
 export const dataTableEmpty = "py-8";
 
 export const dataTableLoadingAnnounce = "sr-only";
+
+export const dataCardListFrame = "relative";
 
 export const dataCardList = "flex flex-col gap-2.5";
 

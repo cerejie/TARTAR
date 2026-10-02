@@ -1,4 +1,5 @@
 import { CircleDollarSign, FileText, Plus, Trash2 } from "lucide-react";
+import { filteredEmptyHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import PrimaryAction from "../../common/button/PrimaryAction";
 import FilterToolbar from "../../common/filter/FilterToolbar";
@@ -267,6 +268,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
           detailTitle={() => title}
           detailActions={actionsOf}
           emptyText={`No ${noun}s match the current filters`}
+          emptyHint={filteredEmptyHint}
           rowClassName={(row) =>
             isLedgerOverdue(row) ? dataTableRowOverdue : ""
           }

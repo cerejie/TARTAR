@@ -1,6 +1,7 @@
 import {
   salesAxisFormats,
   salesPeriodLabels,
+  salesPeriodSubtitles,
   salesPeriodValues,
   type IDailySalesPoint,
   type SalesPeriod,
@@ -38,7 +39,8 @@ const SalesOverviewCard = ({
 
   return (
     <SectionCard
-      title="Sales Overview"
+      title="Sales trend"
+      subtitle={salesPeriodSubtitles[salesPeriod]}
       error={error}
       onRetry={onRetry}
       extra={
@@ -64,7 +66,11 @@ const SalesOverviewCard = ({
           highlight={(row) => row.date === latestDate}
         />
       ) : (
-        <EmptyState description="No sales recorded yet" loading={loading} />
+        <EmptyState
+          title="No sales yet"
+          description="Recorded sales for this period will chart here."
+          loading={loading}
+        />
       )}
     </SectionCard>
   );

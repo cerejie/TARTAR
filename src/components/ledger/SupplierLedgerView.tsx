@@ -1,5 +1,6 @@
 import { ArrowLeft, CircleCheck, FileText, Printer } from "lucide-react";
 import type { IDetailSection } from "../../models/common/detail.model";
+import { filteredEmptyHint } from "../../models/common/table.model";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import {
   payableStatusColors,
@@ -256,6 +257,7 @@ const SupplierLedgerView = () => {
         detailTitle={() => "Payable"}
         detailActions={actionsOf}
         emptyText="No payables match the filters"
+        emptyHint={filteredEmptyHint}
         rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
       />
 

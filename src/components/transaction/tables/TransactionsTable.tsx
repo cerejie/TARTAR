@@ -1,4 +1,5 @@
 import { FileText, History, Plus, Trash2, Wallet } from "lucide-react";
+import { filteredEmptyHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import PrimaryAction from "../../common/button/PrimaryAction";
 import FilterToolbar from "../../common/filter/FilterToolbar";
@@ -276,6 +277,7 @@ const TransactionsTable = () => {
           detailTitle={(row) => `${transactionTypeLabels[row.type]} transaction`}
           detailActions={permissions.isManager ? actionsOf : undefined}
           emptyText="No transactions match the current filters"
+          emptyHint={filteredEmptyHint}
         />
       </TablePanel>
 
