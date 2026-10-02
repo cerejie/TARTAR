@@ -190,16 +190,32 @@ MANUAL VOUCHER EDIT DONE 2026-10-02 (user: yes; build + lint clean, not checked 
   Expense on a voucher whose payable is open is refused by the server (due date cannot be removed).
   Migration 30 applied by the user 2026-10-02.
 
-1. Check on the preview: desktop bell popover, phone sheet, /admin Notifications tab (order, long titles,
-   dot, unread tint, Waiting chip, badge counts); admin edits own manual voucher (cash + check, purchase
-   with payable: amount/due date sync to the payable; printed voucher shows no Edit).
-2. Then back to ROADMAP.md: P0-4 events 3 (payment verification) and 4 (sale verified), P0-5 devices,
-   P0-6 QA reset, merge, production deploy.
+1. DONE 2026-10-02 (Claude-driven, prod build on :5199, headless Chrome; playwright-core in the session
+   scratchpad): desktop bell popover (Needs your action -> due alerts -> Updates; capped at the available
+   height by React Aria and scrolls inside), phone sheet (no x-overflow, Back closes it), /admin Notifications
+   (order, All/Unread above the alerts), employee Updates (unread tint + blue dot + semibold, read rows plain),
+   badges (manager = pending + due alerts, employee = unread). Manual voucher own-edit: cash Purchase saved
+   Approved ("Voucher saved — approved"), Edit voucher -> amount 1,120 -> 2,240 synced to the voucher row AND
+   the payable; check Expense saved Approved, edit form prefilled Bank BPI + Account by label, check no. edit
+   printed, after Print the menu shows only "Print voucher".
+   Open design question (not changed): in the main-app popover/sheet the inbox sections are raised ListCard
+   groups (card on the popover surface, heads indented px-4) while the due alerts are flat rows with flush
+   heads — two row styles in one panel. /admin is consistent (ListCard everywhere).
+   Minor: "Sale needs verification" / "Sale verified" body is only the amount (vouchers show no. · payee ·
+   amount) — add customer/branch in app.notify callers if wanted (SQL, new migration).
+2. DONE 2026-10-02 (inbox half): ROADMAP.md P0-4 event 3 — qaemp2 records ₱50 on C-RACE-500-a0eb ->
+   qaadmin2 "Payment needs verification" (pending, Waiting chip); Verify removes it. Event 4 — qaemp2 records
+   sale ₱1,004 + Mark deposited -> qaadmin2 "Sale needs verification"; Verify removes it, qaemp2 gets "Sale
+   verified". Push delivery itself still needs devices (ROADMAP.md P0-4/P0-5).
+3. Next: ROADMAP.md P0-4 push on devices (events 3-4 + tap opens the right page), P0-5 devices, P0-6 QA reset,
+   merge, production deploy.
 
 ## State
-Branch mobilel-app-native at 1024cf2 (Development v2.14); notification audit fixes + manual voucher edit uncommitted.
-QA rows from the 2026-10-02 test (P0-6 reset): purchases "QA V4 approve" -> QAT-PUR-2026-00000014
-(approved, payable Oct 9 ₱982.14) and "QA V4 reject" -> QAT-PUR-2026-00000015 (non-VAT, rejected then
-resubmitted, pending), both by qaemp2, plus their notifications.
-The mobile roadmap's P0-4 event checks 3 (payment verification) and 4 (sale verified) are still open;
-after mig 29, check 4's managers also get "Sale needs verification" on deposit.
+Branch mobilel-app-native at ddfbb69 (Development v2.15, holds the notification audit fixes + manual voucher
+edit); working tree clean apart from these roadmap notes. Migrations 29 and 30 applied.
+QA rows to reset (P0-6): purchases "QA V4 approve" -> QAT-PUR-2026-00000014 (approved, payable Oct 9 ₱982.14)
+and "QA V4 reject" -> QAT-PUR-2026-00000015 (pending), both by qaemp2; 2026-10-02 N1 test (qaadmin2): manual
+cash purchase "QA N1 Manual" QAT-PUR-2026-00000016 ₱2,240 approved + its open payable (due Oct 2), manual
+check expense "QA N1 Check" QAT-EXP-2026-00000001 ₱500 (check N1-002, printed); qaemp2 payment
+PMT-QAT-2610-0006 ₱50 (verified) on receivable C-RACE-500-a0eb; qaemp2 sale ₱1,004 Oct 2 (verified — locked);
+plus all their notifications rows.
