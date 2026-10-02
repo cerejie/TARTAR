@@ -226,6 +226,8 @@ each phase, then a user check on a real phone.
     expense category "QA O12 Type" (QOT); bank "QA O12 Bank" again. Test push subscription already deleted.
 
 ## Next
+ACTIVE 2026-10-02: continue at .claude/state/ROADMAP-VOUCHER-VAT.md Next item 1 (Claude-driven app test +
+notification UI/UX audit, user granted full testing permission). Read that file right after this one.
 PROGRESS 2026-10-01 (v2.08 pushed): step a done (notifications On at the preview URL); P0-4 event 1
 (voucher needs approval) and event 2 (approved + rejected, realtime) PASSED. Continue at b event 3.
 NEW WORK QUEUED: .claude/state/ROADMAP-VOUCHER-VAT.md (resubmit from Vouchers, admin auto-approve, VAT

@@ -156,15 +156,38 @@ ticking Done with paths, rewriting Next, suggesting the commit (`git log --oneli
   mig 25 (latest update_transaction_with_voucher) · mig 5/7 (voucher_approval_payable) · mig 27/28 (push)
 
 ## Next
-1. V4 preview checks, incl. the mig 29 server checks: admin expense -> Approved, no push; employee expense
-   -> pending + manager inbox row pending = true (orange dot, Waiting time, badge); approve -> the pending row
-   is gone; V2 non-VAT math (2% EWT on a 1,000 non-VAT invoice = 20.00; VAT invoice = 17.86) and the hidden
-   VAT lines. V3: rejected voucher -> Vouchers "View reason" -> Resubmit -> pending; admin own approved
-   expense Edit until printed (payable sync, refused once paid); tap a notification on a phone -> sheet
-   closes, page opens, row scrolls into view and pulses (vouchers, payables payments, sales); push click too.
-2. Open question for the user: should manual vouchers get an edit form (R6 says own manual vouchers too)?
+DONE 2026-10-02 (Claude-driven, prod build on :5199, playwright-core in the session scratchpad — not in
+the repo): a R3a PASS (expense has no VAT; manual Purpose Expense hides + zeroes WHT/return, Purchase
+re-ticks VAT; old expense voucher detail + print show no VAT split). b PASS (2% -> 17.86 ticked / 20.00
+unticked, VAT lines hidden). c PASS (pending row orange dot + "Waiting n mins", badge = unread + pending,
+tap -> /vouchers?focus row pulses, approve removes pending rows + opens payable, B gets approved/rejected,
+View reason -> prefilled non-VAT -> Resubmit -> pending + new A inbox row; phone sheet closes on tap).
+Push not checkable headless — check on devices.
+
+1. WAITING ON USER: pick which notification UI/UX fixes to implement (audit list, 2026-10-02):
+   P1 meta line truncates -> "Waiting …"/amount/time never visible (popover, phone sheet; only wide /admin
+      shows it) -> body on its own clamped line, waiting time as a warning chip/line.
+   P1 long title overflows the card past the chevron (ListCard title `w-fit` defeats `truncate`).
+   P1 /admin Notifications: All/Unread tabs + header "Mark all read" act on due alerts only, but sit above
+      Updates which has its own "Mark all read" -> two buttons, wrong-looking counts.
+   P2 status dot hangs half outside the card's left edge (desktop popover, phone sheet, /admin).
+   P2 unread vs read rows look the same apart from the dot (same title weight, no tint).
+   P2 phone sheet: up to 50 Updates push actionable due alerts (Overdue/Due today) far below; pending
+      requests not grouped -> "Needs your action" group first, then due alerts, then Updates.
+   P2 badge differs: desktop bell = inbox only, phone bell / admin tab = inbox + due alerts.
+   P2 stale pre-mig-29 "Voucher needs approval" rows (pending=false) remain for decided vouchers ->
+      one-off cleanup SQL (propose, never apply).
+   P2 "Mark all read" in popover/sheet is size xs (< 44px tap target on phone).
+   P3 error state shows the raw server message -> "Couldn't load updates" + Retry.
+   P3 push opt-in copy (manager) omits sales: "Vouchers and payments waiting…".
+   P3 Cash voucher detail panel shows an empty CHECK section (not notifications; found in a).
+2. After 1: implement the chosen fixes (tartar-shadcn), build + lint, suggest the commit.
+3. Open question for the user: should manual vouchers get an edit form (R6 says own manual vouchers too)?
 
 ## State
-Branch mobilel-app-native at 670cfe2 (Development v2.12 = V3, pushed). R3a (purchase-only VAT) uncommitted.
+Branch mobilel-app-native at b1917be (Development v2.13 = R3a, committed).
+QA rows from the 2026-10-02 test (P0-6 reset): purchases "QA V4 approve" -> QAT-PUR-2026-00000014
+(approved, payable Oct 9 ₱982.14) and "QA V4 reject" -> QAT-PUR-2026-00000015 (non-VAT, rejected then
+resubmitted, pending), both by qaemp2, plus their notifications.
 The mobile roadmap's P0-4 event checks 3 (payment verification) and 4 (sale verified) are still open;
 after mig 29, check 4's managers also get "Sale needs verification" on deposit.
