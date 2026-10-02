@@ -1,0 +1,19 @@
+[
+ {"note":"login admin","login":["qaadmin2@qa.test","env:QA_PASSWORD"],"stop":true},
+ {"note":"dashboard phone","goto":"/","settle":4000,"name":"d10p-dash"},
+ {"note":"tx card sheet","goto":"/transactions","settle":3500,"click":"main ul[aria-label] > li button","wait":1500,"name":"d10p-tx-sheet","text":"[role=dialog]","max":600},
+ {"note":"close","press":"Escape","always":true},
+ {"note":"sales card sheet","goto":"/sales","settle":3500,"click":"main ul[aria-label] > li button","wait":1500,"name":"d10p-sale-sheet","text":"[role=dialog]","max":600},
+ {"note":"close","press":"Escape","always":true},
+ {"note":"vouchers card sheet","goto":"/vouchers","settle":3500,"click":"main ul[aria-label] > li button","wait":1500,"name":"d10p-voucher-sheet","text":"[role=dialog]","max":600},
+ {"note":"voucher sheet dark","always":true,"js":"document.documentElement.classList.add('dark');1","wait":400,"name":"d10p-voucher-sheet-dark"},
+ {"note":"close","press":"Escape","always":true,"js":"document.documentElement.classList.remove('dark');1"},
+ {"note":"filters sheet","goto":"/transactions","settle":3000,"button":"Filters","page":true,"wait":1200,"name":"d10p-filters","text":"[role=dialog]","max":400},
+ {"note":"close","press":"Escape","always":true},
+ {"note":"record expense form","goto":"/expenses","settle":3000,"button":"Record expense","page":true,"wait":1500,"name":"d10p-expense-form","text":"[role=dialog]","max":500},
+ {"note":"close","press":"Escape","always":true},
+ {"note":"receivables","goto":"/receivables","settle":3500,"name":"d10p-receivables"},
+ {"note":"reports","goto":"/reports","settle":3500,"name":"d10p-reports"},
+ {"note":"account","goto":"/account","settle":3000,"name":"d10p-account"},
+ {"note":"x-overflow last","js":"document.documentElement.scrollWidth-document.documentElement.clientWidth"}
+]

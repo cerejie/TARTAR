@@ -6,7 +6,9 @@ import {
   detailRowValue,
   recordHero,
   recordHeroAmount,
+  recordHeroHeading,
   recordHeroName,
+  recordHeroSubtitle,
   recordHeroTags,
   recordSheet,
 } from "../../../styles/app/app.styles";
@@ -51,12 +53,16 @@ const RecordDetailSheet = <T,>({
       {record !== undefined && fields ? (
         <div className={recordSheet}>
           <div className={recordHero}>
-            <span className={recordHeroName}>
-              {fields.titles.map((field) => (
-                <Fragment key={field.id}>{field.content}</Fragment>
-              ))}
+            <span className={recordHeroHeading}>
+              <span className={recordHeroName}>
+                {fields.titles.map((field) => (
+                  <Fragment key={field.id}>{field.content}</Fragment>
+                ))}
+              </span>
               {fields.subtitles.map((field) => (
-                <Fragment key={field.id}> · {field.content}</Fragment>
+                <span key={field.id} className={recordHeroSubtitle}>
+                  {field.content}
+                </span>
               ))}
             </span>
             {fields.amounts.map((field) => (

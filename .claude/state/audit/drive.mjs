@@ -77,7 +77,7 @@ for (const s of steps) {
       await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
       await page.goto(`${base}/`, { waitUntil: "networkidle" });
       await page.getByLabel("Email").fill(s.login[0]);
-      await page.getByLabel("Password").fill(s.login[1]);
+      await page.getByLabel("Password").fill(s.login[1] === "env:QA_PASSWORD" ? process.env.QA_PASSWORD ?? "" : s.login[1]);
       await page.locator("button[type=submit]").click();
       await page.waitForURL((u) => !/\/login$/.test(u.pathname), { timeout: 15000 });
       await page.waitForTimeout(2500);

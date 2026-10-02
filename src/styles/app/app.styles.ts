@@ -123,6 +123,10 @@ export const recordHero = "flex flex-col items-center gap-2 pt-2 pb-5 text-cente
 
 export const recordHeroName = "max-w-full truncate text-sm font-medium text-muted-foreground";
 
+export const recordHeroHeading = "flex max-w-full flex-col items-center gap-0.5";
+
+export const recordHeroSubtitle = "max-w-full truncate text-caption text-muted-foreground";
+
 export const recordHeroAmount = moneyLevel({ level: "primary" });
 
 export const detailRows =

@@ -1,0 +1,13 @@
+[
+ {"note":"login emp","login":["qaemp1@qa.test","env:QA_PASSWORD"],"stop":true},
+ {"note":"warm sales","goto":"/sales","settle":4000},
+ {"note":"warm expenses","nav":"Expenses"},
+ {"note":"warm sales nav","nav":"Sales"},
+ {"note":"GO OFFLINE","offline":true},
+ {"note":"offline sale 1031","button":"Record sale","page":true,"fill":{"amount":"1031"},"pick":{"Cash account":"Cash Drawer"}},
+ {"submit":"Record","toasts":true,"queue":true},
+ {"note":"1031 listed pending","always":true,"text":"main tbody","max":500,"name":"d10-sale-pending"},
+ {"note":"BACK ONLINE","offline":false,"always":true,"wait":8000,"queue":true,"toasts":true,"name":"d10-after-flush"},
+ {"note":"failed list","always":true,"js":"JSON.parse(localStorage.getItem('tartar-sync-queue')||'{}').state?.failed?.map(f=>f.write.label+' => '+f.reason)"},
+ {"note":"sales after replay","always":true,"goto":"/sales","settle":3000,"expect":"1,031.00","text":"main tbody","max":500,"name":"d10-sales-replayed"}
+]

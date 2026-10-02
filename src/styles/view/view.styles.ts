@@ -56,14 +56,14 @@ export const viewFooter = "flex flex-col gap-4";
 export const bentoGrid = "grid grid-cols-2 gap-3 md:grid-cols-12 md:gap-4";
 
 export const bentoCell = cva(
-  "col-span-2 min-w-0 has-[>[data-stat]]:max-md:col-span-1 has-[>[data-stat]]:max-md:first:nth-last-[2n+1]:col-span-2",
+  "col-span-2 min-w-0 has-[>[data-stat]]:max-md:col-span-1 has-[>[data-stat]]:max-md:first:nth-last-[2n+1]:col-span-2 has-[>[data-stat]]:md:compact:first:nth-last-[2n+1]:col-span-12",
   {
     variants: {
       span: {
         quarter: "md:col-span-6 xl:col-span-3",
-        third: "md:col-span-6 xl:col-span-4",
+        third: "md:col-span-6 lg:col-span-4",
         half: "md:col-span-6",
-        twoThirds: "md:col-span-12 xl:col-span-8",
+        twoThirds: "md:col-span-12 lg:col-span-8",
         full: "md:col-span-12",
         main: "md:col-span-12 xl:col-span-9",
         aside: "md:col-span-12 xl:col-span-3",

@@ -90,3 +90,14 @@
 - Charts → main "Sales Overview" renamed "Sales trend" + period subtitle, same as admin (one question: how sales moved over the period)
 - Motion / icons → already compliant (navigation fades, expansion chevrons, FAB state, focus pulse; 16/20px icons); no change
 - Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed
+
+## 2026-10-03 — D10 Verification → Development v2.34
+- Running-balance ledger Open item → does not block D10 (verification covers what was built); carried to the PWA roadmap's Next as an Open business rule, not built
+- Harness → playwright-core installed in the session scratchpad (not the project); new .claude/state/audit/d10.mjs sweep (PW env = module path) with writes faked; drive.mjs reused for phone flows + offline
+- Roles → qaemp1 / qaacc1 / qaadmin2 (qaemp2 login now rejected: invalid email or password — noted for the user, not changed)
+- Offline regression → one real QA sale (1,031, qaemp1) queued offline and replayed, same as the existing o9 harness; added to the P0-6 reset list
+- Result → 172 route checks (3 roles × 4 viewports × light/dark): x-overflow 0, no page/console errors, cards on phone + tablet portrait, tables on tablet landscape + desktop; offline Pending sync + replay ok, failed list empty
+- Detail-sheet hero stray "·" under stacked title/subtitle cells → subtitle on its own line (mirrors the card head)
+- Tablet landscape bento gap (3 thirds wrapped 2+1 below xl) → third/twoThirds from lg; tablet portrait odd stat sets lead with a full-width card (phone pattern)
+- Handoff → D10 passed: mobile ROADMAP.md deleted, ROADMAP-PWA-SUSPENDED.md renamed to ROADMAP.md with a carry-over block; its Next item 1 is the device test script → hard-stop
+- Verification: yarn build + yarn lint clean; layout fixes confirmed in emulated-viewport screenshots, physical-device visuals unconfirmed
