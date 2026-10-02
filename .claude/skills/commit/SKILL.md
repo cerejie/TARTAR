@@ -55,7 +55,8 @@ Refactor: Tailwind And Shadcn Foundation
 
 ## Rules
 
-- **Never commit unless asked.** Not after finishing a task, not "to be safe".
+- **Never commit unless asked.** Not after finishing a task, not "to be safe". A `/autopilot`
+  run counts as asked, and also authorizes `git push origin HEAD` on a non-default branch.
 - **Never push, never create a PR, never switch or create a branch** unless asked.
 - Check the current branch first. If it is the default branch, say so and ask before committing.
 - Stage deliberately — the files the task touched, not `git add -A` over a dirty tree.

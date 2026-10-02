@@ -47,6 +47,9 @@ user never has to type them:
 4. **`commit`** — suggest mode after every change; commit mode only on request.
 5. **`checkpoint`** — only on `/checkpoint`, or a session opening with
    `.claude/state/ROADMAP.md` on disk.
+6. **`autopilot`** — only on `/autopilot` or a prompt starting `AUTOPILOT`: one roadmap phase,
+   decided by `decision-making`, committed and pushed on the current branch. That invocation is the
+   user's request to commit and push; it overrides "never commit unless asked" for that run only.
 
 ## Resuming multi-session work
 
