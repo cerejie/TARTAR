@@ -226,6 +226,23 @@ each phase, then a user check on a real phone.
     expense category "QA O12 Type" (QOT); bank "QA O12 Bank" again. Test push subscription already deleted.
 
 ## Next
+AUTOMATED RUN 2026-10-02 (Claude, headless Edge on the v2.17 preview via the Vercel share link; scripts in the
+session scratchpad, not the repo): 3.1-3.6 PASS in the inbox (pending rows + Waiting timer, approve, reject reason,
+View reason -> Resubmit -> new pending, payment + sale verify clear the request, notification tap -> /receivables or
+/sales ?focus=<id>, employee gets approved/rejected/sale verified). 4 PASS at 390x844 touch (drawer, Back closes
+drawer/form/Filters/Sort without leaving the page, form 831px with Save at 828, controls 44px on coarse pointer,
+load more 8 -> 79, x-overflow 0 on 11 pages + landscape 844x390, dark mode). 5 PASS (SW-controlled offline reload,
+banner "showing data saved" = P1-8 confirmed, offline sale Pending sync, queue empty after reconnect).
+LEFT FOR THE USER: push arrival on devices (3.1-3.6 as pushes), 3.7 tap with app closed, 3.8 sign-out, 3.9 digest,
+step 1 installs. Automation limits: Playwright Chrome on this machine drops the share-link cookie on SW requests
+(sw.js 302 -> no SW, no push) and its CacheStorage throws (managed Chrome policy?); Edge push subscribe fails or hangs
+under automation. If the phone's Chrome says "Notifications need the installed app...", sign in to Vercel on the
+phone or turn off Vercel Authentication for Previews. Minor (not fixed): the "Get a notification when it is decided?"
+offer also shows while offline.
+QA rows from this run (add to P0-6): expense 1,301 QAT-QAU-2026-00000010 (approved), expense 1,302
+QAT-QAU-2026-00000011 (pending after resubmit), payment PMT-QAT-2610-0007 51 (verified) on C-RACE-500-a0eb,
+sale 1,006 (verified), sale 1,007 (undeposited, recorded offline), plus their notifications rows.
+
 DEVICE TEST SCRIPT (agreed 2026-10-02) — next conversation walks the user through it ONE step at a time,
 waits for pass/fail per step, fixes failures (plan first), then P0-6 QA reset, merge, production deploy.
 Hardware: 1 phone (ask iOS or Android), 1 PC with Edge + Chrome. URL https://tartar-git-mobilel-app-native-ejieworx.vercel.app
