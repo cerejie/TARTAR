@@ -1,5 +1,5 @@
 # ROADMAP — Mobile-native design improvements
-Updated: 2026-10-03 (D5 done)
+Updated: 2026-10-03 (D6 done)
 
 ## Goal
 Move the main app from "desktop architecture with mobile components" to "shared business logic with
@@ -246,13 +246,27 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
   secondary action (createVouchers) → disbursement.list.hook openVoucher: resets the vouchers filter scope to
   search = payee + status, page 1, navigates /vouchers; rejected → "Resubmit" primary, Edit secondary.
 
+- [x] D6 Receivables / Payables phone flow (2026-10-03, autopilot). Compact: ledger/{Customer,Supplier}LedgerModal
+  render the party list plainly (styles/ledger `ledgerPane`) and {Customer,Supplier}LedgerView opens as its own
+  stacked full-screen AppModal (kind flow, title = party, onClose = closeLedgerDetail/closeSupplierDetail;
+  detail hooks expose `detailOpen`). Phone order: balance (new ledger/cards/LedgerPartyOverview: StatCard
+  outstanding + DetailRows unpaid / last payment / last transaction; desktop = the old 4-StatCard bento, now
+  shared) → Records (filter + cards: date title, reference subtitle, balance/amount due, status, amount + due
+  date meta) → Payments. Sheet footer (SheetActions): customer Record payment primary (selection, disabled
+  until rows picked) + Print statement secondary + Customer information in More; supplier Print statement.
+  Record sheets: customer-ledger row Record payment primary (selects that row, opens PaymentAllocationModal);
+  supplier-ledger + main PayableRecordsTable Mark paid primary; main LedgerRecordsTable Record payment primary
+  + Delete danger; detailTitle Receivable/Payable. Desktop two-pane modal unchanged (head styles' dead
+  max-lg variants and ledgerPayButton removed).
+
 ## Next
-1. D6 Receivables / Payables phone flow (see Phases). RecordDetailSheet + SheetActions + IDetailSection
-   `disclosure` are ready for the party → balance → records → payments → ledger sheet.
-2. D7 → D10 in order.
+1. D7 Forms (see Phases). EntityFormModal phone sections + sticky financial summary.
+2. D8 → D10 in order.
 
 ## Open
-- (none)
+- D6: a true running-balance ledger (debit/credit per record and payment, cumulative balance) was NOT built —
+  needs the user's rule on pending/rejected payments and on filtered date windows. The phone ledger shows each
+  record's amount + remaining balance (existing `ledgerBalance`) and Print statement. Decide before D10.
 
 ## State
 Branch mobile-app-native-newlook · Uncommitted: none ·
@@ -260,6 +274,7 @@ Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development
 D9 note: phone dashboard section labels reuse ListSection's small-caps head; desktop attention list sits in the
 bento main column (ListSection panel) — check visually. D4: confirm-from-sheet stacks the confirmation over
 the open detail sheet (React Aria nested overlay) — check on a phone; tables with > 2 meta columns now open a
-sheet even without detailSections. D5: "Open voucher" lands on Vouchers filtered by payee +
+sheet even without detailSections. D6: ledger detail is a sheet stacked on the party-list sheet (customer
+details edit opens from the list sheet underneath) — check overlay order on a phone. D5: "Open voucher" lands on Vouchers filtered by payee +
 status (search is payee-only, so same-payee vouchers with that status also show); action-row labels changed on
 desktop too (View reason → Resubmit where it opens a resubmit form).

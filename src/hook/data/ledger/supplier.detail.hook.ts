@@ -28,6 +28,7 @@ export const useSupplierDetailHook = () => {
   const closeSupplierDetail = useLedgerStore(
     (state) => state.closeSupplierDetail
   );
+  const detailOpen = useLedgerStore((state) => state.supplierDetailOpen);
 
   const markPaidModal = useModal<IPayable>(payableMarkPaidModalKey);
   const permissions = usePermissions();
@@ -75,6 +76,7 @@ export const useSupplierDetailHook = () => {
 
   return {
     supplier,
+    detailOpen,
     permissions,
     rows: listQuery.data ?? [],
     listLoading: listQuery.loading,

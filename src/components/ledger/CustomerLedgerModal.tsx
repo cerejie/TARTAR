@@ -5,12 +5,14 @@ import { useCustomerLedgerHook } from "../../hook/data/ledger/customer.ledger.ho
 import type { ICustomerReceivableSummary } from "../../models/data/ledger/ledger.response";
 import { ledgerKeyOf } from "../../models/data/ledger/ledger.response";
 import {
+  ledgerPane,
   slidePane,
   slidePanes,
   slideTrack,
 } from "../../styles/ledger/ledger.styles";
 import { nowrapCell } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
+import { useIsCompact } from "../../hook/common/breakpoint.hook";
 import SearchInput from "../common/filter/SearchInput";
 import RequirePermission from "../common/guard/RequirePermission";
 import AppModal from "../common/modal/AppModal";
@@ -35,6 +37,7 @@ const CustomerLedgerModal = () => {
     openCustomer,
     close,
   } = useCustomerLedgerHook();
+  const isCompact = useIsCompact();
 
   const actionsOf = (customer: ICustomerReceivableSummary): IRowAction[] => [
     {
@@ -103,6 +106,30 @@ const CustomerLedgerModal = () => {
     },
   ];
 
+  const partyList = (
+    <>
+      <SearchInput
+        placeholder="Search customer"
+        value={search}
+        onChange={(value) => setSearch(value ?? "")}
+      />
+      <DataTable<ICustomerReceivableSummary>
+        columns={columns}
+        data={customers}
+        loading={loading}
+        rowKey={ledgerKeyOf}
+        pageSize={5}
+        onRowClick={(customer) =>
+          openCustomer({
+            customerId: customer.customerId,
+            customerName: customer.customerName,
+          })
+        }
+        emptyText="No customers with receivables"
+      />
+    </>
+  );
+
   return (
     <AppModal
       title="Customer Ledger"
@@ -110,34 +137,23 @@ const CustomerLedgerModal = () => {
       size="xl"
       onClose={close}
     >
-      <div className={slidePanes}>
-        <div className={slideTrack({ detail: detailOpen })}>
-          <div className={slidePane} aria-hidden={detailOpen} inert={detailOpen}>
-            <SearchInput
-              placeholder="Search customer"
-              value={search}
-              onChange={(value) => setSearch(value ?? "")}
-            />
-            <DataTable<ICustomerReceivableSummary>
-              columns={columns}
-              data={customers}
-              loading={loading}
-              rowKey={ledgerKeyOf}
-              pageSize={5}
-              onRowClick={(customer) =>
-                openCustomer({
-                  customerId: customer.customerId,
-                  customerName: customer.customerName,
-                })
-              }
-              emptyText="No customers with receivables"
-            />
-          </div>
-          <div className={slidePane} aria-hidden={!detailOpen} inert={!detailOpen}>
-            <CustomerLedgerView />
+      {isCompact ? (
+        <>
+          <div className={ledgerPane}>{partyList}</div>
+          <CustomerLedgerView />
+        </>
+      ) : (
+        <div className={slidePanes}>
+          <div className={slideTrack({ detail: detailOpen })}>
+            <div className={slidePane} aria-hidden={detailOpen} inert={detailOpen}>
+              {partyList}
+            </div>
+            <div className={slidePane} aria-hidden={!detailOpen} inert={!detailOpen}>
+              <CustomerLedgerView />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <CustomerDetailsModal
         open={detailsModal.modal.visible}

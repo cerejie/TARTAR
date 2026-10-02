@@ -42,3 +42,15 @@
 - Purchases/Expenses voucher link → "Open voucher" navigates to /vouchers with vouchers filter = payee search + voucher status (no ?focus consumer exists; payee is the only search column), gated on createVouchers (route permission)
 - openVoucher location → disbursement.list.hook (owner of both tables; a separate hook kind would not fit list|form|detail|manage|scope)
 - Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed
+
+## 2026-10-03 — D6 Receivables / Payables phone flow → Development v2.30
+- Phone ledger shape → stacked full-screen detail sheet (AppModal kind flow) over the party-list sheet; desktop two-pane slide unchanged (minimal diff, one hook call, desktop untouched)
+- Two-pane slide on compact → removed; list renders plainly, detail is its own sheet with the party as title (back = close sheet)
+- Party balance → shared LedgerPartyOverview: phone StatCard outstanding + DetailRows facts; desktop keeps the 4-StatCard bento (dedupes customer/supplier)
+- Running balance (debit/credit cumulative) → not built; pending/rejected payments and filtered windows need a user rule (Open item). Ledger rows show date, reference, balance/amount due, amount, due date (existing math)
+- "Ledger" step → Print statement in the sheet footer (existing statement), records list is the on-screen ledger
+- Customer sheet primary → Record payment over the existing selection (disabled until picked); per-record sheet Record payment selects that one row (reuses PaymentAllocationModal)
+- Supplier primary Mark as paid → per-record sheet primary (rule is per payable); supplier sheet footer = Print statement
+- Main Receivables/Payables record sheets → Record payment / Mark paid primary, Delete danger (D5 pattern)
+- Dead max-lg head styles + ledgerPayButton → removed (head is desktop-only now)
+- Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed

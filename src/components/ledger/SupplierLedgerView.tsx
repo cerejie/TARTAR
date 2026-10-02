@@ -7,6 +7,7 @@ import {
   payableStatusValues,
 } from "../../enums/ledger.enum";
 import { ledgerExpansionKey } from "../../keys/table.keys";
+import { useIsCompact } from "../../hook/common/breakpoint.hook";
 import { useSupplierDetailHook } from "../../hook/data/ledger/supplier.detail.hook";
 import type { IRowAction } from "../../models/common/action.model";
 import {
@@ -21,6 +22,7 @@ import {
   ledgerHeadStart,
   ledgerIconButton,
   ledgerIconLabel,
+  ledgerPane,
   ledgerSectionTitle,
   ledgerTitle,
 } from "../../styles/ledger/ledger.styles";
@@ -30,20 +32,21 @@ import {
 } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { printStatement } from "../../utils/print.utils";
+import SheetActions from "../common/app/SheetActions";
 import AppButton from "../common/button/AppButton";
-import StatCard from "../common/card/StatCard";
 import FilterToolbar from "../common/filter/FilterToolbar";
 import LedgerFilterBar from "../common/filter/LedgerFilterBar";
+import AppModal from "../common/modal/AppModal";
 import StatusTag from "../common/status/StatusTag";
 import DataTable from "../common/table/DataTable";
 import RowActionMenu from "../common/table/RowActionMenu";
-import BentoCell from "../common/view/BentoCell";
-import BentoGrid from "../common/view/BentoGrid";
 import PaymentsPanel from "../payment/PaymentsPanel";
+import LedgerPartyOverview from "./cards/LedgerPartyOverview";
 
 const SupplierLedgerView = () => {
   const {
     supplier,
+    detailOpen,
     permissions,
     rows,
     listLoading,
@@ -57,8 +60,29 @@ const SupplierLedgerView = () => {
     openMarkPaid,
     closeSupplierDetail,
   } = useSupplierDetailHook();
+  const isCompact = useIsCompact();
 
   if (!supplier) return null;
+
+  const printLedgerStatement = () =>
+    printStatement(
+      "payable",
+      supplier.partyName,
+      summary,
+      rows,
+      payments,
+      branchName
+    );
+
+  const ledgerActions: IRowAction[] = [
+    {
+      key: "print",
+      label: "Print statement",
+      icon: <Printer />,
+      priority: "secondary",
+      onSelect: printLedgerStatement,
+    },
+  ];
 
   const actionsOf = (row: IPayable): IRowAction[] =>
     permissions.encodeTransactions
@@ -67,6 +91,7 @@ const SupplierLedgerView = () => {
             key: "mark-paid",
             label: row.status === "paid" ? "Already paid" : "Mark paid",
             icon: <CircleCheck />,
+            priority: "primary",
             disabled: row.status === "paid",
             onSelect: () => openMarkPaid(row),
           },
@@ -82,7 +107,6 @@ const SupplierLedgerView = () => {
     },
     {
       title: "Due date",
-      mobile: "hidden",
       dataIndex: "due_date",
       width: 120,
       render: (value: string) => formatDate(value),
@@ -95,7 +119,7 @@ const SupplierLedgerView = () => {
     },
     {
       title: "Reference",
-      mobile: "hidden",
+      mobile: "subtitle",
       dataIndex: "reference_number",
       render: (value: string | null) => value || "—",
     },
@@ -173,77 +197,45 @@ const SupplierLedgerView = () => {
     },
   ];
 
-  return (
-    <>
-      <div className={ledgerHead}>
-        <div className={ledgerHeadStart}>
-          <AppButton
-            variant="outline"
-            className={ledgerIconButton}
-            onPress={closeSupplierDetail}
-          >
-            <ArrowLeft />
-            <span className={ledgerIconLabel}>Back to suppliers</span>
-          </AppButton>
-          <h2 className={ledgerTitle}>{supplier.partyName}</h2>
-        </div>
-        <div className={ledgerHeadActions}>
-          <AppButton
-            variant="outline"
-            className={ledgerIconButton}
-            onPress={() =>
-              printStatement(
-                "payable",
-                supplier.partyName,
-                summary,
-                rows,
-                payments,
-                branchName
-              )
-            }
-          >
-            <Printer />
-            <span className={ledgerIconLabel}>Print statement</span>
-          </AppButton>
-        </div>
+  const ledgerHeader = (
+    <div className={ledgerHead}>
+      <div className={ledgerHeadStart}>
+        <AppButton
+          variant="outline"
+          className={ledgerIconButton}
+          onPress={closeSupplierDetail}
+        >
+          <ArrowLeft />
+          <span className={ledgerIconLabel}>Back to suppliers</span>
+        </AppButton>
+        <h2 className={ledgerTitle}>{supplier.partyName}</h2>
       </div>
+      <div className={ledgerHeadActions}>
+        <AppButton
+          variant="outline"
+          className={ledgerIconButton}
+          onPress={printLedgerStatement}
+        >
+          <Printer />
+          <span className={ledgerIconLabel}>Print statement</span>
+        </AppButton>
+      </div>
+    </div>
+  );
 
-      <BentoGrid>
-        <BentoCell span="quarter">
-          <StatCard
-            title="Outstanding balance"
-            value={summary?.outstanding ?? 0}
-            loading={summaryLoading}
-            variant={
-              summary && summary.outstanding > 0 ? "negative" : "positive"
-            }
-          />
-        </BentoCell>
-        <BentoCell span="quarter">
-          <StatCard
-            title="Unpaid payables"
-            value={summary?.unpaidCount ?? 0}
-            loading={summaryLoading}
-            raw
-          />
-        </BentoCell>
-        <BentoCell span="quarter">
-          <StatCard
-            title="Last payment"
-            value={formatDate(lastPayment)}
-            loading={lastPaymentLoading}
-            raw
-          />
-        </BentoCell>
-        <BentoCell span="quarter">
-          <StatCard
-            title="Last transaction"
-            value={formatDate(summary?.lastTransactionAt ?? null)}
-            loading={summaryLoading}
-            raw
-          />
-        </BentoCell>
-      </BentoGrid>
+  const content = (
+    <>
+      {isCompact ? null : ledgerHeader}
+
+      <LedgerPartyOverview
+        summary={summary}
+        summaryLoading={summaryLoading}
+        lastPayment={lastPayment}
+        lastPaymentLoading={lastPaymentLoading}
+        unpaidLabel="Unpaid payables"
+      />
+
+      {isCompact ? <h3 className={ledgerSectionTitle}>Records</h3> : null}
 
       <FilterToolbar>
         <LedgerFilterBar
@@ -261,6 +253,8 @@ const SupplierLedgerView = () => {
         pageSize={5}
         expansionKey={ledgerExpansionKey("supplier-ledger")}
         detailSections={detailSections}
+        detailTitle={() => "Payable"}
+        detailActions={actionsOf}
         emptyText="No payables match the filters"
         rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
       />
@@ -274,6 +268,20 @@ const SupplierLedgerView = () => {
         }}
       />
     </>
+  );
+
+  if (!isCompact) return content;
+
+  return (
+    <AppModal
+      open={detailOpen}
+      title={supplier.partyName}
+      kind="flow"
+      footer={<SheetActions actions={ledgerActions} />}
+      onClose={closeSupplierDetail}
+    >
+      <div className={ledgerPane}>{content}</div>
+    </AppModal>
   );
 };
 

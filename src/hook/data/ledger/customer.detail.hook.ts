@@ -35,6 +35,7 @@ import { customerSummaryKey } from "./customer.ledger.hook";
 export const useCustomerDetailHook = () => {
   const customer = useLedgerStore((state) => state.ledgerCustomer);
   const closeLedgerDetail = useLedgerStore((state) => state.closeLedgerDetail);
+  const detailOpen = useLedgerStore((state) => state.ledgerDetailOpen);
   const selection = useLedgerStore((state) => state.ledgerSelection);
   const setSelection = useLedgerStore((state) => state.setLedgerSelection);
 
@@ -111,6 +112,7 @@ export const useCustomerDetailHook = () => {
 
   return {
     customer,
+    detailOpen,
     permissions,
     rows,
     selection,

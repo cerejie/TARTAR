@@ -3,12 +3,14 @@ import { useSupplierLedgerHook } from "../../hook/data/ledger/supplier.ledger.ho
 import type { ILedgerPartySummary } from "../../models/data/ledger/ledger.response";
 import { partyKeyOf } from "../../models/data/ledger/ledger.response";
 import {
+  ledgerPane,
   slidePane,
   slidePanes,
   slideTrack,
 } from "../../styles/ledger/ledger.styles";
 import { nowrapCell } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
+import { useIsCompact } from "../../hook/common/breakpoint.hook";
 import SearchInput from "../common/filter/SearchInput";
 import AppModal from "../common/modal/AppModal";
 import AvatarCell from "../common/table/AvatarCell";
@@ -26,6 +28,7 @@ const SupplierLedgerModal = () => {
     openSupplier,
     close,
   } = useSupplierLedgerHook();
+  const isCompact = useIsCompact();
 
   const columns: IDataTableColumn<ILedgerPartySummary>[] = [
     {
@@ -61,6 +64,25 @@ const SupplierLedgerModal = () => {
     },
   ];
 
+  const partyList = (
+    <>
+      <SearchInput
+        placeholder="Search supplier"
+        value={search}
+        onChange={(value) => setSearch(value ?? "")}
+      />
+      <DataTable<ILedgerPartySummary>
+        columns={columns}
+        data={suppliers}
+        loading={loading}
+        rowKey={partyKeyOf}
+        pageSize={5}
+        onRowClick={openSupplier}
+        emptyText="No suppliers with payables"
+      />
+    </>
+  );
+
   return (
     <AppModal
       title="Supplier Ledger"
@@ -68,29 +90,23 @@ const SupplierLedgerModal = () => {
       size="xl"
       onClose={close}
     >
-      <div className={slidePanes}>
-        <div className={slideTrack({ detail: detailOpen })}>
-          <div className={slidePane} aria-hidden={detailOpen} inert={detailOpen}>
-            <SearchInput
-              placeholder="Search supplier"
-              value={search}
-              onChange={(value) => setSearch(value ?? "")}
-            />
-            <DataTable<ILedgerPartySummary>
-              columns={columns}
-              data={suppliers}
-              loading={loading}
-              rowKey={partyKeyOf}
-              pageSize={5}
-              onRowClick={openSupplier}
-              emptyText="No suppliers with payables"
-            />
-          </div>
-          <div className={slidePane} aria-hidden={!detailOpen} inert={!detailOpen}>
-            <SupplierLedgerView />
+      {isCompact ? (
+        <>
+          <div className={ledgerPane}>{partyList}</div>
+          <SupplierLedgerView />
+        </>
+      ) : (
+        <div className={slidePanes}>
+          <div className={slideTrack({ detail: detailOpen })}>
+            <div className={slidePane} aria-hidden={detailOpen} inert={detailOpen}>
+              {partyList}
+            </div>
+            <div className={slidePane} aria-hidden={!detailOpen} inert={!detailOpen}>
+              <SupplierLedgerView />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </AppModal>
   );
 };

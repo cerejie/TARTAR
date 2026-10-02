@@ -5,6 +5,7 @@ import {
   Info,
   Printer,
 } from "lucide-react";
+import type { IRowAction } from "../../models/common/action.model";
 import type { IDetailSection } from "../../models/common/detail.model";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import { customerDetailsModalKey } from "../../keys/modal.keys";
@@ -14,6 +15,7 @@ import {
   ledgerStatusLabels,
 } from "../../enums/ledger.enum";
 import StatusTag from "../common/status/StatusTag";
+import { useIsCompact } from "../../hook/common/breakpoint.hook";
 import { useModalActions } from "../../hook/common/modal.hook";
 import { useCustomerDetailHook } from "../../hook/data/ledger/customer.detail.hook";
 import {
@@ -27,28 +29,29 @@ import {
   ledgerHeadStart,
   ledgerIconButton,
   ledgerIconLabel,
-  ledgerPayButton,
+  ledgerPane,
   ledgerSectionTitle,
   ledgerTitle,
 } from "../../styles/ledger/ledger.styles";
 import { dataTableRowOverdue } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { printStatement } from "../../utils/print.utils";
+import SheetActions from "../common/app/SheetActions";
 import AppButton from "../common/button/AppButton";
-import StatCard from "../common/card/StatCard";
 import FilterToolbar from "../common/filter/FilterToolbar";
 import LedgerFilterBar from "../common/filter/LedgerFilterBar";
 import RequirePermission from "../common/guard/RequirePermission";
+import AppModal from "../common/modal/AppModal";
 import DataTable from "../common/table/DataTable";
-import BentoCell from "../common/view/BentoCell";
-import BentoGrid from "../common/view/BentoGrid";
 import PaymentsPanel from "../payment/PaymentsPanel";
+import LedgerPartyOverview from "./cards/LedgerPartyOverview";
 import CustomerInfoModal from "./CustomerInfoModal";
 import PaymentAllocationModal from "./PaymentAllocationModal";
 
 const CustomerLedgerView = () => {
   const {
     customer,
+    detailOpen,
     permissions,
     rows,
     selection,
@@ -69,8 +72,72 @@ const CustomerLedgerView = () => {
   } = useCustomerDetailHook();
 
   const { openModal } = useModalActions();
+  const isCompact = useIsCompact();
 
   if (!customer) return null;
+
+  const printLedgerStatement = () =>
+    printStatement(
+      "receivable",
+      customer.customerName,
+      summary,
+      rows,
+      payments,
+      branchName
+    );
+
+  const payReceivable = (row: IReceivable) => {
+    setSelection([row.id]);
+    paymentModal.openModal();
+  };
+
+  const rowActionsOf = (row: IReceivable): IRowAction[] =>
+    permissions.encodeTransactions
+      ? [
+          {
+            key: "payment",
+            label:
+              row.status === "paid"
+                ? "Record payment — already paid"
+                : "Record payment",
+            icon: <CircleDollarSign />,
+            priority: "primary",
+            disabled: row.status === "paid",
+            onSelect: () => payReceivable(row),
+          },
+        ]
+      : [];
+
+  const ledgerActions: IRowAction[] = [
+    ...(permissions.encodeTransactions
+      ? [
+          {
+            key: "payment",
+            label:
+              selectedRows.length === 0
+                ? "Select receivables to pay"
+                : "Record payment",
+            icon: <CircleDollarSign />,
+            priority: "primary" as const,
+            disabled: selectedRows.length === 0,
+            onSelect: () => paymentModal.openModal(),
+          },
+        ]
+      : []),
+    {
+      key: "print",
+      label: "Print statement",
+      icon: <Printer />,
+      priority: "secondary",
+      onSelect: printLedgerStatement,
+    },
+    {
+      key: "info",
+      label: "Customer information",
+      icon: <Info />,
+      onSelect: () => infoModal.openModal(),
+    },
+  ];
 
   const columns: IDataTableColumn<IReceivable>[] = [
     {
@@ -81,7 +148,6 @@ const CustomerLedgerView = () => {
     },
     {
       title: "Due date",
-      mobile: "hidden",
       dataIndex: "due_date",
       width: 120,
       render: (value: string) => formatDate(value),
@@ -94,13 +160,12 @@ const CustomerLedgerView = () => {
     },
     {
       title: "Reference",
-      mobile: "hidden",
+      mobile: "subtitle",
       dataIndex: "reference_number",
       render: (value: string | null) => value || "—",
     },
     {
       title: "Amount",
-      mobile: "hidden",
       dataIndex: "amount",
       align: "right",
       render: (value: number) => formatMoney(value),
@@ -183,99 +248,66 @@ const CustomerLedgerView = () => {
     },
   ];
 
-  return (
-    <>
-      <div className={ledgerHead}>
-        <div className={ledgerHeadStart}>
-          <AppButton
-            variant="outline"
-            className={ledgerIconButton}
-            onPress={closeLedgerDetail}
-          >
-            <ArrowLeft />
-            <span className={ledgerIconLabel}>Back to customers</span>
-          </AppButton>
-          <h2 className={ledgerTitle}>{customer.customerName}</h2>
-        </div>
-        <div className={ledgerHeadActions}>
-          <AppButton
-            variant="outline"
-            size="icon"
-            aria-label={`Information for ${customer.customerName}`}
-            tooltip="Customer information"
-            onPress={() => infoModal.openModal()}
-          >
-            <Info />
-          </AppButton>
-          <AppButton
-            variant="outline"
-            className={ledgerIconButton}
-            onPress={() =>
-              printStatement(
-                "receivable",
-                customer.customerName,
-                summary,
-                rows,
-                payments,
-                branchName
-              )
-            }
-          >
-            <Printer />
-            <span className={ledgerIconLabel}>Print statement</span>
-          </AppButton>
-          <RequirePermission can="encodeTransactions" fallback={null}>
-            <AppButton
-              variant={selectedRows.length === 0 ? "outline" : "default"}
-              className={ledgerPayButton}
-              disabled={selectedRows.length === 0}
-              onPress={() => paymentModal.openModal()}
-            >
-              <CircleDollarSign />
-              {selectedRows.length === 0
-                ? "Select receivables to pay"
-                : "Record payment"}
-            </AppButton>
-          </RequirePermission>
-        </div>
+  const ledgerHeader = (
+    <div className={ledgerHead}>
+      <div className={ledgerHeadStart}>
+        <AppButton
+          variant="outline"
+          className={ledgerIconButton}
+          onPress={closeLedgerDetail}
+        >
+          <ArrowLeft />
+          <span className={ledgerIconLabel}>Back to customers</span>
+        </AppButton>
+        <h2 className={ledgerTitle}>{customer.customerName}</h2>
       </div>
+      <div className={ledgerHeadActions}>
+        <AppButton
+          variant="outline"
+          size="icon"
+          aria-label={`Information for ${customer.customerName}`}
+          tooltip="Customer information"
+          onPress={() => infoModal.openModal()}
+        >
+          <Info />
+        </AppButton>
+        <AppButton
+          variant="outline"
+          className={ledgerIconButton}
+          onPress={printLedgerStatement}
+        >
+          <Printer />
+          <span className={ledgerIconLabel}>Print statement</span>
+        </AppButton>
+        <RequirePermission can="encodeTransactions" fallback={null}>
+          <AppButton
+            variant={selectedRows.length === 0 ? "outline" : "default"}
+            disabled={selectedRows.length === 0}
+            onPress={() => paymentModal.openModal()}
+          >
+            <CircleDollarSign />
+            {selectedRows.length === 0
+              ? "Select receivables to pay"
+              : "Record payment"}
+          </AppButton>
+        </RequirePermission>
+      </div>
+    </div>
+  );
 
-      <BentoGrid>
-        <BentoCell span="quarter">
-          <StatCard
-            title="Outstanding balance"
-            value={summary?.outstanding ?? 0}
-            loading={summaryLoading}
-            variant={
-              summary && summary.outstanding > 0 ? "negative" : "positive"
-            }
-          />
-        </BentoCell>
-        <BentoCell span="quarter">
-          <StatCard
-            title="Unpaid transactions"
-            value={summary?.unpaidCount ?? 0}
-            loading={summaryLoading}
-            raw
-          />
-        </BentoCell>
-        <BentoCell span="quarter">
-          <StatCard
-            title="Last payment"
-            value={formatDate(lastPayment)}
-            loading={lastPaymentLoading}
-            raw
-          />
-        </BentoCell>
-        <BentoCell span="quarter">
-          <StatCard
-            title="Last transaction"
-            value={formatDate(summary?.lastTransactionAt ?? null)}
-            loading={summaryLoading}
-            raw
-          />
-        </BentoCell>
-      </BentoGrid>
+  const content = (
+    <>
+      {isCompact ? null : ledgerHeader}
+
+      <LedgerPartyOverview
+        summary={summary}
+        summaryLoading={summaryLoading}
+        lastPayment={lastPayment}
+        lastPaymentLoading={lastPaymentLoading}
+        unpaidLabel="Unpaid transactions"
+      />
+
+      {isCompact ? <h3 className={ledgerSectionTitle}>Records</h3> : null}
 
       <FilterToolbar>
         <LedgerFilterBar
@@ -293,6 +325,8 @@ const CustomerLedgerView = () => {
         pageSize={5}
         expansionKey={ledgerExpansionKey("customer-ledger")}
         detailSections={detailSections}
+        detailTitle={() => "Receivable"}
+        detailActions={rowActionsOf}
         emptyText="No receivables match the filters"
         rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
         rowSelection={{
@@ -334,6 +368,20 @@ const CustomerLedgerView = () => {
         onClose={paymentModal.closeModal}
       />
     </>
+  );
+
+  if (!isCompact) return content;
+
+  return (
+    <AppModal
+      open={detailOpen}
+      title={customer.customerName}
+      kind="flow"
+      footer={<SheetActions actions={ledgerActions} />}
+      onClose={closeLedgerDetail}
+    >
+      <div className={ledgerPane}>{content}</div>
+    </AppModal>
   );
 };
 

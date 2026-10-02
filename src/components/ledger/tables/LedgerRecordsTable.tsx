@@ -88,6 +88,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
                 ? "Record payment — already paid"
                 : "Record payment",
             icon: <CircleDollarSign />,
+            priority: "primary" as const,
             disabled: row.status === "paid",
             onSelect: () => openPaymentFor(row),
           },
@@ -263,6 +264,8 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
           onPageChange={goToPage}
           expansionKey={ledgerExpansionKey(scope)}
           detailSections={detailSections}
+          detailTitle={() => title}
+          detailActions={actionsOf}
           emptyText={`No ${noun}s match the current filters`}
           rowClassName={(row) =>
             isLedgerOverdue(row) ? dataTableRowOverdue : ""

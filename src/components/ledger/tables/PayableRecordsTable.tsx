@@ -70,6 +70,7 @@ const PayableRecordsTable = () => {
             key: "mark-paid",
             label: row.status === "paid" ? "Already paid" : "Mark paid",
             icon: <CircleCheck />,
+            priority: "primary",
             disabled: row.status === "paid",
             onSelect: () => markPaidModal.openModal(row),
           },
@@ -197,6 +198,8 @@ const PayableRecordsTable = () => {
         onPageChange={goToPage}
         expansionKey={ledgerExpansionKey("payables")}
         detailSections={detailSections}
+        detailTitle={() => "Payable"}
+        detailActions={actionsOf}
         emptyText="No payables match the current filters"
         rowClassName={(row) =>
           isLedgerOverdue(row) ? dataTableRowOverdue : ""
