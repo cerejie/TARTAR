@@ -16,7 +16,7 @@ import {
   ledgerStatusLabels,
 } from "../../enums/ledger.enum";
 import StatusTag from "../common/status/StatusTag";
-import { useIsCompact } from "../../hook/common/breakpoint.hook";
+import { useIsCompact, useIsPhone } from "../../hook/common/breakpoint.hook";
 import { useModalActions } from "../../hook/common/modal.hook";
 import { useCustomerDetailHook } from "../../hook/data/ledger/customer.detail.hook";
 import {
@@ -74,6 +74,7 @@ const CustomerLedgerView = () => {
 
   const { openModal } = useModalActions();
   const isCompact = useIsCompact();
+  const isPhone = useIsPhone();
 
   if (!customer) return null;
 
@@ -125,13 +126,17 @@ const CustomerLedgerView = () => {
           },
         ]
       : []),
-    {
-      key: "print",
-      label: "Print statement",
-      icon: <Printer />,
-      priority: "secondary",
-      onSelect: printLedgerStatement,
-    },
+    ...(isPhone
+      ? []
+      : [
+          {
+            key: "print",
+            label: "Print statement",
+            icon: <Printer />,
+            priority: "secondary" as const,
+            onSelect: printLedgerStatement,
+          },
+        ]),
     {
       key: "info",
       label: "Customer information",

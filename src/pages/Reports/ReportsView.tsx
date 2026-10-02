@@ -8,7 +8,7 @@ import CashFlowReport from "../../components/report/CashFlowReport";
 import ExpensesReport from "../../components/report/ExpensesReport";
 import LedgerReport from "../../components/report/LedgerReport";
 import PeriodReport from "../../components/report/PeriodReport";
-import { useIsCompact } from "../../hook/common/breakpoint.hook";
+import { useIsCompact, useIsPhone } from "../../hook/common/breakpoint.hook";
 import { useReportHook } from "../../hook/data/report/report.hook";
 import {
   reportTypeLabels,
@@ -43,6 +43,7 @@ const ReportsView = () => {
     setSummaryRange,
   } = useReportHook();
   const isCompact = useIsCompact();
+  const isPhone = useIsPhone();
 
   const state: IReportState = { loading, refreshing, error, onRetry: retry };
 
@@ -99,7 +100,7 @@ const ReportsView = () => {
     <ContentView
       meta={period}
       actions={isCompact ? undefined : printButton}
-      footer={isCompact ? printButton : undefined}
+      footer={isCompact && !isPhone ? printButton : undefined}
       tabs={
         <ContextSwitch
           label="Report type"

@@ -8,7 +8,7 @@ import {
   payableStatusValues,
 } from "../../enums/ledger.enum";
 import { ledgerExpansionKey } from "../../keys/table.keys";
-import { useIsCompact } from "../../hook/common/breakpoint.hook";
+import { useIsCompact, useIsPhone } from "../../hook/common/breakpoint.hook";
 import { useSupplierDetailHook } from "../../hook/data/ledger/supplier.detail.hook";
 import type { IRowAction } from "../../models/common/action.model";
 import {
@@ -62,6 +62,7 @@ const SupplierLedgerView = () => {
     closeSupplierDetail,
   } = useSupplierDetailHook();
   const isCompact = useIsCompact();
+  const isPhone = useIsPhone();
 
   if (!supplier) return null;
 
@@ -75,15 +76,17 @@ const SupplierLedgerView = () => {
       branchName
     );
 
-  const ledgerActions: IRowAction[] = [
-    {
-      key: "print",
-      label: "Print statement",
-      icon: <Printer />,
-      priority: "secondary",
-      onSelect: printLedgerStatement,
-    },
-  ];
+  const ledgerActions: IRowAction[] = isPhone
+    ? []
+    : [
+        {
+          key: "print",
+          label: "Print statement",
+          icon: <Printer />,
+          priority: "secondary",
+          onSelect: printLedgerStatement,
+        },
+      ];
 
   const actionsOf = (row: IPayable): IRowAction[] =>
     permissions.encodeTransactions
@@ -279,7 +282,11 @@ const SupplierLedgerView = () => {
       open={detailOpen}
       title={supplier.partyName}
       kind="flow"
-      footer={<SheetActions actions={ledgerActions} />}
+      footer={
+        ledgerActions.length > 0 ? (
+          <SheetActions actions={ledgerActions} />
+        ) : undefined
+      }
       onClose={closeSupplierDetail}
     >
       <div className={ledgerPane}>{content}</div>

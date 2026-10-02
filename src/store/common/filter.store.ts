@@ -40,8 +40,13 @@ export const useFilterStore = create<States & Actions>()((set) => ({
       },
     })),
   resetFilters: (scope) =>
-    set((state) => ({ filters: { ...state.filters, [scope]: {} } })),
+    set((state) => ({
+      filters: { ...state.filters, [scope]: initialValues.filters[scope] },
+    })),
 }));
 
 export const selectFilters = (scope: ILedgerFilterScope) => (state: States) =>
   state.filters[scope];
+
+export const defaultFiltersOf = (scope: ILedgerFilterScope): ILedgerFilters =>
+  initialValues.filters[scope];

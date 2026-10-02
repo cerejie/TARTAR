@@ -31,6 +31,7 @@ import {
   voucherTypeLabels,
   type VoucherStatus,
 } from "../../../enums/voucher.enum";
+import { useIsPhone } from "../../../hook/common/breakpoint.hook";
 import { useVoucherListHook } from "../../../hook/data/voucher/voucher.list.hook";
 import { voucherExpansionKey } from "../../../keys/table.keys";
 import type { IRowAction } from "../../../models/common/action.model";
@@ -98,6 +99,7 @@ const VouchersTable = () => {
     reasonModal,
     isOwnOpen,
   } = useVoucherListHook();
+  const isPhone = useIsPhone();
 
   const sourceActionsOf = (voucher: IVoucher): IRowAction[] => {
     if (voucher.status === "rejected") {
@@ -167,15 +169,19 @@ const VouchersTable = () => {
             },
           ]
         : []),
-      {
-        key: "print",
-        label: "Print voucher",
-        hint: isApproved ? undefined : "Needs approval",
-        icon: <Printer />,
-        priority: isApproved ? "secondary" : undefined,
-        disabled: !isApproved,
-        onSelect: () => print(voucher),
-      },
+      ...(isPhone
+        ? []
+        : [
+            {
+              key: "print",
+              label: "Print voucher",
+              hint: isApproved ? undefined : "Needs approval",
+              icon: <Printer />,
+              priority: isApproved ? ("secondary" as const) : undefined,
+              disabled: !isApproved,
+              onSelect: () => print(voucher),
+            },
+          ]),
     ];
   };
 

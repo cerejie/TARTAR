@@ -15,6 +15,7 @@ import { sortSheetModalKey } from "../../../keys/modal.keys";
 import type { ISortOption } from "../../../models/common/table.model";
 import {
   filterPill,
+  filterPillLabel,
   filterSort,
   filterSortLabel,
   filterSortSelect,
@@ -52,7 +53,7 @@ const SortSelect = ({ value, options, onChange }: IProps) => {
           onPress={() => sheet.openModal()}
         >
           <ArrowUpDown />
-          Sort
+          <span className={filterPillLabel}>Sort</span>
         </Button>
         <AppSheet open={sheet.modal.visible} title="Sort by" onClose={sheet.closeModal}>
           <div role="group" aria-label="Sort by" className={sortSheetList}>

@@ -20,6 +20,8 @@ import { useModal } from "../../../hook/common/modal.hook";
 import { filterSheetModalKey } from "../../../keys/modal.keys";
 import {
   filterPill,
+  filterPillBadge,
+  filterPillLabel,
   filterPopover,
   filterPopoverHead,
   filterPopoverTitle,
@@ -56,8 +58,10 @@ const FilterPopover = ({ activeCount, onReset, quick, children }: IProps) => {
       onPress={isCompact ? () => sheet.openModal() : undefined}
     >
       <SlidersHorizontal />
-      Filters
-      {activeCount > 0 ? <Badge>{activeCount}</Badge> : null}
+      <span className={filterPillLabel}>Filters</span>
+      {activeCount > 0 ? (
+        <Badge className={filterPillBadge}>{activeCount}</Badge>
+      ) : null}
       {isCompact ? null : <ChevronDown />}
     </Button>
   );

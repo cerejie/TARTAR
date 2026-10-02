@@ -3,6 +3,7 @@ import type {
   ILedgerFilters,
 } from "../../models/common/filter.model";
 import {
+  defaultFiltersOf,
   selectFilters,
   useFilterStore,
 } from "../../store/common/filter.store";
@@ -15,6 +16,7 @@ export const useLedgerFilters = (scope: ILedgerFilterScope = "page") => {
 
   return {
     filters,
+    defaults: defaultFiltersOf(scope),
     setFilters: (patch: Partial<ILedgerFilters>) => set(scope, patch),
     resetFilters: () => reset(scope),
   };

@@ -32,6 +32,7 @@ import {
   voucherStatusLabels,
   voucherTypeLabels,
 } from "../../../enums/voucher.enum";
+import { useIsPhone } from "../../../hook/common/breakpoint.hook";
 import { useConfirm } from "../../../hook/common/confirmation.hook";
 import { useExpenseListHook } from "../../../hook/data/expense/expense.list.hook";
 import { expenseListKey } from "../../../keys/query.keys";
@@ -92,6 +93,7 @@ const ExpensesTable = () => {
     printPeriod,
     openVoucher,
   } = useExpenseListHook();
+  const isPhone = useIsPhone();
 
   const openConfirm = useConfirm();
 
@@ -337,10 +339,12 @@ const ExpensesTable = () => {
             }
           >
             <LedgerFilterBar layout="popover" />
-            <AppButton variant="outline" onPress={openPrint}>
-              <Printer />
-              Print
-            </AppButton>
+            {isPhone ? null : (
+              <AppButton variant="outline" onPress={openPrint}>
+                <Printer />
+                Print
+              </AppButton>
+            )}
           </FilterToolbar>
         }
         footer={

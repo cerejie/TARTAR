@@ -126,35 +126,39 @@ acc: no Vouchers/Branches/Master Data/Users; non-admins land on /transactions).
 
 ## Done
 - R0 Visual audit -> findings F1–F16 above (no source changes).
+- R1 Receivables/Payables/Vouchers phone toolbar (F1–F4) -> inline toolbar search
+  (`SearchInput toolbar`, `data-toolbar-search`/`data-filled`) in `LedgerFilterBar`; CSS variant
+  `toolbar-searching` in `styles/common/theme.css` keyed on `[data-filter-toolbar]`
+  (`FilterToolbar`) collapses Filters/Sort to 40px icon pills (`filterPillLabel`,
+  `filterPillBadge` in `styles/filter/filter.styles.ts`); app-bar search mode retired
+  (`AppBarSearch`, `SearchTrigger`, `view.store` searchMode, `useSearchMode`,
+  `useAppBarSearchHook`, `ISearchMode` deleted). Badge: `activeFilterCount(filters, defaults)`
+  counts only fields differing from the scope default (`defaultFiltersOf` in `filter.store`),
+  inline search not counted; Reset restores scope defaults (keeps the inline search). Print hidden
+  on phone (`useIsPhone`) in Sales/Purchases/Expenses toolbars, Reports footer, Vouchers row/detail
+  action, Customer/Supplier ledger sheet footer. Emulated 390/820/1440 checked.
 
 ## Next
-1. R1 Receivables/Payables phone toolbar (user items 1 + 2, L4) — F1, F2, F3, F4. Files to start
-   from: `components/common/filter/SearchTrigger.tsx`, `components/common/filter/LedgerFilterBar.tsx`,
-   `components/common/layout/{PhoneShell,AppBarSearch}.tsx`, `hook/common/search.hook.ts`,
-   `hook/layout/app.bar.hook.ts`, `store/common/view.store.ts`, `components/ledger/views/LedgerRecordsSection.tsx`,
-   `components/ledger/tables/LedgerPaymentsTable.tsx`; print entries in
-   `components/{sale,purchase,expense,voucher}/tables/*Table.tsx`, `pages/Reports/ReportsView.tsx`,
-   `components/ledger/{Customer,Supplier}LedgerView.tsx`. Vouchers gets the same inline search.
-2. R2 Customer ledger infinite scroll on phone (user item 3, L3) — F5, F6. Files:
+1. R2 Customer ledger infinite scroll on phone (user item 3, L3) — F5, F6. Files:
    `components/ledger/{Customer,Supplier}LedgerModal.tsx`, `components/ledger/{Customer,Supplier}LedgerView.tsx`,
    `components/ledger/tables/{LedgerPartiesTable,LedgerRecordsTable,PayableRecordsTable,LedgerPaymentsTable}.tsx`;
    reuse whatever the Records list already uses for phone next-page loading (PWA D6).
-3. R3 Customer detail native redesign on phone (user item 4) — F7, F8. Files:
+2. R3 Customer detail native redesign on phone (user item 4) — F7, F8. Files:
    `components/ledger/{CustomerLedgerView,SupplierLedgerView,CustomerDetailsModal}.tsx`,
    `components/ledger/cards/LedgerPartyOverview.tsx`, `components/ledger/tables/LedgerPartiesTable.tsx`.
    Record-payment selection behaviour stays as built (no new rule); only its entry point and
    visibility change.
-4. R4 Sheets and stat tiles polish — F9, F10, F11 (ledger record detail footer, Filters sheet
+3. R4 Sheets and stat tiles polish — F9, F10, F11 (ledger record detail footer, Filters sheet
    chrome, two-line stat captions on phone).
-5. R5 Phone card content — F12, F13, F14, F15 (Master Data segment fit, omit empty fields,
+4. R5 Phone card content — F12, F13, F14, F15 (Master Data segment fit, omit empty fields,
    transaction card description line, "records" copy).
-6. R6 Tablet portrait ledger grid — F16 (tablet portrait only; phone and desktop unchanged).
-7. RZ Final sweep: re-run the R0 browse on every route for all three roles at phone + tablet
+5. R6 Tablet portrait ledger grid — F16 (tablet portrait only; phone and desktop unchanged).
+6. RZ Final sweep: re-run the R0 browse on every route for all three roles at phone + tablet
    portrait, fix small regressions, then rename `ROADMAP-PWA-SUSPENDED.md` back to `ROADMAP.md`
    (delete this file; its record is git history + LOG.md) and hard-stop: the PWA Next item 1 is
    the device test script, which needs the user.
 
 ## State
-- Last commit: Development v2.35 (R0 Visual audit). Audit harness lives only in the R0 worker's
+- Last commit: Development v2.36 (R1 phone toolbar + print hidden). Previous: v2.35 (R0). Audit harness lives only in the R0 worker's
   scratchpad (`lib.mjs` login + faked writes, `sweep.mjs`, `ledger.mjs`, `party2.mjs`,
   `detail.mjs`); `.claude/state/audit/d10.mjs` is the committed equivalent to copy from.

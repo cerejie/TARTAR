@@ -10,24 +10,25 @@ type IProps = {
   value: string | undefined;
   placeholder: string;
   onChange: (value: string | undefined) => void;
-  autoFocus?: boolean;
-  fill?: boolean;
+  toolbar?: boolean;
 };
 
 const SearchInput = ({
   value,
   placeholder,
   onChange,
-  autoFocus = false,
-  fill = false,
+  toolbar = false,
 }: IProps) => (
-  <InputGroup className={filterSearch({ fill })}>
+  <InputGroup
+    className={filterSearch({ toolbar })}
+    data-toolbar-search={toolbar || undefined}
+    data-filled={(toolbar && Boolean(value)) || undefined}
+  >
     <InputGroupAddon>
       <Search />
     </InputGroupAddon>
     <InputGroupInput
       type="search"
-      autoFocus={autoFocus}
       aria-label={placeholder}
       placeholder={placeholder}
       value={value ?? ""}

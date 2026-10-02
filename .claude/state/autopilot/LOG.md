@@ -112,3 +112,15 @@
 - Fix phases → R4 sheets + stat tiles, R5 phone card content, R6 tablet-portrait ledger grid (tablet-only finding, allowed by L1)
 - "9 accounts" vs "9 records" → copy fix to "records" (count is records; wording only, not a business rule)
 - Verification: no source changes; emulated-viewport checked, physical device unconfirmed
+
+## 2026-10-03 — R1 Receivables/Payables phone toolbar → Development v2.36
+- Inline search mechanism → CSS-only expand/collapse (`toolbar-searching` custom variant on `[data-filter-toolbar]` :has focus-within or data-filled) instead of focus state in a store (no useState rule; no new state for an ephemeral focus)
+- Search placement → always flex-1 in the toolbar row; Filters + Sort sit beside it and collapse to 40px icon pills (40 matches the existing phone toolbar height, not 44)
+- App-bar search mode → retired entirely (no caller left): AppBarSearch, SearchTrigger, view.store searchMode, useSearchMode, useAppBarSearchHook, ISearchMode deleted
+- F2 badge → inline search excluded from the count on compact; Reset keeps the visible search
+- F3 badge → payments scope default paymentStatus "pending" was counted; count now compares each field to the scope default (defaultFiltersOf)
+- Reset semantics → restore the scope defaults instead of {} (otherwise a reset payments list shows a badge of 1); side effect: Receivables Reset returns the status pill to its default "Unpaid" — UI only, reversible
+- Print on phone → useIsPhone (phone only); tablet portrait keeps Reports footer print and statement print (L1)
+- Supplier ledger sheet with no actions on phone → footer undefined (AppModal Close) rather than an empty footer; F5 (R2) removes Close
+- Tablet portrait search height → h-9 like the other pills there; h-10 only below md
+- Verification: yarn build + yarn lint clean; emulated-viewport checked (390 light/dark, 820, 1440: search 160→262px on focus, Filters/Sort 40x40 side by side, no badge from search, Payments badge gone, no Print on phone, x-overflow 0, no page errors), physical device unconfirmed

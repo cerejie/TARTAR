@@ -28,6 +28,7 @@ import DisbursementHistoryModal from "../../disbursement/modal/DisbursementHisto
 import UserCell from "../../user/table/cells/UserCell";
 import SaleFormModals from "../modal/SaleFormModals";
 import { saleStatusColors, saleStatusLabels } from "../../../enums/sale.enum";
+import { useIsPhone } from "../../../hook/common/breakpoint.hook";
 import { useSaleListHook } from "../../../hook/data/sale/sale.list.hook";
 import { saleExpansionKey } from "../../../keys/table.keys";
 import type { IRowAction } from "../../../models/common/action.model";
@@ -70,6 +71,7 @@ const SalesTable = () => {
     openPrint,
     printPeriod,
   } = useSaleListHook();
+  const isPhone = useIsPhone();
 
   const reviewerOf = (row: ISale) =>
     row.verified_by
@@ -341,10 +343,12 @@ const SalesTable = () => {
             }
           >
             <LedgerFilterBar layout="popover" />
-            <AppButton variant="outline" onPress={openPrint}>
-              <Printer />
-              Print
-            </AppButton>
+            {isPhone ? null : (
+              <AppButton variant="outline" onPress={openPrint}>
+                <Printer />
+                Print
+              </AppButton>
+            )}
           </FilterToolbar>
         }
         footer={

@@ -103,15 +103,25 @@ export const scopeToBranch = <T>(query: T, branch?: string | null): T =>
       ) as T)
     : query;
 
-export const activeFilterCount = (filters: ILedgerFilters): number =>
-  [
-    filters.dateFrom || filters.dateTo,
-    filters.dateBasis,
-    filters.paymentStatus,
-    filters.type,
-    filters.referenceNumber,
-    filters.search,
-  ].filter(Boolean).length;
+const countedFilterFields = [
+  "dateBasis",
+  "paymentStatus",
+  "type",
+  "referenceNumber",
+  "search",
+] as const satisfies readonly (keyof ILedgerFilters)[];
+
+export const activeFilterCount = (
+  filters: ILedgerFilters,
+  defaults: ILedgerFilters = {}
+): number => {
+  const dateCount = filters.dateFrom || filters.dateTo ? 1 : 0;
+  const fieldCount = countedFilterFields.filter(
+    (field) => (filters[field] || undefined) !== (defaults[field] || undefined)
+  ).length;
+
+  return dateCount + fieldCount;
+};
 
 export const ledgerFilterScopeOf = (
   scope: "receivables" | "payables"

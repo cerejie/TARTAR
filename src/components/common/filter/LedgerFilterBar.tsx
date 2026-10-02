@@ -29,7 +29,6 @@ import FilterPopover from "./FilterPopover";
 import FilterSelect from "./FilterSelect";
 import QuickDateFilters from "./QuickDateFilters";
 import SearchInput from "./SearchInput";
-import SearchTrigger from "./SearchTrigger";
 
 type ILedgerStatusFilter = NonNullable<ILedgerFilters["status"]>;
 
@@ -65,7 +64,8 @@ const LedgerFilterBar = ({
   scope = "page",
   layout = "inline",
 }: IProps) => {
-  const { filters, setFilters, resetFilters } = useLedgerFilters(scope);
+  const { filters, defaults, setFilters, resetFilters } =
+    useLedgerFilters(scope);
   const isCompact = useIsCompact();
 
   const defaultStatusValues: readonly ILedgerStatusFilter[] = showOverdue
@@ -74,21 +74,31 @@ const LedgerFilterBar = ({
   const statusFilterValues = statusValues ?? defaultStatusValues;
 
   const isPopover = layout === "popover";
-  const searchInAppBar = isPopover && isCompact && showSearch;
+  const searchInToolbar = isPopover && isCompact && showSearch;
   const searchPlaceholder = "Search name";
+  const countedFilters = searchInToolbar
+    ? { ...filters, search: defaults.search }
+    : filters;
+
+  const changeSearch = (search: string | undefined) => setFilters({ search });
+
+  const resetCountedFilters = () => {
+    resetFilters();
+    if (searchInToolbar) setFilters({ search: filters.search });
+  };
 
   const labelled = (label: string, control: ReactNode) =>
     isPopover ? <FilterField label={label}>{control}</FilterField> : control;
 
   const fields = (
     <div className={filterBar({ layout: isPopover ? "stack" : "inline" })}>
-      {showSearch && !searchInAppBar ? (
+      {showSearch && !searchInToolbar ? (
         labelled(
           "Name",
           <SearchInput
             placeholder={searchPlaceholder}
             value={filters.search}
-            onChange={(search) => setFilters({ search })}
+            onChange={changeSearch}
           />
         )
       ) : null}
@@ -178,12 +188,17 @@ const LedgerFilterBar = ({
 
   return (
     <>
-      {searchInAppBar ? (
-        <SearchTrigger scope={scope} placeholder={searchPlaceholder} />
+      {searchInToolbar ? (
+        <SearchInput
+          toolbar
+          placeholder={searchPlaceholder}
+          value={filters.search}
+          onChange={changeSearch}
+        />
       ) : null}
       <FilterPopover
-        activeCount={activeFilterCount(filters)}
-        onReset={resetFilters}
+        activeCount={activeFilterCount(countedFilters, defaults)}
+        onReset={resetCountedFilters}
         quick={
           <QuickDateFilters
             from={filters.dateFrom}

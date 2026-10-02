@@ -1,5 +1,3 @@
-import type { ILedgerFilterScope } from "./filter.model";
-
 export type ViewLayout = "stack" | "bento";
 
 export type BentoSpan =
@@ -36,9 +34,3 @@ export type DeviceClass =
   | "tabletPortrait"
   | "tabletLandscape"
   | "desktop";
-
-export interface ISearchMode {
-  scope: ILedgerFilterScope;
-  placeholder: string;
-  pathname: string;
-}

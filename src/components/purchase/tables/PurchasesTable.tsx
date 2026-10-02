@@ -33,6 +33,7 @@ import {
   voucherStatusLabels,
   voucherTypeLabels,
 } from "../../../enums/voucher.enum";
+import { useIsPhone } from "../../../hook/common/breakpoint.hook";
 import { useConfirm } from "../../../hook/common/confirmation.hook";
 import { usePurchaseListHook } from "../../../hook/data/purchase/purchase.list.hook";
 import { purchaseListKey } from "../../../keys/query.keys";
@@ -99,6 +100,7 @@ const PurchasesTable = () => {
     printPeriod,
     openVoucher,
   } = usePurchaseListHook();
+  const isPhone = useIsPhone();
 
   const openConfirm = useConfirm();
 
@@ -362,10 +364,12 @@ const PurchasesTable = () => {
             }
           >
             <LedgerFilterBar showDateBasis layout="popover" />
-            <AppButton variant="outline" onPress={openPrint}>
-              <Printer />
-              Print
-            </AppButton>
+            {isPhone ? null : (
+              <AppButton variant="outline" onPress={openPrint}>
+                <Printer />
+                Print
+              </AppButton>
+            )}
           </FilterToolbar>
         }
         footer={

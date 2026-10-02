@@ -3,10 +3,10 @@ import { cva } from "class-variance-authority";
 export const filterToolbar = "flex flex-wrap items-center gap-2 max-md:data-compact:flex-nowrap";
 
 export const filterToolbarStart =
-  "flex min-w-0 flex-auto flex-wrap items-center gap-2 max-md:in-data-compact:flex-none max-md:in-data-compact:flex-nowrap max-md:in-data-compact:[&>[data-slot=button]]:h-10 max-md:in-data-compact:[&>[data-slot=button]]:rounded-full max-md:in-data-compact:[&>[data-slot=button]]:px-4";
+  "flex min-w-0 flex-auto flex-wrap items-center gap-2 max-md:in-data-compact:flex-none max-md:in-data-compact:flex-nowrap max-md:in-data-compact:[&>[data-slot=button]]:h-10 max-md:in-data-compact:[&>[data-slot=button]]:rounded-full max-md:in-data-compact:[&>[data-slot=button]]:px-4 has-[[data-toolbar-search]]:flex-1 toolbar-searching:[&>[data-slot=button]]:size-10 toolbar-searching:[&>[data-slot=button]]:px-0!";
 
 export const filterToolbarActions =
-  "ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 max-md:in-data-compact:flex-nowrap max-md:in-data-compact:[&>[data-slot=button]]:h-10 max-md:in-data-compact:[&>[data-slot=button]]:rounded-full max-md:in-data-compact:[&>[data-slot=button]]:px-4";
+  "ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 max-md:in-data-compact:flex-nowrap max-md:in-data-compact:[&>[data-slot=button]]:h-10 max-md:in-data-compact:[&>[data-slot=button]]:rounded-full max-md:in-data-compact:[&>[data-slot=button]]:px-4 toolbar-searching:[&>[data-slot=button]]:size-10 toolbar-searching:[&>[data-slot=button]]:px-0!";
 
 export const filterBar = cva("flex gap-2", {
   variants: {
@@ -20,12 +20,12 @@ export const filterBar = cva("flex gap-2", {
 
 export const filterSearch = cva("w-full", {
   variants: {
-    fill: {
-      true: "min-w-0 flex-1",
+    toolbar: {
+      true: "min-w-0 flex-1 rounded-full max-md:h-10",
       false: "sm:w-56",
     },
   },
-  defaultVariants: { fill: false },
+  defaultVariants: { toolbar: false },
 });
 
 export const filterSelect = "w-full sm:w-40";
@@ -36,7 +36,12 @@ export const filterDatePlaceholder = "text-muted-foreground";
 
 export const filterDatePopover = "w-auto p-0";
 
-export const filterPill = "rounded-full";
+export const filterPill = "relative rounded-full";
+
+export const filterPillLabel = "toolbar-searching:sr-only";
+
+export const filterPillBadge =
+  "toolbar-searching:absolute toolbar-searching:-top-1 toolbar-searching:-right-1";
 
 export const filterPopover = "w-80";
 

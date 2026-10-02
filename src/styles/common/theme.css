@@ -7,6 +7,7 @@
     @slot;
   }
 }
+@custom-variant toolbar-searching (:where([data-filter-toolbar]:has([data-toolbar-search]:focus-within, [data-toolbar-search][data-filled])) &);
 @custom-variant wide {
   @media (width >= 64rem), (width >= 48rem) and (orientation: landscape) and (height >= 30rem) {
     @slot;
