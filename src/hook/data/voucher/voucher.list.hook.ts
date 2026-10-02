@@ -86,16 +86,20 @@ const deriveKindVatValues = (
 const isPurchaseVoucher = (values: IVoucherInput): boolean =>
   values.kind === "purchase";
 
+const isParticularsField = (field: IFieldConfig<IVoucherInput>): boolean =>
+  field.name === "particulars";
+
+const particularsFields = (): IFieldConfig<IVoucherInput>[] =>
+  voucherBreakdownFields<IVoucherInput>().filter(isParticularsField);
+
 const purchaseOnlyBreakdownFields = (): IFieldConfig<IVoucherInput>[] =>
-  voucherBreakdownFields<IVoucherInput>().map((field) =>
-    field.name === "particulars"
-      ? field
-      : {
-          ...field,
-          hidden: (values) =>
-            !isPurchaseVoucher(values) || (field.hidden?.(values) ?? false),
-        }
-  );
+  voucherBreakdownFields<IVoucherInput>()
+    .filter((field) => !isParticularsField(field))
+    .map((field) => ({
+      ...field,
+      hidden: (values) =>
+        !isPurchaseVoucher(values) || (field.hidden?.(values) ?? false),
+    }));
 
 const deriveManualVoucherValues = (
   changed: Path<IVoucherInput>,
@@ -254,67 +258,84 @@ export const useVoucherListHook = () => {
     if (!voucher.printed) void printedMutation.mutate(voucher.id);
   };
 
-  const fields: IFieldConfig<IVoucherInput>[] = [
+  const sections: IFieldSection<IVoucherInput>[] = [
     {
-      name: "type",
-      label: "Voucher type",
-      type: "select",
-      required: true,
-      options: toOptions(voucherTypeValues, voucherTypeLabels),
+      key: "voucher",
+      title: "Voucher",
+      fields: [
+        {
+          name: "type",
+          label: "Voucher type",
+          type: "select",
+          required: true,
+          options: toOptions(voucherTypeValues, voucherTypeLabels),
+        },
+        {
+          name: "kind",
+          label: "Purpose",
+          type: "select",
+          required: true,
+          options: toOptions(voucherKindValues, voucherKindLabels),
+        },
+        {
+          name: "branch",
+          label: "Branch",
+          type: "select",
+          required: true,
+          options: branchOptions,
+        },
+        { name: "payee", label: "Payee", type: "text", required: true },
+        {
+          name: "amount",
+          label: "Invoice amount",
+          type: "amount",
+          required: true,
+          prefix: "₱",
+          hint: "Invoice total as billed.",
+        },
+        {
+          name: "supplier_id",
+          label: "Supplier",
+          type: "select",
+          allowClear: true,
+          options: supplierOptions,
+          hidden: (values) => values.kind !== "purchase",
+        },
+        {
+          name: "due_date",
+          label: "Payable due date",
+          type: "date",
+          required: true,
+          hidden: (values) => values.kind !== "purchase",
+        },
+        ...particularsFields(),
+      ],
     },
     {
-      name: "kind",
-      label: "Purpose",
-      type: "select",
-      required: true,
-      options: toOptions(voucherKindValues, voucherKindLabels),
+      key: "payment",
+      title: "Payment",
+      fields: [
+        ...bankAccountFields<IVoucherInput>((values) => values.type === "check"),
+        {
+          name: "check_number",
+          label: "Check number",
+          type: "text",
+          required: true,
+          hidden: (values) => values.type !== "check",
+        },
+        {
+          name: "check_due_date",
+          label: "Check due date",
+          type: "date",
+          required: true,
+          hidden: (values) => values.type !== "check",
+        },
+      ],
     },
     {
-      name: "branch",
-      label: "Branch",
-      type: "select",
-      required: true,
-      options: branchOptions,
-    },
-    { name: "payee", label: "Payee", type: "text", required: true },
-    {
-      name: "amount",
-      label: "Invoice amount",
-      type: "amount",
-      required: true,
-      prefix: "₱",
-      hint: "Invoice total as billed.",
-    },
-    ...purchaseOnlyBreakdownFields(),
-    {
-      name: "supplier_id",
-      label: "Supplier",
-      type: "select",
-      allowClear: true,
-      options: supplierOptions,
-      hidden: (values) => values.kind !== "purchase",
-    },
-    {
-      name: "due_date",
-      label: "Payable due date",
-      type: "date",
-      required: true,
-      hidden: (values) => values.kind !== "purchase",
-    },
-    ...bankAccountFields<IVoucherInput>((values) => values.type === "check"),
-    {
-      name: "check_number",
-      label: "Check number",
-      type: "text",
-      required: true,
-      hidden: (values) => values.type !== "check",
-    },
-    {
-      name: "check_due_date",
-      label: "Check due date",
-      type: "date",
-      required: true,
-      hidden: (values) => values.type !== "check",
+      key: "breakdown",
+      title: "Voucher breakdown",
+      fields: purchaseOnlyBreakdownFields(),
     },
   ];
 
@@ -366,7 +387,7 @@ export const useVoucherListHook = () => {
     branchName,
     userNameOf,
     formModal,
-    fields,
+    sections,
     defaults,
     formSummary: voucherSummaryLines,
     deriveFormValues: deriveManualVoucherValues,

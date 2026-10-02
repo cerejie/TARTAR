@@ -77,7 +77,7 @@ const VouchersTable = () => {
     branchName,
     userNameOf,
     formModal,
-    fields,
+    sections,
     defaults,
     formSummary,
     deriveFormValues,
@@ -452,7 +452,7 @@ const VouchersTable = () => {
       <EntityFormModal<IVoucherInput>
         open={formModal.modal.visible}
         title="Manual voucher"
-        fields={fields}
+        sections={sections}
         summary={formSummary}
         deriveValues={deriveFormValues}
         schema={voucherSchema}
@@ -467,7 +467,7 @@ const VouchersTable = () => {
         <EntityFormModal<IVoucherInput>
           open={editModal.modal.visible}
           title={`Edit voucher · ${editRow.voucher_no ?? editRow.payee}`}
-          fields={fields}
+          sections={sections}
           summary={formSummary}
           deriveValues={deriveFormValues}
           schema={voucherSchema}

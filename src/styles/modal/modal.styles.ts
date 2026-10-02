@@ -23,6 +23,8 @@ export const modalBody = "-mx-6 -my-1 max-h-[70dvh] overflow-y-auto px-6 py-1";
 export const modalActionSize =
   "[&_[data-slot=button]]:h-11 [&_[data-slot=button]]:px-6";
 
+export const modalPinned = "-mx-6 border-t border-border px-6";
+
 export const modalFooter = `flex-wrap -mx-6 -mb-6 rounded-b-sheet border-t border-border bg-muted/50 px-6 py-4 ${modalActionSize}`;
 
 export const drawerContent =
@@ -44,6 +46,8 @@ export const drawerHeaderRuled =
   "border-b border-border pr-14 [&_[data-slot=sheet-title]]:text-base [&_[data-slot=sheet-title]]:font-semibold [&_[data-slot=sheet-title]]:leading-8";
 
 export const drawerBody = "min-h-0 flex-1 overflow-y-auto px-4 py-1";
+
+export const drawerPinned = "border-t border-border px-4";
 
 export const drawerFooter = `border-t border-border bg-muted/50 pb-safe ${modalActionSize}`;
 

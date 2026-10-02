@@ -21,10 +21,12 @@ import {
   drawerFooter,
   drawerHeaderRuled,
   drawerKind,
+  drawerPinned,
   modalBody,
   modalContent,
   modalFooter,
   modalHeaderRuled,
+  modalPinned,
   modalSize,
 } from "../../../styles/modal/modal.styles";
 
@@ -34,6 +36,7 @@ type IProps = {
   size?: ModalSize;
   kind?: SheetKind;
   footer?: ReactNode;
+  pinned?: ReactNode;
   onClose: () => void;
   children: ReactNode;
 };
@@ -44,6 +47,7 @@ const AppModal = ({
   size = "md",
   kind = "action",
   footer,
+  pinned,
   onClose,
   children,
 }: IProps) => {
@@ -73,6 +77,8 @@ const AppModal = ({
 
         <div className={drawerBody}>{children}</div>
 
+        {pinned ? <div className={drawerPinned}>{pinned}</div> : null}
+
         <SheetFooter className={drawerFooter}>{actions}</SheetFooter>
       </Sheet>
     );
@@ -90,6 +96,8 @@ const AppModal = ({
       </DialogHeader>
 
       <div className={modalBody}>{children}</div>
+
+      {pinned ? <div className={modalPinned}>{pinned}</div> : null}
 
       <DialogFooter className={modalFooter}>{actions}</DialogFooter>
     </Dialog>

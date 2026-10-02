@@ -54,3 +54,14 @@
 - Main Receivables/Payables record sheets → Record payment / Mark paid primary, Delete danger (D5 pattern)
 - Dead max-lg head styles + ledgerPayButton → removed (head is desktop-only now)
 - Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed
+
+## 2026-10-03 — D7 Forms → Development v2.31
+- Section metadata → existing IFieldSection drives it (no new field); compact + > 1 visible section = collapsible, desktop unchanged cards (minimal diff, no per-hook edits)
+- Default disclosure → every section starts expanded (create forms need every section filled; collapse is for navigating, not hiding required input)
+- Collapsed section with a validation error → forced open (sectionHasError), so a failed submit never hides its error
+- Collapse state → controlled Disclosure over new disclosure.store keyed by form useId, reset on open (useState banned; error-forcing needs control)
+- "Review" step → sticky FormSummaryBar pinned above the action bar on compact: total (emphasis) line always visible, tap reveals the rest; desktop keeps inline FormSummary
+- Pinned slot → generic AppModal `pinned` prop (both layouts) rather than a compact-only prop
+- Manual voucher form → converted to sections (Voucher → Payment → Voucher breakdown) mirroring the purchase form; particulars moved into the core section so the breakdown section is purchase-only
+- All-hidden sections → skipped (visibleSectionsOf), so cash/expense vouchers show no empty cards
+- Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed

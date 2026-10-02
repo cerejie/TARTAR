@@ -9,6 +9,8 @@ import {
   type Resolver,
 } from "react-hook-form";
 import type { ZodType } from "zod";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
+import { useSectionDisclosure } from "../../../hook/common/disclosure.hook";
 import type {
   IFieldConfig,
   IFieldSection,
@@ -18,12 +20,17 @@ import type { ConfirmKind } from "../../../models/common/modal.model";
 import type { ModalSize } from "../../../models/common/view.model";
 import { entityForm } from "../../../styles/form/form.styles";
 import { confirmAction } from "../../../styles/modal/modal.styles";
-import { lastKeyboardFieldOf } from "../../../utils/field.utils";
+import {
+  lastKeyboardFieldOf,
+  sectionHasError,
+  visibleSectionsOf,
+} from "../../../utils/field.utils";
 import AppButton from "../button/AppButton";
 import AppModal from "../modal/AppModal";
 import FormFieldGrid from "./FormFieldGrid";
 import FormSection from "./FormSection";
 import FormSummary from "./FormSummary";
+import FormSummaryBar from "./FormSummaryBar";
 
 type IBaseProps<TValues extends FieldValues> = {
   open: boolean;
@@ -65,8 +72,17 @@ const EntityFormModal = <TValues extends FieldValues>({
   deriveValues,
 }: IProps<TValues>) => {
   const formId = useId();
+  const isCompact = useIsCompact();
+  const disclosure = useSectionDisclosure(formId);
   const resolver = zodResolver(schema as never) as unknown as Resolver<TValues>;
-  const { control, handleSubmit, reset, setValue, watch } = useForm<TValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<TValues>({
     resolver,
     defaultValues,
   });
@@ -76,6 +92,7 @@ const EntityFormModal = <TValues extends FieldValues>({
     if (!open) return;
     reset(defaultValues);
     previousValues.current = { ...defaultValues };
+    disclosure.resetSections();
   }, [open, reset]);
 
   useEffect(() => {
@@ -97,10 +114,13 @@ const EntityFormModal = <TValues extends FieldValues>({
   }, [watch, setValue, deriveValues]);
 
   const values = watch();
+  const visibleSections = sections ? visibleSectionsOf(sections, values) : [];
   const lastKeyboardField = lastKeyboardFieldOf(
-    sections ? sections.flatMap((section) => section.fields) : (fields ?? []),
+    sections ? visibleSections.flatMap((section) => section.fields) : (fields ?? []),
     values
   );
+  const collapsible = isCompact && visibleSections.length > 1;
+  const summaryLines = summary?.(values);
 
   return (
     <AppModal
@@ -109,6 +129,9 @@ const EntityFormModal = <TValues extends FieldValues>({
       size={size}
       kind="form"
       onClose={onClose}
+      pinned={
+        summaryLines && isCompact ? <FormSummaryBar lines={summaryLines} /> : null
+      }
       footer={
         <>
           <AppButton variant="outline" disabled={submitting} onPress={onClose}>
@@ -133,13 +156,21 @@ const EntityFormModal = <TValues extends FieldValues>({
       >
         {intro}
         {sections ? (
-          sections.map((section) => (
+          visibleSections.map((section) => (
             <FormSection
               key={section.key}
               section={section}
               control={control}
               values={values}
               lastKeyboardField={lastKeyboardField}
+              collapsible={collapsible}
+              expanded={
+                !disclosure.isCollapsed(section.key) ||
+                sectionHasError(section, errors)
+              }
+              onExpandedChange={(expanded) =>
+                disclosure.setExpanded(section.key, expanded)
+              }
             />
           ))
         ) : (
@@ -150,7 +181,7 @@ const EntityFormModal = <TValues extends FieldValues>({
             lastKeyboardField={lastKeyboardField}
           />
         )}
-        {summary ? <FormSummary lines={summary(values)} /> : null}
+        {summaryLines && !isCompact ? <FormSummary lines={summaryLines} /> : null}
       </form>
     </AppModal>
   );

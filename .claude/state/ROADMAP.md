@@ -1,5 +1,5 @@
 # ROADMAP — Mobile-native design improvements
-Updated: 2026-10-03 (D6 done)
+Updated: 2026-10-03 (D7 done)
 
 ## Goal
 Move the main app from "desktop architecture with mobile components" to "shared business logic with
@@ -259,9 +259,21 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
   + Delete danger; detailTitle Receivable/Payable. Desktop two-pane modal unchanged (head styles' dead
   max-lg variants and ledgerPayButton removed).
 
+- [x] D7 Forms (2026-10-03, autopilot). common/form/EntityFormModal: compact + > 1 visible section → each
+  FormSection is a collapsible card (ui/collapsible, React Aria Disclosure; form.styles formSection{Disclosure,
+  HeaderToggle,Toggle,Chevron,PanelBody}); all start expanded, a section holding a field error is forced open
+  (utils/field.utils sectionHasError via RHF `get`); collapsed state in new store/common/disclosure.store +
+  hook/common/disclosure.hook useSectionDisclosure(formId), reset on open. Sections whose fields are all hidden
+  are skipped on every width (visibleSectionsOf). Sticky summary: AppModal `pinned` slot (drawerPinned /
+  modalPinned) between body and footer; compact forms with `summary` pin new common/form/FormSummaryBar (total
+  line = emphasis line, tap expands the other lines above it); desktop keeps the inline FormSummary. Manual
+  voucher form (voucher.list.hook → `sections`, VouchersTable) now Voucher (type, purpose, branch, payee, amount,
+  supplier, due date, particulars) → Payment (bank + check, hidden for cash) → Voucher breakdown (purchase only),
+  mirroring the purchase form; desktop voucher form now shows section cards too.
+
 ## Next
-1. D7 Forms (see Phases). EntityFormModal phone sections + sticky financial summary.
-2. D8 → D10 in order.
+1. D8 Secondary screens (see Phases).
+2. D9 → D10 in order.
 
 ## Open
 - D6: a true running-balance ledger (debit/credit per record and payment, cumulative balance) was NOT built —
@@ -270,11 +282,12 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
 
 ## State
 Branch mobile-app-native-newlook · Uncommitted: none ·
-Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.29 (D5, autopilot).
+Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.31 (D7, autopilot).
 D9 note: phone dashboard section labels reuse ListSection's small-caps head; desktop attention list sits in the
 bento main column (ListSection panel) — check visually. D4: confirm-from-sheet stacks the confirmation over
 the open detail sheet (React Aria nested overlay) — check on a phone; tables with > 2 meta columns now open a
 sheet even without detailSections. D6: ledger detail is a sheet stacked on the party-list sheet (customer
 details edit opens from the list sheet underneath) — check overlay order on a phone. D5: "Open voucher" lands on Vouchers filtered by payee +
 status (search is payee-only, so same-payee vouchers with that status also show); action-row labels changed on
-desktop too (View reason → Resubmit where it opens a resubmit form).
+desktop too (View reason → Resubmit where it opens a resubmit form). D7: phone form
+section toggles and the pinned summary bar (expands upward over the body) — check with the keyboard open on a phone.
