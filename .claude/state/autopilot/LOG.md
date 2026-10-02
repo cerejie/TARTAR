@@ -29,3 +29,16 @@
 - Detail rows → wrap long values instead of truncating (description was cut off in sheets)
 - Primary CTA height → 48px through sheetActions selector (beats drawerFooter's 44px), other footers unchanged until D9
 - Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed
+
+## 2026-10-03 — D5 Sales + Vouchers action-first → Development v2.29
+- Sale/voucher detail footer → reuse DataTable `detailActions` = the row-action list with `priority` (one source for row menu + sheet; no dedicated SaleSummary — RecordDetailSheet hero already shows amount, customer, status)
+- Sale verification + deposit status → the one sale_status chip in the hero + "Deposit and verification" section first (no new status rule)
+- Sale primary → Mark deposited (undeposited, encoder) / Verify (deposited, manager) / Resubmit (rejected, encoder); Reject + Delete stay danger with their existing confirm/modal
+- "View reason" label → "Resubmit" where it opens a resubmit form (sales, sourced vouchers, purchases, expenses); manual rejected voucher keeps "View reason" (view-only modal)
+- Collapsible sections → IDetailSection `disclosure` rendered by new RecordDetailSection over ui/collapsible (React Aria owns open state; no useState); desktop expanded row ignores it
+- Voucher sections → Financial summary open; Voucher details / Approval / Audit history collapsed (audit: no long accounting form by default); "Source" = existing voucherPurpose (no new rule)
+- Voucher audit history → created/prepared by/printed only (no voucher history table exists; no schema change)
+- Print in sheet → secondary when approved, else in More disabled with its "Needs approval" hint
+- Purchases/Expenses voucher link → "Open voucher" navigates to /vouchers with vouchers filter = payee search + voucher status (no ?focus consumer exists; payee is the only search column), gated on createVouchers (route permission)
+- openVoucher location → disbursement.list.hook (owner of both tables; a separate hook kind would not fit list|form|detail|manage|scope)
+- Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed

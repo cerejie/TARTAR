@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   transactionSortOptions,
   type DisbursementKind,
@@ -16,6 +17,7 @@ import {
 import {
   disbursementPaginationKey,
   disbursementSortKey,
+  voucherPaginationKey,
 } from "../../../keys/table.keys";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
@@ -26,6 +28,7 @@ import {
   type IDisbursement,
   type ITransactionAudit,
 } from "../../../models/data/transaction/transaction.response";
+import type { IVoucher } from "../../../models/data/voucher/voucher.response";
 import transactionServices from "../../../services/data/transaction.services";
 import {
   selectUserId,
@@ -35,6 +38,7 @@ import { isDisbursementEditLocked } from "../../../utils/disbursement.utils";
 import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
 import { printReport } from "../../../utils/print.utils";
 import { disbursementPrintDocument } from "../../../utils/report.utils";
+import { vouchersPath } from "../../../utils/route.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
 import { useModal } from "../../common/modal.hook";
@@ -85,6 +89,9 @@ export const useDisbursementListHook = (
   const offerPush = usePushOffer();
 
   const { filters } = useLedgerFilters("page");
+  const voucherFilters = useLedgerFilters("vouchers");
+  const voucherPagination = usePagination(voucherPaginationKey);
+  const navigate = useNavigate();
   const { branchName } = useBranchListHook();
   const { userById, userNameOf } = useUserListHook();
   const { paymentLabelOf } = useBankAccountListHook();
@@ -172,6 +179,16 @@ export const useDisbursementListHook = (
     );
   };
 
+  const openVoucher = (voucher: IVoucher) => {
+    voucherFilters.resetFilters();
+    voucherFilters.setFilters({
+      search: voucher.payee,
+      voucherStatus: voucher.status,
+    });
+    voucherPagination.setPagination({ pageNumber: 1 });
+    navigate(vouchersPath);
+  };
+
   return {
     permissions,
     rows,
@@ -214,5 +231,6 @@ export const useDisbursementListHook = (
     printModalKey,
     openPrint: () => printModal.openModal(),
     printPeriod,
+    openVoucher,
   };
 };

@@ -9,13 +9,11 @@ import {
   recordHeroName,
   recordHeroTags,
   recordSheet,
-  recordSheetSection,
-  recordSheetSectionTitle,
 } from "../../../styles/app/app.styles";
 import { visibleDetailSections } from "../../../utils/detail.utils";
 import AppSheet from "../app/AppSheet";
-import DetailRows from "../app/DetailRows";
 import SheetActions from "../app/SheetActions";
+import RecordDetailSection from "./RecordDetailSection";
 
 import type { IRowAction } from "../../../models/common/action.model";
 import type { IDetailSection } from "../../../models/common/detail.model";
@@ -87,13 +85,11 @@ const RecordDetailSheet = <T,>({
           ) : null}
 
           {visibleDetailSections(sections, record).map((section) => (
-            <section key={section.key} className={recordSheetSection}>
-              <h3 className={recordSheetSectionTitle}>
-                {section.icon}
-                {section.title}
-              </h3>
-              <DetailRows record={record} items={section.items} />
-            </section>
+            <RecordDetailSection
+              key={section.key}
+              section={section}
+              record={record}
+            />
           ))}
         </div>
       ) : null}

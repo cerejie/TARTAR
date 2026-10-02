@@ -145,6 +145,12 @@ export const recordSheetSection = "flex flex-col gap-1.5";
 export const recordSheetSectionTitle =
   "flex items-center gap-1.5 px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase [&_svg]:size-3.5";
 
+export const recordSheetSectionToggle =
+  "group/section-toggle flex min-h-11 w-full items-center gap-1.5 rounded-control px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-3.5";
+
+export const recordSheetSectionChevron =
+  "ml-auto transition-transform group-aria-expanded/section-toggle:rotate-180";
+
 export const sheetActions =
   "flex w-full flex-col gap-2 [&_[data-slot=button][data-variant=default]]:h-12 [&_[data-slot=button][data-variant=default]]:w-full [&_[data-slot=button][data-size^=icon]]:size-11 [&_[data-slot=button][data-size^=icon]]:px-0";
 

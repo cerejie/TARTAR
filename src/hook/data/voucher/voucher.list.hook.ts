@@ -68,6 +68,7 @@ import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useSupplierListHook } from "../party/supplier.list.hook";
+import { useUserListHook } from "../user/user.list.hook";
 
 const deriveKindVatValues = (
   changed: Path<IVoucherInput>,
@@ -143,6 +144,7 @@ export const useVoucherListHook = () => {
   const { branches, branchOptions, branchName, defaultBranch } =
     useBranchListHook();
   const { supplierOptions } = useSupplierListHook();
+  const { userNameOf } = useUserListHook();
   const { accountLabelOf, accountDefaultsOfLabel, bankAccountFields } =
     useBankAccountListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
@@ -362,6 +364,7 @@ export const useVoucherListHook = () => {
     error: listQuery.error,
     retry: listQuery.refetch,
     branchName,
+    userNameOf,
     formModal,
     fields,
     defaults,

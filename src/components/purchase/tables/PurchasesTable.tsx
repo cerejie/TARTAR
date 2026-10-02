@@ -3,6 +3,7 @@ import {
   FileText,
   History,
   MessageSquareWarning,
+  ReceiptText,
   Pencil,
   Plus,
   Printer,
@@ -95,6 +96,7 @@ const PurchasesTable = () => {
     printModalKey,
     openPrint,
     printPeriod,
+    openVoucher,
   } = usePurchaseListHook();
 
   const openConfirm = useConfirm();
@@ -106,14 +108,16 @@ const PurchasesTable = () => {
     const locked = isDisbursementLocked(row);
     const rejected = isDisbursementRejected(row);
     const editLocked = editLockedOf(row);
+    const voucher = row.voucher;
 
     return [
       ...(permissions.encodeTransactions && rejected
         ? [
             {
-              key: "view-reason",
-              label: "View reason",
+              key: "resubmit",
+              label: "Resubmit",
               icon: <MessageSquareWarning />,
+              priority: "primary" as const,
               onSelect: () => editModal.openModal(row),
             },
           ]
@@ -125,8 +129,20 @@ const PurchasesTable = () => {
               label: "Edit purchase",
               hint: editLocked ? "Locked" : undefined,
               icon: <Pencil />,
+              priority: "secondary" as const,
               disabled: editLocked,
               onSelect: () => editModal.openModal(row),
+            },
+          ]
+        : []),
+      ...(permissions.createVouchers && voucher
+        ? [
+            {
+              key: "open-voucher",
+              label: "Open voucher",
+              icon: <ReceiptText />,
+              priority: "secondary" as const,
+              onSelect: () => openVoucher(voucher),
             },
           ]
         : []),
@@ -297,9 +313,15 @@ const PurchasesTable = () => {
     },
     {
       key: "voucher",
-      title: "Voucher",
+      title: "Voucher created automatically",
       icon: <FileCheck />,
       items: [
+        {
+          key: "voucher_status",
+          label: "Voucher status",
+          render: (row) =>
+            row.voucher ? voucherStatusLabels[row.voucher.status] : "—",
+        },
         {
           key: "voucher_no",
           label: "Voucher no.",
@@ -367,6 +389,8 @@ const PurchasesTable = () => {
           expansionKey={disbursementExpansionKey(purchaseListKey)}
           pendingKeysOf={disbursementLinkedIds}
           detailSections={detailSections}
+          detailTitle={() => "Purchase"}
+          detailActions={actionsOf}
           emptyText="No purchases match the current filters"
         />
       </TablePanel>

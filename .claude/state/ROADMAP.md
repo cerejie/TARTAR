@@ -1,5 +1,5 @@
 # ROADMAP — Mobile-native design improvements
-Updated: 2026-10-03 (D4 done)
+Updated: 2026-10-03 (D5 done)
 
 ## Goal
 Move the main app from "desktop architecture with mobile components" to "shared business logic with
@@ -232,18 +232,34 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
   details (cash account, income source, party) → Audit (recorded by [manager], recorded at); detailTitle
   "<Type> transaction"; detailActions = delete for managers.
 
+- [x] D5 Sales + Vouchers action-first (2026-10-03, autopilot). IDetailSection `disclosure` (expanded |
+  collapsed; models/common/detail.model) → new common/table/RecordDetailSection (ui/collapsible, React Aria
+  Disclosure; app.styles recordSheetSectionToggle/Chevron); RecordDetailSheet uses it, desktop RowDetailPanel
+  ignores it. Sales (SalesTable): detailTitle "Sale", detailActions = row actions with priority — Mark deposited /
+  Verify / Resubmit sale primary (status- and role-aware, unchanged rules), Edit secondary, history in More,
+  Reject/Delete danger; sections Deposit and verification → Details → Audit. Vouchers (VouchersTable):
+  "<Type> voucher", Approve / Resubmit (sourced rejected; manual = View reason) primary, Edit + Print (approved)
+  secondary; sections Financial summary (expanded; voucherBreakdownItems) → Voucher details (source, payee,
+  reference, type, branch, category, due, check) → Approval (status, decided by/at, reason) → Audit history
+  (prepared by, created, printed), the last three collapsed; voucher.list.hook exposes userNameOf.
+  Purchases + Expenses (identical): section "Voucher created automatically" (+ voucher status), "Open voucher"
+  secondary action (createVouchers) → disbursement.list.hook openVoucher: resets the vouchers filter scope to
+  search = payee + status, page 1, navigates /vouchers; rejected → "Resubmit" primary, Edit secondary.
+
 ## Next
-1. D5 Sales + Vouchers action-first (see Phases). SheetActions + DataTable `detailActions` + IRowAction
-   `priority` are ready for the Verify / Record deposit / Approve / Resubmit footers.
-2. D6 → D10 in order.
+1. D6 Receivables / Payables phone flow (see Phases). RecordDetailSheet + SheetActions + IDetailSection
+   `disclosure` are ready for the party → balance → records → payments → ledger sheet.
+2. D7 → D10 in order.
 
 ## Open
 - (none)
 
 ## State
 Branch mobile-app-native-newlook · Uncommitted: none ·
-Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.28 (D4, autopilot).
+Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.29 (D5, autopilot).
 D9 note: phone dashboard section labels reuse ListSection's small-caps head; desktop attention list sits in the
 bento main column (ListSection panel) — check visually. D4: confirm-from-sheet stacks the confirmation over
 the open detail sheet (React Aria nested overlay) — check on a phone; tables with > 2 meta columns now open a
-sheet even without detailSections.
+sheet even without detailSections. D5: "Open voucher" lands on Vouchers filtered by payee +
+status (search is payee-only, so same-payee vouchers with that status also show); action-row labels changed on
+desktop too (View reason → Resubmit where it opens a resubmit form).

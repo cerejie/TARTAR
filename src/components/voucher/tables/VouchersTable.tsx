@@ -2,11 +2,12 @@ import {
   Calculator,
   Check,
   FileCheck,
-  Landmark,
+  History,
   MessageSquareWarning,
   Pencil,
   Plus,
   Printer,
+  ShieldCheck,
   X,
 } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
@@ -74,6 +75,7 @@ const VouchersTable = () => {
     error,
     retry,
     branchName,
+    userNameOf,
     formModal,
     fields,
     defaults,
@@ -102,8 +104,9 @@ const VouchersTable = () => {
       return [
         {
           key: "view-reason",
-          label: "View reason",
+          label: voucher.transaction_id ? "Resubmit" : "View reason",
           icon: <MessageSquareWarning />,
+          priority: "primary",
           onSelect: () =>
             voucher.transaction_id
               ? sourceModal.openModal(voucher)
@@ -120,6 +123,7 @@ const VouchersTable = () => {
           key: "edit",
           label: "Edit voucher",
           icon: <Pencil />,
+          priority: "secondary",
           onSelect: () => editModal.openModal(voucher),
         },
       ];
@@ -132,6 +136,7 @@ const VouchersTable = () => {
           voucherDisbursementKind(voucher)
         ].toLowerCase()}`,
         icon: <Pencil />,
+        priority: "secondary",
         onSelect: () => sourceModal.openModal(voucher),
       },
     ];
@@ -149,6 +154,7 @@ const VouchersTable = () => {
               key: "approve",
               label: "Approve voucher",
               icon: <Check />,
+              priority: "primary" as const,
               onSelect: () => confirmApprove(voucher),
             },
             {
@@ -165,6 +171,7 @@ const VouchersTable = () => {
         label: "Print voucher",
         hint: isApproved ? undefined : "Needs approval",
         icon: <Printer />,
+        priority: isApproved ? "secondary" : undefined,
         disabled: !isApproved,
         onSelect: () => print(voucher),
       },
@@ -260,19 +267,42 @@ const VouchersTable = () => {
 
   const detailSections: IDetailSection<IVoucher>[] = [
     {
+      key: "financial",
+      title: "Financial summary",
+      icon: <Calculator />,
+      disclosure: "expanded",
+      items: voucherBreakdownItems<IVoucher>((voucher) => voucher),
+    },
+    {
       key: "voucher",
-      title: "Voucher",
+      title: "Voucher details",
       icon: <FileCheck />,
+      disclosure: "collapsed",
       items: [
+        {
+          key: "source",
+          label: "Source",
+          render: (voucher) => voucherPurpose(voucher),
+        },
+        {
+          key: "payee",
+          label: "Payee",
+          render: (voucher) => voucher.payee,
+        },
+        {
+          key: "voucher_no",
+          label: "Reference",
+          render: (voucher) => voucher.voucher_no || "Pending sync",
+        },
+        {
+          key: "type",
+          label: "Voucher type",
+          render: (voucher) => voucherTypeLabels[voucher.type],
+        },
         {
           key: "branch",
           label: "Branch",
           render: (voucher) => branchName(voucher.branch),
-        },
-        {
-          key: "created_at",
-          label: "Created",
-          render: (voucher) => formatDateTime(voucher.created_at),
         },
         {
           key: "category",
@@ -285,25 +315,6 @@ const VouchersTable = () => {
           render: (voucher) =>
             voucher.due_date ? formatDate(voucher.due_date) : "—",
         },
-        {
-          key: "approved_at",
-          label: "Decided at",
-          render: (voucher) =>
-            voucher.approved_at ? formatDateTime(voucher.approved_at) : "—",
-        },
-      ],
-    },
-    {
-      key: "breakdown",
-      title: "Breakdown",
-      icon: <Calculator />,
-      items: voucherBreakdownItems<IVoucher>((voucher) => voucher),
-    },
-    {
-      key: "check",
-      title: "Check",
-      icon: <Landmark />,
-      items: [
         {
           key: "check_bank",
           hidden: (voucher) => voucher.type !== "check",
@@ -322,6 +333,60 @@ const VouchersTable = () => {
           label: "Check due date",
           render: (voucher) =>
             voucher.check_due_date ? formatDate(voucher.check_due_date) : "—",
+        },
+      ],
+    },
+    {
+      key: "approval",
+      title: "Approval",
+      icon: <ShieldCheck />,
+      disclosure: "collapsed",
+      items: [
+        {
+          key: "status",
+          label: "Status",
+          render: (voucher) => voucherStatusLabels[voucher.status],
+        },
+        {
+          key: "decided_by",
+          label: "Decided by",
+          hidden: (voucher) => !voucher.approved_by,
+          render: (voucher) => userNameOf(voucher.approved_by),
+        },
+        {
+          key: "approved_at",
+          label: "Decided at",
+          render: (voucher) =>
+            voucher.approved_at ? formatDateTime(voucher.approved_at) : "—",
+        },
+        {
+          key: "rejection_reason",
+          label: "Rejection reason",
+          hidden: (voucher) => !voucher.rejection_reason,
+          render: (voucher) => voucher.rejection_reason,
+        },
+      ],
+    },
+    {
+      key: "audit",
+      title: "Audit history",
+      icon: <History />,
+      disclosure: "collapsed",
+      items: [
+        {
+          key: "prepared_by",
+          label: "Prepared by",
+          render: (voucher) => userNameOf(voucher.created_by),
+        },
+        {
+          key: "created_at",
+          label: "Created",
+          render: (voucher) => formatDateTime(voucher.created_at),
+        },
+        {
+          key: "printed",
+          label: "Printed",
+          render: (voucher) => (voucher.printed ? "Yes" : "No"),
         },
       ],
     },
@@ -378,6 +443,8 @@ const VouchersTable = () => {
           onPageChange={goToPage}
           expansionKey={voucherExpansionKey}
           detailSections={detailSections}
+          detailTitle={(voucher) => `${voucherTypeLabels[voucher.type]} voucher`}
+          detailActions={actionsOf}
           emptyText="No vouchers match the current filters"
         />
       </TablePanel>

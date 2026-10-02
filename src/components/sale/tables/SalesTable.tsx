@@ -84,9 +84,10 @@ const SalesTable = () => {
       ...(permissions.encodeTransactions && rejected
         ? [
             {
-              key: "view-reason",
-              label: "View reason",
+              key: "resubmit",
+              label: "Resubmit sale",
               icon: <MessageSquareWarning />,
+              priority: "primary" as const,
               onSelect: () => resubmitModal.openModal(row),
             },
           ]
@@ -97,12 +98,14 @@ const SalesTable = () => {
               key: "deposit",
               label: "Mark deposited",
               icon: <Landmark />,
+              priority: "primary" as const,
               onSelect: () => depositModal.openModal(row),
             },
             {
               key: "edit",
               label: "Edit sale",
               icon: <Pencil />,
+              priority: "secondary" as const,
               onSelect: () => editModal.openModal(row),
             },
           ]
@@ -113,6 +116,7 @@ const SalesTable = () => {
               key: "verify",
               label: "Verify",
               icon: <BadgeCheck />,
+              priority: "primary" as const,
               onSelect: () => verifySale(row),
             },
             {
@@ -223,59 +227,8 @@ const SalesTable = () => {
 
   const detailSections: IDetailSection<ISale>[] = [
     {
-      key: "sale",
-      title: "Sale",
-      icon: <FileText />,
-      items: [
-        {
-          key: "reference",
-          label: "Reference",
-          render: (row) => row.reference_number || "—",
-        },
-        {
-          key: "branch",
-          label: "Branch",
-          render: (row) => branchName(row.branch),
-        },
-        ...(permissions.isManager
-          ? [
-              {
-                key: "recorded_by",
-                label: "Recorded by",
-                render: (row: ISale) => userNameOf(row.created_by),
-              },
-            ]
-          : []),
-        {
-          key: "income_source",
-          label: "Income source",
-          render: (row) => incomeSourceLabelOf(row.income_source),
-        },
-        {
-          key: "cash_account",
-          label: "Cash account",
-          render: (row) => paymentLabelOf(row),
-        },
-        {
-          key: "farm_section",
-          label: "Farm section",
-          render: (row) => row.farm_section || "—",
-        },
-        {
-          key: "description",
-          label: "Description",
-          render: (row) => row.description || "—",
-        },
-        {
-          key: "recorded_at",
-          label: "Recorded at",
-          render: (row) => formatDateTime(row.created_at),
-        },
-      ],
-    },
-    {
       key: "deposit",
-      title: "Deposit",
+      title: "Deposit and verification",
       icon: <Landmark />,
       items: [
         {
@@ -299,7 +252,66 @@ const SalesTable = () => {
         {
           key: "rejection_reason",
           label: "Rejection reason",
-          render: (row) => row.rejection_reason || "—",
+          hidden: (row) => !row.rejection_reason,
+          render: (row) => row.rejection_reason,
+        },
+      ],
+    },
+    {
+      key: "sale",
+      title: "Details",
+      icon: <FileText />,
+      items: [
+        {
+          key: "reference",
+          label: "Reference",
+          render: (row) => row.reference_number || "—",
+        },
+        {
+          key: "branch",
+          label: "Branch",
+          render: (row) => branchName(row.branch),
+        },
+        {
+          key: "income_source",
+          label: "Income source",
+          render: (row) => incomeSourceLabelOf(row.income_source),
+        },
+        {
+          key: "cash_account",
+          label: "Cash account",
+          render: (row) => paymentLabelOf(row),
+        },
+        {
+          key: "farm_section",
+          label: "Farm section",
+          render: (row) => row.farm_section || "—",
+        },
+        {
+          key: "description",
+          label: "Description",
+          render: (row) => row.description || "—",
+        },
+      ],
+    },
+    {
+      key: "audit",
+      title: "Audit",
+      icon: <History />,
+      items: [
+        ...(permissions.isManager
+          ? [
+              {
+                key: "recorded_by",
+                label: "Recorded by",
+                render: (row: ISale) => userNameOf(row.created_by),
+              },
+            ]
+          : []),
+        {
+          key: "recorded_at",
+          label: "Recorded at",
+          render: (row) => formatDateTime(row.created_at),
         },
       ],
     },
@@ -355,6 +367,8 @@ const SalesTable = () => {
           onPageChange={goToPage}
           expansionKey={saleExpansionKey}
           detailSections={detailSections}
+          detailTitle={() => "Sale"}
+          detailActions={actionsOf}
           emptyText="No sales match the current filters"
         />
       </TablePanel>
