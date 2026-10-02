@@ -2,6 +2,16 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @custom-variant dark (&:is(.dark *));
+@custom-variant compact {
+  @media (width < 48rem), (width < 64rem) and (orientation: portrait), (width < 64rem) and (height < 30rem) {
+    @slot;
+  }
+}
+@custom-variant wide {
+  @media (width >= 64rem), (width >= 48rem) and (orientation: landscape) and (height >= 30rem) {
+    @slot;
+  }
+}
 
 @layer base {
   :root {

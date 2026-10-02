@@ -12,8 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useIsMobile } from "@/hook/use-mobile";
 import { cn } from "@/utils/cn.utils";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import {
   rowExpansionPersistProps,
   useRowExpansion,
@@ -142,7 +142,7 @@ const DataTable = <T extends object>({
   pendingKeysOf,
 }: IProps<T>) => {
   const tableId = useId();
-  const isMobile = useIsMobile();
+  const isCompact = useIsCompact();
   const expansion = useRowExpansion(expansionKey ?? tableId);
   const { expandedRow, collapsingRow, toggleRow, endCollapse } = expansion;
   const { sort, setSort } = useSort(tableId);
@@ -413,7 +413,7 @@ const DataTable = <T extends object>({
 
   return (
     <div className={dataTableRoot}>
-      {isMobile ? (
+      {isCompact ? (
         <DataTableCards<T>
           columns={columns}
           rows={rows}
@@ -444,7 +444,7 @@ const DataTable = <T extends object>({
         </p>
       ) : null}
 
-      {isMobile && pagination && onPageChange && !loading && rows.length > 0 ? (
+      {isCompact && pagination && onPageChange && !loading && rows.length > 0 ? (
         <LoadMoreSentinel
           loadedCount={rows.length}
           totalCount={totalCount}
@@ -455,7 +455,7 @@ const DataTable = <T extends object>({
         />
       ) : null}
 
-      {!isMobile && pagination && !detachedPagination ? (
+      {!isCompact && pagination && !detachedPagination ? (
         <TablePagination
           pagination={pagination}
           totalCount={totalCount}

@@ -1,10 +1,10 @@
 export const sidebarHeader =
-  "h-16 shrink-0 flex-row items-center gap-2.5 border-b border-sidebar-border py-0 pr-14 pl-4 md:hidden";
+  "h-16 shrink-0 flex-row items-center gap-2.5 border-b border-sidebar-border py-0 pr-14 pl-4 wide:hidden";
 
 export const sidebarWordmark =
   "font-heading text-lg font-semibold tracking-tight text-sidebar-foreground";
 
-export const sidebarContent = "gap-1 px-1 py-1 max-md:px-3 max-md:py-2";
+export const sidebarContent = "gap-1 px-1 py-1 compact:px-3 compact:py-2";
 
 export const sidebarGroupLabel =
   "h-6 px-3 text-micro font-medium tracking-wide text-muted-foreground/80 uppercase";
@@ -14,4 +14,4 @@ export const sidebarMenuButton =
 
 export const sidebarAccount = "mt-2 border-t border-sidebar-border px-2 pt-3";
 
-export const sidebarFooter = "border-t border-sidebar-border p-1 empty:hidden max-md:px-3";
+export const sidebarFooter = "border-t border-sidebar-border p-1 empty:hidden compact:px-3";

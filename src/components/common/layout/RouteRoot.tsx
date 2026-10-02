@@ -1,14 +1,14 @@
 import { RouterProvider } from "react-aria-components";
 import { Outlet, useHref, useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hook/use-mobile";
 import { useOverlayBackHook } from "../../../hook/app/back.hook";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 
 const RouteRoot = () => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const isCompact = useIsCompact();
   useOverlayBackHook();
 
-  const navigateTo = (path: string) => navigate(path, { viewTransition: isMobile });
+  const navigateTo = (path: string) => navigate(path, { viewTransition: isCompact });
 
   return (
     <RouterProvider navigate={navigateTo} useHref={useHref}>

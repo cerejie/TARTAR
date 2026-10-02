@@ -16,7 +16,7 @@ import {
 import { ledgerBalance } from "../../../models/data/ledger/ledger.response";
 import dashboardServices from "../../../services/data/dashboard.services";
 import { payablesPath, vouchersPath } from "../../../utils/route.utils";
-import { useIsTabletUp } from "../../common/breakpoint.hook";
+import { useIsPhone } from "../../common/breakpoint.hook";
 import { useModal } from "../../common/modal.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSegment } from "../../common/segment.hook";
@@ -66,7 +66,7 @@ const isSameEntry = (first: IAdminPayableEntry, second: IAdminPayableEntry | nul
 
 export const useAdminPayablesHook = () => {
   const { branch } = useBranchScopeHook();
-  const isTabletUp = useIsTabletUp();
+  const isPhone = useIsPhone();
   const { segment, setSegment } = useSegment(
     adminPayablesSegmentKey,
     adminPayableSegmentValues
@@ -114,7 +114,7 @@ export const useAdminPayablesHook = () => {
     retry: activeQuery.refetch,
     selected,
     sheetOpen: modal.visible,
-    split: isTabletUp,
+    split: !isPhone,
     isSelected: (row: IAdminPayableRow) => modal.visible && isSameEntry(row.entry, selected),
     openPath: selected ? openPathOf(selected) : payablesPath,
     openRow: (row: IAdminPayableRow) => openModal(row.entry),

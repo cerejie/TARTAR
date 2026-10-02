@@ -15,7 +15,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useIsMobile } from "@/hook/use-mobile";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import { useModal } from "../../../hook/common/modal.hook";
 import { filterSheetModalKey } from "../../../keys/modal.keys";
 import {
@@ -38,7 +38,7 @@ type IProps = {
 };
 
 const FilterPopover = ({ activeCount, onReset, children }: IProps) => {
-  const isMobile = useIsMobile();
+  const isCompact = useIsCompact();
   const sheet = useModal(filterSheetModalKey(useId()));
 
   const handleOpenChange = (next: boolean) => {
@@ -49,7 +49,7 @@ const FilterPopover = ({ activeCount, onReset, children }: IProps) => {
     <Button
       variant="outline"
       className={filterPill}
-      onPress={isMobile ? () => sheet.openModal() : undefined}
+      onPress={isCompact ? () => sheet.openModal() : undefined}
     >
       <SlidersHorizontal />
       Filters
@@ -65,7 +65,7 @@ const FilterPopover = ({ activeCount, onReset, children }: IProps) => {
     </Button>
   );
 
-  if (isMobile) {
+  if (isCompact) {
     return (
       <>
         {trigger}

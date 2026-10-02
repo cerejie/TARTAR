@@ -1,15 +1,19 @@
 import { cva } from "class-variance-authority";
 
 export const appBar = cva(
-  "box-content flex h-14 shrink-0 items-center gap-2 border-b bg-panel px-3 pt-safe transition-[border-color,box-shadow] select-none [view-transition-name:app-bar] md:h-16 md:gap-3 md:rounded-panel md:border md:border-border md:px-6 md:pt-0 md:shadow-panel motion-reduce:transition-none",
+  "box-content flex h-14 shrink-0 items-center gap-2 border-b bg-panel px-3 pt-safe transition-[border-color,box-shadow] select-none [view-transition-name:app-bar] motion-reduce:transition-none",
   {
     variants: {
       scrolled: {
         true: "border-border shadow-sm",
         false: "border-transparent",
       },
+      floating: {
+        true: "h-16 gap-3 rounded-panel border border-border px-6 pt-0 shadow-panel",
+        false: "",
+      },
     },
-    defaultVariants: { scrolled: false },
+    defaultVariants: { scrolled: false, floating: false },
   }
 );
 

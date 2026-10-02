@@ -17,8 +17,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
-import { useIsMobile } from "@/hook/use-mobile";
 import { cn } from "@/utils/cn.utils";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import type { ConfirmKind } from "../../../models/common/modal.model";
 import {
   selectConfirm,
@@ -55,7 +55,7 @@ const defaultMessage = (kind: ConfirmKind, itemName?: string) => {
 };
 
 const ConfirmationModal = () => {
-  const isMobile = useIsMobile();
+  const isCompact = useIsCompact();
   const confirm = useConfirmStore(selectConfirm);
   const running = useConfirmStore(selectConfirmRunning);
   const closeConfirm = useConfirmStore((state) => state.closeConfirm);
@@ -81,7 +81,7 @@ const ConfirmationModal = () => {
     </Button>
   );
 
-  if (isMobile) {
+  if (isCompact) {
     return (
       <Sheet
         side="bottom"

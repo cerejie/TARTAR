@@ -26,3 +26,9 @@ export type ChartTone =
   | "negative";
 
 export type ModalSize = "sm" | "md" | "lg" | "xl";
+
+export type DeviceClass =
+  | "phone"
+  | "tabletPortrait"
+  | "tabletLandscape"
+  | "desktop";

@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useIsMobile } from "@/hook/use-mobile";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import {
   pageItems,
   type IPaginationRequest,
@@ -50,7 +50,7 @@ const TablePagination = ({
   showSizeChanger = true,
   visibleOnPhone = false,
 }: IProps) => {
-  const isMobile = useIsMobile();
+  const isCompact = useIsCompact();
   const { pageNumber, pageSize } = pagination;
   const lastPage = Math.max(1, Math.ceil(totalCount / pageSize));
   const firstItem = (pageNumber - 1) * pageSize + 1;
@@ -63,7 +63,7 @@ const TablePagination = ({
     if (size) onPageChange(1, size);
   };
 
-  if (isMobile && !visibleOnPhone) return null;
+  if (isCompact && !visibleOnPhone) return null;
 
   return (
     <div className={tablePagination}>

@@ -24,7 +24,7 @@ import {
 import { usePermissions } from "../account/account.permission.hook";
 import { useAccountLogoutHook } from "../account/account.logout.hook";
 import { backdropThemeColorToken, useThemeColorHook } from "../app/theme.color.hook";
-import { useIsTabletUp } from "../common/breakpoint.hook";
+import { useIsCompact } from "../common/breakpoint.hook";
 import { useModal, useModalActions } from "../common/modal.hook";
 import { useNetwork } from "../common/network.hook";
 import { useQuery } from "../common/query.hook";
@@ -36,7 +36,7 @@ export const useProtectedLayoutHook = () => {
   useNetwork();
   useThemeColorHook(backdropThemeColorToken);
 
-  return { isPhone: !useIsTabletUp() };
+  return { isPhone: useIsCompact() };
 };
 
 export const useProtectedSiderHook = () => {

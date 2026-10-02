@@ -11,9 +11,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useIsMobile } from "@/hook/use-mobile";
 import { cn } from "@/utils/cn.utils";
 import AppButton from "../button/AppButton";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import type { ModalSize } from "../../../models/common/view.model";
 import {
   drawerBody,
@@ -47,7 +47,7 @@ const AppModal = ({
   onClose,
   children,
 }: IProps) => {
-  const isMobile = useIsMobile();
+  const isCompact = useIsCompact();
 
   const actions = footer ?? (
     <AppButton variant="outline" onPress={onClose}>
@@ -59,7 +59,7 @@ const AppModal = ({
     if (!next) onClose();
   };
 
-  if (isMobile) {
+  if (isCompact) {
     return (
       <Sheet
         side="bottom"

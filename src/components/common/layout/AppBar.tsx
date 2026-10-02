@@ -1,3 +1,4 @@
+import { cn } from "@/utils/cn.utils";
 import { useAppBarHook, useBranchSheetHook } from "../../../hook/layout/app.bar.hook";
 import { appBar, appBarActions, appBarTitle } from "../../../styles/app/app.bar.styles";
 import { branchSheetList } from "../../../styles/app/app.styles";
@@ -12,14 +13,15 @@ type IProps = {
   title: string;
   leading?: ReactNode;
   trailing?: ReactNode;
+  floating?: boolean;
 };
 
-const AppBar = ({ title, leading, trailing }: IProps) => {
-  const { scrolled, compact } = useAppBarHook();
-  const { showSheet, sheetOpen, openSheet, closeSheet } = useBranchSheetHook();
+const AppBar = ({ title, leading, trailing, floating = false }: IProps) => {
+  const { scrolled, compact } = useAppBarHook(floating);
+  const { showSheet, sheetOpen, openSheet, closeSheet } = useBranchSheetHook(floating);
 
   return (
-    <header className={appBar({ scrolled })}>
+    <header className={cn(appBar({ scrolled, floating }))}>
       {leading}
       <ProtectedBranchScope compact={compact} onPress={showSheet ? openSheet : undefined} />
       {compact ? <span className={appBarTitle}>{title}</span> : null}

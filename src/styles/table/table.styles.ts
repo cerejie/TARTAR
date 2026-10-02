@@ -45,7 +45,7 @@ export const dataTableRowFocused =
 
 export const dataTableRowOverdue = "bg-danger-bg/60 hover:bg-danger-bg";
 
-export const dataTableCell = cva("h-14 px-3 py-2 text-sm whitespace-normal text-foreground min-[1440px]:px-4", {
+export const dataTableCell = cva("h-14 px-3 py-2 text-sm whitespace-normal text-foreground pointer-coarse:h-16 min-[1440px]:px-4", {
   variants: {
     align: { left: "", center: "text-center", right: "text-right tabular-nums" },
   },
@@ -215,7 +215,7 @@ export const branchCell = "min-w-32";
 
 export const emptyCell = "text-muted-foreground";
 
-export const rowActionTrigger = "max-md:rounded-full";
+export const rowActionTrigger = "compact:rounded-full";
 
 export const rowActionMenu = "w-auto min-w-48";
 

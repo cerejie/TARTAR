@@ -1,26 +1,43 @@
 import { useSyncExternalStore } from "react";
+import type { DeviceClass } from "../../models/common/view.model";
 
-const desktopMediaQuery = "(min-width: 64rem)";
-const tabletUpMediaQuery = "(min-width: 48rem)";
+const phoneMediaQuery =
+  "(width < 48rem), (width < 64rem) and (height < 30rem)";
+const tabletPortraitMediaQuery = "(width < 64rem) and (orientation: portrait)";
+const desktopMediaQuery = "(width >= 64rem)";
 
-const subscribeTo = (query: string) => (onChange: () => void) => {
-  const media = window.matchMedia(query);
-  media.addEventListener("change", onChange);
-  return () => media.removeEventListener("change", onChange);
+const deviceMediaQueries = [
+  phoneMediaQuery,
+  tabletPortraitMediaQuery,
+  desktopMediaQuery,
+] as const;
+
+const matches = (query: string) => window.matchMedia(query).matches;
+
+const subscribeDevice = (onChange: () => void) => {
+  const medias = deviceMediaQueries.map((query) => window.matchMedia(query));
+  medias.forEach((media) => media.addEventListener("change", onChange));
+  return () =>
+    medias.forEach((media) => media.removeEventListener("change", onChange));
 };
 
-const readMatch = (query: string) => () => window.matchMedia(query).matches;
+const readDevice = (): DeviceClass => {
+  if (matches(phoneMediaQuery)) return "phone";
+  if (matches(desktopMediaQuery)) return "desktop";
+  if (matches(tabletPortraitMediaQuery)) return "tabletPortrait";
+  return "tabletLandscape";
+};
 
-const readServerMatch = () => false;
+const readServerDevice = (): DeviceClass => "desktop";
 
-const subscribeDesktop = subscribeTo(desktopMediaQuery);
-const readDesktop = readMatch(desktopMediaQuery);
+const useDeviceClass = () =>
+  useSyncExternalStore(subscribeDevice, readDevice, readServerDevice);
 
-const subscribeTabletUp = subscribeTo(tabletUpMediaQuery);
-const readTabletUp = readMatch(tabletUpMediaQuery);
+export const useIsPhone = () => useDeviceClass() === "phone";
 
-export const useIsDesktop = () =>
-  useSyncExternalStore(subscribeDesktop, readDesktop, readServerMatch);
+export const useIsCompact = () => {
+  const device = useDeviceClass();
+  return device === "phone" || device === "tabletPortrait";
+};
 
-export const useIsTabletUp = () =>
-  useSyncExternalStore(subscribeTabletUp, readTabletUp, readServerMatch);
+export const useIsDesktop = () => useDeviceClass() === "desktop";

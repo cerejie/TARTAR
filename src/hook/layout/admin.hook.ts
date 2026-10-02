@@ -10,7 +10,7 @@ import {
 } from "../../utils/route.utils";
 import { usePermissions } from "../account/account.permission.hook";
 import { panelThemeColorToken, useThemeColorHook } from "../app/theme.color.hook";
-import { useIsTabletUp } from "../common/breakpoint.hook";
+import { useIsPhone } from "../common/breakpoint.hook";
 import { useModal } from "../common/modal.hook";
 import { useNetwork } from "../common/network.hook";
 import { usePullToRefresh } from "../common/pull.hook";
@@ -75,14 +75,14 @@ export const useAdminTitleHook = () => {
 };
 
 export const useAdminAppBarHook = () => {
-  const isPhone = !useIsTabletUp();
+  const isPhone = useIsPhone();
   const { title } = useAdminTitleHook();
 
-  return { title, showUserSheet: isPhone };
+  return { title, floating: !isPhone, showUserSheet: isPhone };
 };
 
 export const useAdminUserSheetHook = () => {
-  const isPhone = !useIsTabletUp();
+  const isPhone = useIsPhone();
   const { modal, openModal, closeModal } = useModal(adminUserSheetModalKey);
 
   return {

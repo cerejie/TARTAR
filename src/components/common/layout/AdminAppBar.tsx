@@ -4,10 +4,14 @@ import AppBar from "./AppBar";
 import ProtectedUserMenu from "./ProtectedUserMenu";
 
 const AdminAppBar = () => {
-  const { title, showUserSheet } = useAdminAppBarHook();
+  const { title, floating, showUserSheet } = useAdminAppBarHook();
 
   return (
-    <AppBar title={title} trailing={showUserSheet ? <AdminUserSheet /> : <ProtectedUserMenu />} />
+    <AppBar
+      title={title}
+      floating={floating}
+      trailing={showUserSheet ? <AdminUserSheet /> : <ProtectedUserMenu />}
+    />
   );
 };
 

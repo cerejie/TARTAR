@@ -1,8 +1,8 @@
 import { CloudAlert, CloudCheck, CloudUpload, RefreshCw, WifiOff } from "lucide-react";
 import { Dialog } from "react-aria-components";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { useIsMobile } from "@/hook/use-mobile";
 import { cn } from "@/utils/cn.utils";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import { useModal } from "../../../hook/common/modal.hook";
 import { useSyncStatus } from "../../../hook/common/network.hook";
 import { syncSheetModalKey } from "../../../keys/modal.keys";
@@ -53,7 +53,7 @@ const SyncIndicator = () => {
   const status = useSyncStatus();
   const description = describeSync(status);
   const count = status.pending + status.failedCount;
-  const isMobile = useIsMobile();
+  const isCompact = useIsCompact();
   const sheet = useModal(syncSheetModalKey);
 
   const button = (
@@ -62,7 +62,7 @@ const SyncIndicator = () => {
       size="icon"
       aria-label={description}
       className={countButton}
-      onPress={isMobile ? () => sheet.openModal() : undefined}
+      onPress={isCompact ? () => sheet.openModal() : undefined}
     >
       <SyncIcon {...status} />
       {count ? (
@@ -74,7 +74,7 @@ const SyncIndicator = () => {
     </AppButton>
   );
 
-  if (isMobile) {
+  if (isCompact) {
     return (
       <>
         {button}

@@ -1,5 +1,5 @@
 # ROADMAP — Mobile-native design improvements
-Updated: 2026-10-03 (planned; no phase started)
+Updated: 2026-10-03 (D1 done)
 
 ## Goal
 Move the main app from "desktop architecture with mobile components" to "shared business logic with
@@ -178,14 +178,24 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
   `rounded-panel` now only on shell + auth/error cards. Page title is 24px on every width.
   Contrast: dark all ≥ 5.4:1; light positive/warning ≥ 4.6:1. Known leftovers (not changed, D9):
   light destructive on muted 4.42:1; light chart-2 / chart-5 ~2:1 (non-text, below 3:1).
+- [x] D1 Breakpoints (2026-10-03). hook/common/breakpoint.hook.ts: one useSyncExternalStore device store
+  (`DeviceClass` in models/common/view.model.ts) → useIsPhone / useIsCompact (phone|tabletPortrait) /
+  useIsDesktop; useIsTabletUp deleted. phone = <48rem, or <64rem and <30rem tall (sideways phone);
+  tabletPortrait = <64rem portrait; desktop ≥64rem. hook/use-mobile.ts delegates to useIsCompact (first
+  render correct, no gate needed; only ui/sidebar imports it). Main shell/cards/sheets/FAB on useIsCompact;
+  admin stays width-only (useIsPhone: admin.hook, admin.{payables,receivables}.hook) — user decision.
+  theme.css `compact:` / `wide:` custom variants (same queries); sidebar drawer + rowActionTrigger use them.
+  AppBar gets `floating` prop (admin non-phone) instead of md: classes, so the main phone bar stays phone at
+  tablet portrait; branch sheet = !floating. DataTable cells `pointer-coarse:h-16`. Room-only md:/lg: left
+  as is (shell/header render only ≥48rem; bento, filter, ledger, form, modal grids).
 
 ## Next
-1. D1 Breakpoints (see Phases).
-2. D2 ContextSwitch + phone toolbar … then D3 → D10 in order.
+1. D2 ContextSwitch + phone toolbar (see Phases).
+2. D3 → D10 in order.
 
 ## Open
 - (none)
 
 ## State
-Branch mobile-app-native-newlook · Uncommitted: D0 (suggested Development v2.22) ·
-Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.21.
+Branch mobile-app-native-newlook · Uncommitted: D1 (suggested Development v2.23) ·
+Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.22.

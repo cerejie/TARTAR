@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useIsMobile } from "@/hook/use-mobile";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import { useModal } from "../../../hook/common/modal.hook";
 import { sortSheetModalKey } from "../../../keys/modal.keys";
 import type { ISortOption } from "../../../models/common/table.model";
@@ -32,7 +32,7 @@ type IProps = {
 };
 
 const SortSelect = ({ value, options, onChange }: IProps) => {
-  const isMobile = useIsMobile();
+  const isCompact = useIsCompact();
   const sheet = useModal(sortSheetModalKey(useId()));
 
   const chooseOption = (key: string) => {
@@ -40,7 +40,7 @@ const SortSelect = ({ value, options, onChange }: IProps) => {
     sheet.closeModal();
   };
 
-  if (isMobile) {
+  if (isCompact) {
     const current = options.find((option) => option.key === value);
 
     return (
