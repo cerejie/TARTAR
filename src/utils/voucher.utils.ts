@@ -13,7 +13,10 @@ import type {
   IFormSummaryLine,
 } from "../models/common/field.model";
 import type { IVoucherBreakdownInput } from "../models/data/voucher/voucher.request";
-import type { IVoucher } from "../models/data/voucher/voucher.response";
+import {
+  voucherDisbursementKind,
+  type IVoucher,
+} from "../models/data/voucher/voucher.response";
 import { formatMoney, toAmount } from "./format.utils";
 import { toOptions } from "./option.utils";
 
@@ -30,7 +33,7 @@ export interface IVoucherTotalsInput {
 export type IVoucherTotals = Record<VoucherLine, number>;
 
 export const isVatableVoucher = (voucher: IVoucher): boolean =>
-  voucher.vatable !== false;
+  voucherDisbursementKind(voucher) === "purchase" && voucher.vatable !== false;
 
 export const isOwnOpenVoucher = (
   voucher: Pick<IVoucher, "status" | "printed" | "created_by">,
@@ -140,10 +143,6 @@ const vatableField: IFieldConfig<IVoucherBreakdownInput> = {
   type: "checkbox",
   hint: "Leave unchecked for a non-VAT invoice — no VAT is taken out before withholding.",
 };
-
-export const voucherVatField = <
-  TValues extends IVoucherBreakdownInput,
->(): IFieldConfig<TValues> => vatableField as unknown as IFieldConfig<TValues>;
 
 const breakdownFields: IFieldConfig<IVoucherBreakdownInput>[] = [
   vatableField,

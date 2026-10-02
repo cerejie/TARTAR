@@ -1,11 +1,9 @@
 import { todayIso } from "./format.utils";
 import {
   isOwnOpenVoucher,
-  isVatableVoucher,
   voucherBreakdownDefaults,
   voucherBreakdownFields,
   voucherBreakdownOf,
-  voucherVatField,
 } from "./voucher.utils";
 
 import type { DefaultValues } from "react-hook-form";
@@ -125,7 +123,6 @@ const expenseSections = (
         prefix: "₱",
       },
       dueDateField,
-      voucherVatField<IDisbursementInput>(),
       { name: "particulars", label: "Particular", type: "textarea" },
     ],
   },
@@ -213,7 +210,6 @@ export const disbursementEditDefaultsOf = (
 
   return {
     ...voucherBreakdownDefaults,
-    vatable: row.voucher ? isVatableVoucher(row.voucher) : false,
     particulars: row.voucher?.particulars ?? "",
     ...recorded,
     expense_type: row.expense_type

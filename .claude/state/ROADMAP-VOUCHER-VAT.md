@@ -22,6 +22,9 @@ ticking Done with paths, rewriting Next, suggesting the commit (`git log --oneli
   vouchers stay pending for approval. Same pattern as admin-recorded sales (Verified) and managers' own
   payments (self-verify). Consequence: manual vouchers are only made by managers, so they are never
   rejected again -> no manual-voucher resubmit; legacy rejected manual vouchers get a read-only reason.
+- R3a REVISED 2026-10-02 (user, supersedes R3 for expenses): VAT, withholding and less return are PURCHASE-ONLY.
+  Expense form has no VAT checkbox (saves vatable false); manual voucher Purpose = Expense hides VAT/withholding/
+  less return and resets them; isVatableVoucher = purchase category only, so old expense vouchers hide the VAT split.
 - R3 VAT checkbox "VAT-registered invoice" (wording TBD in V2) on Expenses (default UNCHECKED),
   Purchases (default CHECKED), manual vouchers (default by kind: Purchase checked, Expense unchecked;
   re-defaults when the kind changes).
@@ -162,6 +165,6 @@ ticking Done with paths, rewriting Next, suggesting the commit (`git log --oneli
 2. Open question for the user: should manual vouchers get an edit form (R6 says own manual vouchers too)?
 
 ## State
-Branch mobilel-app-native at ec9618e (Development v2.11 = V2). V3 uncommitted.
+Branch mobilel-app-native at 670cfe2 (Development v2.12 = V3, pushed). R3a (purchase-only VAT) uncommitted.
 The mobile roadmap's P0-4 event checks 3 (payment verification) and 4 (sale verified) are still open;
 after mig 29, check 4's managers also get "Sale needs verification" on deposit.

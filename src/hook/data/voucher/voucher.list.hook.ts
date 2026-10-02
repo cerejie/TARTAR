@@ -70,9 +70,26 @@ const deriveKindVatValues = (
 ): Partial<IVoucherInput> | null => {
   if (changed !== "kind") return null;
 
-  const vatable = values.kind === "purchase";
-  return { vatable, ...deriveVoucherValues("vatable", { ...values, vatable }) };
+  if (values.kind !== "purchase") {
+    return { vatable: false, withholding: "none", ewt_amount: 0, less_return: null };
+  }
+
+  return { vatable: true, ...deriveVoucherValues("vatable", { ...values, vatable: true }) };
 };
+
+const isPurchaseVoucher = (values: IVoucherInput): boolean =>
+  values.kind === "purchase";
+
+const purchaseOnlyBreakdownFields = (): IFieldConfig<IVoucherInput>[] =>
+  voucherBreakdownFields<IVoucherInput>().map((field) =>
+    field.name === "particulars"
+      ? field
+      : {
+          ...field,
+          hidden: (values) =>
+            !isPurchaseVoucher(values) || (field.hidden?.(values) ?? false),
+        }
+  );
 
 const deriveManualVoucherValues = (
   changed: Path<IVoucherInput>,
@@ -246,7 +263,7 @@ export const useVoucherListHook = () => {
       prefix: "₱",
       hint: "Invoice total as billed.",
     },
-    ...voucherBreakdownFields<IVoucherInput>(),
+    ...purchaseOnlyBreakdownFields(),
     {
       name: "supplier_id",
       label: "Supplier",
