@@ -272,11 +272,15 @@ P0 — user actions (cannot be done from this machine: no Supabase CLI or servic
 6. Reset QA data (Done M5 list + the deployment checklist below), then deploy.
 
 P1 — code, next session
-7. Push key rotation: subscribeThisDevice reuses an existing subscription even if it was made with another
+7. DONE 2026-10-02 (build + lint clean, not checked on a device): utils/push.utils.ts usesServerKey;
+   push.hook subscribeThisDevice drops an old-key subscription (server remove + unsubscribe) and resubscribes;
+   usePushStatusListener reports an old-key subscription as off, so the card/prompt offer Turn on. Was: Push key rotation: subscribeThisDevice reuses an existing subscription even if it was made with another
    VAPID key (devices subscribed before P0-1 would fail silently with 403). Compare
    subscription.options.applicationServerKey with vapidPublicKey and resubscribe when different
    (hook/common/push.hook.ts).
-8. Offline banner: every mounted query counts (selectHasUnsavedWatched), so one failing shell query (inbox
+8. DONE 2026-10-02 (build + lint clean): IQueryOptions.ignoreOfflineStatus; query.store statusWatchers (counted
+   separately from watchers, so refetchWatched still covers shell queries and a key shared with a page still counts);
+   inbox list + protected due alerts opt out. Was: Offline banner: every mounted query counts (selectHasUnsavedWatched), so one failing shell query (inbox
    bell, due alerts) marks every page "not saved for offline". Let shell-level queries opt out of the
    page's offline status (query.hook option + query.store watchers).
 

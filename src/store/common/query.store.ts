@@ -8,14 +8,15 @@ type ICachedQuery = Pick<IQueryEntry, "data" | "updatedAt">;
 type States = {
   entries: Record<string, IQueryEntry>;
   watchers: Record<string, number>;
+  statusWatchers: Record<string, number>;
 };
 
 type Actions = {
   run: <T>(key: string, fetcher: () => Promise<T>) => Promise<T | undefined>;
   prime: (queries: ReadonlyArray<[string, () => Promise<unknown>]>) => void;
   setEntry: (key: string, partial: Partial<IQueryEntry>) => void;
-  watch: (key: string) => void;
-  unwatch: (key: string) => void;
+  watch: (key: string, countsTowardStatus: boolean) => void;
+  unwatch: (key: string, countsTowardStatus: boolean) => void;
   invalidate: (keyPrefix: string) => void;
   refetchAll: () => void;
   refetchWatched: () => Promise<void>;
@@ -37,6 +38,7 @@ const emptyEntry: IQueryEntry = {
 const initialValues: States = {
   entries: {},
   watchers: {},
+  statusWatchers: {},
 };
 
 const fetchers = new Map<string, () => Promise<unknown>>();
@@ -140,14 +142,20 @@ export const useQueryStore = create<States & Actions>((set, get) => ({
       },
     })),
 
-  watch: (key) =>
+  watch: (key, countsTowardStatus) =>
     set((state) => ({
       watchers: { ...state.watchers, [key]: (state.watchers[key] ?? 0) + 1 },
+      statusWatchers: countsTowardStatus
+        ? { ...state.statusWatchers, [key]: (state.statusWatchers[key] ?? 0) + 1 }
+        : state.statusWatchers,
     })),
 
-  unwatch: (key) =>
+  unwatch: (key, countsTowardStatus) =>
     set((state) => ({
       watchers: { ...state.watchers, [key]: (state.watchers[key] ?? 1) - 1 },
+      statusWatchers: countsTowardStatus
+        ? { ...state.statusWatchers, [key]: (state.statusWatchers[key] ?? 1) - 1 }
+        : state.statusWatchers,
     })),
 
   invalidate: (keyPrefix) => {
@@ -209,7 +217,7 @@ export const selectEntry =
     (emptyEntry as IQueryEntry<T>);
 
 const watchedEntriesOf = (state: States): IQueryEntry[] =>
-  Object.entries(state.watchers)
+  Object.entries(state.statusWatchers)
     .filter(([, count]) => count > 0)
     .map(([key]) => state.entries[key] ?? emptyEntry);
 

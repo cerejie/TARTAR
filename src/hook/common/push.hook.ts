@@ -12,6 +12,7 @@ import {
 import {
   applicationServerKeyOf,
   subscriptionInputOf,
+  usesServerKey,
   vapidPublicKey,
 } from "../../utils/push.utils";
 import { usePermissions } from "../account/account.permission.hook";
@@ -54,6 +55,16 @@ const currentSubscription = async (): Promise<PushSubscription | null> => {
   return registration ? registration.pushManager.getSubscription() : null;
 };
 
+const currentKeySubscriptionOf = async (
+  registration: ServiceWorkerRegistration
+): Promise<PushSubscription | null> => {
+  const subscription = await registration.pushManager.getSubscription();
+  if (!subscription || usesServerKey(subscription, vapidPublicKey)) return subscription;
+  await pushServices.remove(subscription.endpoint).catch(() => undefined);
+  await subscription.unsubscribe();
+  return null;
+};
+
 const subscribeThisDevice = async (): Promise<void> => {
   const permission = await Notification.requestPermission();
   usePushStore.getState().setPermission(permission);
@@ -63,7 +74,7 @@ const subscribeThisDevice = async (): Promise<void> => {
   if (!registration) throw new Error(noWorkerMessage);
 
   const subscription =
-    (await registration.pushManager.getSubscription()) ??
+    (await currentKeySubscriptionOf(registration)) ??
     (await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: applicationServerKeyOf(vapidPublicKey),
@@ -103,7 +114,11 @@ export const usePushStatusListener = () => {
     const sync = () => {
       setPermission(Notification.permission);
       void currentSubscription()
-        .then((subscription) => setSubscribed(subscription !== null))
+        .then((subscription) =>
+          setSubscribed(
+            subscription !== null && usesServerKey(subscription, vapidPublicKey)
+          )
+        )
         .catch(() => setSubscribed(false));
     };
 

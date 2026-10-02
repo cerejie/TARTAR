@@ -13,6 +13,20 @@ export const applicationServerKeyOf = (base64Url: string): Uint8Array<ArrayBuffe
   return key;
 };
 
+export const usesServerKey = (
+  subscription: PushSubscription,
+  base64Url: string
+): boolean => {
+  const subscribedKey = subscription.options.applicationServerKey;
+  if (!subscribedKey) return false;
+  const subscribedBytes = new Uint8Array(subscribedKey);
+  const expectedBytes = applicationServerKeyOf(base64Url);
+  return (
+    subscribedBytes.length === expectedBytes.length &&
+    subscribedBytes.every((byte, index) => byte === expectedBytes[index])
+  );
+};
+
 export const subscriptionInputOf = (
   subscription: PushSubscription,
   userAgent: string

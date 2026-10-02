@@ -14,6 +14,7 @@ export interface IQueryState<T> extends IQueryEntry<T> {
 export interface IQueryOptions {
   enabled?: boolean;
   keepPrevious?: boolean;
+  ignoreOfflineStatus?: boolean;
 }
 
 export interface IMutationOptions<TResult> {
