@@ -226,6 +226,35 @@ each phase, then a user check on a real phone.
     expense category "QA O12 Type" (QOT); bank "QA O12 Bank" again. Test push subscription already deleted.
 
 ## Next
+DEVICE TEST SCRIPT (agreed 2026-10-02) — next conversation walks the user through it ONE step at a time,
+waits for pass/fail per step, fixes failures (plan first), then P0-6 QA reset, merge, production deploy.
+Hardware: 1 phone (ask iOS or Android), 1 PC with Edge + Chrome. URL https://tartar-git-mobilel-app-native-ejieworx.vercel.app
+Roles: Phone installed = qaadmin2@qa.test (manager); PC Edge installed = qaadmin2@qa.test (manager); PC Chrome plain
+tab, not installed = qaemp2@qa.test (employee, creates events). Password QaTest#2026.
+  0 Prep: v2.17 committed + pushed, Vercel Ready; Windows Settings > Notifications allows Edge + Chrome, Do Not
+    Disturb off; phone blocked by Vercel -> sign in to Vercel or relax Deployment Protection for Previews.
+  1 Install: Edge address-bar install (or ... > Apps > Install TARTAR), pin, right-click -> Sales/Vouchers shortcuts;
+    Android Chrome menu > Install app / iPhone Safari Share > Add to Home Screen (iOS 16.4+, push only installed);
+    open from icon -> splash, status bar colour, no browser bars.
+  2 Sign in per role; Account settings > Turn on notifications on all three. A previously subscribed device
+    showing Off = P1-7 old-key fix; Turn on again.
+  3 Push (Chrome creates, phone + Edge receive):
+    3.1 Chrome expense -> phone + Edge "Voucher needs approval"; phone tap opens Vouchers, row pulses.
+    3.2 Phone approves -> Chrome "Voucher approved".
+    3.3 Chrome 2nd expense, Edge rejects with reason -> Chrome "Voucher rejected".
+    3.4 Chrome Vouchers > View reason > Resubmit -> managers pushed again.
+    3.5 Chrome receivable payment -> phone "Payment needs verification"; Edge verifies -> pending row gone.
+    3.6 Chrome sale + Mark deposited -> managers "Sale needs verification"; verify -> Chrome "Sale verified".
+    3.7 Phone app fully closed, repeat 3.1, tap -> app opens on Vouchers.
+    3.8 Chrome creates an expense, signs out; Edge rejects it -> Chrome gets nothing.
+    3.9 Optional: `select app.send_due_digest();` -> phone + Edge "Due today".
+  4 Phone UX: menu -> drawer; Back (Android) / swipe (iOS) closes drawer, sheets, dialogs without leaving the page;
+    New expense full height, Save above keyboard; Filters + Sort sheets; load more on scroll; pull to refresh;
+    landscape (no x-overflow, notch); dark mode.
+  5 Phone offline: airplane mode, reopen app (loads), record sale -> Pending sync; airplane off -> syncs, Sync sheet empty.
+  Debug a missing push: `select id, status_code, content, created from net._http_response order by id desc limit 5;`
+  New QA rows from this script go into the P0-6 reset list.
+
 ACTIVE 2026-10-02: ROADMAP-VOUCHER-VAT.md Next 1-2 DONE (notification panels + manual voucher own-edit checked;
 P0-4 events 3 and 4 PASSED in the inbox, headless). Remaining: push delivery on devices, P0-5, P0-6, merge.
 PROGRESS 2026-10-01 (v2.08 pushed): step a done (notifications On at the preview URL); P0-4 event 1
