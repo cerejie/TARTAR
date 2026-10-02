@@ -93,7 +93,7 @@ export const usePurchaseListHook = () => {
           span: "half",
           required: true,
           prefix: "₱",
-          hint: "VAT inclusive.",
+          hint: "Invoice total as billed.",
         },
         { name: "due_date", label: "Due date", type: "date", span: "half" },
       ],
@@ -117,6 +117,7 @@ export const usePurchaseListHook = () => {
 
   const defaults: DefaultValues<IDisbursementInput> = {
     ...voucherBreakdownDefaults,
+    vatable: true,
     branch: defaultBranch as BranchSlug,
     farm_section: null,
     txn_date: todayIso(),

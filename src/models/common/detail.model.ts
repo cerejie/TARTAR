@@ -5,6 +5,7 @@ export interface IDetailItem<TRecord> {
   label: string;
   render: (record: TRecord) => ReactNode;
   span?: number;
+  hidden?: (record: TRecord) => boolean;
 }
 
 export interface IDetailSection<TRecord> {

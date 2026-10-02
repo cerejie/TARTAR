@@ -9,7 +9,11 @@ import {
   type IExpenseSummary,
 } from "../../../models/data/transaction/transaction.response";
 import { todayIso } from "../../../utils/format.utils";
-import { voucherBreakdownDefaults } from "../../../utils/voucher.utils";
+import {
+  isVatableVoucher,
+  voucherBreakdownDefaults,
+  voucherVatField,
+} from "../../../utils/voucher.utils";
 import {
   pendingVoucherCount,
   sumDisbursements,
@@ -108,6 +112,7 @@ export const useExpenseListHook = () => {
           prefix: "₱",
         },
         { name: "due_date", label: "Due date", type: "date", span: "half" },
+        voucherVatField<IDisbursementInput>(),
         { name: "particulars", label: "Particular", type: "textarea" },
       ],
     },
@@ -146,6 +151,7 @@ export const useExpenseListHook = () => {
   const editDefaults: DefaultValues<IDisbursementInput> | null = editRow
     ? {
         ...voucherBreakdownDefaults,
+        vatable: editRow.voucher ? isVatableVoucher(editRow.voucher) : false,
         particulars: editRow.voucher?.particulars ?? "",
         branch: editRow.branch as BranchSlug,
         farm_section:

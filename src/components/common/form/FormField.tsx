@@ -10,6 +10,7 @@ import {
 } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Combobox,
   ComboboxChip,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/combobox";
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldLabel,
@@ -368,6 +370,38 @@ const FormField = <TValues extends FieldValues>({
   control,
   enterKeyHint,
 }: IProps<TValues>) => {
+  if (config.type === "checkbox") {
+    return (
+      <Controller
+        name={config.name}
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field
+            orientation="horizontal"
+            data-invalid={fieldState.invalid}
+            className={fieldSpan({ span: config.span ?? "full" })}
+          >
+            <Checkbox
+              id={String(config.name)}
+              name={field.name}
+              isSelected={field.value === true}
+              isInvalid={fieldState.invalid}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+            />
+            <FieldContent>
+              <FieldLabel htmlFor={String(config.name)}>{config.label}</FieldLabel>
+              {config.hint ? (
+                <FieldDescription>{config.hint}</FieldDescription>
+              ) : null}
+              <FieldError errors={[fieldState.error]} />
+            </FieldContent>
+          </Field>
+        )}
+      />
+    );
+  }
+
   return (
     <Controller
       name={config.name}

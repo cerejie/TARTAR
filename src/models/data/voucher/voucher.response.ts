@@ -33,6 +33,7 @@ export interface IVoucher {
   ewt_rate: number;
   ewt_amount: number;
   less_return: number;
+  vatable: boolean;
   prepared_by_name?: string | null;
   approved_by_name?: string | null;
 }

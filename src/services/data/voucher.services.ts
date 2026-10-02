@@ -97,6 +97,7 @@ const voucherServices = {
         ewt_rate: withholdingRates[values.withholding],
         ewt_amount: totals.ewt,
         less_return: totals.lessReturn,
+        vatable: values.vatable,
         particulars: values.particulars || null,
         purpose: null,
         category: voucherKindCategory[values.kind],

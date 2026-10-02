@@ -61,11 +61,22 @@ import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useSupplierListHook } from "../party/supplier.list.hook";
 
+const deriveKindVatValues = (
+  changed: Path<IVoucherInput>,
+  values: IVoucherInput
+): Partial<IVoucherInput> | null => {
+  if (changed !== "kind") return null;
+
+  const vatable = values.kind === "purchase";
+  return { vatable, ...deriveVoucherValues("vatable", { ...values, vatable }) };
+};
+
 const deriveManualVoucherValues = (
   changed: Path<IVoucherInput>,
   values: IVoucherInput
 ): Partial<IVoucherInput> => ({
   ...deriveVoucherValues(changed, values),
+  ...deriveKindVatValues(changed, values),
   ...derivePaymentValues(changed, values),
 });
 
@@ -218,7 +229,7 @@ export const useVoucherListHook = () => {
       type: "amount",
       required: true,
       prefix: "₱",
-      hint: "VAT inclusive.",
+      hint: "Invoice total as billed.",
     },
     ...voucherBreakdownFields<IVoucherInput>(),
     {

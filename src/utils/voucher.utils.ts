@@ -23,10 +23,14 @@ export interface IVoucherTotalsInput {
   invoice: number;
   ewtRate: number;
   lessReturn: number;
+  vatable: boolean;
   ewtOverride?: number | null;
 }
 
 export type IVoucherTotals = Record<VoucherLine, number>;
+
+export const isVatableVoucher = (voucher: IVoucher): boolean =>
+  voucher.vatable !== false;
 
 const toCentavos = (value: number): number =>
   Math.round((value + Number.EPSILON) * 100) / 100;
@@ -35,10 +39,11 @@ export const computeVoucherTotals = ({
   invoice,
   ewtRate,
   lessReturn,
+  vatable,
   ewtOverride,
 }: IVoucherTotalsInput): IVoucherTotals => {
   const netOfReturn = invoice - lessReturn;
-  const amountBeforeVat = toCentavos(netOfReturn / vatDivisor);
+  const amountBeforeVat = toCentavos(netOfReturn / (vatable ? vatDivisor : 1));
   const ewt = toCentavos(ewtOverride ?? amountBeforeVat * ewtRate);
 
   return {
@@ -57,6 +62,7 @@ const autoTotalsInputOf = (
   invoice: toAmount(values.amount) ?? 0,
   ewtRate: withholdingRates[values.withholding ?? "none"],
   lessReturn: toAmount(values.less_return) ?? 0,
+  vatable: values.vatable,
 });
 
 export const breakdownTotalsOf = (
@@ -76,27 +82,36 @@ export const voucherTotalsOf = (
     invoice: Number(voucher.gross_amount),
     ewtRate: Number(voucher.ewt_rate),
     lessReturn: Number(voucher.less_return),
+    vatable: isVatableVoucher(voucher),
     ewtOverride: Number(voucher.ewt_amount),
   });
 };
+
+const vatLines: ReadonlySet<VoucherLine> = new Set(["amountBeforeVat", "vat"]);
+
+const isVatLineHidden = (line: VoucherLine, vatable: boolean): boolean =>
+  !vatable && vatLines.has(line);
 
 export const voucherSummaryLines = (
   values: IVoucherBreakdownInput
 ): IFormSummaryLine[] => {
   const totals = breakdownTotalsOf(values);
 
-  return voucherLineValues.map((line) => ({
-    key: line,
-    label: voucherLineLabels[line],
-    value: formatMoney(totals[line]),
-    emphasis: line === "amountToPay",
-  }));
+  return voucherLineValues
+    .filter((line) => !isVatLineHidden(line, values.vatable))
+    .map((line) => ({
+      key: line,
+      label: voucherLineLabels[line],
+      value: formatMoney(totals[line]),
+      emphasis: line === "amountToPay",
+    }));
 };
 
 const recalculatedFields: ReadonlySet<string> = new Set([
   "amount",
   "withholding",
   "less_return",
+  "vatable",
 ]);
 
 export const deriveVoucherValues = (
@@ -108,7 +123,19 @@ export const deriveVoucherValues = (
   return { ewt_amount: computeVoucherTotals(autoTotalsInputOf(values)).ewt };
 };
 
+const vatableField: IFieldConfig<IVoucherBreakdownInput> = {
+  name: "vatable",
+  label: "VAT-registered invoice",
+  type: "checkbox",
+  hint: "Leave unchecked for a non-VAT invoice — no VAT is taken out before withholding.",
+};
+
+export const voucherVatField = <
+  TValues extends IVoucherBreakdownInput,
+>(): IFieldConfig<TValues> => vatableField as unknown as IFieldConfig<TValues>;
+
 const breakdownFields: IFieldConfig<IVoucherBreakdownInput>[] = [
+  vatableField,
   {
     name: "withholding",
     label: "Withholding tax",
@@ -123,7 +150,7 @@ const breakdownFields: IFieldConfig<IVoucherBreakdownInput>[] = [
     type: "amount",
     span: "half",
     prefix: "₱",
-    hint: "Calculated from the amount before VAT — edit if the supplier's differs.",
+    hint: "Calculated automatically — edit if the supplier's differs.",
     hidden: (values) => values.withholding === "none",
   },
   {
@@ -142,6 +169,7 @@ export const voucherBreakdownFields = <
   breakdownFields as unknown as IFieldConfig<TValues>[];
 
 export const voucherBreakdownDefaults: IVoucherBreakdownInput = {
+  vatable: false,
   withholding: "none",
   ewt_amount: 0,
   less_return: null,
@@ -153,6 +181,7 @@ export const voucherBreakdownOf = (
 ): IVoucherBreakdownInput =>
   voucher
     ? {
+        vatable: isVatableVoucher(voucher),
         withholding: withholdingOfRate(voucher.ewt_rate),
         ewt_amount: Number(voucher.ewt_amount),
         less_return: Number(voucher.less_return) || null,
@@ -171,6 +200,10 @@ export const voucherBreakdownItems = <TRecord>(
   ...voucherLineValues.map((line) => ({
     key: line,
     label: voucherLineLabels[line],
+    hidden: (record: TRecord) => {
+      const voucher = voucherOf(record);
+      return voucher ? isVatLineHidden(line, isVatableVoucher(voucher)) : false;
+    },
     render: (record: TRecord) => {
       const voucher = voucherOf(record);
       const totals = voucherTotalsOf(voucher);

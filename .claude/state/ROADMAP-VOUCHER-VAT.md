@@ -1,5 +1,5 @@
 # ROADMAP — Voucher resubmit, admin auto-approve, VAT checkbox
-Updated: 2026-10-01 (V1 migration 29 written, NOT applied; V2 next)
+Updated: 2026-10-02 (V1 mig 29 applied; V2 done, not committed; V3 next)
 
 ## Goal
 1. A rejected voucher is never a dead end: the employee opens "View reason" from the Vouchers page,
@@ -113,6 +113,17 @@ ticking Done with paths, rewriting Next, suggesting the commit (`git log --oneli
   BEFORE INSERT; vouchers_zz_approval_payable now INSERT OR UPDATE + app.sync_voucher_payable;
   notifications.pending, app.notify 6-arg, app.resolve_notifications, push_* recreated, payments_push on
   insert or update of status, *_resolve_notifications delete triggers, cleanup cron skips pending.
+  Applied by the user before 2026-10-02.
+- V2 2026-10-02 (tsc + lint clean, not checked on the preview). Decisions: label "VAT-registered invoice";
+  non-VAT HIDES "Amount before VAT" + "VAT (12%)" in the form summary and detail views; print "12% vat"
+  cell blank. IFieldType "checkbox" -> FormField (ui/checkbox, horizontal Field + FieldContent);
+  IDetailItem.hidden(record) honoured by DetailGrid / DetailRows / RowDetailPanel via
+  utils/detail.utils.ts visibleDetailItems. voucher.utils: computeVoucherTotals vatable divisor,
+  isVatableVoucher (vatable !== false, so cached pre-29 rows read VAT), voucherVatField, vatable
+  recalculates EWT, defaults false, voucherBreakdownOf reads it. Expense form: checkbox after Due date,
+  edit reads the stored flag. Purchase default true. Manual voucher: kind change re-defaults vatable
+  (purchase true) and recomputes EWT. Services: p_vatable in transaction breakdownArgs, vatable on manual
+  insert. Hints "VAT inclusive." -> "Invoice total as billed.", EWT hint neutral.
 
 ## Path map
 - voucher UI: components/voucher/tables/VouchersTable.tsx · hook/data/voucher/voucher.list.hook.ts ·
@@ -126,12 +137,12 @@ ticking Done with paths, rewriting Next, suggesting the commit (`git log --oneli
   mig 25 (latest update_transaction_with_voucher) · mig 5/7 (voucher_approval_payable) · mig 27/28 (push)
 
 ## Next
-1. User reviews migration 29 and applies it (SQL editor, dev = production). Then check: admin creates an
-   expense -> Approved, no push; employee expense -> pending + manager inbox row with pending = true;
-   approve it -> the managers' pending row is gone.
-2. V2 VAT checkbox (client) — as planned above. Old clients keep working after mig 29 (p_vatable defaults).
+1. V3 Resubmit on Vouchers + auto-approve client + R6 own-edit + R8 inbox pending (as planned above).
+2. V4 preview checks, incl. the mig 29 server checks: admin expense -> Approved, no push; employee expense
+   -> pending + manager inbox row pending = true; approve -> the pending row is gone; V2 non-VAT math
+   (2% EWT on a 1,000 non-VAT invoice = 20.00; VAT invoice = 17.86) and the hidden VAT lines.
 
 ## State
-Branch mobilel-app-native at bb84ae7 (Development v2.09). Migration 29 written, not applied, not committed.
+Branch mobilel-app-native at 82afbe3 (Development v2.10, mig 29 committed and applied). V2 uncommitted.
 The mobile roadmap's P0-4 event checks 3 (payment verification) and 4 (sale verified) are still open;
 after mig 29, check 4's managers also get "Sale needs verification" on deposit.

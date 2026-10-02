@@ -12,6 +12,7 @@ import {
 import { branchSlugSchema } from "../branch/branch.response";
 
 export const voucherBreakdownShape = {
+  vatable: z.boolean(),
   withholding: withholdingSchema,
   ewt_amount: optionalAmountField,
   less_return: optionalAmountField,

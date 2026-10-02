@@ -18,7 +18,7 @@ import type { IVoucher } from "../models/data/voucher/voucher.response";
 import { voucherPurpose } from "../models/data/voucher/voucher.response";
 import { printFont, printPalette } from "../styles/print/print.styles";
 import { formatDate, formatDateTime, formatMoney } from "./format.utils";
-import { voucherTotalsOf } from "./voucher.utils";
+import { isVatableVoucher, voucherTotalsOf } from "./voucher.utils";
 
 export interface IPrintStat {
   label: string;
@@ -89,7 +89,7 @@ const voucherBreakdownRows = (voucher: IVoucher): [string, string][] => {
 
   return [
     ["Gross Total", formatMoney(totals?.invoice ?? voucher.amount)],
-    ["12% vat", moneyOrBlank(totals?.amountBeforeVat)],
+    ["12% vat", isVatableVoucher(voucher) ? moneyOrBlank(totals?.amountBeforeVat) : ""],
     [withholdLabel, moneyOrBlank(totals?.ewt)],
     ["TOTAL", formatMoney(totals?.invoice ?? voucher.amount)],
     ["Less return", moneyOrBlank(totals?.lessReturn)],

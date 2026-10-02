@@ -10,7 +10,8 @@ export type IFieldType =
   | "select"
   | "creatable"
   | "multiselect"
-  | "date";
+  | "date"
+  | "checkbox";
 
 export type IFieldSpan = "half" | "full";
 

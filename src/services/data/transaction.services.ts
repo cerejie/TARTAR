@@ -63,6 +63,7 @@ const breakdownArgs = (values: IDisbursementInput) => {
     p_ewt_amount: totals.ewt,
     p_less_return: totals.lessReturn,
     p_particulars: values.particulars || null,
+    p_vatable: values.vatable,
   };
 };
 

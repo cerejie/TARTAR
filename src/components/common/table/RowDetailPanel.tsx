@@ -11,6 +11,7 @@ import {
   rowDetailSectionTitle,
   rowDetailValue,
 } from "../../../styles/table/table.styles";
+import { visibleDetailItems } from "../../../utils/detail.utils";
 
 type IProps<TRecord> = {
   record: TRecord;
@@ -47,7 +48,7 @@ const RowDetailPanel = <TRecord,>({
               ) : null}
               {section.title}
             </div>
-            {section.items.map((item) => (
+            {visibleDetailItems(section.items, record).map((item) => (
               <div key={item.key} className={rowDetailField}>
                 <span className={rowDetailLabel}>{item.label}</span>
                 <span className={rowDetailValue}>{item.render(record)}</span>
