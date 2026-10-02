@@ -9,23 +9,35 @@ import {
 import InboxBell from "../../inbox/menus/InboxBell";
 import PullIndicator from "../app/PullIndicator";
 import AppBar from "./AppBar";
+import AppBarSearch from "./AppBarSearch";
 import PhoneAlertsSheet from "./PhoneAlertsSheet";
 import ProtectedSider from "./ProtectedSider";
 import RouteProgress from "./RouteProgress";
 import SidebarToggle from "./SidebarToggle";
 
 const PhoneShell = () => {
-  const { pathname, scrollRef, handleScroll, pullHandlers, title, openAlerts } =
-    usePhoneShellHook();
+  const {
+    pathname,
+    searchMode,
+    scrollRef,
+    handleScroll,
+    pullHandlers,
+    title,
+    openAlerts,
+  } = usePhoneShellHook();
 
   return (
     <SidebarProvider className={phoneShell}>
       <RouteProgress />
-      <AppBar
-        title={title}
-        leading={<SidebarToggle />}
-        trailing={<InboxBell onPress={openAlerts} />}
-      />
+      {searchMode ? (
+        <AppBarSearch searchMode={searchMode} />
+      ) : (
+        <AppBar
+          title={title}
+          leading={<SidebarToggle />}
+          trailing={<InboxBell onPress={openAlerts} />}
+        />
+      )}
 
       <main
         id="main-content"

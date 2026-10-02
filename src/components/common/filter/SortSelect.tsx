@@ -47,12 +47,12 @@ const SortSelect = ({ value, options, onChange }: IProps) => {
       <>
         <Button
           variant="outline"
-          size="icon"
           className={filterPill}
           aria-label={current ? `Sort by ${current.label}` : "Sort by"}
           onPress={() => sheet.openModal()}
         >
           <ArrowUpDown />
+          Sort
         </Button>
         <AppSheet open={sheet.modal.visible} title="Sort by" onClose={sheet.closeModal}>
           <div role="group" aria-label="Sort by" className={sortSheetList}>

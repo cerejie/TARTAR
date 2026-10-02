@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Printer } from "lucide-react";
 import AppButton from "../../components/common/button/AppButton";
 import ContentView from "../../components/common/view/ContentView";
-import ViewSwitch from "../../components/common/view/ViewSwitch";
+import ContextSwitch from "../../components/common/view/ContextSwitch";
 import BranchSummaryReport from "../../components/report/BranchSummaryReport";
 import CashFlowReport from "../../components/report/CashFlowReport";
 import ExpensesReport from "../../components/report/ExpensesReport";
@@ -15,6 +15,7 @@ import {
   type IReportState,
   type ReportType,
 } from "../../models/data/report/report.response";
+import { segmentOptionsOf } from "../../utils/segment.utils";
 
 const ReportsView = () => {
   const {
@@ -93,10 +94,10 @@ const ReportsView = () => {
         </AppButton>
       }
       tabs={
-        <ViewSwitch
+        <ContextSwitch
+          label="Report type"
           value={type}
-          values={reportTypeValues}
-          labels={reportTypeLabels}
+          options={segmentOptionsOf(reportTypeValues, reportTypeLabels)}
           onChange={setType}
         />
       }

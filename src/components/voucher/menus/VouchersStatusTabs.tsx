@@ -1,10 +1,15 @@
-import StatusFilterTabs from "../../common/filter/StatusFilterTabs";
+import ContextSwitch from "../../common/view/ContextSwitch";
 import {
   voucherStatusLabels,
   voucherStatusValues,
 } from "../../../enums/voucher.enum";
 import { useFilterField } from "../../../hook/common/filter.hook";
 import { voucherPaginationKey } from "../../../keys/table.keys";
+import {
+  allSegmentKey,
+  statusOfSegment,
+  statusSegmentOptionsOf,
+} from "../../../utils/segment.utils";
 
 const VouchersStatusTabs = () => {
   const { value, changeValue } = useFilterField(
@@ -14,12 +19,11 @@ const VouchersStatusTabs = () => {
   );
 
   return (
-    <StatusFilterTabs
+    <ContextSwitch
       label="Voucher status"
-      value={value}
-      values={voucherStatusValues}
-      labels={voucherStatusLabels}
-      onChange={changeValue}
+      value={value ?? allSegmentKey}
+      options={statusSegmentOptionsOf(voucherStatusValues, voucherStatusLabels)}
+      onChange={(key) => changeValue(statusOfSegment(key, voucherStatusValues))}
     />
   );
 };

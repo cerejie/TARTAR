@@ -2,20 +2,6 @@ import { cva } from "class-variance-authority";
 
 import { moneyLevel } from "../common/money.styles";
 
-export const segmentedTabs =
-  "grid w-full auto-cols-fr grid-flow-col gap-0 rounded-pill bg-muted p-1 lg:w-fit";
-
-export const segmentedTabsItem =
-  "relative h-9 min-w-0 rounded-pill px-2 text-muted-foreground sm:px-3 hover:bg-transparent data-selected:bg-transparent data-selected:text-foreground";
-
-export const segmentedTabsThumb =
-  "absolute inset-0 rounded-pill bg-panel shadow-sm transition-[translate,width] duration-200 ease-out motion-reduce:transition-none";
-
-export const segmentedTabsLabel = "relative truncate";
-
-export const segmentedTabsCount =
-  "relative rounded-pill bg-track px-1.5 text-xs tabular-nums text-muted-foreground";
-
 export const metricTileLink =
   "block rounded-card outline-none transition-transform select-none focus-visible:ring-[3px] focus-visible:ring-ring/50 data-pressed:scale-98 motion-reduce:transition-none";
 

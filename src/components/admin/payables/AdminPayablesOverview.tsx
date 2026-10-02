@@ -1,7 +1,7 @@
 import { useAdminPayablesHook } from "../../../hook/data/admin/admin.payables.hook";
 import { adminSplit, adminTabStack } from "../../../styles/admin/admin.layout.styles";
-import SegmentedTabs from "../../common/app/SegmentedTabs";
 import AdminPageTitle from "../../common/layout/AdminPageTitle";
+import ContextSwitch from "../../common/view/ContextSwitch";
 import PayableEntryList from "./PayableEntryList";
 import PayableEntrySheet from "./PayableEntrySheet";
 
@@ -11,7 +11,7 @@ const AdminPayablesOverview = () => {
   return (
     <div className={adminTabStack}>
       <AdminPageTitle />
-      <SegmentedTabs
+      <ContextSwitch
         label="Payables view"
         value={payables.segment}
         options={payables.segmentOptions}

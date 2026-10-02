@@ -1,7 +1,8 @@
-import ViewSwitch from "../../common/view/ViewSwitch";
+import ContextSwitch from "../../common/view/ContextSwitch";
 import { ledgerViewValues } from "../../../enums/ledger.enum";
 import type { LedgerScope } from "../../../hook/data/ledger/ledger.scope.hook";
 import { useLedgerViewHook } from "../../../hook/data/ledger/ledger.view.hook";
+import { segmentOptionsOf } from "../../../utils/segment.utils";
 
 type IProps = {
   scope: LedgerScope;
@@ -11,10 +12,10 @@ const LedgerViewTabs = ({ scope }: IProps) => {
   const { view, setView, labels } = useLedgerViewHook(scope);
 
   return (
-    <ViewSwitch
+    <ContextSwitch
+      label="View"
       value={view}
-      values={ledgerViewValues}
-      labels={labels}
+      options={segmentOptionsOf(ledgerViewValues, labels)}
       onChange={setView}
     />
   );

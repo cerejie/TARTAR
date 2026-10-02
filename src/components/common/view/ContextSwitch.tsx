@@ -1,15 +1,17 @@
 import { SelectionIndicator } from "react-aria-components";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
-  segmentedTabs,
-  segmentedTabsCount,
-  segmentedTabsItem,
-  segmentedTabsLabel,
-  segmentedTabsThumb,
-} from "../../../styles/app/app.styles";
+  contextSwitch,
+  contextSwitchCount,
+  contextSwitchItem,
+  contextSwitchLabel,
+  contextSwitchThumb,
+} from "../../../styles/view/view.styles";
 
 import type { Selection } from "react-aria-components";
 import type { ISegmentOption } from "../../../models/common/segment.model";
+
+const segmentedOptionLimit = 4;
 
 type IProps<T extends string> = {
   value: T;
@@ -18,12 +20,15 @@ type IProps<T extends string> = {
   label: string;
 };
 
-const SegmentedTabs = <T extends string>({
+const ContextSwitch = <T extends string>({
   value,
   options,
   onChange,
   label,
 }: IProps<T>) => {
+  const isSegmented = options.length <= segmentedOptionLimit;
+  const presentation = isSegmented ? "segmented" : "chips";
+
   const handleSelectionChange = (keys: Selection) => {
     if (keys === "all") return;
     const next = options.find((option) => keys.has(option.key));
@@ -32,20 +37,25 @@ const SegmentedTabs = <T extends string>({
 
   return (
     <ToggleGroup
-      spacing={0}
+      variant={isSegmented ? "default" : "outline"}
+      spacing={isSegmented ? 0 : 2}
       selectionMode="single"
       disallowEmptySelection
       selectedKeys={[value]}
       onSelectionChange={handleSelectionChange}
       aria-label={label}
-      className={segmentedTabs}
+      className={contextSwitch({ presentation })}
     >
       {options.map((option) => (
-        <ToggleGroupItem key={option.key} id={option.key} className={segmentedTabsItem}>
-          <SelectionIndicator className={segmentedTabsThumb} />
-          <span className={segmentedTabsLabel}>{option.label}</span>
+        <ToggleGroupItem
+          key={option.key}
+          id={option.key}
+          className={contextSwitchItem({ presentation })}
+        >
+          {isSegmented ? <SelectionIndicator className={contextSwitchThumb} /> : null}
+          <span className={contextSwitchLabel}>{option.label}</span>
           {option.count === undefined ? null : (
-            <span className={segmentedTabsCount}>{option.count}</span>
+            <span className={contextSwitchCount}>{option.count}</span>
           )}
         </ToggleGroupItem>
       ))}
@@ -53,4 +63,4 @@ const SegmentedTabs = <T extends string>({
   );
 };
 
-export default SegmentedTabs;
+export default ContextSwitch;

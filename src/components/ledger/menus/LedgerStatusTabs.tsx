@@ -1,4 +1,4 @@
-import StatusFilterTabs from "../../common/filter/StatusFilterTabs";
+import ContextSwitch from "../../common/view/ContextSwitch";
 import {
   ledgerStatusFilterLabels,
   ledgerStatusFilterValues,
@@ -10,6 +10,11 @@ import type { LedgerScope } from "../../../hook/data/ledger/ledger.scope.hook";
 import { useLedgerViewHook } from "../../../hook/data/ledger/ledger.view.hook";
 import { ledgerPaginationKey } from "../../../keys/table.keys";
 import { ledgerFilterScopeOf } from "../../../utils/filter.utils";
+import {
+  allSegmentKey,
+  statusOfSegment,
+  statusSegmentOptionsOf,
+} from "../../../utils/segment.utils";
 
 type IProps = {
   scope: LedgerScope;
@@ -27,20 +32,20 @@ const LedgerStatusTabs = ({ scope }: IProps) => {
 
   if (scope === "payables")
     return (
-      <StatusFilterTabs
-        value={payableStatusValues.find((status) => status === value)}
-        values={payableStatusValues}
-        labels={payableStatusLabels}
-        onChange={changeValue}
+      <ContextSwitch
+        label="Status"
+        value={payableStatusValues.find((status) => status === value) ?? allSegmentKey}
+        options={statusSegmentOptionsOf(payableStatusValues, payableStatusLabels)}
+        onChange={(key) => changeValue(statusOfSegment(key, payableStatusValues))}
       />
     );
 
   return (
-    <StatusFilterTabs
-      value={ledgerStatusFilterValues.find((status) => status === value)}
-      values={ledgerStatusFilterValues}
-      labels={ledgerStatusFilterLabels}
-      onChange={changeValue}
+    <ContextSwitch
+      label="Status"
+      value={ledgerStatusFilterValues.find((status) => status === value) ?? allSegmentKey}
+      options={statusSegmentOptionsOf(ledgerStatusFilterValues, ledgerStatusFilterLabels)}
+      onChange={(key) => changeValue(statusOfSegment(key, ledgerStatusFilterValues))}
     />
   );
 };

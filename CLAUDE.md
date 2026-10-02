@@ -282,8 +282,8 @@ Forms are react-hook-form + zod, driven declaratively — never a hand-built for
 
 - Every page renders exactly one `ContentView` — the floating content card. Its title row
   holds the page `h1` (from the route `label` via `useProtectedTitleHook`; the route
-  `description` is not rendered), then `tabs` (status pills — `ViewSwitch` /
-  `StatusFilterTabs`) and `actions` (the primary action). The toolbar row under it holds
+  `description` is not rendered), then `tabs` (status pills — `ContextSwitch`:
+  segmented at ≤ 4 options, scrolling chips above; `utils/segment.utils.ts` adds "All") and `actions` (the primary action). The toolbar row under it holds
   `toolbar` (the Filters popover) and `meta` (Sort by). Then the body layout
   (`stack` | `bento`) and an optional `footer`.
 - Bento layouts use `BentoGrid` + `BentoCell` with named spans, never raw grid CSS.

@@ -1,5 +1,5 @@
 # ROADMAP — Mobile-native design improvements
-Updated: 2026-10-03 (D1 done)
+Updated: 2026-10-03 (D2 done)
 
 ## Goal
 Move the main app from "desktop architecture with mobile components" to "shared business logic with
@@ -131,13 +131,13 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
 - breakpoints: src/hook/common/breakpoint.hook.ts (useIsDesktop, useIsTabletUp; matchMedia store) ·
   src/hook/use-mobile.ts (shadcn useIsMobile, flash source)
 - shells: src/layouts/{ProtectedLayout,AdminAppLayout}.tsx · src/components/common/layout/{PhoneShell,
-  AppBar,SidebarToggle,ProtectedSider,PhoneAlertsSheet,AccountSheetItems}.tsx ·
+  AppBar,AppBarSearch,SidebarToggle,ProtectedSider,PhoneAlertsSheet,AccountSheetItems}.tsx ·
   src/hook/layout/{protected.phone,app.bar,admin}.hook.ts · src/styles/layout/shell.styles.ts ·
   src/styles/app/app.bar.styles.ts
-- view: src/components/common/view/{ContentView,BentoGrid,ViewSwitch}.tsx
-- filter: src/components/common/filter/{FilterToolbar,FilterPopover,SortSelect,StatusFilterTabs}.tsx
-- admin primitives: src/components/common/app/{AppSheet,DetailRows,ListCard,ListSection,RecordHero,
-  SegmentedTabs}.tsx · src/components/admin/home/{AttentionList,OverviewTiles}.tsx ·
+- view: src/components/common/view/{ContentView,BentoGrid,ContextSwitch}.tsx · src/utils/segment.utils.ts
+- filter: src/components/common/filter/{FilterToolbar,FilterPopover,SortSelect,LedgerFilterBar,
+  QuickDateFilters,SearchTrigger}.tsx · search mode: store/common/view.store.ts + hook/common/search.hook.ts
+- admin primitives: src/components/common/app/{AppSheet,DetailRows,ListCard,ListSection,RecordHero}.tsx · src/components/admin/home/{AttentionList,OverviewTiles}.tsx ·
   src/hook/data/admin/admin.{payables,receivables}.hook.ts
 - cards/status: src/components/common/card/StatCard.tsx · src/components/common/status/{EmptyState,
   ErrorState}.tsx · src/components/common/table/TableEmptyState.tsx
@@ -188,14 +188,28 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
   AppBar gets `floating` prop (admin non-phone) instead of md: classes, so the main phone bar stays phone at
   tablet portrait; branch sheet = !floating. DataTable cells `pointer-coarse:h-16`. Room-only md:/lg: left
   as is (shell/header render only ≥48rem; bento, filter, ledger, form, modal grids).
+- [x] D2 ContextSwitch + phone toolbar (2026-10-03). common/view/ContextSwitch (options: ISegmentOption;
+  ≤4 = segmented w/ SelectionIndicator, >4 = scrolling outline chips; styles view.styles `contextSwitch*` cva,
+  segmentedTabs* + viewSwitchItem + viewToolbar toggle-group hack removed); utils/segment.utils
+  (segmentOptionsOf, statusSegmentOptionsOf adds "All", statusOfSegment). Migrated Sale/Vouchers/disbursement
+  Voucher/Ledger status tabs, LedgerViewTabs, SalesOverviewCard, Reports, MasterData, 4 admin *Overview.
+  Deleted ViewSwitch, StatusFilterTabs, SegmentedTabs. Phone toolbar: icon-only collapse removed from
+  filterToolbarStart; labelled pills [Search] [Filters n] [Sort] (Sort label on compact, chevron desktop
+  only). FilterPopover `quick` slot → "Quick filters" / "Advanced" sections (sheet + popover).
+  QuickDateFilters: Today / This week (Mon start) / This month via period.utils quickDateRangeOf /
+  quickDateOfRange (models/common/period.model quickDate*); status not duplicated (user). Search mode:
+  view.store `searchMode` (scope, placeholder, pathname) + useSearchMode; SearchTrigger (LedgerFilterBar,
+  compact + showSearch = Receivables/Payables records) → PhoneShell swaps AppBar for AppBarSearch
+  (← clears + exits, autofocus); closed on route change. No ⋯ More (no screen has secondary toolbar actions).
+  Docs: CLAUDE.md, build/stack.md, tartar-shadcn SKILL.md name ContextSwitch.
 
 ## Next
-1. D2 ContextSwitch + phone toolbar (see Phases).
-2. D3 → D10 in order.
+1. D3 Dashboard (see Phases).
+2. D4 → D10 in order.
 
 ## Open
 - (none)
 
 ## State
-Branch mobile-app-native-newlook · Uncommitted: D1 (suggested Development v2.23) ·
-Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.22.
+Branch mobile-app-native-newlook · Uncommitted: D2 (suggested Development v2.24) ·
+Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.23 (D1).

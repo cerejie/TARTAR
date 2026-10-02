@@ -1,9 +1,9 @@
 import { CheckCheck } from "lucide-react";
 import { useAdminNotificationsHook } from "../../../hook/data/admin/admin.notifications.hook";
 import { adminTabStack } from "../../../styles/admin/admin.layout.styles";
-import SegmentedTabs from "../../common/app/SegmentedTabs";
 import AppButton from "../../common/button/AppButton";
 import AdminPageTitle from "../../common/layout/AdminPageTitle";
+import ContextSwitch from "../../common/view/ContextSwitch";
 import InboxFeed from "../../inbox/lists/InboxFeed";
 import NotificationFeed from "./NotificationFeed";
 
@@ -26,7 +26,7 @@ const AdminNotificationsOverview = () => {
         }
       />
       <InboxFeed section="action" />
-      <SegmentedTabs
+      <ContextSwitch
         label="Due alerts view"
         value={notifications.segment}
         options={notifications.segmentOptions}

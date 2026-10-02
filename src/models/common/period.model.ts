@@ -11,6 +11,15 @@ export const printPeriodLabels: Record<PrintPeriod, string> = {
   custom: "Custom range",
 };
 
+export const quickDateValues = ["today", "week", "month"] as const;
+export type QuickDate = (typeof quickDateValues)[number];
+
+export const quickDateLabels: Record<QuickDate, string> = {
+  today: "Today",
+  week: "This week",
+  month: "This month",
+};
+
 export const periodPrintSchema = z
   .object({
     period: z.enum(printPeriodValues),

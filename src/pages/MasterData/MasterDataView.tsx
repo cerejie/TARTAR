@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import ContentView from "../../components/common/view/ContentView";
-import ViewSwitch from "../../components/common/view/ViewSwitch";
+import ContextSwitch from "../../components/common/view/ContextSwitch";
 import BankAccountCreateButton from "../../components/master-data/menus/BankAccountCreateButton";
 import ExpenseCategoryCreateButton from "../../components/master-data/menus/ExpenseCategoryCreateButton";
 import IncomeSourceCreateButton from "../../components/master-data/menus/IncomeSourceCreateButton";
@@ -10,6 +10,7 @@ import ExpenseCategoriesTable from "../../components/master-data/tables/ExpenseC
 import IncomeSourcesTable from "../../components/master-data/tables/IncomeSourcesTable";
 import SuppliersTable from "../../components/master-data/tables/SuppliersTable";
 import { useSearchParam } from "../../hook/common/search.param.hook";
+import { segmentOptionsOf } from "../../utils/segment.utils";
 
 const sections = [
   "suppliers",
@@ -50,10 +51,10 @@ const MasterDataView = () => {
   return (
     <ContentView
       tabs={
-        <ViewSwitch
+        <ContextSwitch
+          label="Section"
           value={section}
-          values={sections}
-          labels={sectionLabels}
+          options={segmentOptionsOf(sections, sectionLabels)}
           onChange={setSection}
         />
       }

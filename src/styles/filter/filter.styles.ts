@@ -3,7 +3,7 @@ import { cva } from "class-variance-authority";
 export const filterToolbar = "flex flex-wrap items-center gap-2 max-md:data-compact:flex-nowrap";
 
 export const filterToolbarStart =
-  "flex min-w-0 flex-auto flex-wrap items-center gap-2 max-md:in-data-compact:flex-none max-md:in-data-compact:flex-nowrap max-md:in-data-compact:[&>[data-slot=button]]:relative max-md:in-data-compact:[&>[data-slot=button]]:size-10 max-md:in-data-compact:[&>[data-slot=button]]:gap-0 max-md:in-data-compact:[&>[data-slot=button]]:rounded-full max-md:in-data-compact:[&>[data-slot=button]]:px-0 max-md:in-data-compact:[&>[data-slot=button]]:text-[0px] max-md:in-data-compact:[&>[data-slot=button]>svg:not(:first-child)]:hidden max-md:in-data-compact:[&_[data-slot=badge]]:absolute max-md:in-data-compact:[&_[data-slot=badge]]:-top-1 max-md:in-data-compact:[&_[data-slot=badge]]:-right-1";
+  "flex min-w-0 flex-auto flex-wrap items-center gap-2 max-md:in-data-compact:flex-none max-md:in-data-compact:flex-nowrap max-md:in-data-compact:[&>[data-slot=button]]:h-10 max-md:in-data-compact:[&>[data-slot=button]]:rounded-full max-md:in-data-compact:[&>[data-slot=button]]:px-4";
 
 export const filterToolbarActions =
   "ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 max-md:in-data-compact:flex-nowrap max-md:in-data-compact:[&>[data-slot=button]]:h-10 max-md:in-data-compact:[&>[data-slot=button]]:rounded-full max-md:in-data-compact:[&>[data-slot=button]]:px-4";
@@ -18,7 +18,15 @@ export const filterBar = cva("flex gap-2", {
   defaultVariants: { layout: "inline" },
 });
 
-export const filterSearch = "w-full sm:w-56";
+export const filterSearch = cva("w-full", {
+  variants: {
+    fill: {
+      true: "min-w-0 flex-1",
+      false: "sm:w-56",
+    },
+  },
+  defaultVariants: { fill: false },
+});
 
 export const filterSelect = "w-full sm:w-40";
 
@@ -35,6 +43,12 @@ export const filterPopover = "w-80";
 export const filterPopoverHead = "flex-row items-center justify-between gap-2";
 
 export const filterPopoverTitle = "text-sm font-semibold";
+
+export const filterSection = "flex flex-col gap-2";
+
+export const filterSectionTitle = "text-label font-semibold text-muted-foreground";
+
+export const filterSections = "flex flex-col gap-5";
 
 export const filterSheetFooter =
   "grid grid-cols-2 border-t border-border bg-muted/50 pb-safe [&_[data-slot=button]]:h-11";

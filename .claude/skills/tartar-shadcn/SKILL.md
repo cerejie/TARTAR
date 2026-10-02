@@ -84,7 +84,7 @@ sed -i '/type DialogProps as AlertDialogPrimitiveProps,/d' src/components/ui/ale
 | Need | Use | Never |
 |---|---|---|
 | Page shell, title, status pills, actions, toolbar | `common/view/ContentView` (`tabs`, `actions`, `toolbar`, `meta`) | a per-page header block |
-| Status pills (title row) | `common/view/ViewSwitch` / `common/filter/StatusFilterTabs` | buttons with manual active state |
+| Status pills / view switch (main + admin) | `common/view/ContextSwitch` (+ `statusSegmentOptionsOf` for "All") | buttons with manual active state |
 | Bento metrics layout | `common/view/BentoGrid` + `BentoCell` | raw grid CSS |
 | Content panel | `card` via `common/card/SectionCard` | a styled bordered `<div>`; a card in a card |
 | Metric tile | `card` via `common/card/StatCard` | a bespoke tile |

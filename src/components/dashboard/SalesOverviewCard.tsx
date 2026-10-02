@@ -10,10 +10,11 @@ import {
   formatMoney,
   formatMoneyCompact,
 } from "../../utils/format.utils";
+import { segmentOptionsOf } from "../../utils/segment.utils";
 import SectionCard from "../common/card/SectionCard";
 import AppBarChart from "../common/chart/AppBarChart";
 import EmptyState from "../common/status/EmptyState";
-import ViewSwitch from "../common/view/ViewSwitch";
+import ContextSwitch from "../common/view/ContextSwitch";
 
 type IProps = {
   salesPeriod: SalesPeriod;
@@ -41,10 +42,10 @@ const SalesOverviewCard = ({
       error={error}
       onRetry={onRetry}
       extra={
-        <ViewSwitch
+        <ContextSwitch
+          label="Sales period"
           value={salesPeriod}
-          values={salesPeriodValues}
-          labels={salesPeriodLabels}
+          options={segmentOptionsOf(salesPeriodValues, salesPeriodLabels)}
           onChange={onSalesPeriodChange}
         />
       }

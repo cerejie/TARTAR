@@ -1,7 +1,12 @@
-import StatusFilterTabs from "../../common/filter/StatusFilterTabs";
+import ContextSwitch from "../../common/view/ContextSwitch";
 import { saleStatusLabels, saleStatusValues } from "../../../enums/sale.enum";
 import { useFilterField } from "../../../hook/common/filter.hook";
 import { salePaginationKey } from "../../../keys/table.keys";
+import {
+  allSegmentKey,
+  statusOfSegment,
+  statusSegmentOptionsOf,
+} from "../../../utils/segment.utils";
 
 const SaleStatusTabs = () => {
   const { value, changeValue } = useFilterField(
@@ -11,12 +16,11 @@ const SaleStatusTabs = () => {
   );
 
   return (
-    <StatusFilterTabs
+    <ContextSwitch
       label="Sale status"
-      value={value}
-      values={saleStatusValues}
-      labels={saleStatusLabels}
-      onChange={changeValue}
+      value={value ?? allSegmentKey}
+      options={statusSegmentOptionsOf(saleStatusValues, saleStatusLabels)}
+      onChange={(key) => changeValue(statusOfSegment(key, saleStatusValues))}
     />
   );
 };

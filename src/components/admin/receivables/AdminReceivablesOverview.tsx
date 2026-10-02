@@ -1,7 +1,7 @@
 import { useAdminReceivablesHook } from "../../../hook/data/admin/admin.receivables.hook";
 import { adminSplit, adminTabStack } from "../../../styles/admin/admin.layout.styles";
-import SegmentedTabs from "../../common/app/SegmentedTabs";
 import AdminPageTitle from "../../common/layout/AdminPageTitle";
+import ContextSwitch from "../../common/view/ContextSwitch";
 import ReceivableEntryList from "./ReceivableEntryList";
 import ReceivableEntrySheet from "./ReceivableEntrySheet";
 
@@ -11,7 +11,7 @@ const AdminReceivablesOverview = () => {
   return (
     <div className={adminTabStack}>
       <AdminPageTitle />
-      <SegmentedTabs
+      <ContextSwitch
         label="Receivables view"
         value={receivables.segment}
         options={receivables.segmentOptions}

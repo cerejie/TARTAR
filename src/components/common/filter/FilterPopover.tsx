@@ -23,6 +23,9 @@ import {
   filterPopover,
   filterPopoverHead,
   filterPopoverTitle,
+  filterSection,
+  filterSectionTitle,
+  filterSections,
   filterSheetFooter,
 } from "../../../styles/filter/filter.styles";
 import {
@@ -34,10 +37,11 @@ import {
 type IProps = {
   activeCount: number;
   onReset: () => void;
+  quick?: ReactNode;
   children: ReactNode;
 };
 
-const FilterPopover = ({ activeCount, onReset, children }: IProps) => {
+const FilterPopover = ({ activeCount, onReset, quick, children }: IProps) => {
   const isCompact = useIsCompact();
   const sheet = useModal(filterSheetModalKey(useId()));
 
@@ -54,8 +58,23 @@ const FilterPopover = ({ activeCount, onReset, children }: IProps) => {
       <SlidersHorizontal />
       Filters
       {activeCount > 0 ? <Badge>{activeCount}</Badge> : null}
-      <ChevronDown />
+      {isCompact ? null : <ChevronDown />}
     </Button>
+  );
+
+  const body = quick ? (
+    <div className={filterSections}>
+      <section className={filterSection}>
+        <h3 className={filterSectionTitle}>Quick filters</h3>
+        {quick}
+      </section>
+      <section className={filterSection}>
+        <h3 className={filterSectionTitle}>Advanced</h3>
+        {children}
+      </section>
+    </div>
+  ) : (
+    children
   );
 
   const resetButton = (variant: "ghost" | "outline", size: "sm" | "default") => (
@@ -78,7 +97,7 @@ const FilterPopover = ({ activeCount, onReset, children }: IProps) => {
           <SheetHeader className={drawerHeaderRuled}>
             <SheetTitle>Filters</SheetTitle>
           </SheetHeader>
-          <div className={drawerBody}>{children}</div>
+          <div className={drawerBody}>{body}</div>
           <SheetFooter className={filterSheetFooter}>
             {resetButton("outline", "default")}
             <Button onPress={sheet.closeModal}>Show results</Button>
@@ -96,7 +115,7 @@ const FilterPopover = ({ activeCount, onReset, children }: IProps) => {
           <PopoverTitle className={filterPopoverTitle}>Filters</PopoverTitle>
           {resetButton("ghost", "sm")}
         </PopoverHeader>
-        {children}
+        {body}
       </Popover>
     </PopoverTrigger>
   );

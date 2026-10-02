@@ -15,6 +15,7 @@ import {
   transactionTypeFilterValues,
   transactionTypeLabels,
 } from "../../../enums/transaction.enum";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import { useLedgerFilters } from "../../../hook/common/filter.hook";
 import type {
   ILedgerFilters,
@@ -26,7 +27,9 @@ import DateRangeFilter from "./DateRangeFilter";
 import FilterField from "./FilterField";
 import FilterPopover from "./FilterPopover";
 import FilterSelect from "./FilterSelect";
+import QuickDateFilters from "./QuickDateFilters";
 import SearchInput from "./SearchInput";
+import SearchTrigger from "./SearchTrigger";
 
 type ILedgerStatusFilter = NonNullable<ILedgerFilters["status"]>;
 
@@ -63,6 +66,7 @@ const LedgerFilterBar = ({
   layout = "inline",
 }: IProps) => {
   const { filters, setFilters, resetFilters } = useLedgerFilters(scope);
+  const isCompact = useIsCompact();
 
   const defaultStatusValues: readonly ILedgerStatusFilter[] = showOverdue
     ? ["unpaid", ...ledgerStatusValues, "overdue"]
@@ -70,17 +74,19 @@ const LedgerFilterBar = ({
   const statusFilterValues = statusValues ?? defaultStatusValues;
 
   const isPopover = layout === "popover";
+  const searchInAppBar = isPopover && isCompact && showSearch;
+  const searchPlaceholder = "Search name";
 
   const labelled = (label: string, control: ReactNode) =>
     isPopover ? <FilterField label={label}>{control}</FilterField> : control;
 
   const fields = (
     <div className={filterBar({ layout: isPopover ? "stack" : "inline" })}>
-      {showSearch ? (
+      {showSearch && !searchInAppBar ? (
         labelled(
           "Name",
           <SearchInput
-            placeholder="Search name"
+            placeholder={searchPlaceholder}
             value={filters.search}
             onChange={(search) => setFilters({ search })}
           />
@@ -171,12 +177,24 @@ const LedgerFilterBar = ({
   if (!isPopover) return fields;
 
   return (
-    <FilterPopover
-      activeCount={activeFilterCount(filters)}
-      onReset={resetFilters}
-    >
-      {fields}
-    </FilterPopover>
+    <>
+      {searchInAppBar ? (
+        <SearchTrigger scope={scope} placeholder={searchPlaceholder} />
+      ) : null}
+      <FilterPopover
+        activeCount={activeFilterCount(filters)}
+        onReset={resetFilters}
+        quick={
+          <QuickDateFilters
+            from={filters.dateFrom}
+            to={filters.dateTo}
+            onChange={(dateFrom, dateTo) => setFilters({ dateFrom, dateTo })}
+          />
+        }
+      >
+        {fields}
+      </FilterPopover>
+    </>
   );
 };
 

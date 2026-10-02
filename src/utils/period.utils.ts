@@ -1,8 +1,11 @@
 import dayjs from "dayjs";
 import { formatDate } from "./format.utils";
+import { quickDateValues } from "../models/common/period.model";
 import type {
   IDateRange,
   IPeriodPrintInput,
+  PrintPeriod,
+  QuickDate,
 } from "../models/common/period.model";
 
 const isoFormat = "YYYY-MM-DD";
@@ -11,6 +14,12 @@ const monthLabelFormat = "MMMM YYYY";
 const recentMonthCount = 12;
 const daysInWeek = 7;
 const mondayOffset = 6;
+
+const quickDatePeriods: Record<QuickDate, Exclude<PrintPeriod, "custom">> = {
+  today: "daily",
+  week: "weekly",
+  month: "monthly",
+};
 
 export const rangeOfPeriod = (values: IPeriodPrintInput): IDateRange => {
   if (values.period === "custom")
@@ -75,3 +84,22 @@ export const monthToDateRange = (monthsAgo: number): IDateRange => {
     to: anchor.format(isoFormat),
   };
 };
+
+export const quickDateRangeOf = (quickDate: QuickDate): IDateRange => {
+  const today = dayjs().format(isoFormat);
+  return rangeOfPeriod({
+    period: quickDatePeriods[quickDate],
+    date: today,
+    date_from: today,
+    date_to: today,
+  });
+};
+
+export const quickDateOfRange = (
+  from: string | undefined,
+  to: string | undefined
+): QuickDate | undefined =>
+  quickDateValues.find((quickDate) => {
+    const range = quickDateRangeOf(quickDate);
+    return range.from === from && range.to === to;
+  });

@@ -22,9 +22,9 @@ Reference stack: React 19, react-router-dom 7, Tailwind v4 (`@tailwindcss/vite`)
 ## shadcn/ui aria-vega (React Aria)
 
 - Use the project's primitives first: `ContentView`, `DataTable`, `SectionCard`, `StatCard`,
-  `InfoCard`, `SectionHeading`, `BentoGrid` / `BentoCell`, `ViewSwitch`, `EntityFormModal`,
+  `InfoCard`, `SectionHeading`, `BentoGrid` / `BentoCell`, `ContextSwitch`, `EntityFormModal`,
   `FormField`, `AppModal`, `DetailModal`, `FilterToolbar`, `FilterPopover`, `SortSelect`,
-  `StatusFilterTabs`, `FilterSelect`, `DateRangeFilter`, `AvatarCell`, `ProgressCell`,
+  `QuickDateFilters`, `SearchTrigger`, `FilterSelect`, `DateRangeFilter`, `AvatarCell`, `ProgressCell`,
   `RowActionMenu`, `AppButton`, `StatusTag`, `EmptyState`, `ErrorState`, `PageSkeleton`,
   `AppBarChart` / `AppDonutChart`, `RequirePermission`. Reach for a raw `components/ui` file
   only when no primitive fits, and prefer extending the primitive.

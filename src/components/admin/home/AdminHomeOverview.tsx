@@ -1,7 +1,7 @@
 import { useAdminHomeHook } from "../../../hook/data/admin/admin.home.hook";
 import { adminTabStack } from "../../../styles/admin/admin.layout.styles";
-import SegmentedTabs from "../../common/app/SegmentedTabs";
 import AdminPageTitle from "../../common/layout/AdminPageTitle";
+import ContextSwitch from "../../common/view/ContextSwitch";
 import AttentionList from "./AttentionList";
 import OverviewTiles from "./OverviewTiles";
 import SalesTrendCard from "./SalesTrendCard";
@@ -12,7 +12,7 @@ const AdminHomeOverview = () => {
   return (
     <div className={adminTabStack}>
       <AdminPageTitle />
-      <SegmentedTabs
+      <ContextSwitch
         label="Overview period"
         value={home.period}
         options={home.periodOptions}
