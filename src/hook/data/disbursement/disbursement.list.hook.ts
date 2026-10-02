@@ -9,21 +9,14 @@ import {
   periodPrintModalKey,
 } from "../../../keys/modal.keys";
 import {
-  expenseCategoryListKey,
-  expenseListKey,
-  expenseSummaryKey,
-  purchaseListKey,
-  purchaseSummaryKey,
+  disbursementScopeOf,
+  disbursementSummaryKeyOf,
   scopedKey,
-  supplierListKey,
-  voucherListKey,
 } from "../../../keys/query.keys";
 import {
   disbursementPaginationKey,
   disbursementSortKey,
 } from "../../../keys/table.keys";
-import type { Path } from "react-hook-form";
-import type { IFieldSection } from "../../../models/common/field.model";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type { IPaginationResponse } from "../../../models/common/pagination.model";
 import type { IDateRange } from "../../../models/common/period.model";
@@ -38,15 +31,10 @@ import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
+import { isDisbursementEditLocked } from "../../../utils/disbursement.utils";
 import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
-import { derivePaymentValues } from "../../../utils/payment.utils";
 import { printReport } from "../../../utils/print.utils";
 import { disbursementPrintDocument } from "../../../utils/report.utils";
-import {
-  deriveVoucherValues,
-  voucherBreakdownFields,
-  voucherSummaryLines,
-} from "../../../utils/voucher.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
 import { useModal } from "../../common/modal.hook";
@@ -59,29 +47,11 @@ import { useSortOption } from "../../common/sort.hook";
 import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
-import { useDisbursementFormHook } from "./disbursement.form.hook";
-import { useFarmSectionListHook } from "../farm-section/farm.section.list.hook";
+import {
+  disbursementInvalidateKeys,
+  useDisbursementFormHook,
+} from "./disbursement.form.hook";
 import { useUserListHook } from "../user/user.list.hook";
-
-export const disbursementScopeOf = (kind: DisbursementKind) =>
-  kind === "purchase" ? purchaseListKey : expenseListKey;
-
-const deriveDisbursementValues = (
-  changed: Path<IDisbursementInput>,
-  values: IDisbursementInput
-): Partial<IDisbursementInput> => ({
-  ...deriveVoucherValues(changed, values),
-  ...derivePaymentValues(changed, values),
-});
-
-const summaryKeyOf = (kind: DisbursementKind) =>
-  kind === "purchase" ? purchaseSummaryKey : expenseSummaryKey;
-
-export const isDisbursementLocked = (row: IDisbursement) =>
-  !!row.voucher && (row.voucher.status === "approved" || row.voucher.printed);
-
-export const isDisbursementRejected = (row: IDisbursement) =>
-  row.voucher?.status === "rejected";
 
 export const pendingVoucherCount = (rows: readonly IDisbursement[]) =>
   rows.filter((row) => row.voucher?.status === "pending").length;
@@ -94,7 +64,7 @@ export const useDisbursementListHook = (
   title: string
 ) => {
   const scope = disbursementScopeOf(kind);
-  const summaryScope = summaryKeyOf(kind);
+  const summaryScope = disbursementSummaryKeyOf(kind);
 
   const formModal = useModal(disbursementFormModalKey(scope));
   const editModal = useModal<IDisbursement>(disbursementEditModalKey(scope));
@@ -115,15 +85,13 @@ export const useDisbursementListHook = (
   const offerPush = usePushOffer();
 
   const { filters } = useLedgerFilters("page");
-  const { branchOptions, branchName, defaultBranch } = useBranchListHook();
-  const { farmSectionOptions } = useFarmSectionListHook();
+  const { branchName } = useBranchListHook();
   const { userById, userNameOf } = useUserListHook();
-  const { paymentFields, paymentDefaultsOf, paymentLabelOf } =
-    useBankAccountListHook();
+  const { paymentLabelOf } = useBankAccountListHook();
   const { branch: scopeBranch, branchName: scopeName } = useBranchScopeHook();
   const printModalKey = periodPrintModalKey(scope);
   const printModal = useModal(printModalKey);
-  const { payeeOptions, prepare } = useDisbursementFormHook(kind);
+  const form = useDisbursementFormHook(kind);
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
   const summaryFilters: ILedgerFilters = {
@@ -159,8 +127,6 @@ export const useDisbursementListHook = (
     }
   );
 
-  const editRow = editModal.modal.data;
-  const editRejected = !!editRow && isDisbursementRejected(editRow);
   const historyRow = historyModal.modal.data;
 
   const auditQuery = useQuery<ITransactionAudit[]>(
@@ -169,23 +135,19 @@ export const useDisbursementListHook = (
     { enabled: historyModal.modal.visible && !!historyRow }
   );
 
-  const invalidate = [
-    scope,
-    summaryScope,
-    voucherListKey,
-    supplierListKey,
-    expenseCategoryListKey,
-  ];
+  const invalidate = disbursementInvalidateKeys(kind);
 
   const createMutation = useMutation(
     async (values: IDisbursementInput) =>
       transactionServices.createDisbursement(
         kind,
-        await prepare(values),
+        await form.prepare(values),
         createdBy
       ),
     {
-      successMessage: `${title} recorded — voucher pending approval`,
+      successMessage: permissions.isManager
+        ? `${title} recorded — voucher approved`
+        : `${title} recorded — voucher pending approval`,
       invalidate,
       onSuccess: () => {
         formModal.closeModal();
@@ -195,41 +157,9 @@ export const useDisbursementListHook = (
     }
   );
 
-  const updateMutation = useMutation(
-    async (payload: { id: string; values: IDisbursementInput }) =>
-      transactionServices.updateDisbursement(
-        payload.id,
-        kind,
-        await prepare(payload.values),
-        editRow?.version ?? 0,
-        editRow?.voucher?.status ?? null
-      ),
-    {
-      successMessage: editRejected
-        ? `${title} resubmitted — voucher pending approval`
-        : `${title} updated`,
-      invalidate,
-      onSuccess: editModal.closeModal,
-    }
-  );
-
   const removeMutation = useMutation(
     (id: string) => transactionServices.remove(id),
     { successMessage: `${title} deleted`, invalidate }
-  );
-
-  const breakdownSection: IFieldSection<IDisbursementInput> = {
-    key: "breakdown",
-    title: "Voucher breakdown",
-    fields: voucherBreakdownFields<IDisbursementInput>(),
-  };
-
-  const disbursementPaymentFields = paymentFields<IDisbursementInput>(
-    "Paid from"
-  ).map((field) =>
-    field.name === "cash_account"
-      ? { ...field, required: true, allowClear: false }
-      : field
   );
 
   const printPeriod = async (range: IDateRange) => {
@@ -260,31 +190,27 @@ export const useDisbursementListHook = (
     summaryError: summaryQuery.error,
     retrySummary: summaryQuery.refetch,
     summaryPeriod: filterPeriodLabel(effectiveFilters),
-    branchOptions,
     branchName,
-    defaultBranch,
-    farmSectionOptions,
-    payeeOptions,
     userById,
     userNameOf,
+    paymentLabelOf,
     formModal,
     editModal,
     historyModal,
-    editRow,
-    editRejected,
-    rejectedByName: userNameOf(editRow?.voucher?.approved_by ?? null),
+    editRow: editModal.modal.data,
+    editLockedOf: (row: IDisbursement) =>
+      isDisbursementEditLocked(row, createdBy, permissions.isManager),
     historyRow,
     audit: auditQuery.data ?? [],
     auditLoading: auditQuery.isInitialLoading,
     createMutation,
-    updateMutation,
     removeMutation,
-    breakdownSection,
-    formSummary: voucherSummaryLines,
-    disbursementPaymentFields,
-    paymentDefaultsOf,
-    paymentLabelOf,
-    deriveFormValues: deriveDisbursementValues,
+    sections: form.sections,
+    defaults: form.defaults,
+    schema: form.schema,
+    formSummary: form.formSummary,
+    deriveFormValues: form.deriveFormValues,
+    expenseCategoryLabelOf: form.expenseCategoryLabelOf,
     printModalKey,
     openPrint: () => printModal.openModal(),
     printPeriod,

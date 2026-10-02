@@ -67,8 +67,18 @@ export const listCard = cva(
 
 export const listCardMedia = "relative";
 
-export const listCardUnreadDot =
-  "absolute top-1/2 -left-3 size-2 -translate-y-1/2 rounded-pill bg-brand";
+export const listCardUnreadDot = cva(
+  "absolute top-1/2 -left-3 size-2 -translate-y-1/2 rounded-pill",
+  {
+    variants: {
+      tone: {
+        unread: "bg-brand",
+        pending: "bg-warning ring-2 ring-warning/25",
+      },
+    },
+    defaultVariants: { tone: "unread" },
+  }
+);
 
 export const listCardAvatarFallback = "bg-brand-soft text-xs font-semibold text-brand";
 

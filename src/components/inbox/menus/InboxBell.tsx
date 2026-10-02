@@ -17,8 +17,8 @@ type IProps = {
 };
 
 const InboxBell = ({ onPress, dueCount = 0 }: IProps) => {
-  const { unreadCount } = useInboxListHook();
-  const count = unreadCount + dueCount;
+  const { attentionCount } = useInboxListHook();
+  const count = attentionCount + dueCount;
   const label = count ? `Notifications, ${count} new` : "Notifications";
 
   const button = (

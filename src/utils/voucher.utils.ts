@@ -32,6 +32,17 @@ export type IVoucherTotals = Record<VoucherLine, number>;
 export const isVatableVoucher = (voucher: IVoucher): boolean =>
   voucher.vatable !== false;
 
+export const isOwnOpenVoucher = (
+  voucher: Pick<IVoucher, "status" | "printed" | "created_by">,
+  userId: string | null,
+  isManager: boolean
+): boolean =>
+  isManager &&
+  voucher.status === "approved" &&
+  !voucher.printed &&
+  !!userId &&
+  voucher.created_by === userId;
+
 const toCentavos = (value: number): number =>
   Math.round((value + Number.EPSILON) * 100) / 100;
 

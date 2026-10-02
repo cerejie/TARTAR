@@ -1,8 +1,9 @@
 import { Bell, BellOff, CheckCheck, FileCheck2, Receipt, Wallet } from "lucide-react";
+import { useMinuteClock } from "../../../hook/common/clock.hook";
 import { useInboxListHook } from "../../../hook/data/inbox/inbox.list.hook";
 import { inboxKindOf } from "../../../models/data/inbox/inbox.response";
 import { inboxIcon } from "../../../styles/app/app.styles";
-import { formatDateTime } from "../../../utils/format.utils";
+import { formatDateTime, formatElapsed } from "../../../utils/format.utils";
 import ListCard from "../../common/app/ListCard";
 import ListSection from "../../common/app/ListSection";
 import AppButton from "../../common/button/AppButton";
@@ -17,8 +18,15 @@ const inboxIcons: Record<InboxKind, LucideIcon> = {
   other: Bell,
 };
 
-const metaOf = (item: IInboxItem): string =>
-  [item.body, formatDateTime(item.created_at)].filter(Boolean).join(" · ");
+const metaOf = (item: IInboxItem, now: number): string =>
+  [
+    item.body,
+    item.pending
+      ? `Waiting ${formatElapsed(item.created_at, now)}`
+      : formatDateTime(item.created_at),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
 type IProps = {
   onOpen?: () => void;
@@ -26,6 +34,7 @@ type IProps = {
 
 const InboxFeed = ({ onOpen }: IProps) => {
   const inbox = useInboxListHook();
+  const now = useMinuteClock();
 
   return (
     <ListSection
@@ -57,9 +66,10 @@ const InboxFeed = ({ onOpen }: IProps) => {
           <ListCard
             key={item.id}
             name={item.title}
-            meta={metaOf(item)}
+            meta={metaOf(item, now)}
             icon={<KindIcon className={inboxIcon} />}
             unread={!item.read_at}
+            pending={item.pending}
             onPress={() => {
               onOpen?.();
               inbox.openItem(item);

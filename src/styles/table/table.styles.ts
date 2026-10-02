@@ -38,6 +38,9 @@ export const dataTableRowPending = "bg-warning/5 text-muted-foreground dark:bg-w
 
 export const dataTableRowClickable = "cursor-pointer";
 
+export const dataTableRowFocused =
+  "bg-brand-mist text-foreground animate-row-focus motion-reduce:animate-none";
+
 export const dataTableRowOverdue = "bg-danger-bg/60 hover:bg-danger-bg";
 
 export const dataTableCell = cva("h-14 px-3 py-2 text-sm whitespace-normal text-foreground min-[1440px]:px-4", {
@@ -81,6 +84,9 @@ export const dataCard =
   "relative flex flex-col gap-2.5 rounded-2xl border border-border/60 bg-card p-3.5 text-sm shadow-xs has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring";
 
 export const dataCardSelected = "border-brand bg-brand-mist";
+
+export const dataCardFocused =
+  "border-brand bg-brand-mist ring-2 ring-brand/30 animate-row-focus motion-reduce:animate-none";
 
 export const dataCardHead = "flex items-start gap-3";
 

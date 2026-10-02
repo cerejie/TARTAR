@@ -15,13 +15,13 @@ import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
 import EntityFormModal from "../../common/form/EntityFormModal";
-import RejectionIntro from "../../common/form/RejectionIntro";
 import RequirePermission from "../../common/guard/RequirePermission";
 import PeriodPrintModal from "../../common/modal/PeriodPrintModal";
 import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
+import DisbursementEditModal from "../../disbursement/modal/DisbursementEditModal";
 import DisbursementHistoryModal from "../../disbursement/modal/DisbursementHistoryModal";
 import StatusTag from "../../common/status/StatusTag";
 import UserCell from "../../user/table/cells/UserCell";
@@ -31,10 +31,6 @@ import {
   voucherTypeLabels,
 } from "../../../enums/voucher.enum";
 import { useConfirm } from "../../../hook/common/confirmation.hook";
-import {
-  isDisbursementLocked,
-  isDisbursementRejected,
-} from "../../../hook/data/disbursement/disbursement.list.hook";
 import { useExpenseListHook } from "../../../hook/data/expense/expense.list.hook";
 import { expenseListKey } from "../../../keys/query.keys";
 import { disbursementExpansionKey } from "../../../keys/table.keys";
@@ -49,6 +45,10 @@ import {
   type IDisbursement,
 } from "../../../models/data/transaction/transaction.response";
 import { nowrapCell, tagRow } from "../../../styles/table/table.styles";
+import {
+  isDisbursementLocked,
+  isDisbursementRejected,
+} from "../../../utils/disbursement.utils";
 import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
 import { voucherBreakdownItems } from "../../../utils/voucher.utils";
 
@@ -75,8 +75,7 @@ const ExpensesTable = () => {
     editModal,
     historyModal,
     editRow,
-    editRejected,
-    rejectedByName,
+    editLockedOf,
     historyRow,
     audit,
     auditLoading,
@@ -84,9 +83,7 @@ const ExpensesTable = () => {
     defaults,
     formSummary,
     deriveFormValues,
-    editDefaults,
     createMutation,
-    updateMutation,
     removeMutation,
     printModalKey,
     openPrint,
@@ -101,6 +98,7 @@ const ExpensesTable = () => {
   const actionsOf = (row: IDisbursement): IRowAction[] => {
     const locked = isDisbursementLocked(row);
     const rejected = isDisbursementRejected(row);
+    const editLocked = editLockedOf(row);
 
     return [
       ...(permissions.encodeTransactions && rejected
@@ -118,9 +116,9 @@ const ExpensesTable = () => {
             {
               key: "edit",
               label: "Edit expense",
-              hint: locked ? "Locked" : undefined,
+              hint: editLocked ? "Locked" : undefined,
               icon: <Pencil />,
-              disabled: locked,
+              disabled: editLocked,
               onSelect: () => editModal.openModal(row),
             },
           ]
@@ -363,33 +361,12 @@ const ExpensesTable = () => {
         onClose={formModal.closeModal}
       />
 
-      {editDefaults ? (
-        <EntityFormModal<IDisbursementInput>
-          open={editModal.modal.visible}
-          title={editRejected ? "Rejected expense" : "Edit expense"}
-          size="lg"
-          intro={
-            editRejected && editRow ? (
-              <RejectionIntro
-                reason={editRow.voucher?.rejection_reason}
-                rejectedBy={rejectedByName}
-                rejectedAt={editRow.voucher?.approved_at ?? null}
-              />
-            ) : undefined
-          }
-          sections={sections}
-          summary={formSummary}
-          deriveValues={deriveFormValues}
-          schema={expenseSchema}
-          defaultValues={editDefaults}
-          submitting={updateMutation.loading}
-          submitText={editRejected ? "Resubmit" : undefined}
-          onSubmit={(values) => {
-            if (editRow) void updateMutation.mutate({ id: editRow.id, values });
-          }}
-          onClose={editModal.closeModal}
-        />
-      ) : null}
+      <DisbursementEditModal
+        kind="expense"
+        row={editRow}
+        open={editModal.modal.visible}
+        onClose={editModal.closeModal}
+      />
 
       <DisbursementHistoryModal
         open={historyModal.modal.visible}

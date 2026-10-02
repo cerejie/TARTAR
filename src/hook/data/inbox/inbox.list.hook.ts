@@ -9,7 +9,11 @@ import {
 import { useMutation } from "../../common/mutation.hook";
 import { useQuery } from "../../common/query.hook";
 
-import type { IInboxItem } from "../../../models/data/inbox/inbox.response";
+import {
+  inboxTargetOf,
+  isInboxAttention,
+  type IInboxItem,
+} from "../../../models/data/inbox/inbox.response";
 
 const markReadQueuedMessage = "Marked read — will sync when back online";
 
@@ -31,10 +35,12 @@ export const useInboxListHook = () => {
 
   const items = inboxQuery.data ?? [];
   const unreadCount = items.filter((item) => !item.read_at).length;
+  const attentionCount = items.filter(isInboxAttention).length;
 
   return {
     items,
     unreadCount,
+    attentionCount,
     loading: inboxQuery.isInitialLoading,
     refreshing: inboxQuery.isRefreshing,
     error: inboxQuery.error,
@@ -42,7 +48,7 @@ export const useInboxListHook = () => {
     markingAllRead: markReadMutation.loading,
     openItem: (item: IInboxItem) => {
       if (!item.read_at) void markReadMutation.mutate([item.id]);
-      navigate(item.url);
+      navigate(inboxTargetOf(item.url, item.tag));
     },
     markAllRead: () => void markReadMutation.mutate(null),
   };

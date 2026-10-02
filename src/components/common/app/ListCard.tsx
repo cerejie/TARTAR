@@ -38,6 +38,7 @@ type IProps = {
   amountTone?: Tone;
   badge?: ReactNode;
   unread?: boolean;
+  pending?: boolean;
   selected?: boolean;
   onPress?: () => void;
 };
@@ -50,6 +51,7 @@ const ListCard = ({
   amountTone = "default",
   badge,
   unread = false,
+  pending = false,
   selected = false,
   onPress,
 }: IProps) => {
@@ -61,7 +63,12 @@ const ListCard = ({
       className={listCard({ selected })}
     >
       <ItemMedia className={listCardMedia}>
-        {unread ? <span className={listCardUnreadDot} role="img" aria-label="Unread" /> : null}
+        {pending ? (
+          <span className={listCardUnreadDot({ tone: "pending" })} role="img" aria-label="Waiting" />
+        ) : null}
+        {unread && !pending ? (
+          <span className={listCardUnreadDot({ tone: "unread" })} role="img" aria-label="Unread" />
+        ) : null}
         <Avatar size="lg">
           <AvatarFallback className={listCardAvatarFallback}>
             {icon ?? formatInitials(name)}

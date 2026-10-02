@@ -13,7 +13,7 @@ const PhoneAlertsSheet = () => {
     <AppSheet open={open} title={title} onClose={close}>
       <PushPromptNotice />
       <div className={inboxStack}>
-        <InboxFeed />
+        <InboxFeed onOpen={close} />
         {showAlerts && alerts && !alertsLoading ? <NotificationsFeed data={alerts} /> : null}
         {showAlerts && (alertsLoading || !alerts) ? (
           <EmptyState description="Loading alerts" loading />

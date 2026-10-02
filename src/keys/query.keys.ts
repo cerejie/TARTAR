@@ -1,3 +1,5 @@
+import type { DisbursementKind } from "../enums/transaction.enum";
+
 export const branchListKey = "branches";
 export const branchAdminListKey = "branches-admin";
 export const branchMonitorKey = "branch-monitor";
@@ -19,6 +21,7 @@ export const saleSummaryKey = "sale-summary";
 export const expenseListKey = "expenses";
 export const expenseSummaryKey = "expense-summary";
 export const voucherListKey = "vouchers";
+export const disbursementDetailKey = "disbursement-detail";
 export const receivableListKey = "receivables";
 export const payableListKey = "payables";
 export const paymentListKey = "payments";
@@ -65,3 +68,9 @@ export const liveRefreshKeys: readonly string[] = [
   ledgerPartyKey,
   inboxListKey,
 ];
+
+export const disbursementScopeOf = (kind: DisbursementKind) =>
+  kind === "purchase" ? purchaseListKey : expenseListKey;
+
+export const disbursementSummaryKeyOf = (kind: DisbursementKind) =>
+  kind === "purchase" ? purchaseSummaryKey : expenseSummaryKey;

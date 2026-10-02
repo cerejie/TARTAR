@@ -303,6 +303,19 @@ const transactionServices = {
     return withVouchers((data ?? []) as unknown as ITransaction[]);
   },
 
+  getDisbursement: async (id: string): Promise<IDisbursement | null> => {
+    const { data, error } = await supabase
+      .from(table)
+      .select(columns)
+      .eq("id", id)
+      .maybeSingle();
+    if (error) throw toError(error);
+    if (!data) return null;
+
+    const [row] = await withVouchers([data as unknown as ITransaction]);
+    return row ?? null;
+  },
+
   getBranchSummary: async (
     filters: ILedgerFilters
   ): Promise<IBranchSummaryData> => {

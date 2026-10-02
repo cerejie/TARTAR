@@ -1,5 +1,5 @@
 # ROADMAP — Voucher resubmit, admin auto-approve, VAT checkbox
-Updated: 2026-10-02 (V1 mig 29 applied; V2 done, not committed; V3 next)
+Updated: 2026-10-02 (V1 applied; V2 committed v2.11; V3 done, not committed; V4 next)
 
 ## Goal
 1. A rejected voucher is never a dead end: the employee opens "View reason" from the Vouchers page,
@@ -125,6 +125,22 @@ ticking Done with paths, rewriting Next, suggesting the commit (`git log --oneli
   (purchase true) and recomputes EWT. Services: p_vatable in transaction breakdownArgs, vatable on manual
   insert. Hints "VAT inclusive." -> "Invoice total as billed.", EWT hint neutral.
 
+- V3 2026-10-02 (tsc + build + lint clean, not checked on the preview). Edit form pulled out of the
+  list hooks: utils/disbursement.utils.ts (sections/defaults/edit defaults per kind, isDisbursementLocked,
+  isDisbursementRejected, isDisbursementEditLocked) + hook/data/disbursement/disbursement.form.hook.ts (lookups,
+  prepare, updateMutation, disbursementInvalidateKeys) + components/disbursement/modal/DisbursementEditModal.tsx
+  used by Expenses, Purchases and Vouchers. keys: disbursementScopeOf / disbursementSummaryKeyOf moved to
+  query.keys, disbursementDetailKey, voucherSource/ReasonModalKey, rowFocusParamKey. transactionServices
+  .getDisbursement(id). Vouchers: hook/data/voucher/voucher.detail.hook.ts + components/voucher/modal/
+  VoucherSourceModals.tsx; "View reason" (linked -> prefilled edit + Resubmit; manual -> read-only reason),
+  "Edit <kind>" on own approved unprinted linked voucher (utils/voucher.utils.ts isOwnOpenVoucher). Manager
+  toasts say approved; manager's queued manual voucher shows Approved. R8: notifications.pending in the
+  inbox, warning dot (ListCard pending), "Waiting 1hr 30 mins" (formatElapsed + store/common/clock.store.ts +
+  hook/common/clock.hook.ts), bell/admin badge = unread + pending. Notification jump: tag -> ?focus=<id>
+  (inboxTargetOf, also in sw.ts push click); DataTable/DataTableCards scroll to and pulse the row
+  (hook/common/focus.hook.ts, theme.css row-focus keyframes); phone alerts sheet now closes on tap.
+  Not done: manual vouchers have no edit form at all, so R6 own-edit covers linked vouchers only.
+
 ## Path map
 - voucher UI: components/voucher/tables/VouchersTable.tsx · hook/data/voucher/voucher.list.hook.ts ·
   services/data/voucher.services.ts · enums/voucher.enum.ts · utils/voucher.utils.ts · utils/print.utils.ts
@@ -137,12 +153,15 @@ ticking Done with paths, rewriting Next, suggesting the commit (`git log --oneli
   mig 25 (latest update_transaction_with_voucher) · mig 5/7 (voucher_approval_payable) · mig 27/28 (push)
 
 ## Next
-1. V3 Resubmit on Vouchers + auto-approve client + R6 own-edit + R8 inbox pending (as planned above).
-2. V4 preview checks, incl. the mig 29 server checks: admin expense -> Approved, no push; employee expense
-   -> pending + manager inbox row pending = true; approve -> the pending row is gone; V2 non-VAT math
-   (2% EWT on a 1,000 non-VAT invoice = 20.00; VAT invoice = 17.86) and the hidden VAT lines.
+1. V4 preview checks, incl. the mig 29 server checks: admin expense -> Approved, no push; employee expense
+   -> pending + manager inbox row pending = true (orange dot, Waiting time, badge); approve -> the pending row
+   is gone; V2 non-VAT math (2% EWT on a 1,000 non-VAT invoice = 20.00; VAT invoice = 17.86) and the hidden
+   VAT lines. V3: rejected voucher -> Vouchers "View reason" -> Resubmit -> pending; admin own approved
+   expense Edit until printed (payable sync, refused once paid); tap a notification on a phone -> sheet
+   closes, page opens, row scrolls into view and pulses (vouchers, payables payments, sales); push click too.
+2. Open question for the user: should manual vouchers get an edit form (R6 says own manual vouchers too)?
 
 ## State
-Branch mobilel-app-native at 82afbe3 (Development v2.10, mig 29 committed and applied). V2 uncommitted.
+Branch mobilel-app-native at ec9618e (Development v2.11 = V2). V3 uncommitted.
 The mobile roadmap's P0-4 event checks 3 (payment verification) and 4 (sale verified) are still open;
 after mig 29, check 4's managers also get "Sale needs verification" on deposit.

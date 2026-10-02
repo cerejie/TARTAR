@@ -128,7 +128,7 @@ const useAdminNotificationFeed = () => {
 export const useAdminNotificationCountHook = () => {
   const { unreadCount } = useAdminNotificationFeed();
   const inbox = useInboxListHook();
-  return { unreadCount: unreadCount + inbox.unreadCount };
+  return { unreadCount: unreadCount + inbox.attentionCount };
 };
 
 export const useAdminNotificationsHook = () => {

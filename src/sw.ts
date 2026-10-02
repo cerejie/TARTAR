@@ -4,6 +4,7 @@ import {
   precacheAndRoute,
 } from "workbox-precaching";
 import { NavigationRoute, registerRoute } from "workbox-routing";
+import { inboxTargetOf } from "./models/data/inbox/inbox.response";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -43,7 +44,7 @@ const urlOf = (notification: Notification): URL => {
     typeof data === "object" && data !== null && "url" in data && typeof data.url === "string"
       ? data.url
       : "/";
-  return new URL(path, self.location.origin);
+  return new URL(inboxTargetOf(path, notification.tag), self.location.origin);
 };
 
 const openTarget = async (target: URL): Promise<void> => {
@@ -59,7 +60,7 @@ const openTarget = async (target: URL): Promise<void> => {
   }
 
   const focused = await sameScope.focus();
-  if (new URL(focused.url).pathname === target.pathname) return;
+  if (focused.url === target.href) return;
   await focused.navigate(target.href).catch(() => self.clients.openWindow(target.href));
 };
 

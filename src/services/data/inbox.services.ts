@@ -5,7 +5,7 @@ import type { IMutationResult } from "../../models/common/query.model";
 import type { IInboxItem } from "../../models/data/inbox/inbox.response";
 
 const table = "notifications";
-const columns = "id, title, body, url, tag, created_at, read_at";
+const columns = "id, title, body, url, tag, created_at, read_at, pending";
 const inboxLimit = 50;
 
 const inboxServices = {

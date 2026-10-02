@@ -4,6 +4,7 @@ import {
   type VoucherStatus,
   type VoucherType,
 } from "../../../enums/voucher.enum";
+import type { DisbursementKind } from "../../../enums/transaction.enum";
 
 export interface IVoucher {
   id: string;
@@ -52,3 +53,8 @@ export const voucherPurpose = (
     ? voucherKindLabels.purchase
     : voucherKindLabels.expense;
 };
+
+export const voucherDisbursementKind = (
+  voucher: Pick<IVoucher, "category">
+): DisbursementKind =>
+  voucher.category === voucherKindCategory.purchase ? "purchase" : "expense";

@@ -65,3 +65,28 @@ export const formatInitials = (name: string): string =>
 
 export const formatChangeCount = (count: number): string =>
   count === 1 ? "1 change" : `${count} changes`;
+
+const msPerMinute = 60_000;
+const minutesPerHour = 60;
+const hoursPerDay = 24;
+
+const countLabel = (count: number, unit: string): string =>
+  `${count}${unit}${count === 1 ? "" : "s"}`;
+
+export const formatElapsed = (from: string, now: number): string => {
+  const minutes = Math.max(1, Math.floor((now - dayjs(from).valueOf()) / msPerMinute));
+  if (minutes < minutesPerHour) return countLabel(minutes, " min");
+
+  const hours = Math.floor(minutes / minutesPerHour);
+  if (hours < hoursPerDay) {
+    const restMinutes = minutes % minutesPerHour;
+    return [countLabel(hours, "hr"), restMinutes ? countLabel(restMinutes, " min") : ""]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  const restHours = hours % hoursPerDay;
+  return [`${Math.floor(hours / hoursPerDay)}d`, restHours ? countLabel(restHours, "hr") : ""]
+    .filter(Boolean)
+    .join(" ");
+};

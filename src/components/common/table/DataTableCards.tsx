@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn.utils";
+import { focusedRowProps } from "../../../hook/common/focus.hook";
 import { useModal } from "../../../hook/common/modal.hook";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import type {
@@ -16,6 +17,7 @@ import {
   dataCard,
   dataCardAmount,
   dataCardField,
+  dataCardFocused,
   dataCardFoot,
   dataCardHead,
   dataCardHeading,
@@ -64,6 +66,7 @@ type IProps<T> = {
   columnId: (column: IDataTableColumn<T>, index: number) => string;
   onRowClick?: (row: T) => void;
   rowClassName?: (row: T) => string;
+  isFocusedRow: (key: string) => boolean;
   rowSelection?: IDataTableSelection<T>;
   detailSheetKey: string;
   detailSections?: IDetailSection<T>[];
@@ -100,6 +103,7 @@ const DataTableCards = <T,>({
   columnId,
   onRowClick,
   rowClassName,
+  isFocusedRow,
   rowSelection,
   detailSheetKey,
   detailSections,
@@ -159,6 +163,7 @@ const DataTableCards = <T,>({
     const actions = fieldsOf("actions");
 
     const isSelected = rowSelection?.selectedRowKeys.includes(key) ?? false;
+    const focused = isFocusedRow(key);
     const openDetail = () => detailSheet.openModal(key);
     const detailPress = hasDetail ? openDetail : undefined;
     const pressTitle = onRowClick ? () => onRowClick(row) : detailPress;
@@ -169,7 +174,13 @@ const DataTableCards = <T,>({
     return (
       <li
         key={key}
-        className={cn(dataCard, isSelected && dataCardSelected, rowClassName?.(row))}
+        className={cn(
+          dataCard,
+          isSelected && dataCardSelected,
+          rowClassName?.(row),
+          focused && dataCardFocused
+        )}
+        {...(focused ? focusedRowProps : {})}
       >
         <div className={dataCardHead}>
           {rowSelection ? (

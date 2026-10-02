@@ -5,7 +5,7 @@ import {
   voucherStatusValues,
 } from "../../../enums/voucher.enum";
 import { useFilterField } from "../../../hook/common/filter.hook";
-import { disbursementScopeOf } from "../../../hook/data/disbursement/disbursement.list.hook";
+import { disbursementScopeOf } from "../../../keys/query.keys";
 import { disbursementPaginationKey } from "../../../keys/table.keys";
 
 type IProps = {

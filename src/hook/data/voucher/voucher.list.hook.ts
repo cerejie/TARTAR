@@ -8,7 +8,9 @@ import {
 } from "../../../enums/voucher.enum";
 import {
   voucherFormModalKey,
+  voucherReasonModalKey,
   voucherRejectModalKey,
+  voucherSourceModalKey,
 } from "../../../keys/modal.keys";
 import {
   payableListKey,
@@ -42,6 +44,7 @@ import { derivePaymentValues } from "../../../utils/payment.utils";
 import { printVoucher } from "../../../utils/print.utils";
 import {
   deriveVoucherValues,
+  isOwnOpenVoucher,
   voucherBreakdownDefaults,
   voucherBreakdownFields,
   voucherSummaryLines,
@@ -90,9 +93,16 @@ const rejectSections: IFieldSection<IVoucherRejectInput>[] = [
   },
 ];
 
+const asApproved = (voucher: IVoucher): IVoucher => ({
+  ...voucher,
+  status: "approved",
+});
+
 export const useVoucherListHook = () => {
   const formModal = useModal(voucherFormModalKey);
   const rejectModal = useModal<IVoucher>(voucherRejectModalKey);
+  const sourceModal = useModal<IVoucher>(voucherSourceModalKey);
+  const reasonModal = useModal<IVoucher>(voucherReasonModalKey);
   const createdBy = useAccountStore(selectUserId);
   const offerPush = usePushOffer();
   const permissions = usePermissions();
@@ -130,7 +140,10 @@ export const useVoucherListHook = () => {
 
   const vouchers = useWithPendingRows(
     listQuery.data?.data ?? [],
-    voucherServices.pendingOf,
+    (write) => {
+      const pending = voucherServices.pendingOf(write);
+      return pending && permissions.isManager ? asApproved(pending) : pending;
+    },
     {
       enabled:
         pagination.pageNumber === 1 &&
@@ -147,7 +160,9 @@ export const useVoucherListHook = () => {
         createdBy
       ),
     {
-      successMessage: "Voucher submitted for approval",
+      successMessage: permissions.isManager
+        ? "Voucher saved — approved"
+        : "Voucher submitted for approval",
       invalidate: [voucherListKey],
       onSuccess: () => {
         formModal.closeModal();
@@ -306,5 +321,9 @@ export const useVoucherListHook = () => {
     rejectDefaults: { reason: "" },
     rejectMutation,
     print,
+    sourceModal,
+    reasonModal,
+    isOwnOpen: (voucher: IVoucher) =>
+      isOwnOpenVoucher(voucher, createdBy, permissions.isManager),
   };
 };

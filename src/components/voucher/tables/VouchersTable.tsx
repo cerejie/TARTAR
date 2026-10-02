@@ -1,4 +1,14 @@
-import { Calculator, Check, FileCheck, Landmark, Plus, Printer, X } from "lucide-react";
+import {
+  Calculator,
+  Check,
+  FileCheck,
+  Landmark,
+  MessageSquareWarning,
+  Pencil,
+  Plus,
+  Printer,
+  X,
+} from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import PrimaryAction from "../../common/button/PrimaryAction";
 import FilterToolbar from "../../common/filter/FilterToolbar";
@@ -11,6 +21,8 @@ import DataTable from "../../common/table/DataTable";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
+import VoucherSourceModals from "../modal/VoucherSourceModals";
+import { transactionTypeLabels } from "../../../enums/transaction.enum";
 import {
   voucherStatusColors,
   voucherStatusLabels,
@@ -28,6 +40,7 @@ import {
   type IVoucherRejectInput,
 } from "../../../models/data/voucher/voucher.request";
 import {
+  voucherDisbursementKind,
   voucherPurpose,
   type IVoucher,
 } from "../../../models/data/voucher/voucher.response";
@@ -74,13 +87,47 @@ const VouchersTable = () => {
     rejectDefaults,
     rejectMutation,
     print,
+    sourceModal,
+    reasonModal,
+    isOwnOpen,
   } = useVoucherListHook();
+
+  const sourceActionsOf = (voucher: IVoucher): IRowAction[] => {
+    if (voucher.status === "rejected") {
+      if (voucher.transaction_id && !permissions.encodeTransactions) return [];
+      return [
+        {
+          key: "view-reason",
+          label: "View reason",
+          icon: <MessageSquareWarning />,
+          onSelect: () =>
+            voucher.transaction_id
+              ? sourceModal.openModal(voucher)
+              : reasonModal.openModal(voucher),
+        },
+      ];
+    }
+
+    if (!voucher.transaction_id || !isOwnOpen(voucher)) return [];
+
+    return [
+      {
+        key: "edit",
+        label: `Edit ${transactionTypeLabels[
+          voucherDisbursementKind(voucher)
+        ].toLowerCase()}`,
+        icon: <Pencil />,
+        onSelect: () => sourceModal.openModal(voucher),
+      },
+    ];
+  };
 
   const actionsOf = (voucher: IVoucher): IRowAction[] => {
     const isPending = voucher.status === "pending";
     const isApproved = voucher.status === "approved";
 
     return [
+      ...sourceActionsOf(voucher),
       ...(permissions.approveVouchers && isPending
         ? [
             {
@@ -347,6 +394,8 @@ const VouchersTable = () => {
           onClose={rejectModal.closeModal}
         />
       ) : null}
+
+      <VoucherSourceModals />
     </>
   );
 };

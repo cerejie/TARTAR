@@ -18,6 +18,7 @@ import {
   rowExpansionPersistProps,
   useRowExpansion,
 } from "../../../hook/common/expansion.hook";
+import { focusedRowProps, useRowFocus } from "../../../hook/common/focus.hook";
 import { usePagination } from "../../../hook/common/pagination.hook";
 import { usePendingIds } from "../../../hook/common/pending.hook";
 import { useSort } from "../../../hook/common/sort.hook";
@@ -45,6 +46,7 @@ import {
   dataTableRow,
   dataTableRowClickable,
   dataTableRowExpanded,
+  dataTableRowFocused,
   dataTableRowPending,
   dataTableRowStatic,
   dataTableSelectionCell,
@@ -181,6 +183,8 @@ const DataTable = <T extends object>({
     ? sortedRows
     : sortedRows.slice((clientPage - 1) * pageSize, clientPage * pageSize);
 
+  const isFocusedRow = useRowFocus(rows.map(resolveRowKey));
+
   const disabledKeys = rowSelection?.getCheckboxProps
     ? rows
         .filter((row) => rowSelection.getCheckboxProps?.(row).disabled)
@@ -232,6 +236,7 @@ const DataTable = <T extends object>({
 
   const renderRow = (row: T, rowIndex: number) => {
     const key = resolveRowKey(row);
+    const focused = isFocusedRow(key);
     const isOpen =
       isExpandable && (expandedRow === key || collapsingRow === key);
 
@@ -243,8 +248,10 @@ const DataTable = <T extends object>({
             dataTableRow,
             onRowClick && dataTableRowClickable,
             isOpen && dataTableRowExpanded,
-            rowClassOf(row)
+            rowClassOf(row),
+            focused && dataTableRowFocused
           )}
+          {...(focused ? focusedRowProps : {})}
           onAction={onRowClick ? () => onRowClick(row) : undefined}
         >
           {rowSelection ? (
@@ -421,6 +428,7 @@ const DataTable = <T extends object>({
           columnId={columnId}
           onRowClick={onRowClick}
           rowClassName={rowClassOf}
+          isFocusedRow={isFocusedRow}
           rowSelection={rowSelection}
           detailSheetKey={rowDetailSheetModalKey(expansionKey ?? tableId)}
           detailSections={isExpandable ? detailSections : undefined}
