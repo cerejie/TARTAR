@@ -65,3 +65,17 @@
 - Manual voucher form → converted to sections (Voucher → Payment → Voucher breakdown) mirroring the purchase form; particulars moved into the core section so the breakdown section is purchase-only
 - All-hidden sections → skipped (visibleSectionsOf), so cash/expense vouchers show no empty cards
 - Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed
+
+## 2026-10-03 — D8 Secondary screens → Development v2.32
+- File plan → Reports key rows + sheet, period meta, phone Print footer; Branch monitor card roles; Users sheet actions; Master Data short labels; Account compact settings list + panel sheets; notification section titles (Simple tier, all reversible UI)
+- Reports "key rows → open detailed" → compact shows first 5 rows + "View all n" full-screen sheet with the full table; desktop untouched (one shared ReportRowsTable for all five reports)
+- Report period → periodLabel as ContentView meta for non-summary types (summary already has month/range filters)
+- Report Print on phones → ContentView footer (last step of type → period → summary → rows → print); desktop keeps it in actions
+- Branch monitoring "status" → not invented (no status field/rule); card = branch + Sales (key metric) + Expenses, receivables/payables in the sheet's Ledger section (no duplicate rows)
+- Branches page order → unchanged (management then monitoring) to keep desktop untouched
+- Users "Edit / More" → Edit user primary; Approve account (pending) / Approve new password (reset requested) take primary and Edit drops to secondary; Reset password in More; Reject/Delete danger
+- Master Data labels → Suppliers / Categories / Income / Banks on all widths (4-segment control fits a phone; page title gives context)
+- Account phone → grouped ListSection list; each row opens its own sheet (one modal key per panel, so no content flash on close); desktop bento unchanged; card bodies extracted and shared
+- Theme row → tap toggles light/dark (same as account sheet); Sync row → opens the existing AppBar sync sheet; Version → build timestamp via vite define (package version is 0.0.0, no release version exists)
+- Notifications order → already Action required → due alerts → updates in main + admin; only titles renamed ("Needs your action" → "Action required", "Updates" → "Information"); due groups keep urgency order
+- Verification: yarn build + yarn lint clean; compiled, visuals unconfirmed

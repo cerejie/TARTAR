@@ -13,10 +13,12 @@ import { formatMoney } from "../../../utils/format.utils";
 const moneyColumn = (
   title: string,
   dataIndex: keyof IBranchMonitorRow,
+  mobile: IDataTableColumn<IBranchMonitorRow>["mobile"],
   collapse?: IDataTableColumn<IBranchMonitorRow>["collapse"]
 ): IDataTableColumn<IBranchMonitorRow> => ({
   title,
   dataIndex,
+  mobile,
   collapse,
   align: "right",
   className: nowrapCell,
@@ -30,10 +32,10 @@ const columns: IDataTableColumn<IBranchMonitorRow>[] = [
     skeleton: "avatar",
     render: (name: string) => <AvatarCell name={name} />,
   },
-  moneyColumn("Sales", "sales"),
-  moneyColumn("Expenses", "expenses"),
-  moneyColumn("Receivables", "receivables", "xl"),
-  moneyColumn("Payables", "payables", "xl"),
+  moneyColumn("Sales", "sales", "amount"),
+  moneyColumn("Expenses", "expenses", "meta"),
+  moneyColumn("Receivables", "receivables", "hidden", "xl"),
+  moneyColumn("Payables", "payables", "hidden", "xl"),
 ];
 
 const detailSections: IDetailSection<IBranchMonitorRow>[] = [
@@ -77,6 +79,7 @@ const BranchMonitorTable = () => {
         rowKey="branch"
         expansionKey={branchMonitorExpansionKey}
         detailSections={detailSections}
+        detailTitle={() => "Branch"}
         emptyText="No branch data"
       />
     </TablePanel>

@@ -1,5 +1,5 @@
 # ROADMAP — Mobile-native design improvements
-Updated: 2026-10-03 (D7 done)
+Updated: 2026-10-03 (D8 done)
 
 ## Goal
 Move the main app from "desktop architecture with mobile components" to "shared business logic with
@@ -271,9 +271,26 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
   supplier, due date, particulars) → Payment (bank + check, hidden for cash) → Voucher breakdown (purchase only),
   mirroring the purchase form; desktop voucher form now shows section cards too.
 
+- [x] D8 Secondary screens (2026-10-03, autopilot). Reports: new report/tables/ReportRowsTable (compact: first 5 key
+  rows + "View all n" → AppSheet flow with the full DataTable; desktop unchanged TablePanel) used by Period/Ledger/
+  CashFlow/Expenses/BranchSummary reports (modal key reportRowsSheetModalKey); report.hook `period` (periodLabel,
+  not for summary — it has its own month/range filters) → ContentView meta; Print report moves to the ContentView
+  footer on compact (desktop keeps actions). Branch monitoring cards: branch → Sales amount → Expenses meta;
+  Receivables/Payables mobile hidden (Ledger section in the sheet), detailTitle "Branch". Users: detailActions =
+  row actions with priority (Approve account / Approve new password primary when pending, else Edit user primary;
+  Reset password in More; Reject/Delete danger), detailTitle "User". Master Data labels Suppliers / Categories /
+  Income / Banks (all widths). Account compact = account/views/AccountSettingsList (ListSection groups Account:
+  Profile, Password · App: Install TARTAR, Theme (tap toggles), Notifications · System: Sync (opens the AppBar sync
+  sheet), Version ("Built <date>" from vite define __APP_BUILT_AT__)); each panel opens account/modal/
+  AccountPanelSheet (accountPanelSheetModalKey); card bodies split into account/views/{ProfileDetails,
+  InstallAppGuide,NotificationsControls} + forms/ChangePasswordForm, shared with the desktop cards; subtitles moved
+  to models (installModeSubtitles, pushModeSubtitles, profileSubtitle, passwordSubtitle); useSyncStatus returns
+  `description` (describeSync moved from SyncIndicator). Notifications (main center + admin): InboxFeed titles
+  "Action required" → due alerts by urgency (Overdue → Today → Tomorrow → This week, unchanged) → "Information".
+
 ## Next
-1. D8 Secondary screens (see Phases).
-2. D9 → D10 in order.
+1. D9 Polish (see Phases).
+2. D10 Verification.
 
 ## Open
 - D6: a true running-balance ledger (debit/credit per record and payment, cumulative balance) was NOT built —
@@ -282,7 +299,7 @@ sidebar and bento; it only gets the token, ordering and shared-component changes
 
 ## State
 Branch mobile-app-native-newlook · Uncommitted: none ·
-Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.31 (D7, autopilot).
+Last check: yarn build + yarn lint clean (2026-10-03) · Last commit Development v2.32 (D8, autopilot).
 D9 note: phone dashboard section labels reuse ListSection's small-caps head; desktop attention list sits in the
 bento main column (ListSection panel) — check visually. D4: confirm-from-sheet stacks the confirmation over
 the open detail sheet (React Aria nested overlay) — check on a phone; tables with > 2 meta columns now open a
@@ -290,4 +307,7 @@ sheet even without detailSections. D6: ledger detail is a sheet stacked on the p
 details edit opens from the list sheet underneath) — check overlay order on a phone. D5: "Open voucher" lands on Vouchers filtered by payee +
 status (search is payee-only, so same-payee vouchers with that status also show); action-row labels changed on
 desktop too (View reason → Resubmit where it opens a resubmit form). D7: phone form
-section toggles and the pinned summary bar (expands upward over the body) — check with the keyboard open on a phone.
+section toggles and the pinned summary bar (expands upward over the body) — check with the keyboard open on a phone. D8: Reports
+"View all" sheet, Print in the phone footer, Account settings list + panel sheets (password sheet stays open after
+success; toast confirms), Users sheet footer — check on a phone. Branches page still shows management table above
+monitoring on every width (order unchanged).

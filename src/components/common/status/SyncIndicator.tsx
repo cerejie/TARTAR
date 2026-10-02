@@ -17,7 +17,6 @@ import {
   offlineDot,
   syncSpin,
 } from "../../../styles/status/status.styles";
-import { formatChangeCount } from "../../../utils/format.utils";
 import AppSheet from "../app/AppSheet";
 import AppButton from "../button/AppButton";
 import SyncPanel from "./SyncPanel";
@@ -27,18 +26,6 @@ type IProps = {
   pending: number;
   failedCount: number;
   flushing: boolean;
-};
-
-const describeSync = ({ online, pending, failedCount, flushing }: IProps) => {
-  if (failedCount > 0) return `${formatChangeCount(failedCount)} could not sync`;
-  if (!online) {
-    return pending
-      ? `Offline — ${formatChangeCount(pending)} will sync when back online`
-      : "You are offline";
-  }
-  if (flushing) return "Syncing queued changes…";
-  if (pending > 0) return `${formatChangeCount(pending)} waiting to sync`;
-  return "Online — all changes saved";
 };
 
 const SyncIcon = ({ online, pending, failedCount, flushing }: IProps) => {
@@ -51,7 +38,7 @@ const SyncIcon = ({ online, pending, failedCount, flushing }: IProps) => {
 
 const SyncIndicator = () => {
   const status = useSyncStatus();
-  const description = describeSync(status);
+  const { description } = status;
   const count = status.pending + status.failedCount;
   const isCompact = useIsCompact();
   const sheet = useModal(syncSheetModalKey);

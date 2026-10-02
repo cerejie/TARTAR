@@ -9,10 +9,9 @@ import type { IDisbursement } from "../../models/data/transaction/transaction.re
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { periodTotals } from "../../utils/report.utils";
 import StatCard from "../common/card/StatCard";
-import DataTable from "../common/table/DataTable";
-import TablePanel from "../common/table/TablePanel";
 import BentoCell from "../common/view/BentoCell";
 import BentoGrid from "../common/view/BentoGrid";
+import ReportRowsTable from "./tables/ReportRowsTable";
 
 type IProps = IReportState & {
   transactions: IDisbursement[];
@@ -103,17 +102,16 @@ const PeriodReport = ({
         </BentoCell>
       </BentoGrid>
 
-      <TablePanel title="Transactions">
-        <DataTable<IDisbursement>
-          columns={columns}
-          data={transactions}
-          loading={loading}
-          refreshing={refreshing}
-          error={error}
-          onRetry={onRetry}
-          emptyText="No transactions in this period"
-        />
-      </TablePanel>
+      <ReportRowsTable<IDisbursement>
+        title="Transactions"
+        columns={columns}
+        rows={transactions}
+        loading={loading}
+        refreshing={refreshing}
+        error={error}
+        onRetry={onRetry}
+        emptyText="No transactions in this period"
+      />
     </>
   );
 };

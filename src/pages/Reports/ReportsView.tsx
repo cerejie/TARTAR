@@ -8,6 +8,7 @@ import CashFlowReport from "../../components/report/CashFlowReport";
 import ExpensesReport from "../../components/report/ExpensesReport";
 import LedgerReport from "../../components/report/LedgerReport";
 import PeriodReport from "../../components/report/PeriodReport";
+import { useIsCompact } from "../../hook/common/breakpoint.hook";
 import { useReportHook } from "../../hook/data/report/report.hook";
 import {
   reportTypeLabels,
@@ -21,6 +22,7 @@ const ReportsView = () => {
   const {
     type,
     setType,
+    period,
     transactions,
     receivables,
     payables,
@@ -40,6 +42,7 @@ const ReportsView = () => {
     setSummaryMonth,
     setSummaryRange,
   } = useReportHook();
+  const isCompact = useIsCompact();
 
   const state: IReportState = { loading, refreshing, error, onRetry: retry };
 
@@ -85,14 +88,18 @@ const ReportsView = () => {
     cashflow: <CashFlowReport transactions={transactions} {...state} />,
   } as Partial<Record<ReportType, ReactNode>>;
 
+  const printButton = (
+    <AppButton onPress={print} disabled={loading}>
+      <Printer />
+      Print report
+    </AppButton>
+  );
+
   return (
     <ContentView
-      actions={
-        <AppButton onPress={print} disabled={loading}>
-          <Printer />
-          Print report
-        </AppButton>
-      }
+      meta={period}
+      actions={isCompact ? undefined : printButton}
+      footer={isCompact ? printButton : undefined}
       tabs={
         <ContextSwitch
           label="Report type"

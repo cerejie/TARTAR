@@ -93,15 +93,18 @@ const UsersTable = () => {
 
   const actionsOf = (user: IUser): IRowAction[] => {
     const isSelf = user.id === currentUserId;
+    const isPending = user.approval_status === "pending";
+    const resetRequested = Boolean(user.password_reset_requested_at);
     if (!canManageUser(user)) return [];
 
     return [
-      ...(user.approval_status === "pending"
+      ...(isPending
         ? [
             {
               key: "approve",
               label: "Approve account",
               icon: <Check />,
+              priority: "primary" as const,
               onSelect: () => approveModal.openModal(user),
             },
             {
@@ -113,12 +116,13 @@ const UsersTable = () => {
             },
           ]
         : []),
-      ...(user.password_reset_requested_at
+      ...(resetRequested
         ? [
             {
               key: "approve-reset",
               label: "Approve new password",
               icon: <LockKeyholeOpen />,
+              priority: isPending ? undefined : ("primary" as const),
               onSelect: () => confirmResetDecision(user, true),
             },
             {
@@ -134,6 +138,7 @@ const UsersTable = () => {
         key: "edit",
         label: "Edit user",
         icon: <Pencil />,
+        priority: isPending || resetRequested ? "secondary" : "primary",
         onSelect: () => editModal.openModal(user),
       },
       {
@@ -206,6 +211,8 @@ const UsersTable = () => {
           error={error}
           onRetry={retry}
           emptyText="No users yet"
+          detailTitle={() => "User"}
+          detailActions={actionsOf}
         />
       </TablePanel>
 

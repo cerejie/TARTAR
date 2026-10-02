@@ -8,10 +8,9 @@ import type { IDisbursement } from "../../models/data/transaction/transaction.re
 import { formatMoney } from "../../utils/format.utils";
 import { cashFlowRows, cashFlowTotals } from "../../utils/report.utils";
 import StatCard from "../common/card/StatCard";
-import DataTable from "../common/table/DataTable";
-import TablePanel from "../common/table/TablePanel";
 import BentoCell from "../common/view/BentoCell";
 import BentoGrid from "../common/view/BentoGrid";
+import ReportRowsTable from "./tables/ReportRowsTable";
 
 const columns: IDataTableColumn<ICashFlowRow>[] = [
   { title: "Category", dataIndex: "label" },
@@ -76,17 +75,16 @@ const CashFlowReport = ({
         </BentoCell>
       </BentoGrid>
 
-      <TablePanel title="Cash Flow by Category">
-        <DataTable<ICashFlowRow>
-          columns={columns}
-          data={cashFlowRows(transactions)}
-          loading={loading}
-          refreshing={refreshing}
-          error={error}
-          onRetry={onRetry}
-          rowKey="key"
-        />
-      </TablePanel>
+      <ReportRowsTable<ICashFlowRow>
+        title="Cash Flow by Category"
+        columns={columns}
+        rows={cashFlowRows(transactions)}
+        loading={loading}
+        refreshing={refreshing}
+        error={error}
+        onRetry={onRetry}
+        rowKey="key"
+      />
     </>
   );
 };

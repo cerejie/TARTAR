@@ -109,6 +109,7 @@ export const useReportHook = () => {
     type,
     setType,
     branchName,
+    period: isSummary ? undefined : periodLabel(type, from, to),
     transactions,
     receivables,
     payables,

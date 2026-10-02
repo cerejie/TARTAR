@@ -22,8 +22,8 @@ type Section = (typeof sections)[number];
 
 const sectionLabels: Record<Section, string> = {
   suppliers: "Suppliers",
-  "expense-categories": "Expense Categories",
-  "income-sources": "Income Sources",
+  "expense-categories": "Categories",
+  "income-sources": "Income",
   banks: "Banks",
 };
 

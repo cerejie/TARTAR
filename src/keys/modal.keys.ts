@@ -56,6 +56,8 @@ export const disbursementHistoryModalKey = (scope: string) => `${scope}-history`
 
 export const periodPrintModalKey = (scope: string) => `${scope}-print`;
 export const salePrintModalKey = "sale-print";
+export const reportRowsSheetModalKey = "report-rows";
+export const accountPanelSheetModalKey = (panel: string) => `account-${panel}`;
 
 export const confirmOverlayKey = "confirm-dialog";
 

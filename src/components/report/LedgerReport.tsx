@@ -17,10 +17,9 @@ import { dataTableRowOverdue } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import { orderedLedger } from "../../utils/report.utils";
 import StatCard from "../common/card/StatCard";
-import DataTable from "../common/table/DataTable";
-import TablePanel from "../common/table/TablePanel";
 import BentoCell from "../common/view/BentoCell";
 import BentoGrid from "../common/view/BentoGrid";
+import ReportRowsTable from "./tables/ReportRowsTable";
 
 type IProps<Row extends IReceivable | IPayable> = IReportState & {
   rows: Row[];
@@ -125,18 +124,17 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
         </BentoCell>
       </BentoGrid>
 
-      <TablePanel title={`Outstanding ${label}s`}>
-        <DataTable<Row>
-          columns={columns}
-          data={orderedLedger(rows)}
-          loading={loading}
-          refreshing={refreshing}
-          error={error}
-          onRetry={onRetry}
-          emptyText="Nothing outstanding"
-          rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
-        />
-      </TablePanel>
+      <ReportRowsTable<Row>
+        title={`Outstanding ${label}s`}
+        columns={columns}
+        rows={orderedLedger(rows)}
+        loading={loading}
+        refreshing={refreshing}
+        error={error}
+        onRetry={onRetry}
+        emptyText="Nothing outstanding"
+        rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
+      />
     </>
   );
 };

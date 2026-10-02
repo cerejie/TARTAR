@@ -54,7 +54,7 @@ const InboxFeed = ({ section, markAll = true, onOpen }: IProps) => {
 
   return (
     <ListSection
-      title={isAction ? "Needs your action" : "Updates"}
+      title={isAction ? "Action required" : "Information"}
       meta={
         !isAction && markAll && inbox.unreadCount ? (
           <AppButton

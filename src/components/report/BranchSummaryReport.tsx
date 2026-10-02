@@ -4,10 +4,9 @@ import StatCard from "../common/card/StatCard";
 import DateRangeFilter from "../common/filter/DateRangeFilter";
 import FilterSelect from "../common/filter/FilterSelect";
 import FilterToolbar from "../common/filter/FilterToolbar";
-import DataTable from "../common/table/DataTable";
-import TablePanel from "../common/table/TablePanel";
 import BentoCell from "../common/view/BentoCell";
 import BentoGrid from "../common/view/BentoGrid";
+import ReportRowsTable from "./tables/ReportRowsTable";
 import type { IDateRange } from "../../models/common/period.model";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import type {
@@ -106,18 +105,17 @@ const BranchSummaryReport = ({
         </BentoCell>
       </BentoGrid>
 
-      <TablePanel title="Totals by Branch">
-        <DataTable<IBranchSummaryRow>
-          columns={columns}
-          data={rows}
-          rowKey="branch"
-          loading={loading}
-          refreshing={refreshing}
-          error={error}
-          onRetry={onRetry}
-          emptyText="No activity in this period"
-        />
-      </TablePanel>
+      <ReportRowsTable<IBranchSummaryRow>
+        title="Totals by Branch"
+        columns={columns}
+        rows={rows}
+        rowKey="branch"
+        loading={loading}
+        refreshing={refreshing}
+        error={error}
+        onRetry={onRetry}
+        emptyText="No activity in this period"
+      />
     </>
   );
 };

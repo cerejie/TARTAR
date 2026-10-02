@@ -26,3 +26,5 @@ export const notificationsBody = "flex flex-col gap-4";
 export const notificationsText = "text-sm text-muted-foreground";
 
 export const notificationsActions = "flex justify-start";
+
+export const settingsList = "flex flex-col gap-5";

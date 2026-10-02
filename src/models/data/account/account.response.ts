@@ -33,3 +33,17 @@ export interface ICustomLoginResponse {
   token: string;
   user: IAuthUser;
 }
+
+export type AccountPanel = "profile" | "password" | "install" | "notifications";
+
+export const accountPanelTitles: Record<AccountPanel, string> = {
+  profile: "Profile",
+  password: "Change password",
+  install: "Install app",
+  notifications: "Notifications",
+};
+
+export const profileSubtitle =
+  "Your name, role and branches are managed by your administrator.";
+
+export const passwordSubtitle = "Takes effect the next time you sign in.";

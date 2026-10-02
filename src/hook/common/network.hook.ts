@@ -83,17 +83,37 @@ const useOwnWrites = () => {
   }, [owner, queue, failed]);
 };
 
+type ISyncCounts = {
+  online: boolean;
+  flushing: boolean;
+  pending: number;
+  failedCount: number;
+};
+
+const describeSync = ({ online, flushing, pending, failedCount }: ISyncCounts): string => {
+  if (failedCount > 0) return `${formatChangeCount(failedCount)} could not sync`;
+  if (!online) {
+    return pending
+      ? `Offline — ${formatChangeCount(pending)} will sync when back online`
+      : "You are offline";
+  }
+  if (flushing) return "Syncing queued changes…";
+  if (pending > 0) return `${formatChangeCount(pending)} waiting to sync`;
+  return "Online — all changes saved";
+};
+
 export const useSyncStatus = () => {
   const online = useNetworkStore((state) => state.online);
   const flushing = useSyncStore((state) => state.flushing);
   const { pendingWrites, failedWrites } = useOwnWrites();
-
-  return {
+  const counts: ISyncCounts = {
     online,
     flushing,
     pending: pendingWrites.length,
     failedCount: failedWrites.length,
   };
+
+  return { ...counts, description: describeSync(counts) };
 };
 
 const offlineTitleOf = (savedAt: number, partlyUnsaved: boolean): string => {

@@ -7,8 +7,7 @@ import type {
 import type { IDisbursement } from "../../models/data/transaction/transaction.response";
 import { formatMoney } from "../../utils/format.utils";
 import { expenseRows } from "../../utils/report.utils";
-import DataTable from "../common/table/DataTable";
-import TablePanel from "../common/table/TablePanel";
+import ReportRowsTable from "./tables/ReportRowsTable";
 
 const columns: IDataTableColumn<IExpenseRow>[] = [
   { title: "Expense type", dataIndex: "label" },
@@ -35,17 +34,16 @@ const ExpensesReport = ({
   onRetry,
 }: IProps) => {
   return (
-    <TablePanel title="Expenses by Type">
-      <DataTable<IExpenseRow>
-        columns={columns}
-        data={expenseRows(transactions, categories)}
-        loading={loading}
-        refreshing={refreshing}
-        error={error}
-        onRetry={onRetry}
-        rowKey="key"
-      />
-    </TablePanel>
+    <ReportRowsTable<IExpenseRow>
+      title="Expenses by Type"
+      columns={columns}
+      rows={expenseRows(transactions, categories)}
+      loading={loading}
+      refreshing={refreshing}
+      error={error}
+      onRetry={onRetry}
+      rowKey="key"
+    />
   );
 };
 
