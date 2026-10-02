@@ -60,20 +60,24 @@ export const listCard = cva(
         true: "bg-brand-soft has-[[data-pressed]]:bg-brand-soft",
         false: "",
       },
+      unread: {
+        true: "bg-brand-soft/40",
+        false: "",
+      },
     },
-    defaultVariants: { selected: false },
+    defaultVariants: { selected: false, unread: false },
   }
 );
 
 export const listCardMedia = "relative";
 
 export const listCardUnreadDot = cva(
-  "absolute top-1/2 -left-3 size-2 -translate-y-1/2 rounded-pill",
+  "absolute -top-0.5 -right-0.5 size-3 rounded-pill ring-2 ring-panel",
   {
     variants: {
       tone: {
         unread: "bg-brand",
-        pending: "bg-warning ring-2 ring-warning/25",
+        pending: "bg-warning",
       },
     },
     defaultVariants: { tone: "unread" },
@@ -84,9 +88,9 @@ export const listCardAvatarFallback = "bg-brand-soft text-xs font-semibold text-
 
 export const listCardContent = "min-w-0";
 
-export const listCardName = cva("truncate", {
+export const listCardName = cva("w-full min-w-0 truncate", {
   variants: {
-    unread: { true: "font-semibold", false: "" },
+    unread: { true: "font-semibold text-foreground", false: "font-normal" },
   },
   defaultVariants: { unread: false },
 });
@@ -95,6 +99,12 @@ export const listCardNamePress =
   "min-w-0 truncate text-left outline-none after:absolute after:inset-0 focus-visible:after:ring-[3px] focus-visible:after:ring-ring/50 focus-visible:after:ring-inset";
 
 export const listCardMeta = "truncate";
+
+export const listCardDescription = "line-clamp-2";
+
+export const listCardNote = "flex items-center gap-1 text-xs";
+
+export const listCardNoteIcon = "size-3.5 shrink-0";
 
 export const listCardAside = "flex shrink-0 items-center gap-1";
 

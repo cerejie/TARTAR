@@ -80,6 +80,10 @@ const VouchersTable = () => {
     formSummary,
     deriveFormValues,
     createMutation,
+    editModal,
+    editRow,
+    editDefaultsOf,
+    updateMutation,
     confirmApprove,
     rejectModal,
     rejectRow,
@@ -108,7 +112,18 @@ const VouchersTable = () => {
       ];
     }
 
-    if (!voucher.transaction_id || !isOwnOpen(voucher)) return [];
+    if (!isOwnOpen(voucher)) return [];
+
+    if (!voucher.transaction_id) {
+      return [
+        {
+          key: "edit",
+          label: "Edit voucher",
+          icon: <Pencil />,
+          onSelect: () => editModal.openModal(voucher),
+        },
+      ];
+    }
 
     return [
       {
@@ -291,16 +306,19 @@ const VouchersTable = () => {
       items: [
         {
           key: "check_bank",
+          hidden: (voucher) => voucher.type !== "check",
           label: "Bank issuing",
           render: (voucher) => voucher.check_bank || "—",
         },
         {
           key: "check_number",
+          hidden: (voucher) => voucher.type !== "check",
           label: "Check number",
           render: (voucher) => voucher.check_number || "—",
         },
         {
           key: "check_due_date",
+          hidden: (voucher) => voucher.type !== "check",
           label: "Check due date",
           render: (voucher) =>
             voucher.check_due_date ? formatDate(voucher.check_due_date) : "—",
@@ -377,6 +395,24 @@ const VouchersTable = () => {
         onSubmit={(values) => void createMutation.mutate(values)}
         onClose={formModal.closeModal}
       />
+
+      {editRow ? (
+        <EntityFormModal<IVoucherInput>
+          open={editModal.modal.visible}
+          title={`Edit voucher · ${editRow.voucher_no ?? editRow.payee}`}
+          fields={fields}
+          summary={formSummary}
+          deriveValues={deriveFormValues}
+          schema={voucherSchema}
+          defaultValues={editDefaultsOf(editRow)}
+          submitting={updateMutation.loading}
+          submitText="Save changes"
+          onSubmit={(values) =>
+            void updateMutation.mutate({ id: editRow.id, values })
+          }
+          onClose={editModal.closeModal}
+        />
+      ) : null}
 
       {rejectRow ? (
         <EntityFormModal<IVoucherRejectInput>

@@ -69,6 +69,18 @@ export const useBankAccountListHook = () => {
     return account ? accountLabel(account) : null;
   };
 
+  const accountDefaultsOfLabel = (
+    label: string | null | undefined
+  ): Pick<IPaymentAccountInput, "bank_id" | "bank_account_id"> => {
+    const account = label
+      ? bankAccounts.find((item) => accountLabel(item) === label)
+      : undefined;
+    return {
+      bank_id: account?.bank_id ?? null,
+      bank_account_id: account?.id ?? null,
+    };
+  };
+
   const paymentLabelOf = (row: IPaymentRow) =>
     accountLabelOf(row.bank_account_id) ??
     (row.cash_account ? cashAccountLabels[row.cash_account] : "—");
@@ -137,6 +149,7 @@ export const useBankAccountListHook = () => {
       void accountsQuery.refetch();
     },
     accountLabelOf,
+    accountDefaultsOfLabel,
     paymentLabelOf,
     paymentDefaultsOf,
     bankAccountFields,

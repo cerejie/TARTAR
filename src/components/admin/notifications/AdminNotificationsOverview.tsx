@@ -25,13 +25,13 @@ const AdminNotificationsOverview = () => {
           </AppButton>
         }
       />
+      <InboxFeed section="action" />
       <SegmentedTabs
-        label="Notifications view"
+        label="Due alerts view"
         value={notifications.segment}
         options={notifications.segmentOptions}
         onChange={notifications.setSegment}
       />
-      <InboxFeed />
       <NotificationFeed
         groups={notifications.groups}
         emptyText={notifications.emptyText}
@@ -41,6 +41,7 @@ const AdminNotificationsOverview = () => {
         onRetry={notifications.retry}
         onOpen={notifications.openItem}
       />
+      <InboxFeed section="updates" markAll={false} />
     </div>
   );
 };

@@ -18,6 +18,7 @@ import {
   listCardAvatarFallback,
   listCardChevron,
   listCardContent,
+  listCardDescription,
   listCardFigures,
   listCardMedia,
   listCardMeta,
@@ -32,6 +33,7 @@ import type { Tone } from "../../../styles/common/tone.styles";
 
 type IProps = {
   name: string;
+  description?: ReactNode;
   meta?: ReactNode;
   amount?: number;
   icon?: ReactNode;
@@ -45,6 +47,7 @@ type IProps = {
 
 const ListCard = ({
   name,
+  description,
   meta,
   amount,
   icon,
@@ -60,7 +63,7 @@ const ListCard = ({
       role="listitem"
       size="sm"
       aria-current={selected ? "true" : undefined}
-      className={listCard({ selected })}
+      className={listCard({ selected, unread })}
     >
       <ItemMedia className={listCardMedia}>
         {pending ? (
@@ -85,6 +88,9 @@ const ListCard = ({
             name
           )}
         </ItemTitle>
+        {description ? (
+          <ItemDescription className={listCardDescription}>{description}</ItemDescription>
+        ) : null}
         {meta ? <ItemDescription className={listCardMeta}>{meta}</ItemDescription> : null}
       </ItemContent>
       <ItemActions className={listCardAside}>

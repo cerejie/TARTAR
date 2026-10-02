@@ -113,6 +113,11 @@ export const useProtectedNotificationsHook = (enabled: boolean) => {
   };
 };
 
+export const useNotificationCenterHook = () => {
+  const { viewDashboard: showAlerts } = usePermissions();
+  return { showAlerts, ...useProtectedNotificationsHook(showAlerts) };
+};
+
 export const useProtectedTitleHook = () => {
   const location = useLocation();
 

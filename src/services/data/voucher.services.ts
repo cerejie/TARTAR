@@ -28,6 +28,31 @@ const voucherColumns: IFilterColumns = {
 
 const defaultSort: ISortState = { column: "created_at", direction: "descending" };
 
+const voucherRowOf = (values: IVoucherInput) => {
+  const isPurchase = values.kind === "purchase";
+  const isCheck = values.type === "check";
+  const totals = breakdownTotalsOf(values);
+
+  return {
+    type: values.type,
+    branch: values.branch,
+    payee: values.payee,
+    amount: totals.amountToPay,
+    gross_amount: totals.invoice,
+    ewt_rate: withholdingRates[values.withholding],
+    ewt_amount: totals.ewt,
+    less_return: totals.lessReturn,
+    vatable: values.vatable,
+    particulars: values.particulars || null,
+    category: voucherKindCategory[values.kind],
+    supplier_id: isPurchase ? values.supplier_id ?? null : null,
+    due_date: isPurchase ? values.due_date ?? null : null,
+    check_bank: isCheck ? values.check_bank ?? null : null,
+    check_number: isCheck ? values.check_number ?? null : null,
+    check_due_date: isCheck ? values.check_due_date ?? null : null,
+  };
+};
+
 const withSignatories = async (
   vouchers: readonly IVoucher[]
 ): Promise<IVoucher[]> => {
@@ -79,39 +104,28 @@ const voucherServices = {
     };
   },
 
-  create: (values: IVoucherInput, createdBy: string | null) => {
-    const isPurchase = values.kind === "purchase";
-    const isCheck = values.type === "check";
-    const totals = breakdownTotalsOf(values);
-
-    return runWrite({
+  create: (values: IVoucherInput, createdBy: string | null) =>
+    runWrite({
       label: `Voucher for ${values.payee} · ${values.amount}`,
       kind: "insert",
       table,
       values: {
-        type: values.type,
-        branch: values.branch,
-        payee: values.payee,
-        amount: totals.amountToPay,
-        gross_amount: totals.invoice,
-        ewt_rate: withholdingRates[values.withholding],
-        ewt_amount: totals.ewt,
-        less_return: totals.lessReturn,
-        vatable: values.vatable,
-        particulars: values.particulars || null,
+        ...voucherRowOf(values),
         purpose: null,
-        category: voucherKindCategory[values.kind],
-        supplier_id: isPurchase ? values.supplier_id ?? null : null,
-        due_date: isPurchase ? values.due_date ?? null : null,
-        check_bank: isCheck ? values.check_bank ?? null : null,
-        check_number: isCheck ? values.check_number ?? null : null,
-        check_due_date: isCheck ? values.check_due_date ?? null : null,
         status: "pending",
         printed: false,
         created_by: createdBy,
       },
-    });
-  },
+    }),
+
+  update: (id: string, values: IVoucherInput) =>
+    runWrite({
+      label: `Edit voucher for ${values.payee} · ${values.amount}`,
+      kind: "update",
+      table,
+      values: voucherRowOf(values),
+      match: { id },
+    }),
 
   decide: (
     id: string,

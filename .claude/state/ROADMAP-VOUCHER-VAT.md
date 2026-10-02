@@ -1,5 +1,5 @@
 # ROADMAP — Voucher resubmit, admin auto-approve, VAT checkbox
-Updated: 2026-10-02 (V1 applied; V2 committed v2.11; V3 done, not committed; V4 next)
+Updated: 2026-10-02 (V1-V4 done; notification audit fixes + manual voucher edit done, not committed; mig 30 applied)
 
 ## Goal
 1. A rejected voucher is never a dead end: the employee opens "View reason" from the Vouchers page,
@@ -164,28 +164,40 @@ tap -> /vouchers?focus row pulses, approve removes pending rows + opens payable,
 View reason -> prefilled non-VAT -> Resubmit -> pending + new A inbox row; phone sheet closes on tap).
 Push not checkable headless — check on devices.
 
-1. WAITING ON USER: pick which notification UI/UX fixes to implement (audit list, 2026-10-02):
-   P1 meta line truncates -> "Waiting …"/amount/time never visible (popover, phone sheet; only wide /admin
-      shows it) -> body on its own clamped line, waiting time as a warning chip/line.
-   P1 long title overflows the card past the chevron (ListCard title `w-fit` defeats `truncate`).
-   P1 /admin Notifications: All/Unread tabs + header "Mark all read" act on due alerts only, but sit above
-      Updates which has its own "Mark all read" -> two buttons, wrong-looking counts.
-   P2 status dot hangs half outside the card's left edge (desktop popover, phone sheet, /admin).
-   P2 unread vs read rows look the same apart from the dot (same title weight, no tint).
-   P2 phone sheet: up to 50 Updates push actionable due alerts (Overdue/Due today) far below; pending
-      requests not grouped -> "Needs your action" group first, then due alerts, then Updates.
-   P2 badge differs: desktop bell = inbox only, phone bell / admin tab = inbox + due alerts.
-   P2 stale pre-mig-29 "Voucher needs approval" rows (pending=false) remain for decided vouchers ->
-      one-off cleanup SQL (propose, never apply).
-   P2 "Mark all read" in popover/sheet is size xs (< 44px tap target on phone).
-   P3 error state shows the raw server message -> "Couldn't load updates" + Retry.
-   P3 push opt-in copy (manager) omits sales: "Vouchers and payments waiting…".
-   P3 Cash voucher detail panel shows an empty CHECK section (not notifications; found in a).
-2. After 1: implement the chosen fixes (tartar-shadcn), build + lint, suggest the commit.
-3. Open question for the user: should manual vouchers get an edit form (R6 says own manual vouchers too)?
+NOTIFICATION AUDIT FIXES DONE 2026-10-02 (user: "run it all"; build + lint clean, NOT checked in a browser):
+  - Shared panel components/inbox/lists/NotificationCenter.tsx (hook useNotificationCenterHook in
+    hook/layout/protected.hook.ts): "Needs your action" (pending) -> due alerts (managers) -> "Updates".
+    Used by the desktop bell popover (InboxBell, now shows due alerts too) and PhoneAlertsSheet.
+    Badge = inbox unread + pending + due alerts everywhere (InboxBell lost its dueCount prop).
+  - InboxFeed `section` "action" | "updates", `markAll`; body on its own 2-line clamp (ListCard
+    `description`), meta = time or a warning "Waiting <elapsed>" with a clock; Mark all read size sm.
+    Hook: pendingItems / updateItems, error -> "Couldn't load updates. ..." (Retry kept).
+  - ListCard: title w-full min-w-0 truncate (w-fit no longer defeats it); dot sits on the avatar corner
+    (ring-panel), unread rows tinted bg-brand-soft/40 + semibold, read rows font-normal.
+  - /admin Notifications: Needs your action -> All/Unread tabs right above the due alerts they filter ->
+    Updates (no second Mark all read; the header one covers both).
+  - Push copy (manager) mentions deposited sales. Cash vouchers: check rows hidden, and RowDetailPanel
+    skips any section with no visible rows (utils/detail.utils.ts visibleDetailSections).
+  - supabase/migrations/20261018000030_notification_request_backfill.sql (data only, NOT applied): pre-29
+    request rows -> pending = true if the voucher/payment is still pending, else deleted.
+
+MANUAL VOUCHER EDIT DONE 2026-10-02 (user: yes; build + lint clean, not checked in a browser). Client only —
+  mig 29 already allows it (guard_voucher_change own-open branch, payable sync). voucherServices.update
+  (shared voucherRowOf with create, runWrite update); voucherEditModalKey; voucher.list.hook editModal /
+  editDefaultsOf / updateMutation; VouchersTable "Edit voucher" on own approved unprinted manual vouchers ->
+  same form, "Save changes". Check vouchers store only the bank label, so bank/account are matched back by
+  label (useBankAccountListHook accountDefaultsOfLabel); no match -> user re-selects. Changing Purpose to
+  Expense on a voucher whose payable is open is refused by the server (due date cannot be removed).
+  Migration 30 applied by the user 2026-10-02.
+
+1. Check on the preview: desktop bell popover, phone sheet, /admin Notifications tab (order, long titles,
+   dot, unread tint, Waiting chip, badge counts); admin edits own manual voucher (cash + check, purchase
+   with payable: amount/due date sync to the payable; printed voucher shows no Edit).
+2. Then back to ROADMAP.md: P0-4 events 3 (payment verification) and 4 (sale verified), P0-5 devices,
+   P0-6 QA reset, merge, production deploy.
 
 ## State
-Branch mobilel-app-native at b1917be (Development v2.13 = R3a, committed).
+Branch mobilel-app-native at 1024cf2 (Development v2.14); notification audit fixes + manual voucher edit uncommitted.
 QA rows from the 2026-10-02 test (P0-6 reset): purchases "QA V4 approve" -> QAT-PUR-2026-00000014
 (approved, payable Oct 9 ₱982.14) and "QA V4 reject" -> QAT-PUR-2026-00000015 (non-VAT, rejected then
 resubmitted, pending), both by qaemp2, plus their notifications.

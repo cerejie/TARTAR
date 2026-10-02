@@ -17,6 +17,8 @@ import {
 
 const markReadQueuedMessage = "Marked read — will sync when back online";
 
+const inboxLoadError = "Couldn't load updates. Check your connection and try again.";
+
 export const useInboxListHook = () => {
   const navigate = useNavigate();
   const isAuthenticated = useAccountStore(selectIsAuthenticated);
@@ -38,12 +40,13 @@ export const useInboxListHook = () => {
   const attentionCount = items.filter(isInboxAttention).length;
 
   return {
-    items,
+    pendingItems: items.filter((item) => item.pending),
+    updateItems: items.filter((item) => !item.pending),
     unreadCount,
     attentionCount,
     loading: inboxQuery.isInitialLoading,
     refreshing: inboxQuery.isRefreshing,
-    error: inboxQuery.error,
+    error: inboxQuery.error ? inboxLoadError : null,
     retry: inboxQuery.refetch,
     markingAllRead: markReadMutation.loading,
     openItem: (item: IInboxItem) => {

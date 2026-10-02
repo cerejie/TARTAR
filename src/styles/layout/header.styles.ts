@@ -63,4 +63,4 @@ export const headerNotificationsHead =
 
 export const headerNotificationsBody = "flex flex-col gap-3 p-4";
 
-export const headerInboxBody = "py-3";
+export const headerInboxBody = "p-3";

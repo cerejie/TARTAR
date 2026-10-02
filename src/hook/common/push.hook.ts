@@ -30,7 +30,7 @@ const incompleteMessage = "This device returned an incomplete push subscription.
 
 const pushSummaryOf = ({ isManager, encodeTransactions }: IPermissions): string => {
   if (isManager) {
-    return "Vouchers and payments waiting for your approval, and a due digest every morning at 8.";
+    return "Vouchers, payments and deposited sales waiting for your review, and a due digest every morning at 8.";
   }
   if (encodeTransactions) {
     return "Your vouchers and sales as soon as they are approved, verified or rejected.";

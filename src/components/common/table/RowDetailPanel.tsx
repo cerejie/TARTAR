@@ -11,7 +11,7 @@ import {
   rowDetailSectionTitle,
   rowDetailValue,
 } from "../../../styles/table/table.styles";
-import { visibleDetailItems } from "../../../utils/detail.utils";
+import { visibleDetailItems, visibleDetailSections } from "../../../utils/detail.utils";
 
 type IProps<TRecord> = {
   record: TRecord;
@@ -38,7 +38,7 @@ const RowDetailPanel = <TRecord,>({
       {...rowExpansionPersistProps}
     >
       <div className={rowDetailContent}>
-        {sections.map((section) => (
+        {visibleDetailSections(sections, record).map((section) => (
           <div key={section.key} className={rowDetailSection}>
             <div className={rowDetailSectionTitle}>
               {section.icon ? (

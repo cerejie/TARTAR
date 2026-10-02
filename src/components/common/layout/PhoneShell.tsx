@@ -15,7 +15,7 @@ import RouteProgress from "./RouteProgress";
 import SidebarToggle from "./SidebarToggle";
 
 const PhoneShell = () => {
-  const { pathname, scrollRef, handleScroll, pullHandlers, title, dueCount, openAlerts } =
+  const { pathname, scrollRef, handleScroll, pullHandlers, title, openAlerts } =
     usePhoneShellHook();
 
   return (
@@ -24,7 +24,7 @@ const PhoneShell = () => {
       <AppBar
         title={title}
         leading={<SidebarToggle />}
-        trailing={<InboxBell onPress={openAlerts} dueCount={dueCount} />}
+        trailing={<InboxBell onPress={openAlerts} />}
       />
 
       <main

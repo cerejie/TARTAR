@@ -7,6 +7,7 @@ import {
   voucherTypeValues,
 } from "../../../enums/voucher.enum";
 import {
+  voucherEditModalKey,
   voucherFormModalKey,
   voucherReasonModalKey,
   voucherRejectModalKey,
@@ -31,7 +32,10 @@ import type {
   IVoucherInput,
   IVoucherRejectInput,
 } from "../../../models/data/voucher/voucher.request";
-import type { IVoucher } from "../../../models/data/voucher/voucher.response";
+import {
+  voucherDisbursementKind,
+  type IVoucher,
+} from "../../../models/data/voucher/voucher.response";
 import voucherServices from "../../../services/data/voucher.services";
 import {
   selectUserId,
@@ -46,6 +50,7 @@ import {
   deriveVoucherValues,
   isOwnOpenVoucher,
   voucherBreakdownDefaults,
+  voucherBreakdownOf,
   voucherBreakdownFields,
   voucherSummaryLines,
 } from "../../../utils/voucher.utils";
@@ -117,6 +122,7 @@ const asApproved = (voucher: IVoucher): IVoucher => ({
 
 export const useVoucherListHook = () => {
   const formModal = useModal(voucherFormModalKey);
+  const editModal = useModal<IVoucher>(voucherEditModalKey);
   const rejectModal = useModal<IVoucher>(voucherRejectModalKey);
   const sourceModal = useModal<IVoucher>(voucherSourceModalKey);
   const reasonModal = useModal<IVoucher>(voucherReasonModalKey);
@@ -137,7 +143,8 @@ export const useVoucherListHook = () => {
   const { branches, branchOptions, branchName, defaultBranch } =
     useBranchListHook();
   const { supplierOptions } = useSupplierListHook();
-  const { accountLabelOf, bankAccountFields } = useBankAccountListHook();
+  const { accountLabelOf, accountDefaultsOfLabel, bankAccountFields } =
+    useBankAccountListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
@@ -186,6 +193,19 @@ export const useVoucherListHook = () => {
         setPagination({ pageNumber: 1 });
         offerPush();
       },
+    }
+  );
+
+  const updateMutation = useMutation(
+    (payload: { id: string; values: IVoucherInput }) =>
+      voucherServices.update(payload.id, {
+        ...payload.values,
+        check_bank: accountLabelOf(payload.values.bank_account_id),
+      }),
+    {
+      successMessage: "Voucher updated",
+      invalidate: [voucherListKey, payableListKey],
+      onSuccess: editModal.closeModal,
     }
   );
 
@@ -311,6 +331,23 @@ export const useVoucherListHook = () => {
     check_due_date: todayIso(),
   };
 
+  const editDefaultsOf = (voucher: IVoucher): DefaultValues<IVoucherInput> => ({
+    ...voucherBreakdownOf(voucher),
+    ...accountDefaultsOfLabel(voucher.check_bank),
+    type: voucher.type,
+    kind: voucherDisbursementKind(voucher),
+    branch: voucher.branch as BranchSlug,
+    payee: voucher.payee,
+    amount: Number(voucher.gross_amount ?? voucher.amount),
+    supplier_id: voucher.supplier_id,
+    due_date: voucher.due_date ?? todayIso(),
+    check_bank: voucher.check_bank ?? "",
+    check_number: voucher.check_number ?? "",
+    check_due_date: voucher.check_due_date ?? todayIso(),
+  });
+
+  const editRow = editModal.modal.data;
+
   return {
     permissions,
     vouchers,
@@ -331,6 +368,10 @@ export const useVoucherListHook = () => {
     formSummary: voucherSummaryLines,
     deriveFormValues: deriveManualVoucherValues,
     createMutation,
+    editModal,
+    editRow,
+    editDefaultsOf,
+    updateMutation,
     confirmApprove,
     rejectModal,
     rejectRow: rejectModal.modal.data,
