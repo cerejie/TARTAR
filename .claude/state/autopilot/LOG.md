@@ -174,3 +174,14 @@
 - RZ browse → skipped: QA_PASSWORD absent from the dispatch (per NEXT_PROMPT RZ note); no regressions found or fixed, no source changes
 - Roadmap hand-back → mobile audit ROADMAP.md deleted, ROADMAP-PWA-SUSPENDED.md renamed back to ROADMAP.md, unbrowsed R2–R6 + RZ sweep carried into its Next as a pre-device-script check
 - Hard-stop → PWA Next item 1 is the device test script (physical phone, user-driven)
+
+## 2026-10-03 — Leftovers → Development v2.44
+- Dirty tree at start → committed as its own version (audit, new Audit fixes roadmap, parked PWA roadmap rename, deep-critique skill, STOP removed by the user); yarn build + yarn lint clean first
+
+## 2026-10-03 — F1 Query ordering → Development v2.45
+- Who shares the in-flight promise → only `run` (mount, prime); invalidate / refetchAll / refetchWatched / hook `refetch` always start a new request (joining a request sent before a write would hand back pre-write rows, the bug in reverse)
+- Ordering token → one module counter + one newest-request record per key, instead of a per-key counter (a cleared map plus per-key restart at 1 could let a pre-sign-out response match a new request)
+- reset → also clears pending requests, so a response landing after sign-out is dropped rather than written into the next session's cache
+- Superseded response → dropped from both the store entry and the IndexedDB write; its own caller still receives its data
+- Scope → query.store.ts + the hook's `refetch` only; fetcher pruning and refetch scope left to F2
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, not exercised under a throttled network

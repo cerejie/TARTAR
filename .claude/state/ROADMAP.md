@@ -79,19 +79,24 @@ user. Any of them may be overturned; say so and the phase is replanned.
 - audit: .claude/state/AUDIT-2026-10-03.md
 
 ## Done
-- [x] Audit written 2026-10-03: `.claude/state/AUDIT-2026-10-03.md` (lint + build clean at v2.43).
+- [x] Audit written 2026-10-03: `.claude/state/AUDIT-2026-10-03.md` (lint + build clean at v2.43). Committed v2.44.
+- [x] F1 Query ordering (v2.45): `src/store/common/query.store.ts` — one request record per key (global
+  counter id + shared promise); only the newest request for a key writes the entry or the IndexedDB cache;
+  `run` (mount, prime) joins the in-flight request, `refresh` / `invalidate` / `refetchAll` /
+  `refetchWatched` always start a new one; `reset` drops pending requests so a late response cannot land
+  after sign-out. `src/hook/common/query.hook.ts` — `refetch` calls `refresh`. Compiled, not exercised
+  under a throttled network.
 
 ## Next
-1. F1 Query ordering — audit § QA-01.
-2. F2 Refetch scope + cache bound — audit § PERF-01, PERF-02.
-3. F3 Complete reads — audit § DATA-01.
-4. F4 Client security hardening — audit § SEC-03, SEC-01, SEC-04.
-5. F5 Failure experience — audit § UX-01, QA-03, UX-03.
-6. F6 Touch + layout — audit § MOB-01, UI-01.
-7. F7 Master Data search — audit § UX-02.
-8. F8 Unit tests — audit § TEST-01.
-9. F9 Entry bundle — audit § PERF-03.
-10. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
+1. F2 Refetch scope + cache bound — audit § PERF-01, PERF-02.
+2. F3 Complete reads — audit § DATA-01.
+3. F4 Client security hardening — audit § SEC-03, SEC-01, SEC-04.
+4. F5 Failure experience — audit § UX-01, QA-03, UX-03.
+5. F6 Touch + layout — audit § MOB-01, UI-01.
+6. F7 Master Data search — audit § UX-02.
+7. F8 Unit tests — audit § TEST-01.
+8. F9 Entry bundle — audit § PERF-03.
+9. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
     delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
 
 ## Open
@@ -105,6 +110,5 @@ user. Any of them may be overturned; say so and the phase is replanned.
 - SEC-05: `send-push` failure counting needs an Edge Function redeploy by the user.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.43 · Uncommitted: yes (this roadmap, the
-audit, the parked PWA roadmap rename, the untracked deep-critique skill) · Last check: yarn lint + yarn
-build clean 2026-10-03.
+Branch: mobile-app-native-newlook · Last commit Development v2.45 (F1) · Uncommitted: none · Last check:
+yarn build + yarn lint clean 2026-10-03.

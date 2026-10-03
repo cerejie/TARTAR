@@ -16,6 +16,7 @@ export const useQuery = <T>(
   const enabled = options.enabled ?? true;
   const countsTowardStatus = !options.ignoreOfflineStatus;
   const run = useQueryStore((state) => state.run);
+  const refresh = useQueryStore((state) => state.refresh);
   const watch = useQueryStore((state) => state.watch);
   const unwatch = useQueryStore((state) => state.unwatch);
   const entry = useQueryStore(selectEntry<T>(key));
@@ -45,7 +46,7 @@ export const useQuery = <T>(
     data,
     isInitialLoading: enabled && !hasData && entry.error === null,
     isRefreshing: hasData && (entry.loading || placeholder !== undefined),
-    refetch: () => void run(key, fetcher),
+    refetch: () => void refresh(key, fetcher),
   };
 };
 

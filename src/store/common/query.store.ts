@@ -5,6 +5,8 @@ import type { IQueryEntry } from "../../models/common/query.model";
 
 type ICachedQuery = Pick<IQueryEntry, "data" | "updatedAt">;
 
+type IRequest = { id: number; result: Promise<unknown> };
+
 type States = {
   entries: Record<string, IQueryEntry>;
   watchers: Record<string, number>;
@@ -13,6 +15,10 @@ type States = {
 
 type Actions = {
   run: <T>(key: string, fetcher: () => Promise<T>) => Promise<T | undefined>;
+  refresh: <T>(
+    key: string,
+    fetcher: () => Promise<T>
+  ) => Promise<T | undefined>;
   prime: (queries: ReadonlyArray<[string, () => Promise<unknown>]>) => void;
   setEntry: (key: string, partial: Partial<IQueryEntry>) => void;
   watch: (key: string, countsTowardStatus: boolean) => void;
@@ -43,6 +49,10 @@ const initialValues: States = {
 
 const fetchers = new Map<string, () => Promise<unknown>>();
 
+const requests = new Map<string, IRequest>();
+
+let requestCount = 0;
+
 const ignoreCacheFailure = () => undefined;
 
 const isNetworkFailure = (error: unknown, message: string): boolean =>
@@ -62,145 +72,177 @@ const hydrate = (
   return { ...entries, ...Object.fromEntries(restored) };
 };
 
-export const useQueryStore = create<States & Actions>((set, get) => ({
-  ...initialValues,
+export const useQueryStore = create<States & Actions>((set, get) => {
+  const isNewest = (key: string, id: number): boolean =>
+    requests.get(key)?.id === id;
 
-  run: async <T>(key: string, fetcher: () => Promise<T>) => {
-    fetchers.set(key, fetcher as () => Promise<unknown>);
-    await cacheReady;
-    const previous = get().entries[key] ?? emptyEntry;
+  const settle = (
+    key: string,
+    id: number,
+    toEntry: (current: IQueryEntry) => IQueryEntry
+  ): boolean => {
+    if (!isNewest(key, id)) return false;
 
-    if (!navigator.onLine) {
-      set((state) => ({
-        entries: {
-          ...state.entries,
-          [key]: {
-            ...previous,
-            loading: false,
-            error: previous.data === undefined ? notSavedOfflineMessage : null,
-          },
-        },
-      }));
-      return previous.data as T | undefined;
-    }
-
+    requests.delete(key);
     set((state) => ({
       entries: {
         ...state.entries,
-        [key]: { ...previous, loading: true, error: null },
+        [key]: toEntry(state.entries[key] ?? emptyEntry),
       },
     }));
+    return true;
+  };
+
+  const load = async <T>(
+    key: string,
+    id: number,
+    fetcher: () => Promise<T>
+  ): Promise<T | undefined> => {
+    await cacheReady;
+
+    if (!navigator.onLine) {
+      const cached = get().entries[key]?.data as T | undefined;
+      settle(key, id, (current) => ({
+        ...current,
+        loading: false,
+        error: current.data === undefined ? notSavedOfflineMessage : null,
+      }));
+      return cached;
+    }
+
+    if (isNewest(key, id)) get().setEntry(key, { loading: true, error: null });
 
     try {
       const data = await fetcher();
       const updatedAt = Date.now();
-      set((state) => ({
-        entries: {
-          ...state.entries,
-          [key]: { data, loading: false, error: null, updatedAt },
-        },
+      const landed = settle(key, id, () => ({
+        data,
+        loading: false,
+        error: null,
+        updatedAt,
       }));
-      void putQuery<ICachedQuery>(key, { data, updatedAt }).catch(
-        ignoreCacheFailure
-      );
+      if (landed)
+        void putQuery<ICachedQuery>(key, { data, updatedAt }).catch(
+          ignoreCacheFailure
+        );
       return data;
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : String(error);
 
-      set((state) => {
-        const current = state.entries[key] ?? emptyEntry;
+      settle(key, id, (current) => {
         const keepsCachedData =
           current.data !== undefined && isNetworkFailure(error, message);
 
         return {
-          entries: {
-            ...state.entries,
-            [key]: {
-              ...current,
-              loading: false,
-              error: keepsCachedData ? null : message,
-            },
-          },
+          ...current,
+          loading: false,
+          error: keepsCachedData ? null : message,
         };
       });
       return undefined;
     }
-  },
+  };
 
-  prime: (queries) => {
-    for (const [key, fetcher] of queries) {
-      if (!fetchers.has(key)) void get().run(key, fetcher);
-    }
-  },
+  const start = <T>(
+    key: string,
+    fetcher: () => Promise<T>
+  ): Promise<T | undefined> => {
+    fetchers.set(key, fetcher);
+    requestCount += 1;
+    const id = requestCount;
+    const result = load(key, id, fetcher);
+    requests.set(key, { id, result });
+    return result;
+  };
 
-  setEntry: (key, partial) =>
-    set((state) => ({
-      entries: {
-        ...state.entries,
-        [key]: { ...(state.entries[key] ?? emptyEntry), ...partial },
-      },
-    })),
+  return {
+    ...initialValues,
 
-  watch: (key, countsTowardStatus) =>
-    set((state) => ({
-      watchers: { ...state.watchers, [key]: (state.watchers[key] ?? 0) + 1 },
-      statusWatchers: countsTowardStatus
-        ? { ...state.statusWatchers, [key]: (state.statusWatchers[key] ?? 0) + 1 }
-        : state.statusWatchers,
-    })),
+    run: <T>(key: string, fetcher: () => Promise<T>) => {
+      const pending = requests.get(key);
+      if (!pending) return start(key, fetcher);
 
-  unwatch: (key, countsTowardStatus) =>
-    set((state) => ({
-      watchers: { ...state.watchers, [key]: (state.watchers[key] ?? 1) - 1 },
-      statusWatchers: countsTowardStatus
-        ? { ...state.statusWatchers, [key]: (state.statusWatchers[key] ?? 1) - 1 }
-        : state.statusWatchers,
-    })),
+      fetchers.set(key, fetcher);
+      return pending.result as Promise<T | undefined>;
+    },
 
-  invalidate: (keyPrefix) => {
-    const matches = Object.keys(get().entries).filter(
-      (key) => key === keyPrefix || key.startsWith(`${keyPrefix}:`)
-    );
+    refresh: start,
 
-    for (const key of matches) {
-      const fetcher = fetchers.get(key);
-
-      if (fetcher) {
-        void get().run(key, fetcher);
-        continue;
+    prime: (queries) => {
+      for (const [key, fetcher] of queries) {
+        if (!fetchers.has(key)) void get().run(key, fetcher);
       }
+    },
 
-      set((state) => {
-        const entries = { ...state.entries };
-        delete entries[key];
-        return { entries };
-      });
-    }
-  },
+    setEntry: (key, partial) =>
+      set((state) => ({
+        entries: {
+          ...state.entries,
+          [key]: { ...(state.entries[key] ?? emptyEntry), ...partial },
+        },
+      })),
 
-  refetchAll: () => {
-    for (const [key, fetcher] of fetchers) void get().run(key, fetcher);
-  },
+    watch: (key, countsTowardStatus) =>
+      set((state) => ({
+        watchers: { ...state.watchers, [key]: (state.watchers[key] ?? 0) + 1 },
+        statusWatchers: countsTowardStatus
+          ? { ...state.statusWatchers, [key]: (state.statusWatchers[key] ?? 0) + 1 }
+          : state.statusWatchers,
+      })),
 
-  refetchWatched: async () => {
-    const watchedKeys = Object.entries(get().watchers)
-      .filter(([, count]) => count > 0)
-      .map(([key]) => key);
-    await Promise.all(
-      watchedKeys.flatMap((key) => {
+    unwatch: (key, countsTowardStatus) =>
+      set((state) => ({
+        watchers: { ...state.watchers, [key]: (state.watchers[key] ?? 1) - 1 },
+        statusWatchers: countsTowardStatus
+          ? { ...state.statusWatchers, [key]: (state.statusWatchers[key] ?? 1) - 1 }
+          : state.statusWatchers,
+      })),
+
+    invalidate: (keyPrefix) => {
+      const matches = Object.keys(get().entries).filter(
+        (key) => key === keyPrefix || key.startsWith(`${keyPrefix}:`)
+      );
+
+      for (const key of matches) {
         const fetcher = fetchers.get(key);
-        return fetcher ? [get().run(key, fetcher)] : [];
-      })
-    );
-  },
 
-  reset: () => {
-    fetchers.clear();
-    set({ entries: {} });
-    void clearQueries().catch(ignoreCacheFailure);
-  },
-}));
+        if (fetcher) {
+          void start(key, fetcher);
+          continue;
+        }
+
+        set((state) => {
+          const entries = { ...state.entries };
+          delete entries[key];
+          return { entries };
+        });
+      }
+    },
+
+    refetchAll: () => {
+      for (const [key, fetcher] of fetchers) void start(key, fetcher);
+    },
+
+    refetchWatched: async () => {
+      const watchedKeys = Object.entries(get().watchers)
+        .filter(([, count]) => count > 0)
+        .map(([key]) => key);
+      await Promise.all(
+        watchedKeys.flatMap((key) => {
+          const fetcher = fetchers.get(key);
+          return fetcher ? [start(key, fetcher)] : [];
+        })
+      );
+    },
+
+    reset: () => {
+      fetchers.clear();
+      requests.clear();
+      set({ entries: {} });
+      void clearQueries().catch(ignoreCacheFailure);
+    },
+  };
+});
 
 const cacheReady: Promise<void> = readAllQueries<ICachedQuery>()
   .then((cached) =>
