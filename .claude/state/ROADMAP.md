@@ -86,17 +86,23 @@ user. Any of them may be overturned; say so and the phase is replanned.
   `refetchWatched` always start a new one; `reset` drops pending requests so a late response cannot land
   after sign-out. `src/hook/common/query.hook.ts` — `refetch` calls `refresh`. Compiled, not exercised
   under a throttled network.
+- [x] F2 Refetch scope + cache bound (v2.46): `src/store/common/query.store.ts` — a fetcher is forgotten when
+  its key loses its last watcher unless the key is primed, so `invalidate` / `refetchAll` rerun watched keys
+  plus the primed lookups only; `invalidate` keeps the stale entry of an unwatched key (refetched on mount,
+  still readable offline) instead of deleting it; search-term variants are never written to IndexedDB; on
+  hydrate the cache keeps the newest 120 entries no older than 30 days and deletes the rest.
+  `src/utils/idb.utils.ts` — `deleteQueries`. `prime.hook.ts` / `realtime.hook.ts` needed no change.
+  Compiled, not exercised offline in a browser.
 
 ## Next
-1. F2 Refetch scope + cache bound — audit § PERF-01, PERF-02.
-2. F3 Complete reads — audit § DATA-01.
-3. F4 Client security hardening — audit § SEC-03, SEC-01, SEC-04.
-4. F5 Failure experience — audit § UX-01, QA-03, UX-03.
-5. F6 Touch + layout — audit § MOB-01, UI-01.
-6. F7 Master Data search — audit § UX-02.
-7. F8 Unit tests — audit § TEST-01.
-8. F9 Entry bundle — audit § PERF-03.
-9. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
+1. F3 Complete reads — audit § DATA-01.
+2. F4 Client security hardening — audit § SEC-03, SEC-01, SEC-04.
+3. F5 Failure experience — audit § UX-01, QA-03, UX-03.
+4. F6 Touch + layout — audit § MOB-01, UI-01.
+5. F7 Master Data search — audit § UX-02.
+6. F8 Unit tests — audit § TEST-01.
+7. F9 Entry bundle — audit § PERF-03.
+8. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
     delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
 
 ## Open
@@ -110,5 +116,5 @@ user. Any of them may be overturned; say so and the phase is replanned.
 - SEC-05: `send-push` failure counting needs an Edge Function redeploy by the user.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.45 (F1) · Uncommitted: none · Last check:
+Branch: mobile-app-native-newlook · Last commit Development v2.46 (F2) · Uncommitted: none · Last check:
 yarn build + yarn lint clean 2026-10-03.

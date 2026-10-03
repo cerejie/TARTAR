@@ -185,3 +185,12 @@
 - Superseded response → dropped from both the store entry and the IndexedDB write; its own caller still receives its data
 - Scope → query.store.ts + the hook's `refetch` only; fetcher pruning and refetch scope left to F2
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, not exercised under a throttled network
+
+## 2026-10-03 — F2 Refetch scope + cache bound → Development v2.46
+- Where to prune fetchers → on `unwatch` when the last watcher leaves and the key is not primed (the fetcher map is then exactly watched + primed, so `invalidate` / `refetchAll` need no extra filtering and F1's `start` / `run` ordering is untouched)
+- Primed offline set → a module `primedKeys` set filled by `prime`, cleared on `reset`; primed lookups keep their fetcher and are still refetched on reconnect, after a sync flush and on invalidate
+- Unwatched key hit by `invalidate` → keep its stale entry instead of deleting it (mount always refetches; deleting it offline would turn a saved page into "Not saved for offline")
+- Search-term variants → detected by a non-empty `"search"` in the key's filter JSON, checked in the store (one place) rather than a `persist` option threaded through every list hook
+- Cache bound → newest 120 entries, at most 30 days old, trimmed on hydrate and deleted from IndexedDB (generous age so a branch offline for weeks keeps its pages; primed lookups are always among the newest)
+- prime.hook.ts / realtime.hook.ts → no change needed (the store scope covers both callers)
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, not exercised offline in a browser

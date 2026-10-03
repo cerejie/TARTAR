@@ -43,6 +43,13 @@ export const putQuery = async <T>(key: string, value: T): Promise<void> => {
   await resultOf(store.put(value, key));
 };
 
+export const deleteQueries = async (keys: readonly string[]): Promise<void> => {
+  if (keys.length === 0) return;
+
+  const store = await queryStoreOf("readwrite");
+  await Promise.all(keys.map((key) => resultOf(store.delete(key))));
+};
+
 export const clearQueries = async (): Promise<void> => {
   const store = await queryStoreOf("readwrite");
   await resultOf(store.clear());

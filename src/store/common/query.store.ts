@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { clearQueries, putQuery, readAllQueries } from "../../utils/idb.utils";
+import {
+  clearQueries,
+  deleteQueries,
+  putQuery,
+  readAllQueries,
+} from "../../utils/idb.utils";
 import { failureKindOf } from "../../utils/write.utils";
 import type { IQueryEntry } from "../../models/common/query.model";
 
@@ -34,6 +39,12 @@ const notSavedOfflineMessage =
 
 const networkFailurePrefix = "TypeError";
 
+const cacheMaxAgeMs = 30 * 24 * 60 * 60 * 1000;
+
+const cacheMaxEntries = 120;
+
+const searchVariantPattern = /"search":"[^"]/;
+
 const emptyEntry: IQueryEntry = {
   data: undefined,
   loading: false,
@@ -49,6 +60,8 @@ const initialValues: States = {
 
 const fetchers = new Map<string, () => Promise<unknown>>();
 
+const primedKeys = new Set<string>();
+
 const requests = new Map<string, IRequest>();
 
 let requestCount = 0;
@@ -58,6 +71,23 @@ const ignoreCacheFailure = () => undefined;
 const isNetworkFailure = (error: unknown, message: string): boolean =>
   failureKindOf(error) === "network" ||
   message.startsWith(networkFailurePrefix);
+
+const isPersistable = (key: string): boolean =>
+  !searchVariantPattern.test(key);
+
+const retainedCacheOf = (
+  cached: Record<string, ICachedQuery>,
+  now: number
+): Record<string, ICachedQuery> =>
+  Object.fromEntries(
+    Object.entries(cached)
+      .filter(
+        ([key, value]) =>
+          isPersistable(key) && now - value.updatedAt <= cacheMaxAgeMs
+      )
+      .sort(([, first], [, second]) => second.updatedAt - first.updatedAt)
+      .slice(0, cacheMaxEntries)
+  );
 
 const hydrate = (
   entries: Record<string, IQueryEntry>,
@@ -75,6 +105,9 @@ const hydrate = (
 export const useQueryStore = create<States & Actions>((set, get) => {
   const isNewest = (key: string, id: number): boolean =>
     requests.get(key)?.id === id;
+
+  const isRefetched = (key: string): boolean =>
+    primedKeys.has(key) || (get().watchers[key] ?? 0) > 0;
 
   const settle = (
     key: string,
@@ -121,7 +154,7 @@ export const useQueryStore = create<States & Actions>((set, get) => {
         error: null,
         updatedAt,
       }));
-      if (landed)
+      if (landed && isPersistable(key))
         void putQuery<ICachedQuery>(key, { data, updatedAt }).catch(
           ignoreCacheFailure
         );
@@ -170,6 +203,7 @@ export const useQueryStore = create<States & Actions>((set, get) => {
 
     prime: (queries) => {
       for (const [key, fetcher] of queries) {
+        primedKeys.add(key);
         if (!fetchers.has(key)) void get().run(key, fetcher);
       }
     },
@@ -190,13 +224,15 @@ export const useQueryStore = create<States & Actions>((set, get) => {
           : state.statusWatchers,
       })),
 
-    unwatch: (key, countsTowardStatus) =>
+    unwatch: (key, countsTowardStatus) => {
       set((state) => ({
         watchers: { ...state.watchers, [key]: (state.watchers[key] ?? 1) - 1 },
         statusWatchers: countsTowardStatus
           ? { ...state.statusWatchers, [key]: (state.statusWatchers[key] ?? 1) - 1 }
           : state.statusWatchers,
-      })),
+      }));
+      if (!isRefetched(key)) fetchers.delete(key);
+    },
 
     invalidate: (keyPrefix) => {
       const matches = Object.keys(get().entries).filter(
@@ -205,17 +241,7 @@ export const useQueryStore = create<States & Actions>((set, get) => {
 
       for (const key of matches) {
         const fetcher = fetchers.get(key);
-
-        if (fetcher) {
-          void start(key, fetcher);
-          continue;
-        }
-
-        set((state) => {
-          const entries = { ...state.entries };
-          delete entries[key];
-          return { entries };
-        });
+        if (fetcher) void start(key, fetcher);
       }
     },
 
@@ -237,6 +263,7 @@ export const useQueryStore = create<States & Actions>((set, get) => {
 
     reset: () => {
       fetchers.clear();
+      primedKeys.clear();
       requests.clear();
       set({ entries: {} });
       void clearQueries().catch(ignoreCacheFailure);
@@ -245,11 +272,15 @@ export const useQueryStore = create<States & Actions>((set, get) => {
 });
 
 const cacheReady: Promise<void> = readAllQueries<ICachedQuery>()
-  .then((cached) =>
+  .then((cached) => {
+    const retained = retainedCacheOf(cached, Date.now());
+    const dropped = Object.keys(cached).filter((key) => !(key in retained));
+
+    void deleteQueries(dropped).catch(ignoreCacheFailure);
     useQueryStore.setState((state) => ({
-      entries: hydrate(state.entries, cached),
-    }))
-  )
+      entries: hydrate(state.entries, retained),
+    }));
+  })
   .catch(ignoreCacheFailure);
 
 export const selectEntry =
