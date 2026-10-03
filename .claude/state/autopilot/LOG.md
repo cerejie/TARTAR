@@ -169,3 +169,8 @@
 - F16 scope → opt-in `cardGrid` prop on DataTable, passed only by the /receivables + /payables page tables (records + payments); other card lists unchanged (L1)
 - Visual check → skipped: QA_PASSWORD not provided; compiled, visuals unconfirmed
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)
+
+## 2026-10-03 — RZ Final sweep + hand-back → Development v2.43
+- RZ browse → skipped: QA_PASSWORD absent from the dispatch (per NEXT_PROMPT RZ note); no regressions found or fixed, no source changes
+- Roadmap hand-back → mobile audit ROADMAP.md deleted, ROADMAP-PWA-SUSPENDED.md renamed back to ROADMAP.md, unbrowsed R2–R6 + RZ sweep carried into its Next as a pre-device-script check
+- Hard-stop → PWA Next item 1 is the device test script (physical phone, user-driven)

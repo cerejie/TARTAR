@@ -1,5 +1,3 @@
-AUTOPILOT — continue the Mobile visual audit + Receivables/Payables fixes roadmap at .claude/state/ROADMAP.md,
-start RZ Final sweep (Next item 1). Branch mobile-app-native-newlook. Last commit
-Development v2.42 (R6 tablet portrait ledger grid), pushed. Follow the roadmap's session protocol: read
-the Audit findings, Done and Next item 1 only. Decide the file plan with decision-making; do not wait for a go.
-RZ note: R2–R6 visual checks were all skipped (no QA_PASSWORD in dispatch); if QA_PASSWORD is still absent, the browse cannot run — log it, do the rename, and hard-stop for the user's device test.
+Continue the Native-feel mobile PWA roadmap at .claude/state/ROADMAP.md (resumed in Development v2.43). Branch
+mobile-app-native-newlook. Start with Next's MOBILE AUDIT CARRY-OVER block (visual check of R1–R6 at 390x844 + 820x1180,
+needs QA_PASSWORD), then Next item 1, the device test script — user-driven, one step at a time; not an autopilot phase.
