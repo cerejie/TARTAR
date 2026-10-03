@@ -309,3 +309,11 @@
 - Password sheet → submit button in the footer linked to the form by `form` id; the desktop card keeps its inline button (fields shared via `ChangePasswordFields`)
 - Notifications sheet → toggle in the footer only for on / off modes; other modes show the note alone with no footer
 - Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing); swept admin + emp phone + desk 829 / 0 failed, 124 sheets; looked at emp phone sheet 03 and nine full shots; swept, device unconfirmed
+
+## 2026-10-03 — V4 Date labels → Development v2.60
+- File plan → one optional `cardPrefix` on `IDataTableColumn`, applied in `DataTableCards` (cards + sheet hero share `cardFieldsOf`), set to "Due" on the three due-date subtitles; per-table render change rejected because it would print "Due" in desktop cells too (Simple tier, UI only)
+- Reports receivables card → due date moved from title to subtitle, name becomes the title (was the first column, so the date led the card)
+- Customer / Supplier ledger view subtitles → left alone (they render their own composed subtitle, not cited by the audit)
+- Purchases due date with no unpaid, non-rejected date → "—" (dropped on cards, aligned in desktop cells); status chip already says Pending / Paid / Rejected
+- UI-13 → `keepTogether` (no-break spaces) on the deposited / reviewed date-time only, not in `formatDateTime`, so exports and prints keep plain spaces
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), tests 107 / 107; swept admin + emp phone 393 / 0 failed, 50 sheets; looked at emp sheet 13 and six full shots; swept, device unconfirmed

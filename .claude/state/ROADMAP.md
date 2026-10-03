@@ -141,14 +141,23 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   transactions (full-width "Delete transaction"), admin phone expenses approved + menu (Open voucher + ⋮, Edit
   expense · Locked in the menu), admin desk payables Paid (no ⋮ on paid rows), admin phone account password +
   notifications (full-width footer button). Swept, device unconfirmed.
+- [x] V4 Date labels (UI-04, UI-08, UI-13) → Development v2.60: `IDataTableColumn.cardPrefix` (`models/common/table.model.ts`)
+  prefixes a card / sheet-hero field in `components/common/table/DataTableCards.tsx`; "Due" on the due-date subtitle in
+  `components/ledger/tables/{LedgerRecordsTable,PayableRecordsTable}.tsx` and `components/report/LedgerReport.tsx`
+  (name is now the card title, due date the subtitle); desktop cells unchanged. `PurchasesTable.tsx` `dueDateLabelOf`
+  returns "—" (dropped from cards) instead of Pending / Paid / Rejected. `utils/detail.utils.ts` `keepTogether` (NBSP)
+  keeps the deposited / reviewed date-time on one line in `SalesTable.tsx`; test in `detail.utils.test.ts`. Build + lint
+  clean, tests 107 / 107. Swept admin + emp phone (393 surfaces, 0 failed, 50 sheets). Looked: emp sheet 13
+  (/receivables), full shots admin receivables overdue sheet, emp payables page, admin reports Receivables, admin
+  purchases All + Approved, emp sales verified sheet — "Due Sep 30, 2026" on cards and sheets, no status under "Due
+  date" on purchases, deposited / reviewed time on one line. Swept, device unconfirmed.
 
 ## Next
-1. V4 Date labels.
-2. V5 Admin app.
-3. V6 Reports.
-4. V7 Ledger modals.
-5. V8 Full re-sweep.
-6. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. V5 Admin app.
+2. V6 Reports.
+3. V7 Ledger modals.
+4. V8 Full re-sweep.
+5. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
@@ -163,6 +172,6 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   user not returned by `user_display_names`. V1 hides the dash either way.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.59 (V3 action groups) · Uncommitted: none · Last check:
-V3 sweep admin+emp phone+desk, 2026-10-03. Autopilot running from V4. A sweep of more than one role can exceed a
+Branch: mobilel-app-native · Last commit Development v2.60 (V4 date labels) · Uncommitted: none · Last check:
+V4 sweep admin+emp phone, 2026-10-03. Autopilot running from V5. A sweep of more than one role can exceed a
 10-minute background timeout — run it with `timeout` 3600000.

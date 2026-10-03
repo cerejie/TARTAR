@@ -35,7 +35,7 @@ import type { IRowAction } from "../../../models/common/action.model";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import type { ISale } from "../../../models/data/sale/sale.response";
 import { nowrapCell } from "../../../styles/table/table.styles";
-import { joinDetailParts } from "../../../utils/detail.utils";
+import { joinDetailParts, keepTogether } from "../../../utils/detail.utils";
 import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
 
 const SalesTable = () => {
@@ -75,7 +75,10 @@ const SalesTable = () => {
   const isPhone = useIsPhone();
 
   const reviewerOf = (row: ISale) =>
-    joinDetailParts([userNameOf(row.verified_by), formatDateTime(row.verified_at)]);
+    joinDetailParts([
+      userNameOf(row.verified_by),
+      keepTogether(formatDateTime(row.verified_at)),
+    ]);
 
   const actionsOf = (row: ISale): IRowAction[] => {
     const undeposited = row.sale_status === "undeposited";
@@ -245,7 +248,7 @@ const SalesTable = () => {
           render: (row) =>
             joinDetailParts([
               userNameOf(row.deposited_by),
-              formatDateTime(row.deposited_at),
+              keepTogether(formatDateTime(row.deposited_at)),
             ]),
         },
         {

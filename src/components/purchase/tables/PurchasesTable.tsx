@@ -57,10 +57,9 @@ import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.u
 import { voucherBreakdownItems } from "../../../utils/voucher.utils";
 
 const dueDateLabelOf = (row: IDisbursement) => {
-  if (row.voucher?.status === "rejected") return "Rejected";
-  if (row.due_date && row.payable?.status !== "paid") return formatDate(row.due_date);
-  if (!row.voucher || row.voucher.status === "pending") return "Pending";
-  return "Paid";
+  if (row.voucher?.status === "rejected") return "—";
+  if (!row.due_date || row.payable?.status === "paid") return "—";
+  return formatDate(row.due_date);
 };
 
 const PurchasesTable = () => {

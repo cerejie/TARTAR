@@ -3,6 +3,7 @@ import type { IDetailItem, IDetailSection } from "../models/common/detail.model"
 import {
   isEmptyDetailValue,
   joinDetailParts,
+  keepTogether,
   visibleDetailItems,
   visibleDetailSections,
 } from "./detail.utils";
@@ -55,5 +56,12 @@ describe("visibleDetailSections", () => {
     const visible = visibleDetailSections(sections, { name: "", note: "Paid" });
     expect(visible.map((section) => section.key)).toEqual(["a", "b"]);
     expect(visibleDetailSections(sections, { name: "", note: "" })).toHaveLength(0);
+  });
+});
+
+describe("keepTogether", () => {
+  it("joins every word with a no-break space", () => {
+    expect(keepTogether("Oct 2, 2026 5:43 PM")).toBe("Oct 2, 2026 5:43 PM");
+    expect(keepTogether("—")).toBe("—");
   });
 });

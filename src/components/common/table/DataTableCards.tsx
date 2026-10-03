@@ -160,7 +160,19 @@ const DataTableCards = <T,>({
         if (mobileRoleOf(column, index) !== role) return [];
         const content = renderContent(column, row, rowIndex);
         if (isEmptyContent(content)) return [];
-        return [{ id: columnId(column, index), title: column.title, content }];
+        return [
+          {
+            id: columnId(column, index),
+            title: column.title,
+            content: column.cardPrefix ? (
+              <>
+                {column.cardPrefix} {content}
+              </>
+            ) : (
+              content
+            ),
+          },
+        ];
       });
 
     return {

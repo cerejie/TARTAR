@@ -82,6 +82,7 @@ const PayableRecordsTable = () => {
     {
       title: "Due date",
       mobile: "subtitle",
+      cardPrefix: "Due",
       dataIndex: "due_date",
       className: nowrapCell,
       render: (value: string) => formatDate(value),

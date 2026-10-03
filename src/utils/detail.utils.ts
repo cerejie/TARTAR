@@ -18,6 +18,8 @@ export const joinDetailParts = (
     .filter((part) => !isEmptyDetailValue(part))
     .join(" · ");
 
+export const keepTogether = (value: string): string => value.replace(/ /g, " ");
+
 export const visibleDetailItems = <TRecord>(
   items: readonly IDetailItem<TRecord>[],
   record: TRecord

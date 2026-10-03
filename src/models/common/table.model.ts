@@ -31,6 +31,7 @@ export interface IDataTableColumn<T> {
   className?: string;
   skeleton?: IColumnSkeleton;
   mobile?: IColumnMobileRole;
+  cardPrefix?: string;
   collapse?: IColumnCollapse;
   sorter?: (left: T, right: T) => number;
   render?(value: unknown, row: T, index: number): ReactNode;

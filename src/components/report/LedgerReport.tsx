@@ -51,10 +51,12 @@ const LedgerReport = <Row extends IReceivable | IPayable>({
   const columns: IDataTableColumn<Row>[] = [
     {
       title: "Due date",
+      mobile: "subtitle",
+      cardPrefix: "Due",
       dataIndex: "due_date",
       render: (value: string) => formatDate(value),
     },
-    { title: label, key: "name", render: (_, row) => nameOf(row) },
+    { title: label, mobile: "title", key: "name", render: (_, row) => nameOf(row) },
     {
       title: "Branch",
       dataIndex: "branch",
