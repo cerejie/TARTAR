@@ -1,6 +1,7 @@
 import type { TransactionType } from "../../../enums/transaction.enum";
 import type { IExpenseCategory } from "../expense-category/expense.category.response";
 import type { IPayable, IReceivable } from "../ledger/ledger.response";
+import type { ILedgerPayment } from "../payment/payment.response";
 import type {
   IDisbursement,
   ITransaction,
@@ -78,6 +79,7 @@ export interface IBranchSummaryData {
 
 export interface IReportData {
   transactions: IDisbursement[];
+  customerPayments: ILedgerPayment[];
   receivables: IReceivable[];
   payables: IPayable[];
   categories: IExpenseCategory[];

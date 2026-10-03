@@ -37,6 +37,7 @@ export const dashboardReviewsKey = "dashboard-reviews";
 export const reportTransactionKey = "report-transactions";
 export const reportReceivableKey = "report-receivables";
 export const reportPayableKey = "report-payables";
+export const reportPaymentKey = "report-payments";
 export const reportSummaryKey = "report-summary";
 export const inboxListKey = "inbox";
 
@@ -61,6 +62,7 @@ export const liveRefreshKeys: readonly string[] = [
   dashboardSalesKey,
   dashboardOverviewKey,
   reportTransactionKey,
+  reportPaymentKey,
   reportSummaryKey,
   dashboardAlertsKey,
   dashboardChecksKey,

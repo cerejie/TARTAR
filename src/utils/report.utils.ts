@@ -4,8 +4,10 @@ import { saleStatusLabels } from "../enums/sale.enum";
 import {
   cashInflowTypes,
   cashOutflowTypes,
+  transactionTypeLabelOf,
   transactionTypeLabels,
   type DisbursementKind,
+  type TransactionType,
 } from "../enums/transaction.enum";
 import { voucherStatusLabels } from "../enums/voucher.enum";
 import type { IDateRange } from "../models/common/period.model";
@@ -16,6 +18,10 @@ import {
   type IPayable,
   type IReceivable,
 } from "../models/data/ledger/ledger.response";
+import {
+  sumCountedPayments,
+  type ILedgerPayment,
+} from "../models/data/payment/payment.response";
 import {
   isPendingSale,
   isVerifiedSale,
@@ -47,12 +53,19 @@ export const sumBy = (
   predicate: (transaction: IDisbursement) => boolean
 ) => sumCounted(transactions.filter(predicate));
 
+const ledgerPaymentsOfType = (
+  type: TransactionType,
+  customerPayments: readonly ILedgerPayment[]
+) => (type === "customer_payment" ? sumCountedPayments(customerPayments) : 0);
+
 export const cashFlowTotals = (
-  transactions: readonly IDisbursement[]
+  transactions: readonly IDisbursement[],
+  customerPayments: readonly ILedgerPayment[]
 ): ICashFlowTotals => ({
-  inflow: sumBy(transactions, (transaction) =>
-    cashInflowTypes.includes(transaction.type)
-  ),
+  inflow:
+    sumBy(transactions, (transaction) =>
+      cashInflowTypes.includes(transaction.type)
+    ) + sumCountedPayments(customerPayments),
   outflow: sumBy(transactions, (transaction) =>
     cashOutflowTypes.includes(transaction.type)
   ),
@@ -97,13 +110,16 @@ export const periodLabel = (
 };
 
 export const cashFlowRows = (
-  transactions: readonly IDisbursement[]
+  transactions: readonly IDisbursement[],
+  customerPayments: readonly ILedgerPayment[]
 ): ICashFlowRow[] =>
   [...cashInflowTypes, ...cashOutflowTypes].map((type) => ({
     key: type,
     label: transactionTypeLabels[type],
     direction: cashInflowTypes.includes(type) ? "Inflow" : "Outflow",
-    total: sumBy(transactions, (transaction) => transaction.type === type),
+    total:
+      sumBy(transactions, (transaction) => transaction.type === type) +
+      ledgerPaymentsOfType(type, customerPayments),
   }));
 
 export const expenseRows = (
@@ -217,7 +233,10 @@ export const reportBody = (
   }
 
   if (type === "cashflow") {
-    const { inflow, outflow } = cashFlowTotals(data.transactions);
+    const { inflow, outflow } = cashFlowTotals(
+      data.transactions,
+      data.customerPayments
+    );
 
     return {
       stats: [
@@ -234,11 +253,9 @@ export const reportBody = (
             { title: "Direction" },
             { title: "Total", numeric: true },
           ],
-          rows: cashFlowRows(data.transactions).map((row) => [
-            row.label,
-            row.direction,
-            formatMoney(row.total),
-          ]),
+          rows: cashFlowRows(data.transactions, data.customerPayments).map(
+            (row) => [row.label, row.direction, formatMoney(row.total)]
+          ),
         },
       ],
     };
@@ -267,7 +284,7 @@ export const reportBody = (
         ],
         rows: data.transactions.map((transaction) => [
           formatDate(transaction.txn_date),
-          transactionTypeLabels[transaction.type],
+          transactionTypeLabelOf(transaction.type),
           data.branchNameOf(transaction.branch),
           transaction.reference_number ?? "—",
           formatMoney(transaction.amount),

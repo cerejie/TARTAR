@@ -1,5 +1,6 @@
 import { ArrowLeftRight, TrendingDown, TrendingUp } from "lucide-react";
 import type { IDataTableColumn } from "../../models/common/table.model";
+import type { ILedgerPayment } from "../../models/data/payment/payment.response";
 import type {
   ICashFlowRow,
   IReportState,
@@ -26,16 +27,18 @@ const columns: IDataTableColumn<ICashFlowRow>[] = [
 
 type IProps = IReportState & {
   transactions: IDisbursement[];
+  customerPayments: ILedgerPayment[];
 };
 
 const CashFlowReport = ({
   transactions,
+  customerPayments,
   loading,
   refreshing,
   error,
   onRetry,
 }: IProps) => {
-  const { inflow, outflow } = cashFlowTotals(transactions);
+  const { inflow, outflow } = cashFlowTotals(transactions, customerPayments);
 
   return (
     <>
@@ -78,7 +81,7 @@ const CashFlowReport = ({
       <ReportRowsTable<ICashFlowRow>
         title="Cash Flow by Category"
         columns={columns}
-        rows={cashFlowRows(transactions)}
+        rows={cashFlowRows(transactions, customerPayments)}
         loading={loading}
         refreshing={refreshing}
         error={error}

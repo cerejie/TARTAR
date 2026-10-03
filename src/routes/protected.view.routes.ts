@@ -33,7 +33,7 @@ export const protectedViewsRoutes: IRoute[] = [
     key: "transactions",
     path: "/transactions",
     label: "Transactions",
-    description: "Sales, payments, deposits and collections",
+    description: "Sales, customer payments and deposits",
     icon: ArrowLeftRight,
     group: "Operations",
     can: "viewReminders",

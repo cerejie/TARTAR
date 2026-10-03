@@ -378,3 +378,15 @@
 - User's three extra requests (print title = branch, period print month + year + purchases filter, purchase check number) → phases P1–P3 between collection and offline, so the offline phases also cover any new query the print work adds
 - Migration-needing work (collection rows, purchase check number) → proposal under .claude/state/proposals/, client work that does not depend on it ships, the proposal waits in USER DECISIONS (user: "make it a USER DECISIONS hard-stop", i.e. at the end) — keeps the offline phases unblocked
 - Offline → two phases (O1 paged-list variants, O2 branches / details / month change), then Z full re-sweep + offline probe for all three roles
+
+## 2026-10-03 — C1 Collection removal → Development v2.68
+- File plan → one phase across enum, list hook, filter bar, label sites, routes, report + dashboard Cash In, last payment, tests, proposal (Simple tier, client-only, reversible)
+- Legacy `collection` rows → shown as type "Other" via `transactionTypeLabelOf` / `transactionTypeColorOf` (no crash, no "undefined"); labelling them "Customer Payment" rejected: it would pre-empt the migration's conversion choice
+- Cash In source → `record_ledger_payment` writes `payments` + `payment_allocations`, not a transaction, so receivable payments are added to Cash In / the "Customer Payment" row (report, print, dashboard `monthlyCashIn`); manual `customer_payment` transactions still count as before
+- Which customer payments count → verified only (mirrors `countedAmountOf`, where a sale counts once verified, and `record_ledger_payment`, which applies only verified payments to balances); "non-rejected" rejected; flagged in USER DECISIONS for confirmation
+- Dashboard Cash In → updated too, so it agrees with the Cash Flow report for the month
+- Customer "last payment" → latest of verified receivable payments and non-sale customer transactions (`.neq("type", "sale")` keeps legacy rows without naming the type)
+- "Nothing to collect here" → "No unpaid balances here" (drops the term from the receivables empty state)
+- Migration 33 → proposal only (`.claude/state/proposals/migration-33-collection.sql`): recommend converting to `customer_payment` + `not valid`/`validate` check constraint; enum value removal needs a type rebuild, not recommended
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), tests 118 / 118; swept admin + acc phone + desk on /, /transactions, /receivables, /reports, /admin/receivables (168 surfaces, admin desk aborted on a dashboard click timeout and was re-run without / : 63 surfaces, 0 failed); looked: sheet-admin-phone-01, -09, Cash Flow tab admin phone + acc desk (Customer Payment row ₱1,701 = transactions + verified ledger payments, Cash In ₱6,176 = rows), Record transaction form; Playwright probe: form Type options = Customer Payment / Supplier Payment / Cash Deposit, filter Type options have no Collection, no "collection" text on /transactions; swept, device unconfirmed
+- Noted, not changed: the Transactions page "Cash In" card sums transactions only (ledger payments are not transactions); left as is, it is that list's summary

@@ -86,6 +86,22 @@ const paymentServices = {
       ).order("paid_at", { ascending: false })
     ),
 
+  getAllInPeriod: (
+    kind: PaymentKind,
+    filters: ILedgerFilters = {}
+  ): Promise<ILedgerPayment[]> =>
+    everyRow<ILedgerPayment>(() => {
+      let query = supabase.from(table).select("*").eq("kind", kind);
+
+      if (filters.branch) query = query.eq("branch", filters.branch);
+      if (filters.dateFrom) query = query.gte("paid_at", filters.dateFrom);
+      if (filters.dateTo) query = query.lte("paid_at", filters.dateTo);
+
+      return query
+        .order("paid_at", { ascending: false })
+        .order("created_at", { ascending: false });
+    }),
+
   record: (
     kind: PaymentKind,
     values: IRecordPaymentInput,

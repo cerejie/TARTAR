@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { IBranchSummaryData } from "../models/data/report/report.response";
 import type { IDisbursement } from "../models/data/transaction/transaction.response";
 import {
+  customerPaymentFixture,
   disbursementFixture,
   expenseCategoryFixture,
   payableFixture,
@@ -26,7 +27,6 @@ const periodTransactions: readonly IDisbursement[] = [
   disbursementFixture({ type: "sale", amount: 1000, sale_status: "verified" }),
   disbursementFixture({ type: "sale", amount: 500, sale_status: "undeposited" }),
   disbursementFixture({ type: "customer_payment", amount: 200 }),
-  disbursementFixture({ type: "collection", amount: 50 }),
   disbursementFixture({ type: "cash_deposit", amount: 300 }),
   disbursementFixture({
     type: "expense",
@@ -51,23 +51,36 @@ describe("sumBy", () => {
   });
 });
 
+const periodCustomerPayments = [
+  customerPaymentFixture({ amount: 400, status: "verified" }),
+  customerPaymentFixture({ amount: 70, status: "pending" }),
+  customerPaymentFixture({ amount: 30, status: "rejected" }),
+];
+
 describe("cashFlowTotals", () => {
   it("splits counted amounts into inflow and outflow", () => {
-    expect(cashFlowTotals(periodTransactions)).toEqual({
+    expect(cashFlowTotals(periodTransactions, [])).toEqual({
       inflow: 1500,
       outflow: 1290,
     });
   });
 
+  it("counts verified customer payments as inflow", () => {
+    expect(cashFlowTotals(periodTransactions, periodCustomerPayments)).toEqual({
+      inflow: 1900,
+      outflow: 1290,
+    });
+  });
+
   it("is zero both ways for no transactions", () => {
-    expect(cashFlowTotals([])).toEqual({ inflow: 0, outflow: 0 });
+    expect(cashFlowTotals([], [])).toEqual({ inflow: 0, outflow: 0 });
   });
 });
 
 describe("cashFlowRows", () => {
-  const rows = cashFlowRows(periodTransactions);
+  const rows = cashFlowRows(periodTransactions, periodCustomerPayments);
 
-  it("lists inflow types then outflow types, without collections", () => {
+  it("lists inflow types then outflow types", () => {
     expect(rows.map((row) => [row.key, row.direction])).toEqual([
       ["sale", "Inflow"],
       ["customer_payment", "Inflow"],
@@ -81,17 +94,19 @@ describe("cashFlowRows", () => {
 
   it("totals each type at its counted amount", () => {
     expect(rows.map((row) => row.total)).toEqual([
-      1000, 200, 300, 90, 60, 1120, 20,
+      1000, 600, 300, 90, 60, 1120, 20,
     ]);
   });
 
-  it("adds up to the inflow total, with collections counted in neither", () => {
+  it("adds up to the inflow total", () => {
     const inflowRowsTotal = rows
       .filter((row) => row.direction === "Inflow")
       .reduce((total, row) => total + row.total, 0);
 
-    expect(inflowRowsTotal).toBe(1500);
-    expect(cashFlowTotals(periodTransactions).inflow).toBe(inflowRowsTotal);
+    expect(inflowRowsTotal).toBe(1900);
+    expect(
+      cashFlowTotals(periodTransactions, periodCustomerPayments).inflow
+    ).toBe(inflowRowsTotal);
   });
 });
 

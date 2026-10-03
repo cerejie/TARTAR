@@ -1,7 +1,7 @@
 import { ArrowLeftRight, ShoppingCart, TrendingDown, TrendingUp } from "lucide-react";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import {
-  transactionTypeLabels,
+  transactionTypeLabelOf,
   type TransactionType,
 } from "../../enums/transaction.enum";
 import type { IReportState } from "../../models/data/report/report.response";
@@ -39,7 +39,7 @@ const PeriodReport = ({
       title: "Type",
       mobile: "status",
       dataIndex: "type",
-      render: (type: TransactionType) => transactionTypeLabels[type],
+      render: (type: TransactionType) => transactionTypeLabelOf(type),
     },
     {
       title: "Branch",

@@ -10,14 +10,9 @@ export const transactionTypeValues = [
   "cash_deposit",
   "petty_cash",
   "purchase",
-  "collection",
 ] as const;
 export const transactionTypeSchema = z.enum(transactionTypeValues);
 export type TransactionType = z.infer<typeof transactionTypeSchema>;
-
-export const transactionTypeFilterValues = transactionTypeValues.filter(
-  (type) => type !== "collection"
-);
 
 export const purchaseDateBasisValues = ["voucher", "paid"] as const;
 export type PurchaseDateBasis = (typeof purchaseDateBasisValues)[number];
@@ -35,7 +30,6 @@ export const transactionTypeLabels: Record<TransactionType, string> = {
   cash_deposit: "Cash Deposit",
   petty_cash: "Petty Cash",
   purchase: "Purchase",
-  collection: "Collection",
 };
 
 export const transactionTypeColors: Record<TransactionType, StatusColor> = {
@@ -46,8 +40,16 @@ export const transactionTypeColors: Record<TransactionType, StatusColor> = {
   cash_deposit: "default",
   petty_cash: "default",
   purchase: "default",
-  collection: "default",
 };
+
+const isTransactionType = (type: string): type is TransactionType =>
+  (transactionTypeValues as readonly string[]).includes(type);
+
+export const transactionTypeLabelOf = (type: string): string =>
+  isTransactionType(type) ? transactionTypeLabels[type] : "Other";
+
+export const transactionTypeColorOf = (type: string): StatusColor =>
+  isTransactionType(type) ? transactionTypeColors[type] : "default";
 
 export const cashInflowTypes: TransactionType[] = [
   "sale",

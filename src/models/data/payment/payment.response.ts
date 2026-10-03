@@ -17,6 +17,16 @@ export interface ILedgerPayment {
   branch: string;
 }
 
+type ICountedPayment = Pick<ILedgerPayment, "status" | "amount">;
+
+export const isCountedPayment = (payment: ICountedPayment) =>
+  payment.status === "verified";
+
+export const sumCountedPayments = (payments: readonly ICountedPayment[]) =>
+  payments
+    .filter(isCountedPayment)
+    .reduce((total, payment) => total + Number(payment.amount), 0);
+
 export interface IPaymentAllocation {
   id: string;
   payment_id: string;

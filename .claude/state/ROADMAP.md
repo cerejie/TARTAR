@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-03
+Updated: 2026-10-03 (C1 done)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -163,21 +163,35 @@ Given by the user on 2026-10-03 unless marked otherwise.
   hit in print or report code; Cash In already excludes the type); offline path mapped (query.store.ts 380 lines,
   prime.hook.ts 121, prime.view.hook.ts 265, idb.utils.ts 56); this roadmap written.
 
+- [x] C1 Collection removal (Development v2.68): `collection` dropped from `src/enums/transaction.enum.ts`
+  (`transactionTypeFilterValues` gone, `LedgerFilterBar.tsx` uses `transactionTypeValues`; new `transactionTypeLabelOf` /
+  `transactionTypeColorOf` label a legacy row "Other", tested in `src/enums/transaction.enum.test.ts`), used in
+  `TransactionsTable.tsx`, `PeriodReport.tsx`, `utils/report.utils.ts` print rows; `transaction.list.hook.ts` customer
+  types + form options; route descriptions; `ReceivableEntryList.tsx` empty copy "No unpaid balances here".
+  Cash In: `record_ledger_payment` writes `payments` + `payment_allocations`, never a transaction, so verified
+  receivable payments (`isCountedPayment` / `sumCountedPayments` in `models/data/payment/payment.response.ts`) now add to
+  the Cash Flow "Customer Payment" row and Cash In (`report.utils.ts`, new `paymentServices.getAllInPeriod`,
+  `reportCustomerPaymentQueryOf` + `reportPaymentKey`, primed in `prime.view.hook.ts`) and to the dashboard
+  `monthlyCashIn` (`dashboard.services.ts`). `getCustomerLastPayment` = latest of verified receivable payments and
+  non-sale customer transactions (legacy rows kept without naming them). Proposal
+  `.claude/state/proposals/migration-33-collection.sql` (convert → customer_payment recommended, check constraint).
+
 ## Next
-1. C1 Collection removal.
-2. P1 Print title = branch.
-3. P2 Period print month + year and the purchases print filter.
-4. P3 Purchase check number.
-5. O1 Offline variants of the paged lists.
-6. O2 Offline branch scopes, details and month change.
-7. Z Final re-sweep + offline probe, all roles.
-8. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. P1 Print title = branch.
+2. P2 Period print month + year and the purchases print filter.
+3. P3 Purchase check number.
+4. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
+5. O2 Offline branch scopes, details and month change.
+6. Z Final re-sweep + offline probe, all roles.
+7. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
   - Migration 32 (SEC-01 / SEC-02, client shipped in Development v2.54) — the user applies it at the production deploy.
   - Collection migration proposal (written by C1, `.claude/state/proposals/migration-33-collection.sql`): how legacy
-    `collection` rows convert and whether new ones are blocked.
+    `collection` rows convert (A customer_payment, recommended / B keep / C cash_deposit) and the check constraint
+    that blocks new ones. Also confirm C1's Cash In rule: only verified customer payments count (pending ones are
+    left out, like unverified sales in `countedAmountOf`).
   - Purchase check-number migration proposal, if P3 needs one (`.claude/state/proposals/migration-34-purchase-check-number.sql`)
     — the input ships after it is applied.
   - The archived audit roadmap's Open items: H1 sign-ups off, H2 max rows, SEC-03 CSP enforce, SEC-05 send-push
@@ -185,5 +199,5 @@ Given by the user on 2026-10-03 unless marked otherwise.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.67 (Stage 1: roadmap) · Uncommitted: none · Last check: V10, build + lint clean, tests 113 / 113. Run any sweep or probe
+Branch: mobilel-app-native · Last commit Development v2.68 (C1 Collection removal) · Uncommitted: none · Last check: C1, build + lint clean, tests 118 / 118, swept admin + acc desk + phone. Run any sweep or probe
 with Bash `run_in_background` and `timeout` 3600000.

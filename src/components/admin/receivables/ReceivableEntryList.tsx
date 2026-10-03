@@ -30,7 +30,7 @@ const ReceivableEntryList = ({
     <ListSection
       title={caption}
       itemCount={rows.length}
-      emptyText="Nothing to collect here"
+      emptyText="No unpaid balances here"
       emptyIcon={<CircleCheck />}
       loading={loading}
       refreshing={refreshing}

@@ -24,6 +24,7 @@ const ReportsView = () => {
     setType,
     period,
     transactions,
+    customerPayments,
     receivables,
     payables,
     expenseCategories,
@@ -86,7 +87,13 @@ const ReportsView = () => {
         {...state}
       />
     ),
-    cashflow: <CashFlowReport transactions={transactions} {...state} />,
+    cashflow: (
+      <CashFlowReport
+        transactions={transactions}
+        customerPayments={customerPayments}
+        {...state}
+      />
+    ),
   } as Partial<Record<ReportType, ReactNode>>;
 
   const printButton = (

@@ -58,7 +58,7 @@ import { useCustomerListHook } from "../party/customer.list.hook";
 import { useSupplierListHook } from "../party/supplier.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
 
-const customerTypes = ["sale", "customer_payment", "collection"];
+const customerTypes = ["sale", "customer_payment"];
 const supplierTypes = ["purchase", "supplier_payment"];
 
 const sumAmount = (
@@ -171,7 +171,6 @@ export const useTransactionListHook = () => {
       type !== "sale" &&
       type !== "purchase" &&
       type !== "expense" &&
-      type !== "collection" &&
       type !== "petty_cash"
   );
 

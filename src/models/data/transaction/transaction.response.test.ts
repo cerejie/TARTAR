@@ -71,7 +71,6 @@ describe("countedAmountOf", () => {
       "supplier_payment",
       "cash_deposit",
       "petty_cash",
-      "collection",
     ] as const) {
       expect(countedAmountOf({ type, amount: 40, voucher: null })).toBe(40);
     }

@@ -274,16 +274,32 @@ export const receivableServices = {
   ): Promise<string | null> => {
     if (!customerId) return null;
 
-    const { data, error } = await supabase
-      .from("transactions")
-      .select("txn_date")
-      .eq("customer_id", customerId)
-      .in("type", ["customer_payment", "collection"])
-      .order("txn_date", { ascending: false })
-      .limit(1);
-    if (error) throw toError(error);
+    const [transactionResult, paymentResult] = await Promise.all([
+      supabase
+        .from("transactions")
+        .select("txn_date")
+        .eq("customer_id", customerId)
+        .neq("type", "sale")
+        .order("txn_date", { ascending: false })
+        .limit(1),
+      supabase
+        .from("payments")
+        .select("paid_at")
+        .eq("kind", "receivable")
+        .eq("customer_id", customerId)
+        .eq("status", "verified")
+        .order("paid_at", { ascending: false })
+        .limit(1),
+    ]);
+    if (transactionResult.error) throw toError(transactionResult.error);
+    if (paymentResult.error) throw toError(paymentResult.error);
 
-    return data?.[0]?.txn_date ?? null;
+    const paymentDates = [
+      transactionResult.data?.[0]?.txn_date,
+      paymentResult.data?.[0]?.paid_at,
+    ].filter((date): date is string => Boolean(date));
+
+    return paymentDates.sort().at(-1) ?? null;
   },
 };
 

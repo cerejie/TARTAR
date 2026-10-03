@@ -1,5 +1,6 @@
 import {
   reportPayableKey,
+  reportPaymentKey,
   reportReceivableKey,
   reportTransactionKey,
   scopedKey,
@@ -11,6 +12,7 @@ import type {
   IPayable,
   IReceivable,
 } from "../../../models/data/ledger/ledger.response";
+import type { ILedgerPayment } from "../../../models/data/payment/payment.response";
 import {
   reportTypeLabels,
   reportTypeValues,
@@ -22,6 +24,7 @@ import {
   payableServices,
   receivableServices,
 } from "../../../services/data/ledger.services";
+import paymentServices from "../../../services/data/payment.services";
 import transactionServices from "../../../services/data/transaction.services";
 import { periodLabel, rangeFor, reportBody } from "../../../utils/report.utils";
 import { printReport } from "../../../utils/print.utils";
@@ -45,6 +48,21 @@ export const reportTransactionQueryOf = (
   () => {
     const { from, to } = rangeFor(type);
     return transactionServices.getAllWithVouchers({
+      dateFrom: from,
+      dateTo: to,
+      ...branchFilterOf(branch),
+    });
+  },
+];
+
+export const reportCustomerPaymentQueryOf = (
+  type: ReportType,
+  branch: string | null
+): IQuerySpec<ILedgerPayment[]> => [
+  scopedKey(reportPaymentKey, type, branch),
+  () => {
+    const { from, to } = rangeFor(type);
+    return paymentServices.getAllInPeriod("receivable", {
       dateFrom: from,
       dateTo: to,
       ...branchFilterOf(branch),
@@ -93,6 +111,13 @@ export const useReportHook = () => {
     enabled: isTransactionReport,
   });
 
+  const isCashFlow = type === "cashflow";
+
+  const customerPaymentQuery = useQuery(
+    ...reportCustomerPaymentQueryOf(type, branch),
+    { enabled: isCashFlow }
+  );
+
   const receivableQuery = useQuery(...reportReceivableQueryOf(branch), {
     enabled: type === "receivables",
   });
@@ -102,6 +127,7 @@ export const useReportHook = () => {
   });
 
   const transactions = transactionQuery.data ?? [];
+  const customerPayments = customerPaymentQuery.data ?? [];
   const receivables = (receivableQuery.data ?? []).filter(isUnpaid);
   const payables = (payableQuery.data ?? []).filter(isUnpaid);
 
@@ -112,6 +138,14 @@ export const useReportHook = () => {
         ? payableQuery
         : transactionQuery;
 
+  const cashFlowQueries = isCashFlow ? [customerPaymentQuery] : [];
+  const activeQueries = [activeQuery, ...cashFlowQueries];
+  const activeLoading = activeQueries.some((query) => query.isInitialLoading);
+  const activeRefreshing = activeQueries.some((query) => query.isRefreshing);
+  const activeError =
+    activeQueries.find((query) => query.error !== null)?.error ?? null;
+  const retryActive = () => activeQueries.forEach((query) => query.refetch());
+
   const printActiveReport = () =>
     printReport({
       title: `${reportTypeLabels[type]} Report`,
@@ -119,6 +153,7 @@ export const useReportHook = () => {
       scope: branchName ?? "All branches",
       ...reportBody(type, {
         transactions,
+        customerPayments,
         receivables,
         payables,
         categories: expenseCategories,
@@ -132,15 +167,16 @@ export const useReportHook = () => {
     branchName,
     period: isSummary ? undefined : periodLabel(type, from, to),
     transactions,
+    customerPayments,
     receivables,
     payables,
     expenseCategories,
     branchNameOf,
     ...summary,
-    loading: isSummary ? summaryLoading : activeQuery.isInitialLoading,
-    refreshing: isSummary ? summaryRefreshing : activeQuery.isRefreshing,
-    error: isSummary ? summaryError : activeQuery.error,
-    retry: isSummary ? retrySummary : activeQuery.refetch,
+    loading: isSummary ? summaryLoading : activeLoading,
+    refreshing: isSummary ? summaryRefreshing : activeRefreshing,
+    error: isSummary ? summaryError : activeError,
+    retry: isSummary ? retrySummary : retryActive,
     print: isSummary ? printSummary : printActiveReport,
   };
 };

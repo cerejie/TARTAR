@@ -33,7 +33,7 @@ export const adminViewRoutes: IRoute[] = [
     key: "admin_receivables",
     path: adminReceivablesPath,
     label: "Receivables",
-    description: "Overdue collections and those due this week",
+    description: "Overdue receivables and those due this week",
     icon: Wallet,
     group: "Admin",
     can: "viewDashboard",

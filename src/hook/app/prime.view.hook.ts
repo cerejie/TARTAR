@@ -61,6 +61,7 @@ import {
 import { supplierSummaryKey } from "../data/ledger/supplier.ledger.hook";
 import { paymentListQueryOf } from "../data/payment/payment.list.hook";
 import {
+  reportCustomerPaymentQueryOf,
   reportPayableQueryOf,
   reportReceivableQueryOf,
   reportTransactionQueryOf,
@@ -222,6 +223,7 @@ const reportQueriesOf = (branch: string | null): IQuerySpec[] => [
   reportSummaryQueryOf(currentMonthRange(), branch),
   reportReceivableQueryOf(branch),
   reportPayableQueryOf(branch),
+  reportCustomerPaymentQueryOf("cashflow", branch),
   ...reportTypeValues
     .filter((type) => transactionReportTypes.includes(type))
     .map((type) => reportTransactionQueryOf(type, branch)),

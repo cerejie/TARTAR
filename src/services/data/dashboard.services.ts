@@ -23,6 +23,10 @@ import type {
   IReceivable,
 } from "../../models/data/ledger/ledger.response";
 import {
+  sumCountedPayments,
+  type ILedgerPayment,
+} from "../../models/data/payment/payment.response";
+import {
   isPendingSale,
   isVerifiedSale,
 } from "../../models/data/sale/sale.response";
@@ -140,6 +144,23 @@ const sumCountedRows = (rows: readonly CountedTransactionRow[]) =>
 type OutstandingRow = { amount: number | string; paid_amount: number | string };
 type BranchOutstandingRow = OutstandingRow & { branch: string };
 
+const customerPaymentsBetween = (
+  from: string,
+  to: string,
+  branch?: string | null
+) =>
+  everyRow<Pick<ILedgerPayment, "status" | "amount">>(() =>
+    scopeToBranch(
+      supabase
+        .from("payments")
+        .select("status, amount")
+        .eq("kind", "receivable")
+        .gte("paid_at", from)
+        .lte("paid_at", to),
+      branch
+    )
+  );
+
 const monthStart = () => dayjs().startOf("month").format("YYYY-MM-DD");
 
 const sum = (rows: AmountRow[]) =>
@@ -214,32 +235,38 @@ const dashboardServices = {
 
     const monthFrom = monthStart();
 
-    const [recentRows, thisMonthRows, accountsReceivable, accountsPayable] =
-      await Promise.all([
-        everyRow<DatedCountedRow>(() =>
-          scopeToBranch(
-            supabase
-              .from("transactions")
-              .select(`${countedColumns}, txn_date`)
-              .in("type", ["sale", "expense"])
-              .gte("txn_date", yesterday)
-              .lte("txn_date", today),
-            branch
-          )
-        ),
-        everyRow<CountedTransactionRow>(() =>
-          scopeToBranch(
-            supabase
-              .from("transactions")
-              .select(countedColumns)
-              .gte("txn_date", monthFrom)
-              .lte("txn_date", today),
-            branch
-          )
-        ),
-        outstandingOf("receivables", branch),
-        outstandingOf("payables", branch),
-      ]);
+    const [
+      recentRows,
+      thisMonthRows,
+      thisMonthCustomerPayments,
+      accountsReceivable,
+      accountsPayable,
+    ] = await Promise.all([
+      everyRow<DatedCountedRow>(() =>
+        scopeToBranch(
+          supabase
+            .from("transactions")
+            .select(`${countedColumns}, txn_date`)
+            .in("type", ["sale", "expense"])
+            .gte("txn_date", yesterday)
+            .lte("txn_date", today),
+          branch
+        )
+      ),
+      everyRow<CountedTransactionRow>(() =>
+        scopeToBranch(
+          supabase
+            .from("transactions")
+            .select(countedColumns)
+            .gte("txn_date", monthFrom)
+            .lte("txn_date", today),
+          branch
+        )
+      ),
+      customerPaymentsBetween(monthFrom, today, branch),
+      outstandingOf("receivables", branch),
+      outstandingOf("payables", branch),
+    ]);
 
     const isExpense = (row: TypedAmountRow) => row.type === "expense";
     const onDay = (date: string, predicate: (row: TypedAmountRow) => boolean) =>
@@ -264,7 +291,9 @@ const dashboardServices = {
       monthlySales: sumCountedRows(thisMonthRows.filter(isVerifiedSale)),
       monthlyPendingSales: matching(thisMonthRows, isPendingSale),
       monthlyExpenses: sumCountedRows(thisMonthRows.filter(isExpense)),
-      monthlyCashIn: ofDirection(thisMonthRows, cashInflowTypes),
+      monthlyCashIn:
+        ofDirection(thisMonthRows, cashInflowTypes) +
+        sumCountedPayments(thisMonthCustomerPayments),
       monthlyCashOut: ofDirection(thisMonthRows, cashOutflowTypes),
     };
   },

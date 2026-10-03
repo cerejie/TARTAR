@@ -12,8 +12,8 @@ import {
 import {
   purchaseDateBasisLabels,
   purchaseDateBasisValues,
-  transactionTypeFilterValues,
   transactionTypeLabels,
+  transactionTypeValues,
 } from "../../../enums/transaction.enum";
 import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import { useLedgerFilters } from "../../../hook/common/filter.hook";
@@ -157,7 +157,7 @@ const LedgerFilterBar = ({
           <FilterSelect
             placeholder="Any type"
             value={filters.type}
-            values={transactionTypeFilterValues}
+            values={transactionTypeValues}
             labels={transactionTypeLabels}
             onChange={(type) => setFilters({ type })}
           />

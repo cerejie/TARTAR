@@ -1,5 +1,6 @@
 import type { IExpenseCategory } from "../models/data/expense-category/expense.category.response";
 import type { IPayable } from "../models/data/ledger/ledger.response";
+import type { ILedgerPayment } from "../models/data/payment/payment.response";
 import {
   blankTransactionFields,
   type IDisbursement,
@@ -78,5 +79,25 @@ export const payableFixture = (values: Partial<IPayable> = {}): IPayable => ({
   created_at: fixtureTimestamp,
   supplier_id: null,
   supplier_name: "Supplier",
+  ...values,
+});
+
+export const customerPaymentFixture = (
+  values: Partial<ILedgerPayment> = {}
+): ILedgerPayment => ({
+  id: "payment-1",
+  kind: "receivable",
+  customer_id: null,
+  supplier_id: null,
+  party_name: "Customer",
+  amount: 0,
+  paid_at: fixtureDate,
+  reference_number: null,
+  status: "verified",
+  verified_by: null,
+  verified_at: null,
+  created_by: null,
+  created_at: fixtureTimestamp,
+  branch: "main",
   ...values,
 });

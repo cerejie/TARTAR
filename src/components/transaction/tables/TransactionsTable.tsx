@@ -14,8 +14,8 @@ import TablePanel from "../../common/table/TablePanel";
 import StatusTag from "../../common/status/StatusTag";
 import UserCell from "../../user/table/cells/UserCell";
 import {
-  transactionTypeColors,
-  transactionTypeLabels,
+  transactionTypeColorOf,
+  transactionTypeLabelOf,
 } from "../../../enums/transaction.enum";
 import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import { useConfirm } from "../../../hook/common/confirmation.hook";
@@ -79,9 +79,9 @@ const TransactionsTable = () => {
         openConfirm({
           kind: "delete",
           title: "Delete transaction?",
-          message: `Deleting this ${transactionTypeLabels[
+          message: `Deleting this ${transactionTypeLabelOf(
             row.type
-          ].toLowerCase()} of ${formatMoney(row.amount)} cannot be undone.`,
+          ).toLowerCase()} of ${formatMoney(row.amount)} cannot be undone.`,
           onConfirm: () => removeMutation.mutate(row.id),
         }),
     },
@@ -122,8 +122,8 @@ const TransactionsTable = () => {
       className: nowrapCell,
       render: (type: ITransaction["type"]) => (
         <StatusTag
-          color={transactionTypeColors[type]}
-          label={transactionTypeLabels[type]}
+          color={transactionTypeColorOf(type)}
+          label={transactionTypeLabelOf(type)}
         />
       ),
     },
@@ -292,7 +292,7 @@ const TransactionsTable = () => {
           onPageChange={goToPage}
           expansionKey={transactionExpansionKey}
           detailSections={detailSections}
-          detailTitle={(row) => `${transactionTypeLabels[row.type]} transaction`}
+          detailTitle={(row) => `${transactionTypeLabelOf(row.type)} transaction`}
           detailActions={permissions.isManager ? actionsOf : undefined}
           emptyText="No transactions match the current filters"
           emptyHint={filteredEmptyHint}
