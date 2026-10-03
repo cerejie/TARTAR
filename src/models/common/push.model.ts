@@ -15,6 +15,17 @@ export const pushModeSubtitles: Record<PushMode, string> = {
   unconfigured: "Notifications are not set up for TARTAR yet.",
 };
 
+export type PushToggleMode = Extract<PushMode, "on" | "off">;
+
+export const pushModeNotes: Record<Exclude<PushMode, PushToggleMode>, string> = {
+  blocked:
+    "Allow notifications for TARTAR in your browser or device settings, then come back here.",
+  "needs-install":
+    "Add TARTAR to your home screen (see Install app), open it from there, then turn notifications on here.",
+  unsupported: "Open TARTAR in Chrome, Edge or Safari, or install it as an app.",
+  unconfigured: "Ask your administrator to finish the notification setup.",
+};
+
 export interface IPushSubscriptionInput {
   endpoint: string;
   p256dh: string;

@@ -126,15 +126,29 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   undeposited + deposited edit history), full shots admin sales verified, acc sales rejected, acc purchases approved,
   admin expenses approved edit history — labels, formatted dates, user names, no UUID / ISO / "—"; seeded expenses and
   purchases have no edits ("No edits recorded."), same component. Swept, device unconfirmed (phone not swept).
+- [x] V3 Action groups (UI-03, UI-10, UI-11, UI-12) → Development v2.59: `src/components/common/app/SheetActions.tsx` —
+  disabled primary / secondary actions drop to the ⋮ menu (still shown there with their hint, e.g. "Edit expense ·
+  Locked"); with no enabled primary or secondary, the first enabled overflow action leads as a full-width outline
+  (or destructive) button and ⋮ trails only when more remain; `src/utils/action.utils.ts` (`hasEnabledAction`) hides
+  ⋮ in `components/common/table/RowActionMenu.tsx` and the footer in `RecordDetailSheet.tsx` /
+  `components/ledger/views/LedgerPartySheet.tsx` when every action is disabled. Account sheets pin their action in
+  the footer: `components/account/modal/{ChangePasswordSheet,NotificationsSheet}.tsx` (password submit button
+  linked by `changePasswordFormId`), `AccountPanelSheet.tsx` takes `footer`, fields shared through
+  `components/account/forms/ChangePasswordFields.tsx`, toggle through `components/account/views/NotificationsToggle.tsx`;
+  `pushModeNotes` moved to `models/common/push.model.ts`, `usePushNotifications` returns `note` / `canToggle`.
+  Build + lint clean. Swept admin + emp phone + desk (829 surfaces, 0 failed, 124 sheets). Looked: emp phone sheet 03
+  (/sales), full shots admin + emp phone sales verified (full-width "Edit history", no lone ⋮), admin phone
+  transactions (full-width "Delete transaction"), admin phone expenses approved + menu (Open voucher + ⋮, Edit
+  expense · Locked in the menu), admin desk payables Paid (no ⋮ on paid rows), admin phone account password +
+  notifications (full-width footer button). Swept, device unconfirmed.
 
 ## Next
-1. V3 Action groups.
-2. V4 Date labels.
-3. V5 Admin app.
-4. V6 Reports.
-5. V7 Ledger modals.
-6. V8 Full re-sweep.
-7. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. V4 Date labels.
+2. V5 Admin app.
+3. V6 Reports.
+4. V7 Ledger modals.
+5. V8 Full re-sweep.
+6. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
@@ -149,6 +163,6 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   user not returned by `user_display_names`. V1 hides the dash either way.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.58 (V2 edit history) · Uncommitted: none · Last check:
-V2 sweep admin+acc desk, 2026-10-03. Autopilot running from V3. A sweep of more than one role can exceed a
+Branch: mobilel-app-native · Last commit Development v2.59 (V3 action groups) · Uncommitted: none · Last check:
+V3 sweep admin+emp phone+desk, 2026-10-03. Autopilot running from V4. A sweep of more than one role can exceed a
 10-minute background timeout — run it with `timeout` 3600000.

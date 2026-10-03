@@ -3,6 +3,7 @@ import SheetActions from "../../common/app/SheetActions";
 import ContextSwitch from "../../common/view/ContextSwitch";
 import { ledgerPartyTabOptions } from "../../../enums/ledger.enum";
 import { ledgerPane } from "../../../styles/ledger/ledger.styles";
+import { hasEnabledAction } from "../../../utils/action.utils";
 
 import type { ReactNode } from "react";
 import type { LedgerPartyTab } from "../../../enums/ledger.enum";
@@ -35,7 +36,7 @@ const LedgerPartySheet = ({
     open={open}
     kind="flow"
     title={title}
-    footer={actions.length > 0 ? <SheetActions actions={actions} /> : undefined}
+    footer={hasEnabledAction(actions) ? <SheetActions actions={actions} /> : undefined}
     onClose={onClose}
   >
     <div className={ledgerPane}>

@@ -56,3 +56,5 @@ export const profileSubtitle =
   "Your name, role and branches are managed by your administrator.";
 
 export const passwordSubtitle = "Takes effect the next time you sign in.";
+
+export const changePasswordFormId = "change-password-form";

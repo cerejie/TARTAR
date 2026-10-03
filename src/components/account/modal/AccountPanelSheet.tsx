@@ -9,10 +9,11 @@ import type { AccountPanel } from "../../../models/data/account/account.response
 type IProps = {
   panel: AccountPanel;
   description?: string;
+  footer?: ReactNode;
   children: ReactNode;
 };
 
-const AccountPanelSheet = ({ panel, description, children }: IProps) => {
+const AccountPanelSheet = ({ panel, description, footer, children }: IProps) => {
   const { modal, closeModal } = useModal(accountPanelSheetModalKey(panel));
 
   return (
@@ -20,6 +21,7 @@ const AccountPanelSheet = ({ panel, description, children }: IProps) => {
       open={modal.visible}
       title={accountPanelTitles[panel]}
       description={description}
+      footer={footer}
       onClose={closeModal}
     >
       {children}

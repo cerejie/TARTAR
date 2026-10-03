@@ -300,3 +300,12 @@
 - `verified_by` / `verified_at` labelled "Reviewed by / at" to match the sale sheet's wording
 - Field name styling → `auditField` becomes plain medium-weight text with a colon (no `code` chip)
 - Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), yarn test 106 / 106; swept admin + acc desk 385 / 0 failed, 65 sheets; looked at acc sheet 04 and four full edit-history shots — readable labels, dates, names; swept, device unconfirmed
+
+## 2026-10-03 — V3 Action groups → Development v2.59
+- File plan → all footer rules inside `SheetActions` + one `hasEnabledAction` util shared with `RowActionMenu` and the two sheets; account sheets get a `footer` slot instead of a per-sheet layout (Simple tier, UI only, reversible)
+- Overflow-only footer → first enabled overflow action leads as a full-width outline button (destructive when danger), ⋮ trails only if more actions remain (audit's second option; names the action instead of a vague "More actions")
+- Disabled primary / secondary → moved to the ⋮ menu with its hint rather than dropped, so "Edit expense · Locked" still explains itself
+- Every action disabled → no ⋮ in table rows and no sheet footer (paid payable); the status chip already says "Paid"
+- Password sheet → submit button in the footer linked to the form by `form` id; the desktop card keeps its inline button (fields shared via `ChangePasswordFields`)
+- Notifications sheet → toggle in the footer only for on / off modes; other modes show the note alone with no footer
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing); swept admin + emp phone + desk 829 / 0 failed, 124 sheets; looked at emp phone sheet 03 and nine full shots; swept, device unconfirmed

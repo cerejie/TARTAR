@@ -16,10 +16,10 @@ import {
 import { settingsList } from "../../../styles/account/account.styles";
 import ListCard from "../../common/app/ListCard";
 import ListSection from "../../common/app/ListSection";
-import ChangePasswordForm from "../forms/ChangePasswordForm";
 import AccountPanelSheet from "../modal/AccountPanelSheet";
+import ChangePasswordSheet from "../modal/ChangePasswordSheet";
+import NotificationsSheet from "../modal/NotificationsSheet";
 import InstallAppGuide from "./InstallAppGuide";
-import NotificationsControls from "./NotificationsControls";
 import ProfileDetails from "./ProfileDetails";
 
 const AccountSettingsList = () => {
@@ -87,15 +87,11 @@ const AccountSettingsList = () => {
       <AccountPanelSheet panel="profile" description={profileSubtitle}>
         <ProfileDetails />
       </AccountPanelSheet>
-      <AccountPanelSheet panel="password" description={passwordSubtitle}>
-        <ChangePasswordForm />
-      </AccountPanelSheet>
+      <ChangePasswordSheet />
       <AccountPanelSheet panel="install" description={installHint}>
         <InstallAppGuide />
       </AccountPanelSheet>
-      <AccountPanelSheet panel="notifications" description={notificationsHint}>
-        <NotificationsControls />
-      </AccountPanelSheet>
+      <NotificationsSheet description={notificationsHint} />
     </div>
   );
 };

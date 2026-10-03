@@ -12,6 +12,7 @@ import {
   recordHeroTags,
   recordSheet,
 } from "../../../styles/app/app.styles";
+import { hasEnabledAction } from "../../../utils/action.utils";
 import { visibleDetailSections } from "../../../utils/detail.utils";
 import AppSheet from "../app/AppSheet";
 import SheetActions from "../app/SheetActions";
@@ -40,7 +41,7 @@ const RecordDetailSheet = <T,>({
   actions,
   onClose,
 }: IProps<T>) => {
-  const footer = actions.length > 0 ? <SheetActions actions={actions} /> : undefined;
+  const footer = hasEnabledAction(actions) ? <SheetActions actions={actions} /> : undefined;
 
   return (
     <AppSheet

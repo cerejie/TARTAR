@@ -13,6 +13,7 @@ import {
   rowActionMenu,
   rowActionTrigger,
 } from "../../../styles/table/table.styles";
+import { hasEnabledAction } from "../../../utils/action.utils";
 import type { IRowAction } from "../../../models/common/action.model";
 
 type IProps = {
@@ -21,7 +22,7 @@ type IProps = {
 };
 
 const RowActionMenu = ({ actions, label = "Row actions" }: IProps) => {
-  if (actions.length === 0) return null;
+  if (!hasEnabledAction(actions)) return null;
 
   const firstDangerIndex = actions.findIndex((action) => action.danger);
 

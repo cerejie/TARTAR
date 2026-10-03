@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { pushModeNotes } from "../../models/common/push.model";
 import pushServices from "../../services/data/push.services";
 import { selectInstalled, useInstallStore } from "../../store/common/install.store";
 import { selectOnline, useNetworkStore } from "../../store/common/network.store";
@@ -152,9 +153,15 @@ export const usePushNotifications = () => {
     return subscribed ? "on" : "off";
   };
 
+  const mode = modeOf();
+  const summary = pushSummaryOf(permissions);
+  const canToggle = mode === "on" || mode === "off";
+
   return {
-    mode: modeOf(),
-    summary: pushSummaryOf(permissions),
+    mode,
+    summary,
+    canToggle,
+    note: mode === "on" || mode === "off" ? summary : pushModeNotes[mode],
     enable: () => void enableMutation.mutate(),
     disable: () => void disableMutation.mutate(),
     enabling: enableMutation.loading,
