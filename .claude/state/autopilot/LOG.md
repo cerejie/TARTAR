@@ -342,3 +342,9 @@
 - UI-16 scope → `SupplierLedgerView` has the same columns and the same defect, fixed alongside (V5 precedent)
 - Harness → sweep.mjs post-tab-click wait uses `route.settle ?? 1500` (conductor's instruction, for V8)
 - Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing); swept admin desk + phone on /receivables + /payables 120 / 0 failed, 19 sheets; looked at two sheets and four full shots; supplier ledger detail and payable record-payment compiled, visuals unconfirmed; swept, device unconfirmed
+
+## 2026-10-03 — V8 Full re-sweep (written up by the conductor) → Development v2.64
+- Worker cut off by a network failure after viewing 179 / 179 sheets, before writing the roadmap → conductor wrote the Done entry from the worker's per-sheet notes (no app code involved)
+- New defects found by V8 → one new phase V10 (UI-18 … UI-21, all Low; UI-18 is a V5 regression), not silent fixes
+- User report mid-run (offline Sales / Vouchers show "not saved for offline") → new phase V9, ahead of V10 (High; the user's rule: offline shows the cached data from the last time online)
+- HEAD found on main (fast-forward merge at 18:14, origin/main at v2.63; same pattern as the 12:17 merge before the run) → treated as the user's deploy merge; switched back to mobilel-app-native (same commit, clean tree) so autopilot does not run on main

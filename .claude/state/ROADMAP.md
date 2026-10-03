@@ -86,6 +86,36 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   Open every contact sheet (viewed = total), keep a per-sheet log in Done, confirm UI-01 … UI-17 are gone and
   nothing regressed; record surfaces captured / failed / sheets viewed. A new defect found here becomes a new
   phase before this one, not a silent fix.
+- V9 Offline shows the last loaded data (OFF-01; High — reported by the user from an iPhone on 2026-10-03, with
+  screenshots): offline, Sales shows a grid of "You're offline — This was not saved for offline use" cards under an
+  "Offline — this page was not saved for offline" banner, and Vouchers shows the same error state. The user's
+  requirement: **when offline, every page must show all its data from the cache — the latest data from when the
+  device was online — never a "not saved for offline" state for a page that has been loaded or primed.** Find the
+  root cause first (do not patch the message): `src/store/common/query.store.ts` (which keys are written to
+  IndexedDB, the 120-entry / 30-day trim, the fetcher-forget rule from F2, what a key miss does offline),
+  `src/hook/app/prime.hook.ts` (which lists are primed while online — today lookups only?),
+  `src/hook/common/query.hook.ts`, `src/utils/idb.utils.ts`, and the list hooks' keys (pagination, sort, status tab
+  and branch scope all sit in the key, so the offline key may simply differ from the one cached). Expected shape of
+  the fix: while online, prime the default view of every list and stat query a role can open (first page, default
+  sort, each status tab, the active branch scope), keep them in IndexedDB through the trim, and offline fall back to
+  the newest cached variant of the same list when the exact key is missing; stat cards read their cached values
+  too. The offline write queue (`store/common/sync.store.ts`, `utils/write.utils.ts`) must not regress. No
+  migration. Verify with a Playwright probe in the scratch folder (not the sweep): sign in online, let prime finish,
+  `context.setOffline(true)`, navigate in-app (sidebar links, no reload) to every route as admin, emp and acc on
+  phone, screenshot each and look — no "not saved for offline", rows and stat cards present; include a page never
+  opened online in that session. Add unit tests for any new pure key / fallback helper. Log "probed offline in dev,
+  installed-PWA cold start unconfirmed" — a reload offline needs the production service worker.
+- V10 Sweep leftovers (UI-18 … UI-21; Low — found by V8): UI-18 regression from V5 — at 820 the `/admin/receivables`
+  and `/admin/payables` master list truncates "QA Custome…" / "RCV-QAT-26…" because the wider rail took 16 px
+  (`src/styles/app/app.bar.styles.ts`, the admin master-detail grid) — give the list column its width back; UI-19
+  `/admin` Home on phone, Weekly / Monthly: stat tile hint cut mid-word ("+₱4,500.00 new this w…") — let the hint
+  wrap or shorten it (`components/admin/*` home stats, `StatCard`); UI-20 Supplier Ledger picker cards on phone
+  have an empty second row holding only the chevron (the supplier picker / `LedgerPartiesTable.tsx`) — match the
+  customer picker's card; UI-21 `/admin/receivables` and `/admin/payables`: after switching to a tab with no rows
+  the detail pane keeps the previously selected record — clear the selection when it is not in the visible list
+  (`hook/data/admin/admin.{receivables,payables}.hook.ts`). Re-sweep: ROLES=admin DEVICES=phone,tabP,desk on
+  `/admin`, `/admin/receivables`, `/admin/payables`, `/payables` (a temporary config copy with only those routes is
+  fine); look at the shots.
 
 ## Path map
 - detail rows: src/components/common/app/{DetailRows,SheetActions}.tsx · src/components/common/table/
@@ -194,10 +224,25 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   "Created by" column), toolbar-Customer ledger + phone card-by-customer-0 ("No contact details"). The sweep opens no
   supplier ledger detail and no payable record-payment: those are compiled, visuals unconfirmed. Swept, device
   unconfirmed.
+- [x] V8 Full re-sweep (the worker was cut off by a network failure after viewing; written up by the conductor
+  from its per-sheet notes): three roles × four devices, **1,184 surfaces, 0 failed, 179 / 179 contact sheets
+  viewed** (admin 522 / 79, emp 363 / 55, acc 299 / 45; out dirs `tartar-sweep-final-{admin,emp,acc}`). UI-01 … UI-17
+  confirmed gone, with full-size checks: no dash rows in record sheets and no empty deposit section (UI-01); edit
+  history reads "Status: Deposited → Verified · Reviewed by: Set to QA Admin Two" (UI-02); no lone ⋮ — full-width
+  "Edit history" / "Delete transaction" / "Mark paid" footers (UI-03); "Due Sep 30, 2026" on cards and heroes
+  (UI-04); rail indicator clear of labels at tabP, tabL and desk, zoomed (UI-05); reports period on one line, 8 tabs
+  + Print visible at 1440, scrolling at 1180 (UI-06); branch card adds up (UI-07); UI-08 … UI-17 ok. Reports tabs
+  now load in the sweep (settle fix). Harness artifacts, not defects: the 5th chip on phone is not reached by the
+  sweep (a probe showed `/sales` Rejected and `/payables` Paid scroll into view and filter), some tab shots are
+  mid-refresh, dark shots follow the `/account` Theme row. New defects → V10 (UI-18 … UI-21). Per-sheet log: admin
+  phone 01–28, tabP 01–03, tabL 01–03, desk 01–45 ok except UI-18 (tabP #238), UI-19 (phone #194 #195), UI-20
+  (phone #123), UI-21 (desk #506 #507); acc phone 01–20, tabP 01–02, tabL 01–03, desk 01–20 ok (UI-20 at #91); emp
+  phone 01–22, tabP 01–02, tabL 01–03, desk 01–28 ok (UI-20 at #111). Swept, device unconfirmed.
 
 ## Next
-1. V8 Full re-sweep.
-2. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. V9 Offline shows the last loaded data.
+2. V10 Sweep leftovers.
+3. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
@@ -212,7 +257,7 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   user not returned by `user_display_names`. V1 hides the dash either way.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.63 (V7 ledger modals) · Uncommitted: none · Last check:
-V7 sweep admin desk+phone (/receivables + /payables), 2026-10-03. Autopilot running from V8. A sweep of more than one
-role or device can exceed a 10-minute background timeout — run it with `timeout` 3600000 (the four-device admin sweep
-took about 25 minutes; the full V8 sweep is three roles × four devices, and `/reports` tabs now wait 4 s each).
+Branch: mobilel-app-native (main was fast-forwarded to v2.63 at 18:14 for a deploy; autopilot stays on this branch)
+· Last commit Development v2.64 (V8 write-up, V9 / V10 added) · Uncommitted: none · Last check: V8 full sweep
+1,184 / 0 failed, 179 / 179 sheets, 2026-10-03. Autopilot running from V9. Run any sweep or probe with Bash
+`run_in_background` and `timeout` 3600000.
