@@ -15,7 +15,13 @@ import {
   paymentPaginationKey,
   paymentSortKey,
 } from "../../../keys/table.keys";
-import type { IPaginationResponse } from "../../../models/common/pagination.model";
+import type { ILedgerFilters } from "../../../models/common/filter.model";
+import type {
+  IPaginationRequest,
+  IPaginationResponse,
+} from "../../../models/common/pagination.model";
+import type { IQuerySpec } from "../../../models/common/query.model";
+import type { ISortOption } from "../../../models/common/table.model";
 import type {
   ILedgerPayment,
   IPartyFilter,
@@ -37,6 +43,23 @@ import { isEmptyDetailValue, joinDetailParts } from "../../../utils/detail.utils
 import { formatDate, formatMoney } from "../../../utils/format.utils";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useUserListHook } from "../user/user.list.hook";
+
+export const paymentListQueryOf = (
+  kind: PaymentKind,
+  filters: ILedgerFilters,
+  pagination: IPaginationRequest,
+  sortOption: ISortOption | undefined
+): IQuerySpec<IPaginationResponse<ILedgerPayment>> => [
+  scopedKey(
+    paymentListKey,
+    kind,
+    JSON.stringify(filters),
+    pagination.pageNumber,
+    pagination.pageSize,
+    sortOption?.key
+  ),
+  () => paymentServices.getList(kind, filters, { ...pagination, sort: sortOption }),
+];
 
 export const usePaymentListHook = (
   kind: PaymentKind,
@@ -60,20 +83,8 @@ export const usePaymentListHook = (
   const ledgerKey = kind === "receivable" ? receivableListKey : payableListKey;
   const invalidate = [paymentListKey, ledgerKey, ledgerSummaryKey, ledgerPartyKey];
 
-  const listQuery = useQuery<IPaginationResponse<ILedgerPayment>>(
-    scopedKey(
-      paymentListKey,
-      kind,
-      JSON.stringify(effectiveFilters),
-      pagination.pageNumber,
-      pagination.pageSize,
-      sortKey
-    ),
-    () =>
-      paymentServices.getList(kind, effectiveFilters, {
-        ...pagination,
-        sort: sortOption,
-      }),
+  const listQuery = useQuery(
+    ...paymentListQueryOf(kind, effectiveFilters, pagination, sortOption),
     { enabled: !party, keepPrevious: true }
   );
 

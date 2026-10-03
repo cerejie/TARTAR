@@ -7,6 +7,14 @@ import {
 } from "../../../store/data/account/account.store";
 import { useQuery } from "../../common/query.hook";
 
+export const accessibleBranchesOf = (
+  all: readonly IBranch[],
+  access: readonly string[] | null
+): IBranch[] =>
+  access === null
+    ? [...all]
+    : all.filter((branch) => access.includes(branch.slug));
+
 export const useBranchListHook = () => {
   const access = useAccountStore(selectBranchAccess);
   const query = useQuery<IBranch[]>(
@@ -15,10 +23,7 @@ export const useBranchListHook = () => {
   );
 
   const all = query.data ?? [];
-  const branches =
-    access === null
-      ? all
-      : all.filter((branch) => access.includes(branch.slug));
+  const branches = accessibleBranchesOf(all, access);
   const toOption = (branch: IBranch) => ({
     value: branch.slug,
     label: branch.name,

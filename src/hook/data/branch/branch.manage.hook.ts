@@ -10,6 +10,7 @@ import {
   scopedKey,
 } from "../../../keys/query.keys";
 import type { IFieldConfig } from "../../../models/common/field.model";
+import type { IQuerySpec } from "../../../models/common/query.model";
 import type { IBranchInput } from "../../../models/data/branch/branch.request";
 import type { IBranch } from "../../../models/data/branch/branch.response";
 import type { IBranchMonitorRow } from "../../../models/data/dashboard/dashboard.response";
@@ -53,6 +54,13 @@ export const branchFormFields: IFieldConfig<IBranchInput>[] = [
     label: "Address (voucher letterhead)",
     type: "textarea",
   },
+];
+
+export const branchMonitorQueryOf = (
+  monitored: IBranch[]
+): IQuerySpec<IBranchMonitorRow[]> => [
+  scopedKey(branchMonitorKey, monitored.map((branch) => branch.slug).join(",")),
+  () => dashboardServices.getBranchMonitor(monitored),
 ];
 
 export const useBranchManageHook = () => {
@@ -124,11 +132,9 @@ export const useBranchManageHook = () => {
     ? branches.filter((branch) => branch.slug === scopeBranch)
     : branches;
 
-  const monitorQuery = useQuery<IBranchMonitorRow[]>(
-    scopedKey(branchMonitorKey, monitored.map((b) => b.slug).join(",")),
-    () => dashboardServices.getBranchMonitor(monitored),
-    { enabled: monitored.length > 0 }
-  );
+  const monitorQuery = useQuery(...branchMonitorQueryOf(monitored), {
+    enabled: monitored.length > 0,
+  });
 
   const createDefaults: DefaultValues<IBranchInput> = {
     name: "",

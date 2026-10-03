@@ -238,13 +238,43 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   phone 01–28, tabP 01–03, tabL 01–03, desk 01–45 ok except UI-18 (tabP #238), UI-19 (phone #194 #195), UI-20
   (phone #123), UI-21 (desk #506 #507); acc phone 01–20, tabP 01–02, tabL 01–03, desk 01–20 ok (UI-20 at #91); emp
   phone 01–22, tabP 01–02, tabL 01–03, desk 01–28 ok (UI-20 at #111). Swept, device unconfirmed.
+- [x] V9 Offline shows the last loaded data (OFF-01). **Root cause:** the query cache only ever held the exact
+  keys a mounted screen had run — `usePrimeLookupsHook` primed the ten lookup lists and nothing else — so a page (or
+  status tab) not opened online since sign-in had no entry and `load()` answered "Not saved for offline". Second
+  cause: Transactions, Sales, Purchases and Expenses share the `page` filter scope, so one screen's status tab
+  (`saleStatus` / `voucherStatus`) leaked into the other screens' cache keys and made them miss even when cached.
+  **Fix:** (1) every page query is now built by an exported `…QueryOf` spec (`IQuerySpec` = key + fetcher) that the
+  hook and the primer share, so the primed key cannot drift from the mounted one — `transaction` / `sale` /
+  `disbursement` / `voucher` / `ledger` / `payment` list hooks, `dashboard.hook.ts`, `admin.home.hook.ts`,
+  `report.hook.ts`, `report.summary.hook.ts`, `branch.manage.hook.ts`; (2) `pageFiltersOf` (`utils/filter.utils.ts`)
+  strips the foreign status field before the key and the fetch (fetch results unchanged — the services never read
+  them); (3) `hook/app/prime.view.hook.ts` (lazy chunk) lists the default view of every page the role can open —
+  first page, default sort, every status tab, every dashboard / admin period, every report tab, active branch scope
+  — and `usePrimeViewsHook` (`prime.hook.ts`, mounted in `app.hook.ts`) hands it to the new `warm` action of
+  `store/common/query.store.ts` on sign-in, reconnect, role or branch-scope change; (4) `warm` fetches in batches
+  of 6 without retaining a fetcher, skips keys a mounted screen already keeps fresh, and re-fetches the keys an
+  `invalidate` / `refetchAll` touched at most once per 30 s, so the saved copy follows mutations and realtime
+  without a request storm; trim raised 120 → 300 entries. The write queue (`sync.store.ts`, `write.utils.ts`,
+  `mutation.hook.ts`) is untouched. Tests: `utils/filter.utils.test.ts`, `keys/query.keys.test.ts` (113 / 113).
+  Probe (`C:/Users/CER/AppData/Local/Temp/tartar-offline-probe/probe.mjs`, remote hosts aborted +
+  `navigator.onLine` false, in-app navigation, no writes — 0 write requests): before the fix admin phone showed
+  "You're offline" cards on 12 of 17 routes; after, admin / emp / acc phone and admin desk show 0 on every route,
+  none of them opened online in the session except the landing page, and admin phone shows 0 on all 26 status /
+  period / report tabs clicked offline, then Transactions after foreign tabs were set. Looked: sheet-admin,
+  sheet-admin-tabs, sheet-emp, sheet-acc, full shots sales + vouchers (stat cards and rows present, banner "Offline
+  — showing data saved …"). Admin priming is ~62 requests and took 25–45 s on localhost. Probed offline in dev,
+  installed-PWA cold start unconfirmed.
 
 ## Next
-1. V9 Offline shows the last loaded data.
-2. V10 Sweep leftovers.
-3. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. V10 Sweep leftovers.
+2. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
+- Offline scope left by V9 (decide): a page beyond the first, a non-default sort, a custom date / search filter, a
+  branch scope other than the active one and a ledger / record detail are saved only once opened online — offline
+  they still show the honest "not saved" state rather than rows of a different variant. Report and dashboard keys
+  carry today's month, so a device that stays offline across a month change misses them. Serving those offline
+  from the unpaged summary datasets (client-side filter / sort / page) is a possible follow-up phase.
 - Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
   user applies it.
 - Cash Flow report rule (carried from the archived roadmap): "Cash In" counts `collection` transactions but the
@@ -258,6 +288,6 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
 
 ## State
 Branch: mobilel-app-native (main was fast-forwarded to v2.63 at 18:14 for a deploy; autopilot stays on this branch)
-· Last commit Development v2.64 (V8 write-up, V9 / V10 added) · Uncommitted: none · Last check: V8 full sweep
-1,184 / 0 failed, 179 / 179 sheets, 2026-10-03. Autopilot running from V9. Run any sweep or probe with Bash
-`run_in_background` and `timeout` 3600000.
+· Last commit Development v2.65 (V9 offline cached data) · Uncommitted: none · Last check: V9 offline probe, admin /
+emp / acc phone + admin desk, 0 offline cards, 2026-10-03; build + lint clean, tests 113 / 113. Autopilot running
+from V10. Run any sweep or probe with Bash `run_in_background` and `timeout` 3600000.

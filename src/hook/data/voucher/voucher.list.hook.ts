@@ -26,7 +26,13 @@ import type {
   IFieldConfig,
   IFieldSection,
 } from "../../../models/common/field.model";
-import type { IPaginationResponse } from "../../../models/common/pagination.model";
+import type { ILedgerFilters } from "../../../models/common/filter.model";
+import type {
+  IPaginationRequest,
+  IPaginationResponse,
+} from "../../../models/common/pagination.model";
+import type { IQuerySpec } from "../../../models/common/query.model";
+import type { ISortOption } from "../../../models/common/table.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type {
   IVoucherInput,
@@ -125,6 +131,21 @@ const asApproved = (voucher: IVoucher): IVoucher => ({
   status: "approved",
 });
 
+export const voucherListQueryOf = (
+  filters: ILedgerFilters,
+  pagination: IPaginationRequest,
+  sortOption: ISortOption | undefined
+): IQuerySpec<IPaginationResponse<IVoucher>> => [
+  scopedKey(
+    voucherListKey,
+    JSON.stringify(filters),
+    pagination.pageNumber,
+    pagination.pageSize,
+    sortOption?.key
+  ),
+  () => voucherServices.getList(filters, { ...pagination, sort: sortOption }),
+];
+
 export const useVoucherListHook = () => {
   const formModal = useModal(voucherFormModalKey);
   const editModal = useModal<IVoucher>(voucherEditModalKey);
@@ -154,17 +175,9 @@ export const useVoucherListHook = () => {
   const { branch: scopeBranch } = useBranchScopeHook();
 
   const effectiveFilters = scopedFilters(filters, scopeBranch);
-  const pageRequest = { ...pagination, sort: sortOption };
 
-  const listQuery = useQuery<IPaginationResponse<IVoucher>>(
-    scopedKey(
-      voucherListKey,
-      JSON.stringify(effectiveFilters),
-      pagination.pageNumber,
-      pagination.pageSize,
-      sortKey
-    ),
-    () => voucherServices.getList(effectiveFilters, pageRequest),
+  const listQuery = useQuery(
+    ...voucherListQueryOf(effectiveFilters, pagination, sortOption),
     { keepPrevious: true }
   );
 

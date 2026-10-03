@@ -8,6 +8,14 @@ import {
 import { useBranchStore } from "../../../store/data/branch/branch.store";
 import { useSearch } from "../../common/search.hook";
 import { useBranchListHook } from "./branch.list.hook";
+import type { IBranch } from "../../../models/data/branch/branch.response";
+
+export const scopedBranchOf = (
+  stored: string | null,
+  canScope: boolean,
+  branches: readonly IBranch[]
+): string | null =>
+  canScope && branches.some((item) => item.slug === stored) ? stored : null;
 
 export const useBranchScopeHook = () => {
   const navigate = useNavigate();
@@ -18,8 +26,7 @@ export const useBranchScopeHook = () => {
   const { branches, isInitialLoading } = useBranchListHook();
   const { search, setSearch } = useSearch(branchScopeSearchKey);
 
-  const storedIsListed = branches.some((item) => item.slug === stored);
-  const branch = canScope && storedIsListed ? stored : null;
+  const branch = scopedBranchOf(stored, canScope, branches);
   const branchName = branch
     ? branches.find((item) => item.slug === branch)?.name ?? branch
     : null;

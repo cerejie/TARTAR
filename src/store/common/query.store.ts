@@ -5,8 +5,12 @@ import {
   putQuery,
   readAllQueries,
 } from "../../utils/idb.utils";
+import { isKeyUnder } from "../../keys/query.keys";
 import { failureKindOf } from "../../utils/write.utils";
-import type { IQueryEntry } from "../../models/common/query.model";
+import type {
+  IQueryEntry,
+  IQuerySpec,
+} from "../../models/common/query.model";
 
 type ICachedQuery = Pick<IQueryEntry, "data" | "updatedAt">;
 
@@ -24,7 +28,8 @@ type Actions = {
     key: string,
     fetcher: () => Promise<T>
   ) => Promise<T | undefined>;
-  prime: (queries: ReadonlyArray<[string, () => Promise<unknown>]>) => void;
+  prime: (queries: readonly IQuerySpec[]) => void;
+  warm: (queries: readonly IQuerySpec[]) => void;
   setEntry: (key: string, partial: Partial<IQueryEntry>) => void;
   watch: (key: string, countsTowardStatus: boolean) => void;
   unwatch: (key: string, countsTowardStatus: boolean) => void;
@@ -41,7 +46,11 @@ const networkFailurePrefix = "TypeError";
 
 const cacheMaxAgeMs = 30 * 24 * 60 * 60 * 1000;
 
-const cacheMaxEntries = 120;
+const cacheMaxEntries = 300;
+
+const backgroundRefreshDelayMs = 30_000;
+
+const backgroundBatchSize = 6;
 
 const searchVariantPattern = /"search":"[^"]/;
 
@@ -63,6 +72,14 @@ const fetchers = new Map<string, () => Promise<unknown>>();
 const primedKeys = new Set<string>();
 
 const requests = new Map<string, IRequest>();
+
+const backgroundFetchers = new Map<string, () => Promise<unknown>>();
+
+const staleBackgroundKeys = new Set<string>();
+
+let backgroundTimer: ReturnType<typeof setTimeout> | undefined;
+
+let backgroundRun: Promise<void> = Promise.resolve();
 
 let requestCount = 0;
 
@@ -188,6 +205,47 @@ export const useQueryStore = create<States & Actions>((set, get) => {
     return result;
   };
 
+  const refreshInBackground = (key: string): Promise<unknown> => {
+    const fetcher = backgroundFetchers.get(key);
+    if (!fetcher || fetchers.has(key)) return Promise.resolve();
+
+    const pending = requests.get(key);
+    if (pending) return pending.result;
+
+    requestCount += 1;
+    const id = requestCount;
+    const result = load(key, id, fetcher);
+    requests.set(key, { id, result });
+    return result;
+  };
+
+  const flushBackground = async (): Promise<void> => {
+    clearTimeout(backgroundTimer);
+    backgroundTimer = undefined;
+    const keys = [...staleBackgroundKeys];
+    staleBackgroundKeys.clear();
+
+    for (let index = 0; index < keys.length; index += backgroundBatchSize) {
+      if (!navigator.onLine) return;
+
+      await Promise.all(
+        keys.slice(index, index + backgroundBatchSize).map(refreshInBackground)
+      );
+    }
+  };
+
+  const queueBackground = () => {
+    backgroundRun = backgroundRun.then(flushBackground);
+  };
+
+  const markBackgroundStale = (isStale: (key: string) => boolean) => {
+    const staleKeys = [...backgroundFetchers.keys()].filter(isStale);
+    if (staleKeys.length === 0) return;
+
+    for (const key of staleKeys) staleBackgroundKeys.add(key);
+    backgroundTimer ??= setTimeout(queueBackground, backgroundRefreshDelayMs);
+  };
+
   return {
     ...initialValues,
 
@@ -206,6 +264,16 @@ export const useQueryStore = create<States & Actions>((set, get) => {
         primedKeys.add(key);
         if (!fetchers.has(key)) void get().run(key, fetcher);
       }
+    },
+
+    warm: (queries) => {
+      backgroundFetchers.clear();
+      staleBackgroundKeys.clear();
+      for (const [key, fetcher] of queries) {
+        backgroundFetchers.set(key, fetcher);
+        staleBackgroundKeys.add(key);
+      }
+      queueBackground();
     },
 
     setEntry: (key, partial) =>
@@ -235,18 +303,20 @@ export const useQueryStore = create<States & Actions>((set, get) => {
     },
 
     invalidate: (keyPrefix) => {
-      const matches = Object.keys(get().entries).filter(
-        (key) => key === keyPrefix || key.startsWith(`${keyPrefix}:`)
+      const matches = Object.keys(get().entries).filter((key) =>
+        isKeyUnder(key, keyPrefix)
       );
 
       for (const key of matches) {
         const fetcher = fetchers.get(key);
         if (fetcher) void start(key, fetcher);
       }
+      markBackgroundStale((key) => isKeyUnder(key, keyPrefix));
     },
 
     refetchAll: () => {
       for (const [key, fetcher] of fetchers) void start(key, fetcher);
+      markBackgroundStale(() => true);
     },
 
     refetchWatched: async () => {
@@ -265,6 +335,10 @@ export const useQueryStore = create<States & Actions>((set, get) => {
       fetchers.clear();
       primedKeys.clear();
       requests.clear();
+      backgroundFetchers.clear();
+      staleBackgroundKeys.clear();
+      clearTimeout(backgroundTimer);
+      backgroundTimer = undefined;
       set({ entries: {} });
       void clearQueries().catch(ignoreCacheFailure);
     },

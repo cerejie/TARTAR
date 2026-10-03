@@ -27,7 +27,11 @@ import type {
   IPaginationRequest,
   IPaginationResponse,
 } from "../../../models/common/pagination.model";
-import type { IMutationResult } from "../../../models/common/query.model";
+import type {
+  IMutationResult,
+  IQuerySpec,
+} from "../../../models/common/query.model";
+import type { ISortOption } from "../../../models/common/table.model";
 import {
   ledgerBalance,
   partyKeyOf,
@@ -121,6 +125,46 @@ const paymentRowLabel = (title: string, row: ILedgerRow, index: number) =>
 const paymentRowHint = (row: ILedgerRow) =>
   `Due ${formatDate(row.due_date)} · Balance ${formatMoney(ledgerBalance(row))}`;
 
+type ILedgerReads<Row extends ILedgerRow> = Pick<
+  ILedgerServices<Row, never>,
+  "getList" | "getAll" | "getPartySummaries"
+>;
+
+export const ledgerListQueryOf = <Row extends ILedgerRow>(
+  scope: ILedgerListConfig<Row, FieldValues>["scope"],
+  services: ILedgerReads<Row>,
+  filters: ILedgerFilters,
+  pagination: IPaginationRequest,
+  sortOption: ISortOption | undefined
+): IQuerySpec<IPaginationResponse<Row>> => [
+  scopedKey(
+    scope,
+    JSON.stringify(filters),
+    pagination.pageNumber,
+    pagination.pageSize,
+    sortOption?.key
+  ),
+  () => services.getList(filters, { ...pagination, sort: sortOption }),
+];
+
+export const ledgerSummaryQueryOf = <Row extends ILedgerRow>(
+  scope: ILedgerListConfig<Row, FieldValues>["scope"],
+  services: ILedgerReads<Row>,
+  filters: ILedgerFilters
+): IQuerySpec<Row[]> => [
+  scopedKey(ledgerSummaryKey, scope, JSON.stringify(filters)),
+  () => services.getAll(filters),
+];
+
+export const ledgerPartyQueryOf = <Row extends ILedgerRow>(
+  scope: ILedgerListConfig<Row, FieldValues>["scope"],
+  services: ILedgerReads<Row>,
+  branch: string | null
+): IQuerySpec<ILedgerPartySummary[]> => [
+  scopedKey(ledgerPartyKey, scope, branch),
+  () => services.getPartySummaries(branch),
+];
+
 export const useLedgerListHook = <
   Row extends ILedgerRow,
   Input extends FieldValues,
@@ -161,30 +205,23 @@ export const useLedgerListHook = <
     supplierListKey,
   ];
 
-  const listQuery = useQuery<IPaginationResponse<Row>>(
-    scopedKey(
+  const listQuery = useQuery(
+    ...ledgerListQueryOf(
       config.scope,
-      JSON.stringify(effectiveFilters),
-      pagination.pageNumber,
-      pagination.pageSize,
-      sortKey
+      config.services,
+      effectiveFilters,
+      pagination,
+      sortOption
     ),
-    () =>
-      config.services.getList(effectiveFilters, {
-        ...pagination,
-        sort: sortOption,
-      }),
     { keepPrevious: true }
   );
 
-  const summaryQuery = useQuery<Row[]>(
-    scopedKey(ledgerSummaryKey, config.scope, JSON.stringify(summaryFilters)),
-    () => config.services.getAll(summaryFilters)
+  const summaryQuery = useQuery(
+    ...ledgerSummaryQueryOf(config.scope, config.services, summaryFilters)
   );
 
-  const partyQuery = useQuery<ILedgerPartySummary[]>(
-    scopedKey(ledgerPartyKey, config.scope, scopeBranch),
-    () => config.services.getPartySummaries(scopeBranch)
+  const partyQuery = useQuery(
+    ...ledgerPartyQueryOf(config.scope, config.services, scopeBranch)
   );
 
   const paymentTarget = paymentModal.modal.data;

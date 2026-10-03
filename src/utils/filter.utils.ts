@@ -22,6 +22,8 @@ interface IStatusChainable {
   lte: (column: string, value: unknown) => unknown;
 }
 
+type IPageStatusField = "saleStatus" | "voucherStatus";
+
 const defaultColumns: IFilterColumns = { date: "txn_date", amount: "amount" };
 
 const likeWildcards = /[\\%_]/g;
@@ -101,6 +103,20 @@ export const scopedFilters = (
   filters: ILedgerFilters,
   branch: string | null
 ): ILedgerFilters => (branch ? { ...filters, branch } : filters);
+
+export const pageFiltersOf = (
+  filters: ILedgerFilters,
+  branch: string | null,
+  statusField?: IPageStatusField
+): ILedgerFilters => {
+  const { saleStatus, voucherStatus, ...shared } = filters;
+  const statuses = { saleStatus, voucherStatus };
+
+  return scopedFilters(
+    statusField ? { ...shared, [statusField]: statuses[statusField] } : shared,
+    branch
+  );
+};
 
 export const scopeToBranch = <T>(query: T, branch?: string | null): T =>
   branch

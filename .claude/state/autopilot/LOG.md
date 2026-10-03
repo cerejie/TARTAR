@@ -348,3 +348,15 @@
 - New defects found by V8 → one new phase V10 (UI-18 … UI-21, all Low; UI-18 is a V5 regression), not silent fixes
 - User report mid-run (offline Sales / Vouchers show "not saved for offline") → new phase V9, ahead of V10 (High; the user's rule: offline shows the cached data from the last time online)
 - HEAD found on main (fast-forward merge at 18:14, origin/main at v2.63; same pattern as the 12:17 merge before the run) → treated as the user's deploy merge; switched back to mobilel-app-native (same commit, clean tree) so autopilot does not run on main
+
+## 2026-10-03 — V9 Offline shows the last loaded data → Development v2.65
+- Root cause → the cache held only keys a mounted screen had run (prime covered lookups only), and the shared `page` filter scope leaked one screen's status tab into the other screens' keys
+- How the primer learns the keys → each hook exports its `…QueryOf` spec and uses it itself (no drift), rather than a prime file re-composing keys by hand or mounting hidden pages (Complex tier: touches 11 hooks, but the only option where a key change cannot silently break offline)
+- Where the primer lives → `hook/app/prime.view.hook.ts`, loaded with one dynamic import so the list hooks stay out of the entry chunk
+- What is primed → default view of every page the role can open: first page, default sort, each status tab, each dashboard / admin period, each report tab, active branch scope only (all branches × all pages rejected: request count multiplies by the branch count)
+- Freshness vs load → background keys keep no live fetcher; an invalidate marks them stale and one batch run refreshes them at most every 30 s (immediate refetch of ~62 keys on every realtime event rejected)
+- Fallback to "newest cached variant of the same list" (roadmap's expected shape) → not built: another tab, page, sort or period is different data and would be shown under the wrong label in a bookkeeping app; priming makes the default variants exact hits instead; left in Open for the user
+- Foreign status fields in `page` filters → stripped by `pageFiltersOf` before key and fetch (services never read them, so results are unchanged)
+- Cache trim → 120 → 300 entries (admin primes ~62 plus lookups; 120 left no room for visited variants)
+- Probe method → remote hosts aborted + `navigator.onLine` false instead of `context.setOffline` (the dev server must keep serving lazy chunks, as the production service worker does); no writes performed, 0 write requests seen
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), tests 113 / 113; probe before 12 / 17 admin routes with offline cards, after 0 on admin / emp / acc phone + admin desk and on 26 tabs clicked offline; looked at four contact sheets and two full shots; probed offline in dev, installed-PWA cold start unconfirmed

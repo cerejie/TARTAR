@@ -19,12 +19,21 @@ import {
 import { salePaginationKey, saleSortKey } from "../../../keys/table.keys";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type { IDateRange } from "../../../models/common/period.model";
-import type { IPaginationResponse } from "../../../models/common/pagination.model";
+import type {
+  IPaginationRequest,
+  IPaginationResponse,
+} from "../../../models/common/pagination.model";
+import type { IQuerySpec } from "../../../models/common/query.model";
+import type { ISortOption } from "../../../models/common/table.model";
 import type { ISale, ISaleSummary } from "../../../models/data/sale/sale.response";
 import type { ITransactionAudit } from "../../../models/data/transaction/transaction.response";
 import saleServices from "../../../services/data/sale.services";
 import transactionServices from "../../../services/data/transaction.services";
-import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
+import {
+  filterPeriodLabel,
+  pageFiltersOf,
+  scopedFilters,
+} from "../../../utils/filter.utils";
 import { formatMoney } from "../../../utils/format.utils";
 import { printReport } from "../../../utils/print.utils";
 import { salesPrintDocument } from "../../../utils/report.utils";
@@ -62,6 +71,28 @@ const summarize = (rows: readonly ISale[]): ISaleSummary => ({
   rejected: rows.filter((row) => row.sale_status === "rejected").length,
 });
 
+export const saleListQueryOf = (
+  filters: ILedgerFilters,
+  pagination: IPaginationRequest,
+  sortOption: ISortOption | undefined
+): IQuerySpec<IPaginationResponse<ISale>> => [
+  scopedKey(
+    saleListKey,
+    JSON.stringify(filters),
+    pagination.pageNumber,
+    pagination.pageSize,
+    sortOption?.key
+  ),
+  () => saleServices.getList(filters, { ...pagination, sort: sortOption }),
+];
+
+export const saleSummaryQueryOf = (
+  filters: ILedgerFilters
+): IQuerySpec<ISale[]> => [
+  scopedKey(saleSummaryKey, JSON.stringify(filters)),
+  () => saleServices.getAll(filters),
+];
+
 export const useSaleListHook = () => {
   const formModal = useModal(saleFormModalKey);
   const editModal = useModal<ISale>(saleEditModalKey);
@@ -87,28 +118,15 @@ export const useSaleListHook = () => {
   const { branch: scopeBranch, branchName: scopeName } = useBranchScopeHook();
   const printModal = useModal(salePrintModalKey);
 
-  const effectiveFilters = scopedFilters(filters, scopeBranch);
-  const summaryFilters: ILedgerFilters = {
-    ...effectiveFilters,
-    saleStatus: undefined,
-  };
-  const pageRequest = { ...pagination, sort: sortOption };
+  const effectiveFilters = pageFiltersOf(filters, scopeBranch, "saleStatus");
 
-  const listQuery = useQuery<IPaginationResponse<ISale>>(
-    scopedKey(
-      saleListKey,
-      JSON.stringify(effectiveFilters),
-      pagination.pageNumber,
-      pagination.pageSize,
-      sortKey
-    ),
-    () => saleServices.getList(effectiveFilters, pageRequest),
+  const listQuery = useQuery(
+    ...saleListQueryOf(effectiveFilters, pagination, sortOption),
     { keepPrevious: true }
   );
 
-  const summaryQuery = useQuery<ISale[]>(
-    scopedKey(saleSummaryKey, JSON.stringify(summaryFilters)),
-    () => saleServices.getAll(summaryFilters)
+  const summaryQuery = useQuery(
+    ...saleSummaryQueryOf(pageFiltersOf(filters, scopeBranch))
   );
 
   const rows = useWithPendingRows(

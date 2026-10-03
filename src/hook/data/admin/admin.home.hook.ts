@@ -3,7 +3,6 @@ import {
   dashboardAlertsKey,
   dashboardChecksKey,
   dashboardOverviewKey,
-  dashboardSalesKey,
   scopedKey,
 } from "../../../keys/query.keys";
 import { adminHomePeriodSegmentKey } from "../../../keys/segment.keys";
@@ -24,11 +23,12 @@ import { adminPayablesPath, adminReceivablesPath } from "../../../utils/route.ut
 import { useQuery } from "../../common/query.hook";
 import { useSegment } from "../../common/segment.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
+import { dashboardSalesQueryOf } from "../dashboard/dashboard.hook";
 
+import type { IQuerySpec } from "../../../models/common/query.model";
 import type { ISegmentOption } from "../../../models/common/segment.model";
 import type {
   IAttentionItem,
-  IDailySalesPoint,
   IDashboardOverview,
   IDueAlerts,
   OverviewPeriod,
@@ -99,6 +99,21 @@ const attentionItemsOf = (
   ].filter((item) => item.count > 0);
 };
 
+export const adminOverviewQueryOf = (
+  branch: string | null,
+  period: OverviewPeriod
+): IQuerySpec<IDashboardOverview> => [
+  scopedKey(dashboardOverviewKey, branch, period),
+  () => dashboardServices.getOverview(period, branch),
+];
+
+export const adminChecksQueryOf = (
+  branch: string | null
+): IQuerySpec<IVoucher[]> => [
+  scopedKey(dashboardChecksKey, branch),
+  () => dashboardServices.getDueChecks(dueHorizonDays, branch),
+];
+
 export const useAdminHomeHook = () => {
   const navigate = useNavigate();
   const { branch } = useBranchScopeHook();
@@ -108,25 +123,15 @@ export const useAdminHomeHook = () => {
   );
   const salesPeriod = overviewSalesPeriods[period];
 
-  const overviewQuery = useQuery<IDashboardOverview>(
-    scopedKey(dashboardOverviewKey, branch, period),
-    () => dashboardServices.getOverview(period, branch)
-  );
-
-  const salesQuery = useQuery<IDailySalesPoint[]>(
-    scopedKey(dashboardSalesKey, branch, salesPeriod),
-    () => dashboardServices.getSalesSeries(salesPeriod, branch)
-  );
+  const overviewQuery = useQuery(...adminOverviewQueryOf(branch, period));
+  const salesQuery = useQuery(...dashboardSalesQueryOf(branch, salesPeriod));
 
   const alertsQuery = useQuery<IDueAlerts>(
     scopedKey(dashboardAlertsKey, branch),
     () => dashboardServices.getDueAlerts(dueHorizonDays, branch)
   );
 
-  const checksQuery = useQuery<IVoucher[]>(
-    scopedKey(dashboardChecksKey, branch),
-    () => dashboardServices.getDueChecks(dueHorizonDays, branch)
-  );
+  const checksQuery = useQuery(...adminChecksQueryOf(branch));
 
   const overview = overviewQuery.data;
 

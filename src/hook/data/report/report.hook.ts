@@ -5,6 +5,7 @@ import {
   scopedKey,
 } from "../../../keys/query.keys";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
+import type { IQuerySpec } from "../../../models/common/query.model";
 import type {
   ILedgerRow,
   IPayable,
@@ -33,6 +34,38 @@ import { useReportSummaryHook } from "./report.summary.hook";
 
 const isUnpaid = (row: ILedgerRow) => row.status !== "paid";
 
+const branchFilterOf = (branch: string | null): ILedgerFilters =>
+  branch ? { branch } : {};
+
+export const reportTransactionQueryOf = (
+  type: ReportType,
+  branch: string | null
+): IQuerySpec<IDisbursement[]> => [
+  scopedKey(reportTransactionKey, type, branch),
+  () => {
+    const { from, to } = rangeFor(type);
+    return transactionServices.getAllWithVouchers({
+      dateFrom: from,
+      dateTo: to,
+      ...branchFilterOf(branch),
+    });
+  },
+];
+
+export const reportReceivableQueryOf = (
+  branch: string | null
+): IQuerySpec<IReceivable[]> => [
+  scopedKey(reportReceivableKey, branch),
+  () => receivableServices.getAll(branchFilterOf(branch)),
+];
+
+export const reportPayableQueryOf = (
+  branch: string | null
+): IQuerySpec<IPayable[]> => [
+  scopedKey(reportPayableKey, branch),
+  () => payableServices.getAll(branchFilterOf(branch)),
+];
+
 export const useReportHook = () => {
   const { value: type, setValue: setType } = useSearchParam<ReportType>(
     "type",
@@ -54,31 +87,19 @@ export const useReportHook = () => {
     ...summary
   } = useReportSummaryHook(isSummary);
 
-  const branchFilter: ILedgerFilters = branch ? { branch } : {};
   const isTransactionReport = transactionReportTypes.includes(type);
 
-  const transactionQuery = useQuery<IDisbursement[]>(
-    scopedKey(reportTransactionKey, type, branch),
-    () =>
-      transactionServices.getAllWithVouchers({
-        dateFrom: from,
-        dateTo: to,
-        ...branchFilter,
-      }),
-    { enabled: isTransactionReport }
-  );
+  const transactionQuery = useQuery(...reportTransactionQueryOf(type, branch), {
+    enabled: isTransactionReport,
+  });
 
-  const receivableQuery = useQuery<IReceivable[]>(
-    scopedKey(reportReceivableKey, branch),
-    () => receivableServices.getAll(branchFilter),
-    { enabled: type === "receivables" }
-  );
+  const receivableQuery = useQuery(...reportReceivableQueryOf(branch), {
+    enabled: type === "receivables",
+  });
 
-  const payableQuery = useQuery<IPayable[]>(
-    scopedKey(reportPayableKey, branch),
-    () => payableServices.getAll(branchFilter),
-    { enabled: type === "payables" }
-  );
+  const payableQuery = useQuery(...reportPayableQueryOf(branch), {
+    enabled: type === "payables",
+  });
 
   const transactions = transactionQuery.data ?? [];
   const receivables = (receivableQuery.data ?? []).filter(isUnpaid);

@@ -28,6 +28,7 @@ import { useFilterField } from "../../common/filter.hook";
 import { useQuery } from "../../common/query.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 
+import type { IQuerySpec } from "../../../models/common/query.model";
 import type {
   IAttentionItem,
   IDailySalesPoint,
@@ -35,7 +36,62 @@ import type {
   IDashboardSummary,
   IDueAlerts,
   IPendingReviews,
+  SalesPeriod,
 } from "../../../models/data/dashboard/dashboard.response";
+
+const dueAlertDays = 7;
+
+const profitOf = async (branch: string | null): Promise<IDashboardProfit> => {
+  const [current, previous] = await Promise.all(
+    [monthToDateRange(0), monthToDateRange(1)].map((range) =>
+      transactionServices.getBranchSummary({
+        dateFrom: range.from,
+        dateTo: range.to,
+        ...(branch ? { branch } : {}),
+      })
+    )
+  );
+  return {
+    current: branchSummaryNet(current),
+    previous: branchSummaryNet(previous),
+  };
+};
+
+export const dashboardSummaryQueryOf = (
+  branch: string | null
+): IQuerySpec<IDashboardSummary> => [
+  scopedKey(dashboardSummaryKey, branch),
+  () => dashboardServices.getSummary(branch),
+];
+
+export const dashboardSalesQueryOf = (
+  branch: string | null,
+  salesPeriod: SalesPeriod
+): IQuerySpec<IDailySalesPoint[]> => [
+  scopedKey(dashboardSalesKey, branch, salesPeriod),
+  () => dashboardServices.getSalesSeries(salesPeriod, branch),
+];
+
+export const dashboardAlertsQueryOf = (
+  branch: string | null
+): IQuerySpec<IDueAlerts> => [
+  scopedKey(dashboardAlertsKey, branch),
+  () => dashboardServices.getDueAlerts(dueAlertDays, branch),
+];
+
+export const dashboardReviewsQueryOf = (
+  branch: string | null
+): IQuerySpec<IPendingReviews> => [
+  scopedKey(dashboardReviewsKey, branch),
+  () => dashboardServices.getPendingReviews(branch),
+];
+
+export const dashboardProfitQueryOf = (
+  branch: string | null
+): IQuerySpec<IDashboardProfit> => [
+  scopedKey(dashboardProfitKey, branch),
+  () => profitOf(branch),
+];
 
 export const useDashboardHook = () => {
   const navigate = useNavigate();
@@ -50,44 +106,11 @@ export const useDashboardHook = () => {
   const salesPeriod = useDashboardStore((state) => state.salesPeriod);
   const setSalesPeriod = useDashboardStore((state) => state.setSalesPeriod);
 
-  const summaryQuery = useQuery<IDashboardSummary>(
-    scopedKey(dashboardSummaryKey, branch),
-    () => dashboardServices.getSummary(branch)
-  );
-
-  const salesQuery = useQuery<IDailySalesPoint[]>(
-    scopedKey(dashboardSalesKey, branch, salesPeriod),
-    () => dashboardServices.getSalesSeries(salesPeriod, branch)
-  );
-
-  const alertsQuery = useQuery<IDueAlerts>(
-    scopedKey(dashboardAlertsKey, branch),
-    () => dashboardServices.getDueAlerts(7, branch)
-  );
-
-  const reviewsQuery = useQuery<IPendingReviews>(
-    scopedKey(dashboardReviewsKey, branch),
-    () => dashboardServices.getPendingReviews(branch)
-  );
-
-  const profitQuery = useQuery<IDashboardProfit>(
-    scopedKey(dashboardProfitKey, branch),
-    async () => {
-      const [current, previous] = await Promise.all(
-        [monthToDateRange(0), monthToDateRange(1)].map((range) =>
-          transactionServices.getBranchSummary({
-            dateFrom: range.from,
-            dateTo: range.to,
-            ...(branch ? { branch } : {}),
-          })
-        )
-      );
-      return {
-        current: branchSummaryNet(current),
-        previous: branchSummaryNet(previous),
-      };
-    }
-  );
+  const summaryQuery = useQuery(...dashboardSummaryQueryOf(branch));
+  const salesQuery = useQuery(...dashboardSalesQueryOf(branch, salesPeriod));
+  const alertsQuery = useQuery(...dashboardAlertsQueryOf(branch));
+  const reviewsQuery = useQuery(...dashboardReviewsQueryOf(branch));
+  const profitQuery = useQuery(...dashboardProfitQueryOf(branch));
 
   const summary = summaryQuery.data;
   const cashIn = summary?.monthlyCashIn ?? 0;

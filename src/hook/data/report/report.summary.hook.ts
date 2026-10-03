@@ -17,31 +17,37 @@ import { useLedgerFilters } from "../../common/filter.hook";
 import { useQuery } from "../../common/query.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
-import type { ILedgerFilters } from "../../../models/common/filter.model";
 import type { IDateRange } from "../../../models/common/period.model";
+import type { IQuerySpec } from "../../../models/common/query.model";
 import type { IBranchSummaryData } from "../../../models/data/report/report.response";
+
+export const currentMonthRange = (): IDateRange => monthRangeOf(currentMonth());
+
+export const reportSummaryQueryOf = (
+  range: IDateRange,
+  branch: string | null
+): IQuerySpec<IBranchSummaryData> => [
+  scopedKey(reportSummaryKey, range.from, range.to, branch),
+  () =>
+    transactionServices.getBranchSummary({
+      dateFrom: range.from,
+      dateTo: range.to,
+      ...(branch ? { branch } : {}),
+    }),
+];
 
 export const useReportSummaryHook = (enabled: boolean) => {
   const { filters, setFilters } = useLedgerFilters("report-summary");
   const { branch, branchName } = useBranchScopeHook();
   const { branchName: branchNameOf } = useBranchListHook();
 
-  const monthRange = monthRangeOf(currentMonth());
+  const monthRange = currentMonthRange();
   const range: IDateRange = {
     from: filters.dateFrom ?? monthRange.from,
     to: filters.dateTo ?? monthRange.to,
   };
-  const rangeFilters: ILedgerFilters = {
-    dateFrom: range.from,
-    dateTo: range.to,
-    ...(branch ? { branch } : {}),
-  };
 
-  const query = useQuery<IBranchSummaryData>(
-    scopedKey(reportSummaryKey, range.from, range.to, branch),
-    () => transactionServices.getBranchSummary(rangeFilters),
-    { enabled }
-  );
+  const query = useQuery(...reportSummaryQueryOf(range, branch), { enabled });
 
   const summaryRows = query.data
     ? branchSummaryRows(query.data, branchNameOf)

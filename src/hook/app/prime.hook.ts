@@ -11,6 +11,7 @@ import {
   userDisplayNamesKey,
   userListKey,
 } from "../../keys/query.keys";
+import { derivePermissions } from "../../models/common/permission.model";
 import bankServices from "../../services/data/bank.services";
 import {
   customerServices,
@@ -19,16 +20,28 @@ import {
 import referenceServices from "../../services/data/reference.services";
 import userServices from "../../services/data/user.services";
 import { useNetworkStore } from "../../store/common/network.store";
-import { useQueryStore } from "../../store/common/query.store";
+import { selectEntry, useQueryStore } from "../../store/common/query.store";
 import {
+  selectBranchAccess,
+  selectCanScopeBranch,
   selectIsManager,
+  selectRole,
   selectUserId,
   useAccountStore,
 } from "../../store/data/account/account.store";
+import { useBranchStore } from "../../store/data/branch/branch.store";
+import { accessibleBranchesOf } from "../data/branch/branch.list.hook";
+import { scopedBranchOf } from "../data/branch/branch.scope.hook";
+import type { IQuerySpec } from "../../models/common/query.model";
+import type { IBranch } from "../../models/data/branch/branch.response";
 
-type ILookupQuery = [string, () => Promise<unknown>];
+const noBranches: readonly IBranch[] = [];
 
-const sharedLookups: readonly ILookupQuery[] = [
+const selectBranches = selectEntry<IBranch[]>(branchListKey);
+
+const ignoreUnavailableViews = () => undefined;
+
+const sharedLookups: readonly IQuerySpec[] = [
   [branchListKey, referenceServices.getBranches],
   [farmSectionListKey, referenceServices.getFarmSections],
   [expenseCategoryListKey, referenceServices.getAllExpenseCategories],
@@ -39,12 +52,12 @@ const sharedLookups: readonly ILookupQuery[] = [
   [supplierListKey, () => supplierServices.getList()],
 ];
 
-const managerUserLookup: ILookupQuery = [
+const managerUserLookup: IQuerySpec = [
   userListKey,
   () => userServices.getList(),
 ];
 
-const staffUserLookup: ILookupQuery = [
+const staffUserLookup: IQuerySpec = [
   userDisplayNamesKey,
   () => userServices.getDisplayNames(),
 ];
@@ -64,4 +77,45 @@ export const usePrimeLookupsHook = () => {
       isManager ? managerUserLookup : staffUserLookup,
     ]);
   }, [online, userId, isManager]);
+};
+
+export const usePrimeViewsHook = () => {
+  const online = useNetworkStore((state) => state.online);
+  const userId = useAccountStore(selectUserId);
+  const role = useAccountStore(selectRole);
+  const access = useAccountStore(selectBranchAccess);
+  const canScope = useAccountStore(selectCanScopeBranch);
+  const stored = useBranchStore((state) => state.branchFilter);
+  const allBranches = useQueryStore(selectBranches).data;
+
+  const branches = accessibleBranchesOf(allBranches ?? noBranches, access);
+  const branch = scopedBranchOf(stored, canScope, branches);
+  const branchSlugs = branches.map((item) => item.slug).join(",");
+  const branchesLoaded = allBranches !== undefined;
+
+  useEffect(() => {
+    if (!online || !userId || !branchesLoaded) return;
+
+    let superseded = false;
+
+    void import("./prime.view.hook")
+      .then(({ viewQueriesOf }) => {
+        if (superseded) return;
+
+        const store = useQueryStore.getState();
+        const loaded = selectBranches(store).data ?? noBranches;
+        store.warm(
+          viewQueriesOf({
+            permissions: derivePermissions(role),
+            branch,
+            branches: accessibleBranchesOf(loaded, access),
+          })
+        );
+      })
+      .catch(ignoreUnavailableViews);
+
+    return () => {
+      superseded = true;
+    };
+  }, [online, userId, role, access, branch, branchSlugs, branchesLoaded]);
 };

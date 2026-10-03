@@ -20,7 +20,12 @@ import {
   voucherPaginationKey,
 } from "../../../keys/table.keys";
 import type { ILedgerFilters } from "../../../models/common/filter.model";
-import type { IPaginationResponse } from "../../../models/common/pagination.model";
+import type {
+  IPaginationRequest,
+  IPaginationResponse,
+} from "../../../models/common/pagination.model";
+import type { IQuerySpec } from "../../../models/common/query.model";
+import type { ISortOption } from "../../../models/common/table.model";
 import type { IDateRange } from "../../../models/common/period.model";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
 import {
@@ -35,7 +40,11 @@ import {
   useAccountStore,
 } from "../../../store/data/account/account.store";
 import { isDisbursementEditLocked } from "../../../utils/disbursement.utils";
-import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
+import {
+  filterPeriodLabel,
+  pageFiltersOf,
+  scopedFilters,
+} from "../../../utils/filter.utils";
 import { printReport } from "../../../utils/print.utils";
 import { disbursementPrintDocument } from "../../../utils/report.utils";
 import { vouchersPath } from "../../../utils/route.utils";
@@ -63,12 +72,39 @@ export const pendingVoucherCount = (rows: readonly IDisbursement[]) =>
 export const sumDisbursements = (rows: readonly IDisbursement[]) =>
   sumCounted(rows);
 
+export const disbursementListQueryOf = (
+  kind: DisbursementKind,
+  filters: ILedgerFilters,
+  pagination: IPaginationRequest,
+  sortOption: ISortOption | undefined
+): IQuerySpec<IPaginationResponse<IDisbursement>> => [
+  scopedKey(
+    disbursementScopeOf(kind),
+    JSON.stringify(filters),
+    pagination.pageNumber,
+    pagination.pageSize,
+    sortOption?.key
+  ),
+  () =>
+    transactionServices.getDisbursementList(kind, filters, {
+      ...pagination,
+      sort: sortOption,
+    }),
+];
+
+export const disbursementSummaryQueryOf = (
+  kind: DisbursementKind,
+  filters: ILedgerFilters
+): IQuerySpec<IDisbursement[]> => [
+  scopedKey(disbursementSummaryKeyOf(kind), JSON.stringify(filters)),
+  () => transactionServices.getDisbursementAll(kind, filters),
+];
+
 export const useDisbursementListHook = (
   kind: DisbursementKind,
   title: string
 ) => {
   const scope = disbursementScopeOf(kind);
-  const summaryScope = disbursementSummaryKeyOf(kind);
 
   const formModal = useModal(disbursementFormModalKey(scope));
   const editModal = useModal<IDisbursement>(disbursementEditModalKey(scope));
@@ -100,29 +136,15 @@ export const useDisbursementListHook = (
   const printModal = useModal(printModalKey);
   const form = useDisbursementFormHook(kind);
 
-  const effectiveFilters = scopedFilters(filters, scopeBranch);
-  const summaryFilters: ILedgerFilters = {
-    ...effectiveFilters,
-    voucherStatus: undefined,
-  };
-  const pageRequest = { ...pagination, sort: sortOption };
+  const effectiveFilters = pageFiltersOf(filters, scopeBranch, "voucherStatus");
 
-  const listQuery = useQuery<IPaginationResponse<IDisbursement>>(
-    scopedKey(
-      scope,
-      JSON.stringify(effectiveFilters),
-      pagination.pageNumber,
-      pagination.pageSize,
-      sortKey
-    ),
-    () =>
-      transactionServices.getDisbursementList(kind, effectiveFilters, pageRequest),
+  const listQuery = useQuery(
+    ...disbursementListQueryOf(kind, effectiveFilters, pagination, sortOption),
     { keepPrevious: true }
   );
 
-  const summaryQuery = useQuery<IDisbursement[]>(
-    scopedKey(summaryScope, JSON.stringify(summaryFilters)),
-    () => transactionServices.getDisbursementAll(kind, summaryFilters)
+  const summaryQuery = useQuery(
+    ...disbursementSummaryQueryOf(kind, pageFiltersOf(filters, scopeBranch))
   );
 
   const rows = useWithPendingRows(

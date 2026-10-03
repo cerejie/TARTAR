@@ -11,6 +11,11 @@ export interface IQueryState<T> extends IQueryEntry<T> {
   refetch: () => void;
 }
 
+export type IQuerySpec<T = unknown> = readonly [
+  key: string,
+  fetcher: () => Promise<T>,
+];
+
 export interface IQueryOptions {
   enabled?: boolean;
   keepPrevious?: boolean;

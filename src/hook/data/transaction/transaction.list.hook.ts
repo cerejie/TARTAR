@@ -17,7 +17,13 @@ import {
   transactionSummaryKey,
 } from "../../../keys/query.keys";
 import type { IFieldSection } from "../../../models/common/field.model";
-import type { IPaginationResponse } from "../../../models/common/pagination.model";
+import type { ILedgerFilters } from "../../../models/common/filter.model";
+import type {
+  IPaginationRequest,
+  IPaginationResponse,
+} from "../../../models/common/pagination.model";
+import type { IQuerySpec } from "../../../models/common/query.model";
+import type { ISortOption } from "../../../models/common/table.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { ITransactionInput } from "../../../models/data/transaction/transaction.request";
 import { countedAmountOf } from "../../../models/data/transaction/transaction.response";
@@ -32,7 +38,7 @@ import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
-import { filterPeriodLabel, scopedFilters } from "../../../utils/filter.utils";
+import { filterPeriodLabel, pageFiltersOf } from "../../../utils/filter.utils";
 import { todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
 import { derivePaymentValues } from "../../../utils/payment.utils";
@@ -86,6 +92,28 @@ const normalize = (values: ITransactionInput): ITransactionInput => ({
   supplier_id: supplierTypes.includes(values.type) ? values.supplier_id : null,
 });
 
+export const transactionListQueryOf = (
+  filters: ILedgerFilters,
+  pagination: IPaginationRequest,
+  sortOption: ISortOption | undefined
+): IQuerySpec<IPaginationResponse<ITransaction>> => [
+  scopedKey(
+    transactionListKey,
+    JSON.stringify(filters),
+    pagination.pageNumber,
+    pagination.pageSize,
+    sortOption?.key
+  ),
+  () => transactionServices.getList(filters, { ...pagination, sort: sortOption }),
+];
+
+export const transactionSummaryQueryOf = (
+  filters: ILedgerFilters
+): IQuerySpec<IDisbursement[]> => [
+  scopedKey(transactionSummaryKey, JSON.stringify(filters)),
+  () => transactionServices.getAllWithVouchers(filters),
+];
+
 export const useTransactionListHook = () => {
   const formModal = useModal(transactionFormModalKey);
   const { pagination, setPagination, goToPage } = usePagination(
@@ -109,24 +137,13 @@ export const useTransactionListHook = () => {
   const { labelOf: incomeSourceLabelOf } = useIncomeSourceListHook();
   const { branch: scopeBranch } = useBranchScopeHook();
 
-  const effectiveFilters = scopedFilters(filters, scopeBranch);
-  const pageRequest = { ...pagination, sort: sortOption };
-  const listQuery = useQuery<IPaginationResponse<ITransaction>>(
-    scopedKey(
-      transactionListKey,
-      JSON.stringify(effectiveFilters),
-      pagination.pageNumber,
-      pagination.pageSize,
-      sortKey
-    ),
-    () => transactionServices.getList(effectiveFilters, pageRequest),
+  const effectiveFilters = pageFiltersOf(filters, scopeBranch);
+  const listQuery = useQuery(
+    ...transactionListQueryOf(effectiveFilters, pagination, sortOption),
     { keepPrevious: true }
   );
 
-  const summaryQuery = useQuery<IDisbursement[]>(
-    scopedKey(transactionSummaryKey, JSON.stringify(effectiveFilters)),
-    () => transactionServices.getAllWithVouchers(effectiveFilters)
-  );
+  const summaryQuery = useQuery(...transactionSummaryQueryOf(effectiveFilters));
 
   const createMutation = useMutation(
     (values: ITransactionInput) =>
