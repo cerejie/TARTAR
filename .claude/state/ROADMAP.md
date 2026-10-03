@@ -181,10 +181,23 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   skeleton or blank captures (harness timing; Daily, Cash Flow, Receivables and phone Monthly rendered). Swept,
   device unconfirmed.
 
+- [x] V7 Ledger modals (UI-14, UI-15, UI-16) → Development v2.63: `src/hook/data/ledger/ledger.list.hook.ts`
+  `paymentRowLabel` labels each allocation field "<Receivable | Payable> <reference> · Amount to apply" (falls back to
+  the row number when there is no reference); `components/ledger/CustomerInfoTag.tsx` "Not filled" → "No contact
+  details"; `components/ledger/{CustomerLedgerView,SupplierLedgerView}.tsx` — Date / Due date / Reference cells are
+  `nowrapCell` (fixed 120 px widths dropped) and "Created by" is only a column when a row on the page resolves a creator
+  (same rule as `LedgerPaymentsTable`), so the table fits `ModalSize` xl without widening. Harness:
+  `.claude/skills/deep-critique/scripts/sweep.mjs` waits `route.settle ?? 1500` after a tab click, so V8 captures loaded
+  Reports tabs. Build + lint clean. Swept admin desk + phone, `/receivables` + `/payables` (120 surfaces, 0 failed, 19
+  sheets). Looked: sheets admin-desk-06, admin-phone-04; full shots admin desk menu-item-all-record-payment
+  ("Receivable C-RACE-500-a0eb · Amount to apply"), menu-item-by-customer-view-ledger (every row on one line, no
+  "Created by" column), toolbar-Customer ledger + phone card-by-customer-0 ("No contact details"). The sweep opens no
+  supplier ledger detail and no payable record-payment: those are compiled, visuals unconfirmed. Swept, device
+  unconfirmed.
+
 ## Next
-1. V7 Ledger modals.
-2. V8 Full re-sweep.
-3. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. V8 Full re-sweep.
+2. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
@@ -199,7 +212,7 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   user not returned by `user_display_names`. V1 hides the dash either way.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.62 (V6 reports) · Uncommitted: none · Last check:
-V6 sweep admin phone+tabL+desk (/reports only), 2026-10-03. Autopilot running from V7. A sweep of more than one role or
-device can exceed a 10-minute background timeout — run it with `timeout` 3600000 (the four-device admin sweep
-took about 25 minutes).
+Branch: mobilel-app-native · Last commit Development v2.63 (V7 ledger modals) · Uncommitted: none · Last check:
+V7 sweep admin desk+phone (/receivables + /payables), 2026-10-03. Autopilot running from V8. A sweep of more than one
+role or device can exceed a 10-minute background timeout — run it with `timeout` 3600000 (the four-device admin sweep
+took about 25 minutes; the full V8 sweep is three roles × four devices, and `/reports` tabs now wait 4 s each).

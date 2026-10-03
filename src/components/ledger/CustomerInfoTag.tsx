@@ -9,7 +9,7 @@ import type { StatusColor } from "../../models/common/view.model";
 const infoTags: Record<PartyInfoState, { color: StatusColor; label: string }> = {
   complete: { color: "positive", label: "Complete" },
   partial: { color: "warning", label: "Incomplete" },
-  none: { color: "default", label: "Not filled" },
+  none: { color: "default", label: "No contact details" },
 };
 
 type IProps = {

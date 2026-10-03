@@ -35,7 +35,11 @@ import {
   ledgerSectionTitle,
   ledgerTitle,
 } from "../../styles/ledger/ledger.styles";
-import { dataTableRowOverdue } from "../../styles/table/table.styles";
+import {
+  dataTableRowOverdue,
+  nowrapCell,
+} from "../../styles/table/table.styles";
+import { isEmptyDetailValue } from "../../utils/detail.utils";
 import { formatDate, formatMoney } from "../../utils/format.utils";
 import {
   ledgerRecordSubtitleOf,
@@ -196,6 +200,10 @@ const CustomerLedgerView = () => {
         },
       ];
 
+  const showCreatedBy =
+    permissions.isManager &&
+    rows.some((row) => !isEmptyDetailValue(userNameOf(row.created_by)));
+
   const statusColumn: IDataTableColumn<IReceivable> = {
     title: "Status",
     mobile: "status",
@@ -240,13 +248,13 @@ const CustomerLedgerView = () => {
     {
       title: "Date",
       dataIndex: "created_at",
-      width: 120,
+      className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     {
       title: "Due date",
       dataIndex: "due_date",
-      width: 120,
+      className: nowrapCell,
       render: (value: string) => formatDate(value),
     },
     {
@@ -259,6 +267,7 @@ const CustomerLedgerView = () => {
       title: "Reference",
       mobile: "subtitle",
       dataIndex: "reference_number",
+      className: nowrapCell,
       render: (value: string | null) => value || "—",
     },
     {
@@ -282,7 +291,7 @@ const CustomerLedgerView = () => {
       render: (_, row) => formatMoney(ledgerBalance(row)),
     },
     statusColumn,
-    ...(permissions.isManager
+    ...(showCreatedBy
       ? [
           {
             title: "Created by",

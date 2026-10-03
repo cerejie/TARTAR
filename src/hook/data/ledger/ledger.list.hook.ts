@@ -115,8 +115,8 @@ const summarize = (rows: readonly ILedgerRow[]): ILedgerSummary => {
   };
 };
 
-const paymentRowLabel = (row: ILedgerRow, index: number) =>
-  row.reference_number?.trim() || `Record ${index + 1}`;
+const paymentRowLabel = (title: string, row: ILedgerRow, index: number) =>
+  `${title} ${row.reference_number?.trim() || index + 1} · Amount to apply`;
 
 const paymentRowHint = (row: ILedgerRow) =>
   `Due ${formatDate(row.due_date)} · Balance ${formatMoney(ledgerBalance(row))}`;
@@ -270,7 +270,7 @@ export const useLedgerListHook = <
         },
         ...paymentRows.map((row, index) => ({
           name: `amounts.${row.id}` as const,
-          label: paymentRowLabel(row, index),
+          label: paymentRowLabel(config.title, row, index),
           hint: paymentRowHint(row),
           type: "amount" as const,
           prefix: "₱",

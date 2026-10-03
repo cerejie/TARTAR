@@ -333,3 +333,12 @@
 - Tab strip → no change to `ContextSwitch`; freeing the row is enough for all eight tabs at 1440, and at 1180 it scrolls (the roadmap accepts "or scrolls"; the chip clip is the locked design)
 - UI-07 → per-table `cardMetaLimit` of 3 rather than raising the global limit of 2 (a global change would alter every card with three metas); the card then needs no detail sheet
 - Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), tests 107 / 107; swept admin phone + tabL + desk on /reports 30 / 0 failed, 6 sheets; looked at four sheets and one full shot; some report-tab shots still skeleton (harness timing); swept, device unconfirmed
+
+## 2026-10-03 — V7 Ledger modals → Development v2.63
+- File plan → label in `ledger.list.hook.ts`, tag copy in `CustomerInfoTag`, column changes in the two ledger views (Simple tier, UI copy / layout only, reversible)
+- UI-14 label → one field label "<Receivable | Payable> <reference> · Amount to apply" (a field renders a single label; the hint line keeps due date and balance); `PaymentAllocationModal` left alone (it is a table with headed columns, not cited)
+- UI-15 → "No contact details" (the audit's wording); "Complete" / "Incomplete" unchanged
+- UI-16 → nowrap cells + drop the "Created by" column when no row resolves a creator, rather than widening the modal (already `ModalSize` xl, the largest; a new size would be a new token for one screen)
+- UI-16 scope → `SupplierLedgerView` has the same columns and the same defect, fixed alongside (V5 precedent)
+- Harness → sweep.mjs post-tab-click wait uses `route.settle ?? 1500` (conductor's instruction, for V8)
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing); swept admin desk + phone on /receivables + /payables 120 / 0 failed, 19 sheets; looked at two sheets and four full shots; supplier ledger detail and payable record-payment compiled, visuals unconfirmed; swept, device unconfirmed

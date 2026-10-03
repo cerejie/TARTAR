@@ -124,7 +124,7 @@ const run = async (role, device) => {
         const tab = page.locator(sel.tabs).nth(tabIndex);
         await tab.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => {});
         await tab.click({ force: true }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await page.waitForTimeout(route.settle ?? 1500);
         await shoot(route.path, `tab-${tabName}`, "tab");
       }
       if (device.cards) {
