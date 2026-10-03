@@ -47,6 +47,11 @@ Settle the user's answers to the Visual roadmap's Open list (2026-10-03) plus th
 
 ## Decisions locked
 Given by the user on 2026-10-03 unless marked otherwise.
+- Mobile tables (2026-10-04): rows render as a native-style list, not cards, keeping the important information.
+- Receivables / Payables (2026-10-04): a Payments tab replaces By customer / By supplier; party grouping lives in the
+  Customer / Supplier Ledger.
+- Mobile forms (2026-10-04): form modals must feel like a native app on iOS and Android — responsive inputs and
+  dropdowns, the keyboard never hiding the field or the action, no layout jumps.
 - Collection: remove the term everywhere — transaction type, labels, enums, filters, forms, reports, print documents,
   tests, route descriptions. Customer payments are the collection; Cash Flow "Cash In" counts customer payments, not
   collection transactions. Existing `collection` rows are production data: never drop them; converting them or
@@ -131,6 +136,40 @@ Given by the user on 2026-10-03 unless marked otherwise.
   (it already reads `vouchers.check_number`) and leave the input for after approval, recorded in USER DECISIONS.
   Check: sweep ROLES=admin,emp DEVICES=desk,phone on `/purchases`, `/vouchers`, `/payables`; popup probe of a check
   voucher print.
+- M1 Mobile list rows instead of cards (user request 2026-10-04, mid-run): on mobile, table rows render as a modern
+  native list (iOS / Android list style: full-width rows with hairline separators, title + key value on the first
+  line, one muted secondary line, trailing amount / status, chevron when pressable, no card chrome per row) instead
+  of a card per row — still showing the important information. One change in the shared primitive
+  (`components/common/table/DataTableCards.tsx`, `styles/table/table.styles.ts`, `IDataTableColumn` card roles in
+  `models/common/table.model.ts`) so every table follows; the detail sheet (`RecordDetailSheet`) keeps the full
+  record. Applies wherever cards render today (phone + tablet portrait, per the mobile design memory — decide, and log
+  it). Keep the four data states (skeleton rows become list skeletons), selection / press feedback, overdue danger
+  tint, and the V-phase rules (Due prefix, cardMetaLimit, chevron). Check: deep-critique sweep ROLES=admin,emp,acc
+  DEVICES=phone,tabP on every list route; look at every sheet.
+- M2 Receivables / Payables tabs (user request 2026-10-04): replace the "By customer" (receivables) and "By supplier"
+  (payables) tabs with a "Payments" tab; the payments table that today sits below the records moves into that tab,
+  so each tab shows one table. Reason given by the user: customer / supplier grouping already lives in the Customer
+  Ledger / Supplier Ledger, so the by-party tabs are redundant. Files: the receivables / payables views and their
+  tab definitions (`components/ledger/**`, `LedgerRecordsTable.tsx`, `PayableRecordsTable.tsx`,
+  `LedgerPaymentsTable.tsx`, `LedgerPartiesTable.tsx` if it only served those tabs), `hook/data/ledger/*.list.hook.ts`,
+  the status / tab enum, `hook/app/prime.view.hook.ts` (prime the Payments tab instead of the by-party tab). Delete
+  dead code the removal leaves (no orphan components, keys or styles). Check: sweep ROLES=admin,emp,acc
+  DEVICES=phone,desk on `/receivables`, `/payables`; look at each tab.
+- M3 Mobile form interaction (user report 2026-10-04: on iOS and Android, filling forms in modals is "very
+  destructive" — inputs and dropdowns not responsive to taps, the keyboard covers most of the screen, other
+  components jump around). Start with a deep-critique pass of the form modals on phone (`EntityFormModal`, `AppModal`,
+  `FormField`, the select / combobox / date picker controls, the phone sheet presentation) — mobile WebKit / Chrome
+  facts to check: inputs under 16px font-size trigger iOS zoom; `vh` / fixed footers vs the virtual keyboard
+  (`visualViewport`, `interactive-widget=resizes-content` in the viewport meta, `dvh` / `svh`); a focused field
+  scrolled into view above the keyboard; React Aria popovers (Select / ComboBox / DatePicker) inside a modal sheet on
+  touch — use the native-feeling tray / sheet presentation on phones rather than a floating popover; touch targets
+  ≥ 44px; `inputMode` / `enterKeyHint` / `autoComplete` per field type (numeric keypad for amounts, date fields);
+  body scroll lock without the iOS jump; the footer action staying reachable. Then fix in the shared primitives so
+  every form modal benefits — no per-form patches. Check: Playwright phone emulation (iPhone and Pixel devices,
+  `hasTouch`, `isMobile`) — tap every field type in the purchase, expense, sale, transaction and record-payment forms,
+  open each dropdown / date picker, simulate the keyboard by shrinking the viewport / `visualViewport` height, and
+  screenshot; look at the shots. Real iOS / Android keyboard behaviour stays unconfirmed — log "probed in emulation,
+  device unconfirmed".
 - O1 Offline variants of the paged lists: page 2+, non-default sorts, custom date / search filters for transactions,
   sales, purchases, expenses, vouchers, receivables, payables, payments. Expected shape (decide): while online the
   primer also caches the unpaged dataset each list can be derived from (the `getAll` the reports already use, per
@@ -225,11 +264,14 @@ Given by the user on 2026-10-03 unless marked otherwise.
 
 ## Next
 1. P3 Purchase check number.
-2. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
-3. O2 Offline branch scopes, details and month change.
-4. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
+2. M1 Mobile list rows instead of cards.
+3. M2 Receivables / Payables: Payments tab replaces By customer / By supplier.
+4. M3 Mobile form interaction (iOS / Android keyboard, inputs, dropdowns in modals).
+5. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
+6. O2 Offline branch scopes, details and month change.
+7. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
    exercise them: the QA accounts see one branch).
-5. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+8. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
