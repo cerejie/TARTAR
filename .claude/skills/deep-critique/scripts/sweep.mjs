@@ -44,8 +44,12 @@ const run = async (role, device) => {
     if (["GET", "HEAD", "OPTIONS"].includes(method) || allow.test(request.url())) return route.continue();
     return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
   });
-  context.on("page", async (popup) => { await popup.waitForTimeout(800).catch(() => {}); await popup.close().catch(() => {}); });
   const page = await context.newPage();
+  context.on("page", async (popup) => {
+    if (popup === page) return;
+    await popup.waitForTimeout(800).catch(() => {});
+    await popup.close().catch(() => {});
+  });
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message.split("\n")[0]));
 
@@ -114,10 +118,12 @@ const run = async (role, device) => {
     const tabs = page.locator(sel.tabs);
     const tabCount = Math.min(await tabs.count(), 6);
     const tabNames = [];
-    for (let i = 0; i < tabCount; i++) tabNames.push((await tabs.nth(i).innerText()).trim());
-    for (const tabName of tabCount ? tabNames : [""]) {
+    for (let i = 0; i < tabCount; i++) tabNames.push((await tabs.nth(i).innerText()).trim().replace(/\s+/g, " "));
+    for (const [tabIndex, tabName] of (tabCount ? tabNames : [""]).entries()) {
       if (tabName) {
-        await page.locator(sel.tabs).filter({ hasText: tabName }).first().click({ force: true }).catch(() => {});
+        const tab = page.locator(sel.tabs).nth(tabIndex);
+        await tab.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => {});
+        await tab.click({ force: true }).catch(() => {});
         await page.waitForTimeout(1500);
         await shoot(route.path, `tab-${tabName}`, "tab");
       }
@@ -173,7 +179,7 @@ for (const [key, entries] of groups) {
   for (let start = 0; start < entries.length; start += perSheet) {
     const chunk = entries.slice(start, start + perSheet);
     const html = `<html><body style="margin:0;font:12px sans-serif;background:#888;display:grid;grid-template-columns:repeat(${columns},1fr);gap:6px;padding:6px">${chunk
-      .map((e) => `<figure style="margin:0;background:#fff"><figcaption style="padding:3px 5px;background:#222;color:#fff">#${manifest.indexOf(e)} ${e.route} · ${e.surface}</figcaption><img style="width:100%;display:block" src="${pathToFileURL(`${out}/${e.shot}`).href}"></figure>`)
+      .map((e) => `<figure style="margin:0;background:#fff"><figcaption style="padding:3px 5px;background:#222;color:#fff">#${manifest.indexOf(e)} ${e.route} · ${e.surface}</figcaption><img style="width:100%;display:block" src="data:image/png;base64,${readFileSync(`${out}/${e.shot}`).toString("base64")}"></figure>`)
       .join("")}</body></html>`;
     await sheetPage.setContent(html, { waitUntil: "load" });
     const file = `${out}/sheet-${key}-${String(start / perSheet + 1).padStart(2, "0")}.png`;

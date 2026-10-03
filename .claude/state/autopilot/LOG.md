@@ -272,3 +272,11 @@
 - More precache entries (90 → 123, +20 KiB) → accepted (the same code split into smaller files; every chunk is still precached, so offline keeps working)
 - Next item is USER DECISIONS → STOP written, no next phase
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing), yarn test 92 / 92; entry 1,292.70 → 703.35 kB, JS before sign-in 1,292.70 → 1,203.60 kB (gzip 389.82 → 364.93); compiled, visuals unconfirmed
+
+## 2026-10-03 — Visual audit (conductor, Stage 1) → Development v2.56
+- Archived the Audit fixes roadmap as ROADMAP-AUDIT-2026-10-03-DONE.md (SEC-01 / SEC-02 shipped in v2.54; migration 32 waits for the production deploy)
+- qaacc1 password reset → not needed (signed in with admin12345)
+- Sweep harness bugs → fixed in sweep.mjs (popup-closer closed the main page; file:// shots blank in contact sheets; tabs matched by text) — harness only, no app code
+- Findings → UI-01 … UI-17, none needs a migration or a business rule; phases V1–V8 ordered by severity, carried USER DECISIONS kept as the final hard-stop
+- Unresolved "Recorded by" user → hide the row (locked in the roadmap; overturnable)
+- Verification: 1,221 surfaces, 0 failed, 183 / 183 contact sheets viewed; app code untouched, so build / lint not rerun

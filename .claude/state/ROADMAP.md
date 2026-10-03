@@ -1,206 +1,132 @@
-# ROADMAP — Audit fixes (deep critique 2026-10-03)
+# ROADMAP — Visual fixes (visual dry run 2026-10-03)
 Updated: 2026-10-03
 
-The Native-feel mobile PWA roadmap is parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md` (device test
-script, QA reset list, merge). When this roadmap finishes, delete this file and rename that one back.
+The previous roadmap (Audit fixes, F1–F9 + SEC-01/SEC-02) is archived as
+`.claude/state/ROADMAP-AUDIT-2026-10-03-DONE.md`. The Native-feel mobile PWA roadmap stays parked as
+`.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes, delete this file and rename that one back.
 
 ## Goal
-Fix every finding of `.claude/state/AUDIT-2026-10-03.md` that needs no schema change and no new business
-rule, one phase per commit, `yarn build` + `yarn lint` clean after each. Findings that need a migration
-or a rule are handed to the user as the last Next item.
+Fix every finding of `.claude/state/AUDIT-VISUAL-2026-10-03.md` (UI-01 … UI-17), one phase per shared primitive
+or screen group, ordered by severity, `yarn build` + `yarn lint` clean after each, each phase confirmed by
+re-sweeping the surfaces it touched and looking at the shots. No finding needs a migration or a new business
+rule; the hard-stop items at the end are carried over from the archived roadmap.
 
 ## Session protocol
-1. Read this file, `git status --short`, start `Next` item 1. Load `build` (+ `tartar-shadcn` and
-   `shadcn` docs for UI). Read only the audit section the phase cites — never the whole audit.
-2. One phase per conversation / worker. Under autopilot, decide the file plan with `decision-making`
-   and do not wait for a go; otherwise present the plan and wait.
-3. No migrations, no Edge Function deploys, no new business rules in F1–F9. A phase that turns out to
-   need one hard-stops.
-4. Close a phase: build + lint clean, tick Done with paths, rewrite Next, update State, commit as
-   `Development v<X.Y>` (`git log --oneline --grep="^Development v" -1` + 0.1).
-5. Visuals are never confirmed by a build: log "compiled, visuals unconfirmed".
+1. Read this file, `git status --short`, start `Next` item 1. Load `build` (+ `tartar-shadcn` and `shadcn` docs
+   for UI). Read only the audit sections the phase cites (by finding ID) — never the whole audit.
+2. One phase per conversation / worker. Under autopilot, decide the file plan with `decision-making` and do not
+   wait for a go; otherwise present the plan and wait.
+3. No migrations, no Edge Function deploys, no new business rules. A phase that turns out to need one
+   hard-stops.
+4. Close a phase: build + lint clean, then the visual check below, tick Done with paths, rewrite Next, update
+   State, commit as `Development v<X.Y>` (`git log --oneline --grep="^Development v" -1` + 0.1).
+5. Visual check (every phase): the dev server must answer on http://localhost:5199 (if not:
+   `yarn dev --port 5199 --strictPort` in the background). Run
+   `PW=C:/Users/CER/AppData/Local/Temp/tartar-pw/node_modules/playwright-core/index.mjs OUT=C:/Users/CER/AppData/Local/Temp/tartar-sweep-<phase> SWEEP_PASSWORD=admin12345 ROLES=<roles> DEVICES=<devices> node .claude/skills/deep-critique/scripts/sweep.mjs .claude/state/audit/sweep.config.json`
+   (if playwright-core is missing: `npm i playwright-core` inside `C:/Users/CER/AppData/Local/Temp/tartar-pw`,
+   never in the project). Open every contact sheet of the run whose captions match the phase's routes, plus
+   the full-size shots of the surfaces the phase fixed. Log "looked: <sheets>, <result>" in Done. Writes are
+   faked by the sweep — toasts like "changed nothing" are harness artifacts. A shot that still shows the
+   defect means the phase is not done.
+6. Visuals beyond the sweep (real device, safe areas, keyboard) stay unconfirmed: log "swept, device unconfirmed".
 
 ## Decisions locked
-Taken by Claude with the decision-making skill on 2026-10-03, standing in for the user — not given by the
-user. Any of them may be overturned; say so and the phase is replanned.
-- DATA-01 fix now → a client "fetch every page" helper, not aggregate RPCs (no migration needed, correct at
-  any row cap; RPCs stay an Open item for the user).
-- Query store → fix in place (ordering, refetch scope, cache bound); the TanStack Query migration is not
-  started here (larger, and the offline queue behaviour must survive it).
-- Security headers → ship the plain headers enforced and the CSP as `Content-Security-Policy-Report-Only`;
-  enforcing it waits for a clean preview console (a wrong CSP blanks the production app).
-- SEC-01 → client-side safeguard only in F4 (confirm copy); the real fix is a migration, Open.
-- Tests → vitest as a devDependency, pure utils only, characterising current behaviour. Why a new
-  dependency: the repo has no test runner at all, and vitest reuses the existing Vite config.
-- Technical-debt observations (long hooks/components, duplicate ledger service methods) are NOT scheduled
-  (CLAUDE.md: convert when touched, never wholesale).
-- L1 Every CLAUDE.md convention holds (no comments, no useState, class strings in *.styles.ts, tokens only
-  in theme.css, useConfirm, writes through runWrite, Transactions is the reference).
+Taken by Claude on 2026-10-03, standing in for the user — not given by the user. Any of them may be overturned.
+- Empty detail values are hidden, not dashed; "—" stays only in table cells, where columns must align.
+- An unresolved user id hides the "Recorded by" row (no "Former user" label) until the user decides otherwise.
+- Edit history formats values with the existing formatters and label maps; no new audit columns.
+- The scrolling-chip clip on phones is the `ContextSwitch` design (memory: mobile design decisions 2026-10) — not
+  changed.
+- L1 Every CLAUDE.md convention holds (no comments, no useState, class strings in *.styles.ts, tokens only in
+  theme.css, useConfirm, writes through runWrite, Transactions is the reference).
 
 ## Phases
-- F1 Query ordering (QA-01): per-key request sequence so only the newest response writes; share the
-  in-flight promise for one key. `store/common/query.store.ts`.
-- F2 Refetch scope + cache bound (PERF-01, PERF-02): `invalidate` / `refetchAll` rerun watched keys and the
-  primed offline set only, and forget fetchers of unwatched variants; trim the IndexedDB cache on hydrate
-  (age/count bound). Offline reload and `prime` must still work. `store/common/query.store.ts`,
-  `utils/idb.utils.ts`, `hook/app/prime.hook.ts`, `hook/app/realtime.hook.ts`.
-- F3 Complete reads (DATA-01): one helper that pages a query to the end on a stable order; use it in every
-  aggregate and report read and remove `reportLimit`. `utils/supabase.utils.ts` (or a new
-  `utils/page.utils.ts`), `services/data/{dashboard,ledger,transaction}.services.ts`, and any other
-  service `getAll` (check payment, voucher, sale).
-- F4 Client security hardening (SEC-03, SEC-01 safeguard, SEC-04): `vercel.json` headers + report-only CSP;
-  password-reset approval confirm states when it was requested and to verify with the person first
-  (`hook/data/user/user.manage.hook.ts`); escape `%`, `_`, `\` in `ilike` terms (`utils/filter.utils.ts`).
-- F5 Failure experience (UX-01, QA-03, UX-03): map server errors to plain copy in `toError`
-  (`utils/supabase.utils.ts`, `utils/error.utils.ts`); `onSuccess` outside the write's failure path
-  (`hook/common/mutation.hook.ts`); no push offer while offline (`hook/common/push.hook.ts`).
-- F6 Touch + layout (MOB-01, UI-01): options in select / combobox / menu ≥ 44px on coarse pointers
-  (`styles/common/theme.css` coarse rule); Dashboard "Sales Overview" head stacks its pills below md
-  (`components/dashboard/SalesOverviewCard.tsx`, `styles/dashboard/dashboard.styles.ts`).
-- F7 Master Data search (UX-02): `SearchInput` + newest-first on the four Master Data tables
-  (`components/master-data/tables/*.tsx`, their manage hooks).
-- F8 Unit tests (TEST-01): vitest + `yarn test`; tests for `utils/voucher.utils.ts`, `utils/write.utils.ts`
-  (replay rules), `sumCounted`, `utils/report.utils.ts` totals. No rule changes; a failing expectation
-  that reveals a real bug is reported, not silently "fixed".
-- F9 Entry bundle (PERF-03): find what the 1.29 MB entry holds, defer what the sign-in route does not
-  need, split vendors; record before/after sizes. `vite.config.ts`, `routes/*.ts`.
+- V1 Detail placeholders (UI-01, UI-17; High): `components/common/app/DetailRows.tsx` hides a row whose rendered
+  value is empty or the placeholder; `utils/detail.utils.ts` (`visibleDetailItems` / `visibleDetailSections`) is
+  the place for the rule; `hook/data/user/user.list.hook.ts:34` stops returning "—" for an unresolved id (add a
+  nullable variant for detail rows, keep table cells aligned); drop the redundant `|| "—"` fallbacks in detail
+  `render`s (`components/sale/tables/SalesTable.tsx:239-272`, transaction / purchase / expense / voucher /
+  ledger tables, `components/admin/receivables/ReceivableEntryDetail.tsx`,
+  `components/admin/payables/PayableEntryDetail.tsx`). Re-sweep: ROLES=admin,emp DEVICES=phone; look at
+  `/sales`, `/transactions`, `/purchases`, `/expenses`, `/vouchers`, `/receivables`, `/payables`,
+  `/admin/receivables` sheets.
+- V2 Edit history (UI-02; High): `components/disbursement/modal/DisbursementHistoryModal.tsx:43-70` — per-field
+  label + formatter map (status label maps, `*_at` → `formatDateTime`, `*_date` → `formatDate`, `*_by` →
+  user name, amounts → `formatMoney`, unknown → humanised name + raw value), "Set to X" for a null old value, no
+  `code` styling; map lives in `utils/` with a unit test beside the other `*.test.ts`. Re-sweep: ROLES=admin,acc
+  DEVICES=desk; look at every `menu-item-*-edit-history` shot on `/sales`, `/purchases`, `/expenses`.
+- V3 Action groups (UI-03, UI-10, UI-11, UI-12; Medium): `components/common/app/SheetActions.tsx` +
+  `styles/app/app.styles.ts:156-160` — overflow-only and danger-only footers render a full-width button (no lone
+  ⋮); a disabled-only action is not rendered as a footer button; `components/common/table/RowActionMenu.tsx`
+  hides ⋮ when every action is disabled; account Password / Notifications sheets pin their action in the sheet
+  footer (`components/account/modal/AccountPanelSheet.tsx`, `components/account/views/*`). Re-sweep: ROLES=admin,emp
+  DEVICES=phone,desk; look at `/sales` (Verified), `/transactions`, `/expenses` + `/purchases` (Approved),
+  `/payables` (Paid), `/account`.
+- V4 Date labels (UI-04, UI-08, UI-13; Medium): receivable / payable cards and sheets say "Due <date>"
+  (`components/ledger/tables/LedgerRecordsTable.tsx:119-120`, `PayableRecordsTable.tsx:83-84`, the reports
+  receivables table, `components/common/table/DataTableCards.tsx` / `RecordDetailSheet.tsx` if the subtitle role
+  needs a label); `PurchasesTable.tsx:59-64` hides the due-date meta when there is no date; deposited / reviewed
+  values keep date and time together (`SalesTable.tsx:239-256`). Re-sweep: ROLES=admin,emp DEVICES=phone; look at
+  `/receivables`, `/payables`, `/purchases`, `/reports` (Receivables), `/sales` (Verified).
+- V5 Admin app (UI-05, UI-09; Medium): the `/admin` rail item and active indicator
+  (`components/common/layout/AppTabBar.tsx` + its styles under `styles/layout/`) — indicator clears the label,
+  label fits the item; `components/admin/receivables/ReceivableEntryDetail.tsx:27` shows the branch name.
+  Re-sweep: ROLES=admin DEVICES=phone,tabP,tabL,desk; look at every `/admin/*` shot, zoom the rail.
+- V6 Reports (UI-06, UI-07; Medium): `components/report/*` title row — the period stays on one line outside the
+  h1 column and the tab strip shows every tab (or scrolls) at 1180 and 1440; Branch Summary card shows Sales,
+  Expenses and Purchases so it adds up to Net (`BranchSummaryReport.tsx:21-25`, `DataTableCards.tsx:50,188`).
+  Re-sweep: ROLES=admin DEVICES=phone,tabL,desk; add `"settle": 4000` to the `/reports` route in
+  `.claude/state/audit/sweep.config.json` so Weekly / Monthly / Cash Flow are not captured as skeletons.
+- V7 Ledger modals (UI-14, UI-15, UI-16; Low): record-payment allocation rows labelled
+  (`components/ledger/modal/RecordPaymentModal.tsx`), "Not filled" → "No contact details"
+  (`components/ledger/CustomerInfoTag.tsx:12`), customer ledger modal columns fit / empty "Created by" column
+  dropped (`components/ledger/CustomerLedgerView.tsx`, `ModalSize`). Re-sweep: ROLES=admin DEVICES=desk,phone;
+  look at `/receivables` toolbar-Customer ledger, menu-item record-payment, By customer.
+- V8 Full re-sweep: every role and device, no ROLES / DEVICES filter, `OUT=C:/Users/CER/AppData/Local/Temp/tartar-sweep-final`.
+  Open every contact sheet (viewed = total), keep a per-sheet log in Done, confirm UI-01 … UI-17 are gone and
+  nothing regressed; record surfaces captured / failed / sheets viewed. A new defect found here becomes a new
+  phase before this one, not a silent fix.
 
 ## Path map
-- query cache: src/store/common/query.store.ts · src/hook/common/{query,mutation}.hook.ts ·
-  src/utils/idb.utils.ts · src/hook/app/{prime,realtime}.hook.ts · src/keys/query.keys.ts
-- offline queue (do not regress): src/store/common/sync.store.ts · src/utils/write.utils.ts ·
-  src/hook/common/network.hook.ts
-- aggregates: src/services/data/{dashboard,ledger,transaction}.services.ts · src/utils/filter.utils.ts
-- errors: src/utils/{supabase,error}.utils.ts · src/components/common/status/ErrorState.tsx
-- auth UI: src/hook/data/user/user.manage.hook.ts · src/components/user/tables/UsersTable.tsx
-- deploy: vercel.json · vite.config.ts · src/sw.ts
-- money math: src/utils/{voucher,report,disbursement}.utils.ts ·
-  src/models/data/transaction/transaction.response.ts (sumCounted)
-- audit: .claude/state/AUDIT-2026-10-03.md
+- detail rows: src/components/common/app/{DetailRows,SheetActions}.tsx · src/components/common/table/
+  {RecordDetailSheet,RecordDetailSection,DataTableCards,RowActionMenu}.tsx · src/utils/detail.utils.ts ·
+  src/models/common/detail.model.ts · src/styles/app/app.styles.ts
+- user names: src/hook/data/user/user.list.hook.ts
+- history: src/components/disbursement/modal/DisbursementHistoryModal.tsx
+- ledger: src/components/ledger/{tables,modal}/* · src/components/ledger/{CustomerLedgerView,CustomerInfoTag}.tsx
+- admin app: src/components/common/layout/{AppTabBar,AdminAppBar}.tsx · src/components/admin/**
+- reports: src/components/report/* · src/utils/report.utils.ts
+- sweep: .claude/skills/deep-critique/scripts/sweep.mjs · .claude/state/audit/sweep.config.json
+- audit: .claude/state/AUDIT-VISUAL-2026-10-03.md
 
 ## Done
-- [x] Audit written 2026-10-03: `.claude/state/AUDIT-2026-10-03.md` (lint + build clean at v2.43). Committed v2.44.
-- [x] F1 Query ordering (v2.45): `src/store/common/query.store.ts` — one request record per key (global
-  counter id + shared promise); only the newest request for a key writes the entry or the IndexedDB cache;
-  `run` (mount, prime) joins the in-flight request, `refresh` / `invalidate` / `refetchAll` /
-  `refetchWatched` always start a new one; `reset` drops pending requests so a late response cannot land
-  after sign-out. `src/hook/common/query.hook.ts` — `refetch` calls `refresh`. Compiled, not exercised
-  under a throttled network.
-- [x] F2 Refetch scope + cache bound (v2.46): `src/store/common/query.store.ts` — a fetcher is forgotten when
-  its key loses its last watcher unless the key is primed, so `invalidate` / `refetchAll` rerun watched keys
-  plus the primed lookups only; `invalidate` keeps the stale entry of an unwatched key (refetched on mount,
-  still readable offline) instead of deleting it; search-term variants are never written to IndexedDB; on
-  hydrate the cache keeps the newest 120 entries no older than 30 days and deletes the rest.
-  `src/utils/idb.utils.ts` — `deleteQueries`. `prime.hook.ts` / `realtime.hook.ts` needed no change.
-  Compiled, not exercised offline in a browser.
-- [x] F3 Complete reads (v2.47): `src/utils/page.utils.ts` (new) — `everyRow` pages a query to the end on its
-  own order plus an `id` tiebreaker, 1,000 rows a page, stopping on an empty page so it is complete at any
-  server row cap; `everyRowIn` splits an id list into 200-id chunks for follow-up `.in()` lookups.
-  `src/services/data/{transaction,sale,payment,ledger}.services.ts` — every `getAll`, `getDisbursementAll`,
-  party summary and party ledger read goes through it; `reportLimit` is gone; voucher and payable lookups
-  are chunked. `src/services/data/dashboard.services.ts` — summary, overview, sales series, branch monitor,
-  due alerts, pending reviews and due checks all read every row. No query key or filter field changed.
-  Compiled, totals not compared against `select sum(...)` on real data.
-- [x] F4 Client security hardening (v2.48): `vercel.json` — enforced `X-Content-Type-Options: nosniff`,
-  `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` and a `Content-Security-Policy` holding
-  only `frame-ancestors 'none'`; the full policy (self, `*.supabase.co` over https/wss, inline styles, data /
-  blob images) ships as `Content-Security-Policy-Report-Only`. `src/hook/data/user/user.manage.hook.ts` — the
-  reset-approval confirm states when the request was made and to confirm with the person first.
-  `src/utils/filter.utils.ts` — `containsPattern` escapes `\`, `%`, `_`; used by `applyLedgerFilters` and
-  `src/services/data/party.services.ts`. Headers not checked with `curl -I` on a preview; compiled, visuals
-  unconfirmed.
-
-- [x] F5 Failure experience (v2.49): `src/utils/error.utils.ts` — `plainServerMessage` turns a Postgres /
-  PostgREST error code into plain copy (constraint, format, timeout, busy, not-found, session-expired, RLS
-  permission; any other code gets one generic line); messages the database functions wrote themselves
-  (`P0001`, and `42501` / `28000` / `28P01` raised with their own text) pass through unchanged.
-  `src/utils/supabase.utils.ts` — `toError` uses it and keeps the raw error as `cause`; network failures keep
-  their raw text because `query.store.ts` detects them by the `TypeError` prefix to keep cached data offline.
-  `src/hook/common/mutation.hook.ts` — `onSuccess` runs after the write has settled; if it throws, the write
-  stays saved and a warning toast says not to save again. `src/hook/common/push.hook.ts` — `usePushOffer`
-  does nothing while offline and does not spend the one-time offer. Compiled, error copy not triggered
-  against a real server error, visuals unconfirmed.
-- [x] F6 Touch + layout (v2.50): `src/styles/common/theme.css` — the coarse-pointer rule now gives
-  `select-item`, `combobox-item`, `dropdown-menu-item`, `dropdown-menu-sub-trigger` and `command-item` a
-  2.75rem (44px) minimum height; fine pointers are unchanged. `src/components/common/card/SectionCard.tsx`
-  + `src/styles/card/card.styles.ts` — `stackExtra` moves the head's `extra` to its own full-width row below
-  `md` (`sectionCardExtra` is now a `cva` with `stacked`); `src/components/dashboard/SalesOverviewCard.tsx`
-  sets it, so the period pills sit under the title on phones instead of clipping. `dashboard.styles.ts`
-  needed no change. Compiled, visuals unconfirmed (not checked on a phone).
-- [x] F7 Master Data search (v2.51): `src/utils/search.utils.ts` (new) — `matchingRows` (case-insensitive
-  contains over the texts a row offers) and `newestFirst` (by `created_at`). `src/keys/table.keys.ts` — four
-  search keys. `src/hook/data/{party/supplier,expense-category/expense.category,income-source/income.source,
-  bank/bank.account}.manage.hook.ts` — each reads its term through `useSearch`, filters and orders the table
-  rows newest-first, and returns `search` / `setSearch`; the list hooks and services are untouched, so every
-  selector keeps its name / sort order. `src/components/master-data/tables/*.tsx` — a `FilterToolbar` +
-  `SearchInput` above each table and a "no match" empty state. Still client-paged at 8 (lookup lists stay
-  unpaged). Compiled, visuals unconfirmed.
-- [x] F8 Unit tests (v2.52): `vitest` ^3.2 (devDependency, the line that supports Vite 5) + `yarn test`
-  (`vitest run`); `vitest.config.ts` (node environment, `src/**/*.test.ts`, the `@` alias — the app's PWA /
-  Tailwind plugins stay out of test runs), listed in `tsconfig.node.json`. 92 tests in 5 files, all passing,
-  characterising current behaviour with no rule changed: `src/utils/voucher.utils.test.ts` (VAT, withholding,
-  return, centavo rounding, override, stored-voucher breakdown), `src/utils/write.utils.test.ts` (id and
-  idempotency-key stamping, write targets, replayed insert / slug insert, unmatched update / delete, failure
-  kinds — Supabase mocked, no env needed), `src/models/data/transaction/transaction.response.test.ts`
-  (`sumCounted`), `src/utils/report.utils.test.ts` (cash flow, period, expense and branch totals),
-  `src/utils/search.utils.test.ts`. `src/utils/fixture.utils.ts` holds the shared row builders. Tests are
-  type-checked by `yarn build`. `utils/disbursement.utils.ts` is not covered (not in the F8 list).
-
-- [x] F9 Entry bundle (v2.53): measured with a throwaway Rollup analyzer (not committed). The 1,292.70 kB entry
-  (389.82 kB gzip) held react-aria / react-stately / react-aria-components, react-dom, Supabase, react-router,
-  zod, tailwind-merge, react-hook-form and the whole app shell. `src/routes/protected.routes.ts`,
-  `src/routes/admin.routes.ts` — `ProtectedLayout` and `AdminAppLayout` load through `lazyView`, so the sign-in
-  route no longer ships the sidebar, header, phone shell, inbox and admin bar. `vite.config.ts` —
-  `manualChunks` puts react / react-dom / scheduler / react-router in `react` and `@supabase/*` in `supabase`
-  (both needed whole at boot; react-aria is left to Rollup so lazily used parts stay lazy). After: entry
-  703.35 kB (218.18 gzip) + react 285.48 kB (91.18) + supabase 214.77 kB (55.57), fetched in parallel
-  (modulepreload) = 1,203.60 kB (364.93 gzip) before sign-in, down from 1,292.70 (389.82). Precache 90 entries
-  / 2,769.17 KiB -> 123 entries / 2,789.64 KiB (more, smaller chunks; both vendor chunks and both layout
-  chunks are in the precache manifest, `sw.ts` untouched, `sw.mjs` still 17.99 kB). yarn test 92 / 92.
-  Compiled; a signed-in cold load now shows `PageSkeleton` until the layout chunk arrives — visuals
-  unconfirmed, offline reload not exercised in a browser.
+- [x] Visual audit written 2026-10-03: `.claude/state/AUDIT-VISUAL-2026-10-03.md` — 1,221 surfaces, 0 failed,
+  183 / 183 contact sheets viewed; sweep script fixed (main page no longer closed, sheets inline their shots,
+  tabs clicked by index after scroll-into-view).
 
 ## Next
-1. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
-    delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
+1. V1 Detail placeholders.
+2. V2 Edit history.
+3. V3 Action groups.
+4. V4 Date labels.
+5. V5 Admin app.
+6. V6 Reports.
+7. V7 Ledger modals.
+8. V8 Full re-sweep.
+9. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
-- SEC-01 real fix (migration): replace the anon-supplied reset password with an admin-issued one.
-- SEC-02 (migration): failed-login counter + lockout; minimum password length.
-- H1 (dashboard check): Supabase Auth "Allow new users to sign up" must be OFF — else any outsider can
-  read customers, suppliers and bank accounts.
-- H2 (dashboard check): API "Max rows" value.
-- QA-02 (migration): idempotency key on `update_transaction_with_voucher`.
-- DATA-01 follow-up (migration): server-side aggregate RPCs for the dashboard. Until then every aggregate
-  read costs one extra empty request (the end-of-data probe) and ships every row.
-- DATA-01 remainder (not done in F3): the purchases "paid" date basis still takes its id list from the
-  `purchase_ids_paid_between` RPC in one response and sends it back as one `.in("id", …)` — past the API
-  max rows, or a few hundred ids in the URL, that one filter is still incomplete. The clean fix is an RPC
-  change (migration). Lookup lists (customers, suppliers, branches, categories, users) are still single
-  unpaged reads.
-- SEC-03 follow-up (user, preview deploy): `curl -I` the preview URL, open the app with the console open, and
-  once no CSP report-only violation shows, rename `Content-Security-Policy-Report-Only` to
-  `Content-Security-Policy` in `vercel.json` (merging `frame-ancestors 'none'` into it). If the Supabase
-  project uses a custom domain, add it to `connect-src` first.
-- SEC-04 remainder: PostgREST also reads `*` as a wildcard in `ilike` and has no escape for it, so a search
-  for `*` still matches everything.
-- UX-01 remainder: a network failure still reaches a toast as the browser's raw text (`TypeError: Failed to
-  fetch`) — rewording it needs `query.store.ts` to stop detecting network failures by that prefix first.
-  Error copy for codes not in the map is one generic line; add a code to `serverCodeMessages` when a real
-  one shows up.
-- SEC-05: `send-push` failure counting needs an Edge Function redeploy by the user.
-- Cash Flow report (found by the F8 tests, rule not changed): "Cash In" counts `collection` transactions,
-  but the "Cash Flow by Category" table has no Collection row, so with collections in the period the inflow
-  rows add up to less than the Cash In stat. Decide: add a Collection row, or leave collections out of Cash In.
-- Tests not yet written: `utils/disbursement.utils.ts`, the print-document builders in `report.utils.ts`,
-  `rangeFor` / `periodLabel` (date-dependent). No CI runs `yarn test` yet.
-- PERF-03 remainder (not done in F9): the entry is still 703 kB because the sign-in form goes through
-  `components/common/form` (`FormField`), which statically imports every field control — calendar, combobox,
-  select, tag group — on top of zod, react-hook-form, tailwind-merge and react-aria's locale strings. Cutting
-  it further means loading `FormField`'s date / combobox / select controls on demand: a form-layer change,
-  not a config one.
+- Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
+  user applies it.
+- Cash Flow report rule (carried from the archived roadmap): "Cash In" counts `collection` transactions but the
+  "Cash Flow by Category" table has no Collection row. Decide: add a Collection row, or leave collections out
+  of Cash In.
+- Remaining Open items of the archived roadmap (H1 sign-ups off, H2 max rows, SEC-03 CSP enforce, SEC-05
+  send-push redeploy, QA-02 / DATA-01 RPC migrations) are unchanged — see
+  `.claude/state/ROADMAP-AUDIT-2026-10-03-DONE.md` § Open.
+- Hypothesis (needs DB read, not a rule): whether receivable "Recorded by —" rows have a null `created_by` or a
+  user not returned by `user_display_names`. V1 hides the dash either way.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.53 (F9) · Uncommitted: none · Last check:
-yarn build + yarn lint clean, yarn test 92 / 92 passing, 2026-10-03. Autopilot stopped: Next item 1 is the
-user's decisions.
+Branch: mobilel-app-native · Last commit Development v2.56 (visual audit) · Uncommitted: none · Last check:
+sweep 1,221 / 0 failed, 2026-10-03. Autopilot running from V1.

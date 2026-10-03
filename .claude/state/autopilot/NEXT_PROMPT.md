@@ -1,3 +1,5 @@
-AUTOPILOT — the Audit fixes roadmap at .claude/state/ROADMAP.md has no autopilot phase left. Branch
-mobile-app-native-newlook. Last commit Development v2.53 (F9 Entry bundle), pushed.
-Next item 1 is USER DECISIONS (schema changes / business rules in the roadmap's Open list) — a hard-stop; do not run it.
+AUTOPILOT — continue the Visual fixes roadmap at .claude/state/ROADMAP.md, start V1 Detail placeholders
+(Next item 1). Branch mobilel-app-native. Last commit Development v2.56 (visual audit), pushed.
+Follow the roadmap's session protocol: read only the audit findings V1 cites (.claude/state/AUDIT-VISUAL-2026-10-03.md
+§ [UI-01] lines 85-112 and the UI-17 line under "Desktop"). Decide the file plan with decision-making; do not wait for a go.
+Close the phase with the protocol's step 5 visual check (re-sweep ROLES=admin,emp DEVICES=phone and look at the shots).
