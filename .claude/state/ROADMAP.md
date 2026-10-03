@@ -146,9 +146,22 @@ user. Any of them may be overturned; say so and the phase is replanned.
   `src/utils/search.utils.test.ts`. `src/utils/fixture.utils.ts` holds the shared row builders. Tests are
   type-checked by `yarn build`. `utils/disbursement.utils.ts` is not covered (not in the F8 list).
 
+- [x] F9 Entry bundle (v2.53): measured with a throwaway Rollup analyzer (not committed). The 1,292.70 kB entry
+  (389.82 kB gzip) held react-aria / react-stately / react-aria-components, react-dom, Supabase, react-router,
+  zod, tailwind-merge, react-hook-form and the whole app shell. `src/routes/protected.routes.ts`,
+  `src/routes/admin.routes.ts` — `ProtectedLayout` and `AdminAppLayout` load through `lazyView`, so the sign-in
+  route no longer ships the sidebar, header, phone shell, inbox and admin bar. `vite.config.ts` —
+  `manualChunks` puts react / react-dom / scheduler / react-router in `react` and `@supabase/*` in `supabase`
+  (both needed whole at boot; react-aria is left to Rollup so lazily used parts stay lazy). After: entry
+  703.35 kB (218.18 gzip) + react 285.48 kB (91.18) + supabase 214.77 kB (55.57), fetched in parallel
+  (modulepreload) = 1,203.60 kB (364.93 gzip) before sign-in, down from 1,292.70 (389.82). Precache 90 entries
+  / 2,769.17 KiB -> 123 entries / 2,789.64 KiB (more, smaller chunks; both vendor chunks and both layout
+  chunks are in the precache manifest, `sw.ts` untouched, `sw.mjs` still 17.99 kB). yarn test 92 / 92.
+  Compiled; a signed-in cold load now shows `PageSkeleton` until the layout chunk arrives — visuals
+  unconfirmed, offline reload not exercised in a browser.
+
 ## Next
-1. F9 Entry bundle — audit § PERF-03.
-2. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
+1. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
     delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
 
 ## Open
@@ -181,7 +194,13 @@ user. Any of them may be overturned; say so and the phase is replanned.
   rows add up to less than the Cash In stat. Decide: add a Collection row, or leave collections out of Cash In.
 - Tests not yet written: `utils/disbursement.utils.ts`, the print-document builders in `report.utils.ts`,
   `rangeFor` / `periodLabel` (date-dependent). No CI runs `yarn test` yet.
+- PERF-03 remainder (not done in F9): the entry is still 703 kB because the sign-in form goes through
+  `components/common/form` (`FormField`), which statically imports every field control — calendar, combobox,
+  select, tag group — on top of zod, react-hook-form, tailwind-merge and react-aria's locale strings. Cutting
+  it further means loading `FormField`'s date / combobox / select controls on demand: a form-layer change,
+  not a config one.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.52 (F8) · Uncommitted: none · Last check:
-yarn build + yarn lint clean, yarn test 92 / 92 passing, 2026-10-03.
+Branch: mobile-app-native-newlook · Last commit Development v2.53 (F9) · Uncommitted: none · Last check:
+yarn build + yarn lint clean, yarn test 92 / 92 passing, 2026-10-03. Autopilot stopped: Next item 1 is the
+user's decisions.

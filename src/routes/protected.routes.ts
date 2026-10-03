@@ -1,8 +1,8 @@
 import RouteRoot from "../components/common/layout/RouteRoot";
 import RootErrorView from "../components/common/status/RootErrorView";
-import ProtectedLayout from "../layouts/ProtectedLayout";
 import type { IRoute } from "../models/common/route.model";
 import { protectedViewsRoutes } from "./protected.view.routes";
+import { lazyView } from "./route.lazy";
 
 export const protectedLayoutRoutes: IRoute[] = [
   {
@@ -12,7 +12,7 @@ export const protectedLayoutRoutes: IRoute[] = [
     children: [
       {
         id: "protected_route",
-        Component: ProtectedLayout,
+        ...lazyView(() => import("../layouts/ProtectedLayout")),
         children: protectedViewsRoutes,
       },
     ],

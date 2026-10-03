@@ -261,3 +261,14 @@
 - Float sums → asserted to the centavo with `toBeCloseTo`, not pinned to the raw binary float (characterises the rule, not the representation)
 - Cash Flow rows vs Cash In total → the tests pin today's behaviour (collections counted in Cash In, no Collection row); whether that is intended is a business rule, so it is recorded in Open, not changed
 - Verification: yarn test 92 / 92 passing on the first run (no expectation had to be bent, no money-math bug found); yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)
+
+## 2026-10-03 — F9 Entry bundle → Development v2.53
+- File plan → lazy-load the two signed-in layouts through the existing `lazyView` + a two-group `manualChunks` in vite.config.ts (Simple tier, three files, reversible, no dependency, no rule or schema change)
+- How to find what the entry holds → a throwaway Rollup `generateBundle` analyzer built into the scratch directory, deleted afterwards (no visualizer dependency added)
+- Which packages get a vendor chunk → react / react-dom / scheduler / react-router and @supabase only (the boot path needs them whole); react-aria, zod and react-hook-form left to Rollup (a manual react-aria chunk would drag the table / menu parts that are lazy today into the eager load)
+- Public auth views → stay eager (CLAUDE.md says so; they are about 16 kB rendered)
+- Layout fallback and error boundary → reuse `lazyView` as is (`PageSkeleton`, `RouteErrorView` with its chunk-load "new version" copy) rather than a second helper
+- Splitting `FormField` so the sign-in form stops pulling calendar / combobox / select → not done (a form-layer refactor beyond the roadmap's `vite.config.ts` + `routes/*.ts`; recorded in Open)
+- More precache entries (90 → 123, +20 KiB) → accepted (the same code split into smaller files; every chunk is still precached, so offline keeps working)
+- Next item is USER DECISIONS → STOP written, no next phase
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing), yarn test 92 / 92; entry 1,292.70 → 703.35 kB, JS before sign-in 1,292.70 → 1,203.60 kB (gzip 389.82 → 364.93); compiled, visuals unconfirmed

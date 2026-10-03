@@ -4,6 +4,16 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const vendorChunks = [
+  { name: 'react', packages: ['react', 'react-dom', 'scheduler', 'react-router', 'react-router-dom'] },
+  { name: 'supabase', packages: ['@supabase'] },
+]
+
+const vendorChunkOf = (id: string): string | undefined =>
+  vendorChunks.find(({ packages }) =>
+    packages.some((name) => id.includes(`/node_modules/${name}/`)),
+  )?.name
+
 // https://vite.dev/config/
 export default defineConfig({
   define: {
@@ -78,6 +88,11 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: { manualChunks: vendorChunkOf },
+    },
+  },
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
