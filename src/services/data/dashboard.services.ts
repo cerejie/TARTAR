@@ -33,7 +33,8 @@ import {
 import type { IVoucher } from "../../models/data/voucher/voucher.response";
 import { scopeToBranch } from "../../utils/filter.utils";
 import { todayIso } from "../../utils/format.utils";
-import { supabase, toError } from "../../utils/supabase.utils";
+import { everyRow, everyRowIn } from "../../utils/page.utils";
+import { supabase } from "../../utils/supabase.utils";
 
 type AmountRow = { amount: number | string };
 
@@ -60,34 +61,28 @@ const plainDuePayable = (payable: IPayable): IDuePayable => ({
 const toDuePayables = async (payables: IPayable[]): Promise<IDuePayable[]> => {
   if (payables.length === 0) return [];
 
-  const vouchers = await supabase
-    .from("vouchers")
-    .select("payable_id, transaction_id, category, check_bank")
-    .in(
-      "payable_id",
-      payables.map((payable) => payable.id)
-    );
-  if (vouchers.error) throw toError(vouchers.error);
-
-  const voucherRows = (vouchers.data ?? []) as PayableVoucherRow[];
+  const voucherRows = await everyRowIn<PayableVoucherRow>(
+    payables.map((payable) => payable.id),
+    (ids) =>
+      supabase
+        .from("vouchers")
+        .select("payable_id, transaction_id, category, check_bank")
+        .in("payable_id", ids)
+  );
   const transactionIds = voucherRows.flatMap((voucher) =>
     voucher.transaction_id ? [voucher.transaction_id] : []
   );
 
-  const transactions = transactionIds.length
-    ? await supabase
+  const transactions = await everyRowIn<PayableTransactionRow>(
+    transactionIds,
+    (ids) =>
+      supabase
         .from("transactions")
         .select("id, type, cash_account, bank_account_id")
-        .in("id", transactionIds)
-    : { data: [], error: null };
-  if (transactions.error) throw toError(transactions.error);
-
-  const transactionById = new Map(
-    ((transactions.data ?? []) as PayableTransactionRow[]).map((row) => [
-      row.id,
-      row,
-    ])
+        .in("id", ids)
   );
+
+  const transactionById = new Map(transactions.map((row) => [row.id, row]));
   const voucherByPayable = new Map(
     voucherRows.map((voucher) => [voucher.payable_id, voucher])
   );
@@ -117,13 +112,16 @@ const toDuePayables = async (payables: IPayable[]): Promise<IDuePayable[]> => {
   });
 };
 type TypedAmountRow = AmountRow & Pick<ITransaction, "type" | "sale_status">;
-type BranchAmountRow = { branch: string; amount: number | string };
+type BranchAmountRow = AmountRow & { branch: string };
 
 type CountedVoucher = Pick<IVoucher, "status" | "amount">;
 
 type CountedTransactionRow = TypedAmountRow & {
   vouchers: CountedVoucher | CountedVoucher[] | null;
 };
+
+type DatedCountedRow = CountedTransactionRow & { txn_date: string };
+type BranchCountedRow = CountedTransactionRow & { branch: string };
 
 const countedColumns = "type, sale_status, amount, vouchers(status, amount)";
 
@@ -140,6 +138,7 @@ const sumCountedRows = (rows: readonly CountedTransactionRow[]) =>
     }))
   );
 type OutstandingRow = { amount: number | string; paid_amount: number | string };
+type BranchOutstandingRow = OutstandingRow & { branch: string };
 
 const monthStart = () => dayjs().startOf("month").format("YYYY-MM-DD");
 
@@ -174,17 +173,21 @@ const overviewPeriodUnits: Record<
 const overviewPeriodStart = (period: OverviewPeriod) =>
   period === "all" ? null : dayjs().startOf(overviewPeriodUnits[period]);
 
+const unpaidRowsOf = (
+  table: "receivables" | "payables",
+  branch?: string | null
+): Promise<OutstandingRow[]> =>
+  everyRow<OutstandingRow>(() =>
+    scopeToBranch(
+      supabase.from(table).select("amount, paid_amount").neq("status", "paid"),
+      branch
+    )
+  );
+
 const outstandingOf = async (
   table: "receivables" | "payables",
   branch?: string | null
-): Promise<number> => {
-  const { data, error } = await scopeToBranch(
-    supabase.from(table).select("amount, paid_amount").neq("status", "paid"),
-    branch
-  );
-  if (error) throw toError(error);
-  return outstanding((data ?? []) as OutstandingRow[]);
-};
+): Promise<number> => outstanding(await unpaidRowsOf(table, branch));
 
 const createdSince = async (
   table: "receivables" | "payables",
@@ -192,12 +195,16 @@ const createdSince = async (
   branch?: string | null
 ): Promise<number> => {
   if (!start) return 0;
-  const { data, error } = await scopeToBranch(
-    supabase.from(table).select("amount").gte("created_at", start.toISOString()),
-    branch
+  const createdFrom = start.toISOString();
+
+  return sum(
+    await everyRow<AmountRow>(() =>
+      scopeToBranch(
+        supabase.from(table).select("amount").gte("created_at", createdFrom),
+        branch
+      )
+    )
   );
-  if (error) throw toError(error);
-  return sum((data ?? []) as AmountRow[]);
 };
 
 const dashboardServices = {
@@ -205,56 +212,40 @@ const dashboardServices = {
     const today = todayIso();
     const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
 
-    const [recent, thisMonth, receivables, payables] =
+    const monthFrom = monthStart();
+
+    const [recentRows, thisMonthRows, accountsReceivable, accountsPayable] =
       await Promise.all([
-        scopeToBranch(
-          supabase
-            .from("transactions")
-            .select(`${countedColumns}, txn_date`)
-            .in("type", ["sale", "expense"])
-            .gte("txn_date", yesterday)
-            .lte("txn_date", today),
-          branch
+        everyRow<DatedCountedRow>(() =>
+          scopeToBranch(
+            supabase
+              .from("transactions")
+              .select(`${countedColumns}, txn_date`)
+              .in("type", ["sale", "expense"])
+              .gte("txn_date", yesterday)
+              .lte("txn_date", today),
+            branch
+          )
         ),
-        scopeToBranch(
-          supabase
-            .from("transactions")
-            .select(countedColumns)
-            .gte("txn_date", monthStart())
-            .lte("txn_date", today),
-          branch
+        everyRow<CountedTransactionRow>(() =>
+          scopeToBranch(
+            supabase
+              .from("transactions")
+              .select(countedColumns)
+              .gte("txn_date", monthFrom)
+              .lte("txn_date", today),
+            branch
+          )
         ),
-        scopeToBranch(
-          supabase
-            .from("receivables")
-            .select("amount, paid_amount")
-            .neq("status", "paid"),
-          branch
-        ),
-        scopeToBranch(
-          supabase
-            .from("payables")
-            .select("amount, paid_amount")
-            .neq("status", "paid"),
-          branch
-        ),
+        outstandingOf("receivables", branch),
+        outstandingOf("payables", branch),
       ]);
 
-    const firstError = [recent, thisMonth, receivables, payables].find(
-      (result) => result.error
-    )?.error;
-    if (firstError) throw toError(firstError);
-
-    const recentRows = (recent.data ?? []) as unknown as (CountedTransactionRow & {
-      txn_date: string;
-    })[];
     const isExpense = (row: TypedAmountRow) => row.type === "expense";
     const onDay = (date: string, predicate: (row: TypedAmountRow) => boolean) =>
       sumCountedRows(
         recentRows.filter((row) => row.txn_date === date && predicate(row))
       );
-
-    const thisMonthRows = (thisMonth.data ?? []) as unknown as CountedTransactionRow[];
 
     const matching = (
       rows: CountedTransactionRow[],
@@ -268,10 +259,8 @@ const dashboardServices = {
       todaysExpenses: onDay(today, isExpense),
       yesterdaysSales: onDay(yesterday, isVerifiedSale),
       yesterdaysExpenses: onDay(yesterday, isExpense),
-      accountsReceivable: outstanding(
-        (receivables.data ?? []) as OutstandingRow[]
-      ),
-      accountsPayable: outstanding((payables.data ?? []) as OutstandingRow[]),
+      accountsReceivable,
+      accountsPayable,
       monthlySales: sumCountedRows(thisMonthRows.filter(isVerifiedSale)),
       monthlyPendingSales: matching(thisMonthRows, isPendingSale),
       monthlyExpenses: sumCountedRows(thisMonthRows.filter(isExpense)),
@@ -285,28 +274,30 @@ const dashboardServices = {
     branch?: string | null
   ): Promise<IDashboardOverview> => {
     const start = overviewPeriodStart(period);
-    const salesAndExpenses = supabase
-      .from("transactions")
-      .select(countedColumns)
-      .in("type", ["sale", "expense"])
-      .lte("txn_date", todayIso());
+    const today = todayIso();
+    const salesAndExpenses = () => {
+      const upToToday = supabase
+        .from("transactions")
+        .select(countedColumns)
+        .in("type", ["sale", "expense"])
+        .lte("txn_date", today);
 
-    const [transactions, arOutstanding, arNew, apOutstanding, apNew] =
+      return scopeToBranch(
+        start
+          ? upToToday.gte("txn_date", start.format("YYYY-MM-DD"))
+          : upToToday,
+        branch
+      );
+    };
+
+    const [rows, arOutstanding, arNew, apOutstanding, apNew] =
       await Promise.all([
-        scopeToBranch(
-          start
-            ? salesAndExpenses.gte("txn_date", start.format("YYYY-MM-DD"))
-            : salesAndExpenses,
-          branch
-        ),
+        everyRow<CountedTransactionRow>(salesAndExpenses),
         outstandingOf("receivables", branch),
         createdSince("receivables", start, branch),
         outstandingOf("payables", branch),
         createdSince("payables", start, branch),
       ]);
-    if (transactions.error) throw toError(transactions.error);
-
-    const rows = (transactions.data ?? []) as unknown as CountedTransactionRow[];
 
     return {
       sales: sumCountedRows(rows.filter(isVerifiedSale)),
@@ -327,19 +318,20 @@ const dashboardServices = {
       .subtract(count - 1, unit)
       .startOf(unit);
 
-    const { data, error } = await scopeToBranch(
-      supabase
-        .from("transactions")
-        .select("txn_date, amount")
-        .eq("type", "sale")
-        .eq("sale_status", "verified")
-        .gte("txn_date", from.format("YYYY-MM-DD")),
-      branch
+    const rows = await everyRow<AmountRow & { txn_date: string }>(() =>
+      scopeToBranch(
+        supabase
+          .from("transactions")
+          .select("txn_date, amount")
+          .eq("type", "sale")
+          .eq("sale_status", "verified")
+          .gte("txn_date", from.format("YYYY-MM-DD")),
+        branch
+      )
     );
-    if (error) throw toError(error);
 
     const byBucket = new Map<string, number>();
-    for (const row of (data ?? []) as (AmountRow & { txn_date: string })[]) {
+    for (const row of rows) {
       const key = dayjs(row.txn_date).startOf(unit).format("YYYY-MM-DD");
       byBucket.set(key, (byBucket.get(key) ?? 0) + Number(row.amount));
     }
@@ -356,58 +348,44 @@ const dashboardServices = {
   getBranchMonitor: async (
     branches: IBranch[]
   ): Promise<IBranchMonitorRow[]> => {
+    const unpaidByBranch = (table: "receivables" | "payables") =>
+      everyRow<BranchOutstandingRow>(() =>
+        supabase
+          .from(table)
+          .select("branch, amount, paid_amount")
+          .neq("status", "paid")
+      );
+
     const [sales, expenses, receivables, payables] = await Promise.all([
-      supabase
-        .from("transactions")
-        .select("branch, amount")
-        .eq("type", "sale")
-        .eq("sale_status", "verified"),
-      supabase
-        .from("transactions")
-        .select(`branch, ${countedColumns}`)
-        .eq("type", "expense"),
-      supabase
-        .from("receivables")
-        .select("branch, amount, paid_amount")
-        .neq("status", "paid"),
-      supabase
-        .from("payables")
-        .select("branch, amount, paid_amount")
-        .neq("status", "paid"),
+      everyRow<BranchAmountRow>(() =>
+        supabase
+          .from("transactions")
+          .select("branch, amount")
+          .eq("type", "sale")
+          .eq("sale_status", "verified")
+      ),
+      everyRow<BranchCountedRow>(() =>
+        supabase
+          .from("transactions")
+          .select(`branch, ${countedColumns}`)
+          .eq("type", "expense")
+      ),
+      unpaidByBranch("receivables"),
+      unpaidByBranch("payables"),
     ]);
 
-    const firstError = [sales, expenses, receivables, payables].find(
-      (result) => result.error
-    )?.error;
-    if (firstError) throw toError(firstError);
-
-    const totalBy = (rows: BranchAmountRow[] | null, branch: string) =>
-      (rows ?? [])
-        .filter((row) => row.branch === branch)
-        .reduce((total, row) => total + Number(row.amount), 0);
-
-    const outstandingBy = (
-      rows: (OutstandingRow & { branch: string })[] | null,
+    const ofBranch = <Row extends { branch: string }>(
+      rows: readonly Row[],
       branch: string
-    ) =>
-      (rows ?? [])
-        .filter((row) => row.branch === branch)
-        .reduce(
-          (total, row) => total + (Number(row.amount) - Number(row.paid_amount)),
-          0
-        );
+    ) => rows.filter((row) => row.branch === branch);
 
     return branches.map((branch) => ({
       branch: branch.slug,
       branchName: branch.name,
-      sales: totalBy(sales.data, branch.slug),
-      expenses: sumCountedRows(
-        ((expenses.data ?? []) as unknown as (CountedTransactionRow & {
-          branch: string;
-        })[]).filter((row) => row.branch === branch.slug)
-      ),
-      receivables: outstandingBy(receivables.data as never, branch.slug),
-      payables: outstandingBy(payables.data as never, branch.slug),
+      sales: sum(ofBranch(sales, branch.slug)),
+      expenses: sumCountedRows(ofBranch(expenses, branch.slug)),
+      receivables: outstanding(ofBranch(receivables, branch.slug)),
+      payables: outstanding(ofBranch(payables, branch.slug)),
     }));
   },
 
@@ -418,32 +396,23 @@ const dashboardServices = {
     const today = todayIso();
     const horizon = dayjs().add(nearDays, "day").format("YYYY-MM-DD");
 
-    const [receivables, payables] = await Promise.all([
-      scopeToBranch(
-        supabase
-          .from("receivables")
-          .select("*")
-          .neq("status", "paid")
-          .lte("due_date", horizon),
-        branch
-      ),
-      scopeToBranch(
-        supabase
-          .from("payables")
-          .select("*")
-          .neq("status", "paid")
-          .lte("due_date", horizon),
-        branch
-      ),
+    const dueRowsOf = <Row>(table: "receivables" | "payables") =>
+      everyRow<Row>(() =>
+        scopeToBranch(
+          supabase
+            .from(table)
+            .select("*")
+            .neq("status", "paid")
+            .lte("due_date", horizon),
+          branch
+        )
+      );
+
+    const [receivableRows, payables] = await Promise.all([
+      dueRowsOf<IReceivable>("receivables"),
+      dueRowsOf<IPayable>("payables"),
     ]);
-
-    if (receivables.error) throw toError(receivables.error);
-    if (payables.error) throw toError(payables.error);
-
-    const receivableRows = (receivables.data ?? []) as IReceivable[];
-    const payableRows = await toDuePayables(
-      (payables.data ?? []) as IPayable[]
-    );
+    const payableRows = await toDuePayables(payables);
     const isOverdue = (dueDate: string) => dueDate < today;
 
     return {
@@ -462,29 +431,30 @@ const dashboardServices = {
     branch?: string | null
   ): Promise<IPendingReviews> => {
     const [vouchers, sales] = await Promise.all([
-      scopeToBranch(
-        supabase.from("vouchers").select("amount").eq("status", "pending"),
-        branch
+      everyRow<AmountRow>(() =>
+        scopeToBranch(
+          supabase.from("vouchers").select("amount").eq("status", "pending"),
+          branch
+        )
       ),
-      scopeToBranch(
-        supabase
-          .from("transactions")
-          .select("amount")
-          .eq("type", "sale")
-          .eq("sale_status", "deposited"),
-        branch
+      everyRow<AmountRow>(() =>
+        scopeToBranch(
+          supabase
+            .from("transactions")
+            .select("amount")
+            .eq("type", "sale")
+            .eq("sale_status", "deposited"),
+          branch
+        )
       ),
     ]);
 
-    const firstError = [vouchers, sales].find((result) => result.error)?.error;
-    if (firstError) throw toError(firstError);
-
-    const amountsOf = (rows: AmountRow[] | null) =>
-      (rows ?? []).map((row) => Number(row.amount));
+    const amountsOf = (rows: readonly AmountRow[]) =>
+      rows.map((row) => Number(row.amount));
 
     return {
-      pendingVouchers: amountsOf(vouchers.data as AmountRow[] | null),
-      salesToVerify: amountsOf(sales.data as AmountRow[] | null),
+      pendingVouchers: amountsOf(vouchers),
+      salesToVerify: amountsOf(sales),
     };
   },
 
@@ -495,36 +465,30 @@ const dashboardServices = {
     const today = todayIso();
     const horizon = dayjs().add(nearDays, "day").format("YYYY-MM-DD");
 
-    const { data, error } = await scopeToBranch(
-      supabase
-        .from("vouchers")
-        .select("*")
-        .eq("type", "check")
-        .eq("status", "approved")
-        .lte("check_due_date", horizon)
-        .or(`check_due_date.gte.${today},payable_id.not.is.null`)
-        .order("check_due_date", { ascending: true }),
-      branch
+    const checks = await everyRow<IVoucher>(() =>
+      scopeToBranch(
+        supabase
+          .from("vouchers")
+          .select("*")
+          .eq("type", "check")
+          .eq("status", "approved")
+          .lte("check_due_date", horizon)
+          .or(`check_due_date.gte.${today},payable_id.not.is.null`)
+          .order("check_due_date", { ascending: true }),
+        branch
+      )
     );
-    if (error) throw toError(error);
-
-    const checks = (data ?? []) as IVoucher[];
     const isUpcoming = (check: IVoucher) => (check.check_due_date ?? "") >= today;
     const pastPayableIds = checks.flatMap((check) =>
       !isUpcoming(check) && check.payable_id ? [check.payable_id] : []
     );
     if (pastPayableIds.length === 0) return checks.filter(isUpcoming);
 
-    const unpaid = await supabase
-      .from("payables")
-      .select("id")
-      .in("id", pastPayableIds)
-      .neq("status", "paid");
-    if (unpaid.error) throw toError(unpaid.error);
-
-    const unpaidIds = new Set(
-      ((unpaid.data ?? []) as { id: string }[]).map((row) => row.id)
+    const unpaid = await everyRowIn<{ id: string }>(pastPayableIds, (ids) =>
+      supabase.from("payables").select("id").in("id", ids).neq("status", "paid")
     );
+
+    const unpaidIds = new Set(unpaid.map((row) => row.id));
 
     return checks.filter(
       (check) =>

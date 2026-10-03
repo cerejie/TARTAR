@@ -12,12 +12,12 @@ import type {
   IPartyFilter,
 } from "../../models/data/payment/payment.response";
 import { runWrite } from "../../store/common/sync.store";
+import { everyRow } from "../../utils/page.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 import { queuedAtOf, queuedRpcArgsOf } from "../../utils/write.utils";
 import type { IQueuedWrite } from "../../models/common/write.model";
 
 const table = "payments";
-const reportLimit = 5000;
 
 const defaultSort: ISortState = { column: "paid_at", direction: "descending" };
 
@@ -74,20 +74,17 @@ const paymentServices = {
     };
   },
 
-  getAll: async (
+  getAll: (
     kind: PaymentKind,
     filters: IPartyFilter = {}
-  ): Promise<ILedgerPayment[]> => {
-    const base = supabase.from(table).select("*").eq("kind", kind);
-    const query = applyPartyFilter(base, kind, filters);
-
-    const { data, error } = await query
-      .order("paid_at", { ascending: false })
-      .limit(reportLimit);
-    if (error) throw toError(error);
-
-    return (data ?? []) as ILedgerPayment[];
-  },
+  ): Promise<ILedgerPayment[]> =>
+    everyRow<ILedgerPayment>(() =>
+      applyPartyFilter(
+        supabase.from(table).select("*").eq("kind", kind),
+        kind,
+        filters
+      ).order("paid_at", { ascending: false })
+    ),
 
   record: (
     kind: PaymentKind,

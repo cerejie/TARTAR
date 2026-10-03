@@ -194,3 +194,13 @@
 - Cache bound → newest 120 entries, at most 30 days old, trimmed on hydrate and deleted from IndexedDB (generous age so a branch offline for weeks keeps its pages; primed lookups are always among the newest)
 - prime.hook.ts / realtime.hook.ts → no change needed (the store scope covers both callers)
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, not exercised offline in a browser
+
+## 2026-10-03 — F3 Complete reads → Development v2.47
+- When a paged read ends → on an empty page, advancing by rows received, not on a short page (a short page cannot tell "end" from a server max-rows below 1,000, value unknown — Open H2; costs one extra empty request per read, accepted for correct totals)
+- Helper input → a query factory called once per page, not one reused builder (re-awaiting and re-ranging one PostgREST builder leans on its internals)
+- Stable order → the helper appends `id` ascending after the caller's own order (dates tie constantly; without a unique tiebreaker pages can skip or repeat rows)
+- Follow-up `.in()` lookups (vouchers, payables, due-payable transactions) → chunked 200 ids each now (complete reads make the id list unbounded, and one long `.in` both overflows the URL and is itself capped)
+- Purchases "paid" date basis (RPC id list + one `.in`) → left as is and recorded in Open (a proper fix changes the RPC, which is a migration)
+- Lookup lists (customers, suppliers, branches, categories, users) → out of scope (roadmap names aggregates, reports and `getAll` only)
+- Home → new `src/utils/page.utils.ts` rather than `supabase.utils.ts` (that file is the client and its errors; paging is a separate job)
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, totals not compared against real data

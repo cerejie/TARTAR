@@ -14,6 +14,7 @@ import type { ISale } from "../../models/data/sale/sale.response";
 import { blankTransactionFields } from "../../models/data/transaction/transaction.response";
 import { runWrite } from "../../store/common/sync.store";
 import { applyLedgerFilters } from "../../utils/filter.utils";
+import { everyRow } from "../../utils/page.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 import { queuedAtOf, queuedInsertOf } from "../../utils/write.utils";
 import type { IQueuedWrite } from "../../models/common/write.model";
@@ -30,8 +31,6 @@ const columns = `
   rejection_reason,
   customer:customers(name)
 `;
-
-const reportLimit = 5000;
 
 const saleQuery = (filters: ILedgerFilters, count?: "exact") => {
   const base = supabase
@@ -80,14 +79,10 @@ const saleServices = {
     };
   },
 
-  getAll: async (filters: ILedgerFilters = {}): Promise<ISale[]> => {
-    const { data, error } = await saleQuery(filters)
-      .order("txn_date", { ascending: false })
-      .limit(reportLimit);
-    if (error) throw toError(error);
-
-    return (data ?? []) as unknown as ISale[];
-  },
+  getAll: (filters: ILedgerFilters = {}): Promise<ISale[]> =>
+    everyRow<ISale>(() =>
+      saleQuery(filters).order("txn_date", { ascending: false })
+    ),
 
   create: (values: ISaleInput, createdBy: string | null) =>
     runWrite({

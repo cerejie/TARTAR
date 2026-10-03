@@ -26,6 +26,7 @@ import {
   applyStatusFilter,
   scopeToBranch,
 } from "../../utils/filter.utils";
+import { everyRow } from "../../utils/page.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 
 type LedgerTable = "receivables" | "payables";
@@ -49,7 +50,16 @@ type IPartySummaryRow = {
   created_at: string;
 } & Record<"customer_id" | "supplier_id", string | null> &
   Record<"customer_name" | "supplier_name", string>;
-const reportLimit = 5000;
+
+type ICustomerSummaryRow = Pick<
+  IReceivable,
+  | "customer_id"
+  | "customer_name"
+  | "amount"
+  | "paid_amount"
+  | "status"
+  | "created_at"
+>;
 
 const makeLedgerServices = <Row, Input extends { branch: string; amount: number; due_date: string }>(
   config: ILedgerConfig<Input>
@@ -87,40 +97,35 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
       };
     },
 
-    getAll: async (filters: ILedgerFilters = {}): Promise<Row[]> => {
-      const filtered = applyLedgerFilters(
-        supabase.from(config.table).select("*"),
-        filters,
-        columns
-      );
-
-      const { data, error } = await applyStatusFilter(
-        filtered,
-        filters.status
-      )
-        .order("due_date", { ascending: true })
-        .limit(reportLimit);
-      if (error) throw toError(error);
-
-      return (data ?? []) as unknown as Row[];
-    },
+    getAll: (filters: ILedgerFilters = {}): Promise<Row[]> =>
+      everyRow<Row>(() =>
+        applyStatusFilter(
+          applyLedgerFilters(
+            supabase.from(config.table).select("*"),
+            filters,
+            columns
+          ),
+          filters.status
+        ).order("due_date", { ascending: true })
+      ),
 
     getPartySummaries: async (
       branch?: string | null
     ): Promise<ILedgerPartySummary[]> => {
-      const { data, error } = await scopeToBranch(
-        supabase
-          .from(config.table)
-          .select(
-            `${config.idColumn}, ${config.nameColumn}, amount, paid_amount, status, created_at`
-          ),
-        branch
+      const rows = await everyRow<IPartySummaryRow>(() =>
+        scopeToBranch(
+          supabase
+            .from(config.table)
+            .select(
+              `${config.idColumn}, ${config.nameColumn}, amount, paid_amount, status, created_at`
+            ),
+          branch
+        )
       );
-      if (error) throw toError(error);
 
       const byKey = new Map<string, ILedgerPartySummary>();
 
-      for (const row of (data ?? []) as unknown as IPartySummaryRow[]) {
+      for (const row of rows) {
         const partyId = row[config.idColumn] ?? null;
         const partyName = row[config.nameColumn];
         const key = partyId ?? `name:${partyName}`;
@@ -153,20 +158,21 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
       party: ILedgerPartyKey,
       filters: ILedgerFilters = {}
     ): Promise<Row[]> => {
-      const base = supabase.from(config.table).select("*");
-      const scoped = party.partyId
-        ? base.eq(config.idColumn, party.partyId)
-        : base.is(config.idColumn, null).eq(config.nameColumn, party.partyName);
+      const partyQuery = () => {
+        const base = supabase.from(config.table).select("*");
+        const scoped = party.partyId
+          ? base.eq(config.idColumn, party.partyId)
+          : base
+              .is(config.idColumn, null)
+              .eq(config.nameColumn, party.partyName);
 
-      const filtered = applyLedgerFilters(scoped, filters, columns);
+        return applyStatusFilter(
+          applyLedgerFilters(scoped, filters, columns),
+          filters.status
+        ).order("due_date", { ascending: true });
+      };
 
-      const { data, error } = await applyStatusFilter(
-        filtered,
-        filters.status
-      ).order("due_date", { ascending: true });
-      if (error) throw toError(error);
-
-      return (data ?? []) as unknown as Row[];
+      return everyRow<Row>(partyQuery);
     },
 
     create: (values: Input, createdBy: string | null) =>
@@ -205,16 +211,17 @@ export const receivableServices = {
   }),
 
   getCustomerSummaries: async (): Promise<ICustomerReceivableSummary[]> => {
-    const { data, error } = await supabase
-      .from("receivables")
-      .select(
-        "customer_id, customer_name, amount, paid_amount, status, created_at"
-      );
-    if (error) throw toError(error);
+    const rows = await everyRow<ICustomerSummaryRow>(() =>
+      supabase
+        .from("receivables")
+        .select(
+          "customer_id, customer_name, amount, paid_amount, status, created_at"
+        )
+    );
 
     const byKey = new Map<string, ICustomerReceivableSummary>();
 
-    for (const row of data ?? []) {
+    for (const row of rows) {
       const key = row.customer_id ?? `name:${row.customer_name}`;
       const summary = byKey.get(key) ?? {
         customerId: row.customer_id,
@@ -245,22 +252,21 @@ export const receivableServices = {
     customer: ICustomerLedgerKey,
     filters: ILedgerFilters = {}
   ): Promise<IReceivable[]> => {
-    const base = supabase.from("receivables").select("*");
-    const scoped = customer.customerId
-      ? base.eq("customer_id", customer.customerId)
-      : base
-          .is("customer_id", null)
-          .eq("customer_name", customer.customerName);
+    const customerQuery = () => {
+      const base = supabase.from("receivables").select("*");
+      const scoped = customer.customerId
+        ? base.eq("customer_id", customer.customerId)
+        : base
+            .is("customer_id", null)
+            .eq("customer_name", customer.customerName);
 
-    const filtered = applyLedgerFilters(scoped, filters, ledgerColumns);
+      return applyStatusFilter(
+        applyLedgerFilters(scoped, filters, ledgerColumns),
+        filters.status
+      ).order("due_date", { ascending: true });
+    };
 
-    const { data, error } = await applyStatusFilter(
-      filtered,
-      filters.status
-    ).order("due_date", { ascending: true });
-    if (error) throw toError(error);
-
-    return (data ?? []) as IReceivable[];
+    return everyRow<IReceivable>(customerQuery);
   },
 
   getCustomerLastPayment: async (

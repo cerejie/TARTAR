@@ -93,16 +93,23 @@ user. Any of them may be overturned; say so and the phase is replanned.
   hydrate the cache keeps the newest 120 entries no older than 30 days and deletes the rest.
   `src/utils/idb.utils.ts` — `deleteQueries`. `prime.hook.ts` / `realtime.hook.ts` needed no change.
   Compiled, not exercised offline in a browser.
+- [x] F3 Complete reads (v2.47): `src/utils/page.utils.ts` (new) — `everyRow` pages a query to the end on its
+  own order plus an `id` tiebreaker, 1,000 rows a page, stopping on an empty page so it is complete at any
+  server row cap; `everyRowIn` splits an id list into 200-id chunks for follow-up `.in()` lookups.
+  `src/services/data/{transaction,sale,payment,ledger}.services.ts` — every `getAll`, `getDisbursementAll`,
+  party summary and party ledger read goes through it; `reportLimit` is gone; voucher and payable lookups
+  are chunked. `src/services/data/dashboard.services.ts` — summary, overview, sales series, branch monitor,
+  due alerts, pending reviews and due checks all read every row. No query key or filter field changed.
+  Compiled, totals not compared against `select sum(...)` on real data.
 
 ## Next
-1. F3 Complete reads — audit § DATA-01.
-2. F4 Client security hardening — audit § SEC-03, SEC-01, SEC-04.
-3. F5 Failure experience — audit § UX-01, QA-03, UX-03.
-4. F6 Touch + layout — audit § MOB-01, UI-01.
-5. F7 Master Data search — audit § UX-02.
-6. F8 Unit tests — audit § TEST-01.
-7. F9 Entry bundle — audit § PERF-03.
-8. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
+1. F4 Client security hardening — audit § SEC-03, SEC-01, SEC-04.
+2. F5 Failure experience — audit § UX-01, QA-03, UX-03.
+3. F6 Touch + layout — audit § MOB-01, UI-01.
+4. F7 Master Data search — audit § UX-02.
+5. F8 Unit tests — audit § TEST-01.
+6. F9 Entry bundle — audit § PERF-03.
+7. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
     delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
 
 ## Open
@@ -112,9 +119,15 @@ user. Any of them may be overturned; say so and the phase is replanned.
   read customers, suppliers and bank accounts.
 - H2 (dashboard check): API "Max rows" value.
 - QA-02 (migration): idempotency key on `update_transaction_with_voucher`.
-- DATA-01 follow-up (migration): server-side aggregate RPCs for the dashboard.
+- DATA-01 follow-up (migration): server-side aggregate RPCs for the dashboard. Until then every aggregate
+  read costs one extra empty request (the end-of-data probe) and ships every row.
+- DATA-01 remainder (not done in F3): the purchases "paid" date basis still takes its id list from the
+  `purchase_ids_paid_between` RPC in one response and sends it back as one `.in("id", …)` — past the API
+  max rows, or a few hundred ids in the URL, that one filter is still incomplete. The clean fix is an RPC
+  change (migration). Lookup lists (customers, suppliers, branches, categories, users) are still single
+  unpaged reads.
 - SEC-05: `send-push` failure counting needs an Edge Function redeploy by the user.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.46 (F2) · Uncommitted: none · Last check:
+Branch: mobile-app-native-newlook · Last commit Development v2.47 (F3) · Uncommitted: none · Last check:
 yarn build + yarn lint clean 2026-10-03.

@@ -28,6 +28,7 @@ import {
 import type { IVoucher } from "../../models/data/voucher/voucher.response";
 import { runWrite } from "../../store/common/sync.store";
 import { applyLedgerFilters } from "../../utils/filter.utils";
+import { everyRow, everyRowIn } from "../../utils/page.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 import { breakdownTotalsOf } from "../../utils/voucher.utils";
 import { queuedAtOf, queuedRpcArgsOf } from "../../utils/write.utils";
@@ -53,8 +54,6 @@ const transactionColumns = {
   type: "type",
 };
 
-const reportLimit = 5000;
-
 const breakdownArgs = (values: IDisbursementInput) => {
   const totals = breakdownTotalsOf(values);
 
@@ -75,17 +74,16 @@ const payablesOf = async (
   );
   if (payableIds.length === 0) return new Map();
 
-  const { data, error } = await supabase
-    .from(payableTable)
-    .select("id, status, amount, paid_amount")
-    .in("id", payableIds);
-  if (error) throw toError(error);
-
-  return new Map(
-    ((data ?? []) as (IDisbursementPayable & { id: string })[]).map(
-      ({ id, ...payable }) => [id, payable]
-    )
+  const payables = await everyRowIn<IDisbursementPayable & { id: string }>(
+    payableIds,
+    (ids) =>
+      supabase
+        .from(payableTable)
+        .select("id, status, amount, paid_amount")
+        .in("id", ids)
   );
+
+  return new Map(payables.map(({ id, ...payable }) => [id, payable]));
 };
 
 const withVouchers = async (
@@ -93,16 +91,10 @@ const withVouchers = async (
 ): Promise<IDisbursement[]> => {
   if (rows.length === 0) return [];
 
-  const { data, error } = await supabase
-    .from(voucherTable)
-    .select("*")
-    .in(
-      "transaction_id",
-      rows.map((row) => row.id)
-    );
-  if (error) throw toError(error);
-
-  const vouchers = (data ?? []) as IVoucher[];
+  const vouchers = await everyRowIn<IVoucher>(
+    rows.map((row) => row.id),
+    (ids) => supabase.from(voucherTable).select("*").in("transaction_id", ids)
+  );
   const voucherByTransaction = new Map(
     vouchers.map((voucher) => [voucher.transaction_id, voucher])
   );
@@ -204,17 +196,14 @@ const transactionServices = {
     };
   },
 
-  getAll: async (filters: ILedgerFilters = {}): Promise<ITransaction[]> => {
-    const base = supabase.from(table).select(columns);
-    const query = applyLedgerFilters(base, filters, transactionColumns);
-
-    const { data, error } = await query
-      .order("txn_date", { ascending: false })
-      .limit(reportLimit);
-    if (error) throw toError(error);
-
-    return (data ?? []) as unknown as ITransaction[];
-  },
+  getAll: (filters: ILedgerFilters = {}): Promise<ITransaction[]> =>
+    everyRow<ITransaction>(() =>
+      applyLedgerFilters(
+        supabase.from(table).select(columns),
+        filters,
+        transactionColumns
+      ).order("txn_date", { ascending: false })
+    ),
 
   getAllWithVouchers: async (
     filters: ILedgerFilters = {}
@@ -295,12 +284,13 @@ const transactionServices = {
     filters: ILedgerFilters = {}
   ): Promise<IDisbursement[]> => {
     const paidIds = await paidPurchaseIdsOf(kind, filters);
-    const { data, error } = await disbursementQuery(kind, filters, paidIds)
-      .order("txn_date", { ascending: false })
-      .limit(reportLimit);
-    if (error) throw toError(error);
+    const rows = await everyRow<ITransaction>(() =>
+      disbursementQuery(kind, filters, paidIds).order("txn_date", {
+        ascending: false,
+      })
+    );
 
-    return withVouchers((data ?? []) as unknown as ITransaction[]);
+    return withVouchers(rows);
   },
 
   getDisbursement: async (id: string): Promise<IDisbursement | null> => {
