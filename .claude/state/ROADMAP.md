@@ -127,12 +127,19 @@ user. Any of them may be overturned; say so and the phase is replanned.
   `md` (`sectionCardExtra` is now a `cva` with `stacked`); `src/components/dashboard/SalesOverviewCard.tsx`
   sets it, so the period pills sit under the title on phones instead of clipping. `dashboard.styles.ts`
   needed no change. Compiled, visuals unconfirmed (not checked on a phone).
+- [x] F7 Master Data search (v2.51): `src/utils/search.utils.ts` (new) — `matchingRows` (case-insensitive
+  contains over the texts a row offers) and `newestFirst` (by `created_at`). `src/keys/table.keys.ts` — four
+  search keys. `src/hook/data/{party/supplier,expense-category/expense.category,income-source/income.source,
+  bank/bank.account}.manage.hook.ts` — each reads its term through `useSearch`, filters and orders the table
+  rows newest-first, and returns `search` / `setSearch`; the list hooks and services are untouched, so every
+  selector keeps its name / sort order. `src/components/master-data/tables/*.tsx` — a `FilterToolbar` +
+  `SearchInput` above each table and a "no match" empty state. Still client-paged at 8 (lookup lists stay
+  unpaged). Compiled, visuals unconfirmed.
 
 ## Next
-1. F7 Master Data search — audit § UX-02.
-2. F8 Unit tests — audit § TEST-01.
-3. F9 Entry bundle — audit § PERF-03.
-4. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
+1. F8 Unit tests — audit § TEST-01.
+2. F9 Entry bundle — audit § PERF-03.
+3. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
     delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
 
 ## Open
@@ -162,5 +169,5 @@ user. Any of them may be overturned; say so and the phase is replanned.
 - SEC-05: `send-push` failure counting needs an Edge Function redeploy by the user.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.50 (F6) · Uncommitted: none · Last check:
+Branch: mobile-app-native-newlook · Last commit Development v2.51 (F7) · Uncommitted: none · Last check:
 yarn build + yarn lint clean 2026-10-03.

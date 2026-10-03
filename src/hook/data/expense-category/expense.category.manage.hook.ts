@@ -13,6 +13,9 @@ import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { useWithPendingRows } from "../../common/pending.hook";
 import { useExpenseCategoryListHook } from "./expense.category.list.hook";
+import { expenseCategorySearchKey } from "../../../keys/table.keys";
+import { matchingRows, newestFirst } from "../../../utils/search.utils";
+import { useSearch } from "../../common/search.hook";
 
 export const expenseCategoryFormFields: IFieldConfig<IExpenseCategoryInput>[] =
   [
@@ -37,6 +40,7 @@ export const useExpenseCategoryManageHook = () => {
   const createModal = useModal(expenseCategoryCreateModalKey);
   const editModal = useModal<IExpenseCategory>(expenseCategoryEditModalKey);
   const openConfirm = useConfirm();
+  const { search, setSearch } = useSearch(expenseCategorySearchKey);
   const {
     expenseCategories,
     isInitialLoading,
@@ -121,14 +125,23 @@ export const useExpenseCategoryManageHook = () => {
     sort: editing?.sort ?? nextSort,
   };
 
-  const rows = useWithPendingRows(
+  const knownCategories = useWithPendingRows(
     expenseCategories,
     referenceServices.pendingExpenseCategoryOf,
     { enabled: true, keyOf: (category) => category.slug }
   );
 
+  const rows = newestFirst(
+    matchingRows(knownCategories, search, (category) => [
+      category.name,
+      category.code,
+    ])
+  );
+
   return {
     expenseCategories: rows,
+    search,
+    setSearch,
     loading: isInitialLoading,
     refreshing: isRefreshing,
     error,

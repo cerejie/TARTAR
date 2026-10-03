@@ -3,12 +3,15 @@ import {
   bankAccountEditModalKey,
 } from "../../../keys/modal.keys";
 import { bankAccountListKey, bankListKey } from "../../../keys/query.keys";
+import { bankAccountSearchKey } from "../../../keys/table.keys";
 import bankServices from "../../../services/data/bank.services";
 import { nameKey } from "../../../utils/fuzzy.utils";
+import { matchingRows, newestFirst } from "../../../utils/search.utils";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { useWithPendingRows } from "../../common/pending.hook";
+import { useSearch } from "../../common/search.hook";
 import { useBankAccountListHook } from "./bank.account.list.hook";
 import type { DefaultValues } from "react-hook-form";
 import type { IFieldConfig } from "../../../models/common/field.model";
@@ -19,6 +22,7 @@ export const useBankAccountManageHook = () => {
   const createModal = useModal(bankAccountCreateModalKey);
   const editModal = useModal<IBankAccount>(bankAccountEditModalKey);
   const openConfirm = useConfirm();
+  const { search, setSearch } = useSearch(bankAccountSearchKey);
   const { banks, bankAccounts, loading, refreshing, error, retry } =
     useBankAccountListHook();
   const knownBanks = useWithPendingRows(banks, bankServices.pendingBankOf, {
@@ -150,14 +154,24 @@ export const useBankAccountManageHook = () => {
     sort: editing?.sort ?? nextSort,
   };
 
-  const rows = useWithPendingRows(
+  const knownAccounts = useWithPendingRows(
     bankAccounts,
     (write) => bankServices.pendingAccountOf(write, knownBanks),
     { enabled: true }
   );
 
+  const rows = newestFirst(
+    matchingRows(knownAccounts, search, (account) => [
+      account.bank?.name,
+      account.account_name,
+      account.account_number,
+    ])
+  );
+
   return {
     bankAccounts: rows,
+    search,
+    setSearch,
     loading,
     refreshing,
     error,

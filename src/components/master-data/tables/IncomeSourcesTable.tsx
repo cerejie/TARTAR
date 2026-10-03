@@ -1,6 +1,11 @@
 import { Archive, Pencil, Trash2, Undo2 } from "lucide-react";
-import { firstRecordHint } from "../../../models/common/table.model";
+import {
+  firstRecordHint,
+  searchEmptyHint,
+} from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
+import FilterToolbar from "../../common/filter/FilterToolbar";
+import SearchInput from "../../common/filter/SearchInput";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
 import AvatarCell from "../../common/table/AvatarCell";
@@ -22,6 +27,8 @@ import { nowrapCell } from "../../../styles/table/table.styles";
 const IncomeSourcesTable = () => {
   const {
     incomeSources,
+    search,
+    setSearch,
     loading,
     refreshing,
     error,
@@ -98,7 +105,17 @@ const IncomeSourcesTable = () => {
 
   return (
     <>
-      <TablePanel>
+      <TablePanel
+        toolbar={
+          <FilterToolbar>
+            <SearchInput
+              placeholder="Search income sources"
+              value={search}
+              onChange={(term) => setSearch(term ?? "")}
+            />
+          </FilterToolbar>
+        }
+      >
         <DataTable<IIncomeSource>
           columns={columns}
           data={incomeSources}
@@ -107,8 +124,8 @@ const IncomeSourcesTable = () => {
           error={error}
           onRetry={retry}
           rowKey="slug"
-          emptyText="No income sources yet"
-          emptyHint={firstRecordHint}
+          emptyText={search ? "No income sources match your search" : "No income sources yet"}
+          emptyHint={search ? searchEmptyHint : firstRecordHint}
         />
       </TablePanel>
 

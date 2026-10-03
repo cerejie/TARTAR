@@ -21,3 +21,8 @@ export const ledgerSortKey = (scope: string) => `${scope}-sort`;
 export const paymentSortKey = (kind: string) => `${kind}-payments-sort`;
 
 export const rowFocusParamKey = "focus";
+
+export const supplierSearchKey = "suppliers-search";
+export const expenseCategorySearchKey = "expense-categories-search";
+export const incomeSourceSearchKey = "income-sources-search";
+export const bankAccountSearchKey = "bank-accounts-search";

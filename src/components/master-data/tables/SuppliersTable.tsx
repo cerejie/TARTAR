@@ -1,6 +1,11 @@
 import { Pencil, Trash2 } from "lucide-react";
-import { firstRecordHint } from "../../../models/common/table.model";
+import {
+  firstRecordHint,
+  searchEmptyHint,
+} from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
+import FilterToolbar from "../../common/filter/FilterToolbar";
+import SearchInput from "../../common/filter/SearchInput";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
@@ -21,6 +26,8 @@ import { nowrapCell } from "../../../styles/table/table.styles";
 const SuppliersTable = () => {
   const {
     suppliers,
+    search,
+    setSearch,
     loading,
     refreshing,
     error,
@@ -82,7 +89,17 @@ const SuppliersTable = () => {
 
   return (
     <>
-      <TablePanel>
+      <TablePanel
+        toolbar={
+          <FilterToolbar>
+            <SearchInput
+              placeholder="Search suppliers"
+              value={search}
+              onChange={(term) => setSearch(term ?? "")}
+            />
+          </FilterToolbar>
+        }
+      >
         <DataTable<ISupplier>
           columns={columns}
           data={suppliers}
@@ -90,8 +107,8 @@ const SuppliersTable = () => {
           refreshing={refreshing}
           error={error}
           onRetry={retry}
-          emptyText="No suppliers yet"
-          emptyHint={firstRecordHint}
+          emptyText={search ? "No suppliers match your search" : "No suppliers yet"}
+          emptyHint={search ? searchEmptyHint : firstRecordHint}
         />
       </TablePanel>
 

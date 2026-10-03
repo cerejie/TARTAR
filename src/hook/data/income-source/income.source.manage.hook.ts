@@ -13,6 +13,9 @@ import type { DefaultValues } from "react-hook-form";
 import type { IFieldConfig } from "../../../models/common/field.model";
 import type { IIncomeSourceInput } from "../../../models/data/income-source/income.source.request";
 import type { IIncomeSource } from "../../../models/data/income-source/income.source.response";
+import { incomeSourceSearchKey } from "../../../keys/table.keys";
+import { matchingRows, newestFirst } from "../../../utils/search.utils";
+import { useSearch } from "../../common/search.hook";
 
 export const incomeSourceFormFields: IFieldConfig<IIncomeSourceInput>[] = [
   {
@@ -29,6 +32,7 @@ export const useIncomeSourceManageHook = () => {
   const createModal = useModal(incomeSourceCreateModalKey);
   const editModal = useModal<IIncomeSource>(incomeSourceEditModalKey);
   const openConfirm = useConfirm();
+  const { search, setSearch } = useSearch(incomeSourceSearchKey);
   const { incomeSources, isInitialLoading, isRefreshing, error, refetch } =
     useIncomeSourceListHook();
 
@@ -103,14 +107,20 @@ export const useIncomeSourceManageHook = () => {
     sort: editing?.sort ?? nextSort,
   };
 
-  const rows = useWithPendingRows(
+  const knownSources = useWithPendingRows(
     incomeSources,
     referenceServices.pendingIncomeSourceOf,
     { enabled: true, keyOf: (source) => source.slug }
   );
 
+  const rows = newestFirst(
+    matchingRows(knownSources, search, (source) => [source.name])
+  );
+
   return {
     incomeSources: rows,
+    search,
+    setSearch,
     loading: isInitialLoading,
     refreshing: isRefreshing,
     error,

@@ -4,13 +4,16 @@ import {
   supplierEditModalKey,
 } from "../../../keys/modal.keys";
 import { supplierListKey } from "../../../keys/query.keys";
+import { supplierSearchKey } from "../../../keys/table.keys";
 import type { IFieldConfig } from "../../../models/common/field.model";
 import type { IPartyInput } from "../../../models/data/party/party.request";
 import type { ISupplier } from "../../../models/data/party/party.response";
 import { supplierServices } from "../../../services/data/party.services";
+import { matchingRows, newestFirst } from "../../../utils/search.utils";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
+import { useSearch } from "../../common/search.hook";
 import { useSupplierListHook } from "./supplier.list.hook";
 
 export const supplierFormFields: IFieldConfig<IPartyInput>[] = [
@@ -48,6 +51,7 @@ export const useSupplierManageHook = () => {
   const createModal = useModal(supplierCreateModalKey);
   const editModal = useModal<ISupplier>(supplierEditModalKey);
   const openConfirm = useConfirm();
+  const { search, setSearch } = useSearch(supplierSearchKey);
   const { suppliers, isInitialLoading, isRefreshing, error, refetch } =
     useSupplierListHook();
 
@@ -95,8 +99,19 @@ export const useSupplierManageHook = () => {
       }
     : emptySupplier;
 
+  const rows = newestFirst(
+    matchingRows(suppliers, search, (supplier) => [
+      supplier.name,
+      supplier.contact_person,
+      supplier.contact,
+      supplier.address,
+    ])
+  );
+
   return {
-    suppliers,
+    suppliers: rows,
+    search,
+    setSearch,
     loading: isInitialLoading,
     refreshing: isRefreshing,
     error,

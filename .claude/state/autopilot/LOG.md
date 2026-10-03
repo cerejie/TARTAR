@@ -236,3 +236,15 @@
 - Stack for every card or opt-in → opt-in (NotificationsCard's extra is a short link that fits beside its title)
 - Breakpoint → below `md`, as the roadmap states; the switch is already `w-full` below `lg`, so it fills the row
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, visuals unconfirmed
+
+## 2026-10-03 — F7 Master Data search → Development v2.51
+- File plan → one pure util (search.utils), four search keys, `useSearch` in the four manage hooks, `FilterToolbar` + `SearchInput` in the four tables (Simple tier, UI-only, reversible, no schema or rule change)
+- Client or server search → client-side over the already-loaded list (lookup lists stay unpaged per CLAUDE.md; the list query, its key and the offline cache are untouched)
+- Where newest-first is applied → in the manage hooks, on the table rows only, not in the services (the same lists feed every selector, which must keep name / sort order)
+- Newest-first vs the "Order" column on categories, income sources and banks → newest-first in the Master Data table as the roadmap states; `sort` still drives pickers and stays visible as a column
+- Search state → existing `useSearch` (view store) with keys in `keys/table.keys.ts`; no new store
+- What is searched → suppliers: name, contact person, contact, address; categories: name, code; income sources: name; bank accounts: bank, account name, account number
+- Empty state → "No … match your search" + the existing `searchEmptyHint` when a term is set, first-record copy otherwise
+- Page size → still client-paged at 8; DataTable already clamps the page when results shrink
+- `tsconfig.app.tsbuildinfo` → committed (tracked file, changed only by the new source file in its list; leaving it would leave the tree dirty)
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, visuals unconfirmed
