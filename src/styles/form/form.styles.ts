@@ -92,3 +92,11 @@ export const formSummaryBarTotal = `ml-auto ${moneyLevel({ level: "amount" })}`;
 
 export const formSummaryBarChevron =
   "size-4 text-muted-foreground transition-transform group-aria-expanded/summary-toggle:rotate-180";
+
+export const switchRow = "flex min-h-11 items-center justify-between gap-4";
+
+export const switchText = "flex min-w-0 flex-col gap-0.5";
+
+export const switchLabel = "text-sm font-medium text-foreground";
+
+export const switchDescription = "text-xs text-muted-foreground";

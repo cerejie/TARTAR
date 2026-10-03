@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { pushModeNotes } from "../../models/common/push.model";
+import { pushBlockedSteps, pushModeNotes } from "../../models/common/push.model";
 import pushServices from "../../services/data/push.services";
 import { selectInstalled, useInstallStore } from "../../store/common/install.store";
 import { selectOnline, useNetworkStore } from "../../store/common/network.store";
@@ -13,6 +13,7 @@ import {
 } from "../../store/common/push.store";
 import {
   applicationServerKeyOf,
+  pushPlatformOf,
   subscriptionInputOf,
   usesServerKey,
   vapidPublicKey,
@@ -29,6 +30,10 @@ const blockedMessage =
   "Notifications are blocked. Allow them for TARTAR in your browser or device settings.";
 const noWorkerMessage =
   "Notifications need the installed app or the published site. Reload and try again.";
+const dismissedMessage =
+  "Notifications were not allowed. Turn the switch on again to see the prompt.";
+const enabledMessage = "Notifications are on for this device";
+const blockedTitle = "Notifications are blocked on this device";
 const incompleteMessage = "This device returned an incomplete push subscription.";
 
 const pushSummaryOf = ({ isManager, encodeTransactions }: IPermissions): string => {
@@ -70,7 +75,11 @@ const currentKeySubscriptionOf = async (
 const subscribeThisDevice = async (): Promise<void> => {
   const permission = await Notification.requestPermission();
   usePushStore.getState().setPermission(permission);
-  if (permission !== "granted") throw new Error(blockedMessage);
+  if (permission === "denied") {
+    usePushStore.getState().setEnableRequested(true);
+    throw new Error(blockedMessage);
+  }
+  if (permission !== "granted") throw new Error(dismissedMessage);
 
   const registration = await currentRegistration();
   if (!registration) throw new Error(noWorkerMessage);
@@ -86,6 +95,7 @@ const subscribeThisDevice = async (): Promise<void> => {
 
   await pushServices.save(input);
   usePushStore.getState().setSubscribed(true);
+  usePushStore.getState().setEnableRequested(false);
 };
 
 const unsubscribeThisDevice = async (): Promise<void> => {
@@ -95,6 +105,7 @@ const unsubscribeThisDevice = async (): Promise<void> => {
     await subscription.unsubscribe();
   }
   usePushStore.getState().setSubscribed(false);
+  usePushStore.getState().setEnableRequested(false);
 };
 
 export const releasePushSubscription = async (): Promise<void> => {
@@ -103,6 +114,31 @@ export const releasePushSubscription = async (): Promise<void> => {
   await pushServices.remove(subscription.endpoint).catch(() => undefined);
   await subscription.unsubscribe().catch(() => false);
   usePushStore.getState().setSubscribed(false);
+};
+
+const errorMessageOf = (error: unknown): string =>
+  error instanceof Error ? error.message : blockedMessage;
+
+const resumeRequestedEnable = () => {
+  const { enableRequested, subscribed, setEnableRequested } = usePushStore.getState();
+  if (!enableRequested || subscribed) return;
+  setEnableRequested(false);
+  void subscribeThisDevice()
+    .then(() => toast.success(enabledMessage))
+    .catch((error: unknown) => toast.error(errorMessageOf(error)));
+};
+
+const blockedStepsOf = (): string =>
+  pushBlockedSteps[pushPlatformOf(navigator.userAgent, isAppleTouchDevice())];
+
+const watchPermissionChange = async (
+  onChange: () => void,
+  signal: AbortSignal
+): Promise<void> => {
+  if (!("permissions" in navigator)) return;
+  const status = await navigator.permissions.query({ name: "notifications" });
+  if (signal.aborted) return;
+  status.addEventListener("change", onChange, { signal });
 };
 
 export const usePushStatusListener = () => {
@@ -114,18 +150,24 @@ export const usePushStatusListener = () => {
     const listeners = new AbortController();
 
     const sync = () => {
-      setPermission(Notification.permission);
+      const permission = Notification.permission;
+      setPermission(permission);
       void currentSubscription()
         .then((subscription) =>
           setSubscribed(
             subscription !== null && usesServerKey(subscription, vapidPublicKey)
           )
         )
-        .catch(() => setSubscribed(false));
+        .catch(() => setSubscribed(false))
+        .then(() => {
+          if (permission === "granted") resumeRequestedEnable();
+        });
     };
 
     sync();
     document.addEventListener("visibilitychange", sync, { signal: listeners.signal });
+    window.addEventListener("focus", sync, { signal: listeners.signal });
+    void watchPermissionChange(sync, listeners.signal).catch(() => undefined);
 
     return () => listeners.abort();
   }, [setPermission, setSubscribed]);
@@ -138,7 +180,7 @@ export const usePushNotifications = () => {
   const permissions = usePermissions();
 
   const enableMutation = useMutation(subscribeThisDevice, {
-    successMessage: "Notifications are on for this device",
+    successMessage: enabledMessage,
   });
   const disableMutation = useMutation(unsubscribeThisDevice, {
     successMessage: "Notifications are off for this device",
@@ -155,17 +197,41 @@ export const usePushNotifications = () => {
 
   const mode = modeOf();
   const summary = pushSummaryOf(permissions);
-  const canToggle = mode === "on" || mode === "off";
+  const canToggle = mode === "on" || mode === "off" || mode === "blocked";
+  const enable = () => void enableMutation.mutate();
+
+  const noteOf = (): string => {
+    if (mode === "on" || mode === "off") return summary;
+    if (mode === "blocked") return blockedStepsOf();
+    return pushModeNotes[mode];
+  };
+
+  const showBlockedSteps = () => {
+    usePushStore.getState().setEnableRequested(true);
+    toast.info(blockedTitle, { description: blockedStepsOf() });
+  };
+
+  const toggle = (selected: boolean) => {
+    if (!selected) {
+      void disableMutation.mutate();
+      return;
+    }
+    if (mode === "blocked") {
+      showBlockedSteps();
+      return;
+    }
+    enable();
+  };
 
   return {
     mode,
     summary,
     canToggle,
-    note: mode === "on" || mode === "off" ? summary : pushModeNotes[mode],
-    enable: () => void enableMutation.mutate(),
-    disable: () => void disableMutation.mutate(),
+    note: noteOf(),
+    enable,
+    toggle,
+    busy: enableMutation.loading || disableMutation.loading,
     enabling: enableMutation.loading,
-    disabling: disableMutation.loading,
   };
 };
 

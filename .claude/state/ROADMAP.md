@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-03 (C1 done)
+Updated: 2026-10-04 (N1 done)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -191,15 +191,25 @@ Given by the user on 2026-10-03 unless marked otherwise.
   non-sale customer transactions (legacy rows kept without naming them). Proposal
   `.claude/state/proposals/migration-33-collection.sql` (convert → customer_payment recommended, check constraint).
 
+- [x] N1 Account notifications toggle (Development v2.69): new common primitive `src/components/common/form/AppSwitch.tsx`
+  (shadcn `ui/switch`, label + optional description, styles `switchRow` / `switchText` / `switchLabel` /
+  `switchDescription` in `styles/form/form.styles.ts`); `NotificationsToggle.tsx` is now the switch (on only when
+  permission is granted and the subscription is active), shown for on / off / blocked; `NotificationsControls.tsx`
+  puts the switch above the note and `NotificationsSheet.tsx` renders the same controls (no footer button;
+  `notificationsActions` removed). `push.hook.ts`: `toggle` / `busy`; blocked → tapping on shows a toast with the
+  platform's steps (`pushBlockedSteps` in `models/common/push.model.ts`, `pushPlatformOf` in `utils/push.utils.ts`,
+  tested in `push.utils.test.ts`) and the note shows them inline; a dismissed prompt ("default") says to tap again,
+  which re-prompts; status listener re-reads on `visibilitychange`, window `focus` and the Permissions API `change`;
+  `enableRequested` (persisted in `store/common/push.store.ts`) makes a blocked → allowed change subscribe by itself.
+
 ## Next
-1. N1 Account notifications toggle.
-2. P1 Print title = branch.
-3. P2 Period print month + year and the purchases print filter.
-4. P3 Purchase check number.
-5. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
-6. O2 Offline branch scopes, details and month change.
-7. Z Final re-sweep + offline probe, all roles.
-8. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. P1 Print title = branch.
+2. P2 Period print month + year and the purchases print filter.
+3. P3 Purchase check number.
+4. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
+5. O2 Offline branch scopes, details and month change.
+6. Z Final re-sweep + offline probe, all roles.
+7. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
@@ -215,5 +225,5 @@ Given by the user on 2026-10-03 unless marked otherwise.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.68 (C1 Collection removal) · Uncommitted: none · Last check: C1, build + lint clean, tests 118 / 118, swept admin + acc desk + phone. Run any sweep or probe
+Branch: mobilel-app-native · Last commit Development v2.69 (N1 Account notifications toggle) · Uncommitted: none · Last check: N1, build + lint clean, tests 121 / 121, swept admin + emp phone + desk on /account, permission probe (on / off / dismissed / denied → allowed). Run any sweep or probe
 with Bash `run_in_background` and `timeout` 3600000.

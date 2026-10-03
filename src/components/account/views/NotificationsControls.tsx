@@ -1,9 +1,5 @@
 import { usePushNotifications } from "../../../hook/common/push.hook";
-import {
-  notificationsActions,
-  notificationsBody,
-  notificationsText,
-} from "../../../styles/account/account.styles";
+import { notificationsBody, notificationsText } from "../../../styles/account/account.styles";
 import NotificationsToggle from "./NotificationsToggle";
 
 const NotificationsControls = () => {
@@ -11,12 +7,8 @@ const NotificationsControls = () => {
 
   return (
     <div className={notificationsBody}>
+      {canToggle ? <NotificationsToggle /> : null}
       <p className={notificationsText}>{note}</p>
-      {canToggle ? (
-        <div className={notificationsActions}>
-          <NotificationsToggle />
-        </div>
-      ) : null}
     </div>
   );
 };

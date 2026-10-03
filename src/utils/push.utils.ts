@@ -1,4 +1,7 @@
-import type { IPushSubscriptionInput } from "../models/common/push.model";
+import type {
+  IPushSubscriptionInput,
+  PushPlatform,
+} from "../models/common/push.model";
 
 export const vapidPublicKey: string = import.meta.env.VITE_VAPID_PUBLIC_KEY ?? "";
 
@@ -36,4 +39,9 @@ export const subscriptionInputOf = (
   const auth = keys?.auth;
   if (!endpoint || !p256dh || !auth) return null;
   return { endpoint, p256dh, auth, userAgent };
+};
+
+export const pushPlatformOf = (userAgent: string, appleTouch: boolean): PushPlatform => {
+  if (appleTouch) return "ios";
+  return /Android/i.test(userAgent) ? "android" : "desktop";
 };
