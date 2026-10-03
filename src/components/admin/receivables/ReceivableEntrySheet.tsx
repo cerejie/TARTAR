@@ -12,6 +12,7 @@ type IProps = {
   open: boolean;
   receivable: IReceivable | null;
   customer: ICustomer | null;
+  branchLabel: string | null;
   phoneHref: string | null;
   split: boolean;
   onClose: () => void;
@@ -21,6 +22,7 @@ const ReceivableEntrySheet = ({
   open,
   receivable,
   customer,
+  branchLabel,
   phoneHref,
   split,
   onClose,
@@ -41,7 +43,11 @@ const ReceivableEntrySheet = ({
   );
 
   const detail = receivable ? (
-    <ReceivableEntryDetail receivable={receivable} customer={customer} />
+    <ReceivableEntryDetail
+      receivable={receivable}
+      customer={customer}
+      branchLabel={branchLabel ?? receivable.branch}
+    />
   ) : null;
 
   if (split) {

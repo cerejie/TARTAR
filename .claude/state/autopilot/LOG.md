@@ -317,3 +317,12 @@
 - Purchases due date with no unpaid, non-rejected date → "—" (dropped on cards, aligned in desktop cells); status chip already says Pending / Paid / Rejected
 - UI-13 → `keepTogether` (no-break spaces) on the deposited / reviewed date-time only, not in `formatDateTime`, so exports and prints keep plain spaces
 - Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), tests 107 / 107; swept admin + emp phone 393 / 0 failed, 50 sheets; looked at emp sheet 13 and six full shots; swept, device unconfirmed
+
+## 2026-10-03 — V5 Admin app → Development v2.61
+- File plan → rail fix in `app.bar.styles.ts` + a label span in `AppTabBar`; branch name resolved in the two admin hooks and passed down as `branchLabel` (Simple tier, UI only, reversible)
+- Rail indicator → moved to the rail's outer edge (`md:-left-2`) rather than padding the item (audit's second option; padding would squeeze a 74 px label in an 80 px item)
+- Rail width → `md:w-28` (was `w-24`) so "Notifications" has 11 px each side inside the hover fill; nothing else depends on the rail width
+- Long labels → `max-w-full truncate` on the label span as a guard; no current label truncates on phone or rail
+- UI-09 scope → admin payable + due-check sheets printed the same slug, fixed with the receivable sheet (same defect, same hook pattern)
+- Branch lookup → `useBranchListHook().branchName` in the hook (falls back to the slug for an unknown branch), not a new service call
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing); swept admin phone + tabP + tabL + desk 523 / 0 failed, 79 sheets; looked at four sheets, rail zoomed on 12 pages, two full receivable-sheet shots; payable sheet branch row compiled, visuals unconfirmed; swept, device unconfirmed

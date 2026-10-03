@@ -6,6 +6,7 @@ import {
   appTabIcon,
   appTabIndicator,
   appTabItem,
+  appTabLabel,
   appTabList,
 } from "../../../styles/app/app.bar.styles";
 import { countBadge } from "../../../styles/status/status.styles";
@@ -29,7 +30,7 @@ const AppTabBar = ({ label, tabs }: IProps) => (
               {Icon ? <Icon /> : null}
               {tab.badge ? <span className={cn(countBadge, appTabBadge)}>{tab.badge}</span> : null}
             </span>
-            {tab.label}
+            <span className={appTabLabel}>{tab.label}</span>
             {tab.active ? <span className={appTabIndicator} aria-hidden="true" /> : null}
           </>
         );

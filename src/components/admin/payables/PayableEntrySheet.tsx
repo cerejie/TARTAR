@@ -9,12 +9,20 @@ import type { IAdminPayableEntry } from "../../../models/data/admin/admin.respon
 type IProps = {
   open: boolean;
   entry: IAdminPayableEntry | null;
+  branchLabel: string | null;
   openPath: string;
   split: boolean;
   onClose: () => void;
 };
 
-const PayableEntrySheet = ({ open, entry, openPath, split, onClose }: IProps) => {
+const PayableEntrySheet = ({
+  open,
+  entry,
+  branchLabel,
+  openPath,
+  split,
+  onClose,
+}: IProps) => {
   const title = entry?.kind === "check" ? "Due check" : "Payable";
   const footer = (
     <AppButton href={openPath}>
@@ -22,7 +30,9 @@ const PayableEntrySheet = ({ open, entry, openPath, split, onClose }: IProps) =>
       Open in TARTAR
     </AppButton>
   );
-  const detail = entry ? <PayableEntryDetail entry={entry} /> : null;
+  const detail = entry ? (
+    <PayableEntryDetail entry={entry} branchLabel={branchLabel ?? entry.record.branch} />
+  ) : null;
 
   if (split) {
     return (

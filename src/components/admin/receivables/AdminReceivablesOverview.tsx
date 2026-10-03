@@ -32,6 +32,7 @@ const AdminReceivablesOverview = () => {
           open={receivables.sheetOpen}
           receivable={receivables.selected}
           customer={receivables.customer}
+          branchLabel={receivables.branchLabel}
           phoneHref={receivables.phoneHref}
           split={receivables.split}
           onClose={receivables.closeSheet}

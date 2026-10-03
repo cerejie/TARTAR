@@ -152,12 +152,25 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   purchases All + Approved, emp sales verified sheet — "Due Sep 30, 2026" on cards and sheets, no status under "Due
   date" on purchases, deposited / reviewed time on one line. Swept, device unconfirmed.
 
+- [x] V5 Admin app (UI-05, UI-09) → Development v2.61: `src/styles/app/app.bar.styles.ts` — the rail is `md:w-28`, the
+  active indicator sits on the rail's outer edge (`md:-left-2`) instead of the item's, and `appTabLabel`
+  (`max-w-full truncate`) keeps a long label inside the item (`components/common/layout/AppTabBar.tsx` wraps the label
+  in it). Branch name instead of slug in the admin sheets: `hook/data/admin/admin.{receivables,payables}.hook.ts`
+  return `branchLabel` from `useBranchListHook().branchName`, threaded through
+  `components/admin/receivables/{AdminReceivablesOverview,ReceivableEntrySheet,ReceivableEntryDetail}.tsx` and
+  `components/admin/payables/{AdminPayablesOverview,PayableEntrySheet,PayableEntryDetail}.tsx` (same slug defect,
+  fixed alongside). Build + lint clean. Swept admin phone + tabP + tabL + desk (523 surfaces, 0 failed, 79 sheets).
+  Looked: sheets admin-tabP-02, admin-tabL-02, admin-phone-26, admin-desk-31; rail zoomed 2.4x on all four `/admin/*`
+  pages at tabP, tabL and desk — indicator at the rail edge, clear of "Notifications" / "Receivables" / "Payables",
+  labels inside the item; full shots admin phone + desk receivables sheet — "Branch QA Test". Measured: indicator
+  x 17–21, item 24–120, widest label 74 px. The sweep opens no admin payable sheet: its branch row is compiled,
+  visual unconfirmed. Swept, device unconfirmed.
+
 ## Next
-1. V5 Admin app.
-2. V6 Reports.
-3. V7 Ledger modals.
-4. V8 Full re-sweep.
-5. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. V6 Reports.
+2. V7 Ledger modals.
+3. V8 Full re-sweep.
+4. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
@@ -172,6 +185,7 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   user not returned by `user_display_names`. V1 hides the dash either way.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.60 (V4 date labels) · Uncommitted: none · Last check:
-V4 sweep admin+emp phone, 2026-10-03. Autopilot running from V5. A sweep of more than one role can exceed a
-10-minute background timeout — run it with `timeout` 3600000.
+Branch: mobilel-app-native · Last commit Development v2.61 (V5 admin app) · Uncommitted: none · Last check:
+V5 sweep admin phone+tabP+tabL+desk, 2026-10-03. Autopilot running from V6. A sweep of more than one role or
+device can exceed a 10-minute background timeout — run it with `timeout` 3600000 (the four-device admin sweep
+took about 25 minutes).

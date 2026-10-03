@@ -12,11 +12,13 @@ import type { ICustomer } from "../../../models/data/party/party.response";
 type IProps = {
   receivable: IReceivable;
   customer: ICustomer | null;
+  branchLabel: string;
 };
 
 type IReceivableDetail = {
   receivable: IReceivable;
   customer: ICustomer | null;
+  branchLabel: string;
 };
 
 const receivableItems: readonly IDetailItem<IReceivableDetail>[] = [
@@ -24,12 +26,12 @@ const receivableItems: readonly IDetailItem<IReceivableDetail>[] = [
   { key: "amount", label: "Amount", render: ({ receivable }) => formatMoney(receivable.amount) },
   { key: "paid", label: "Paid", render: ({ receivable }) => formatMoney(receivable.paid_amount) },
   { key: "reference", label: "Reference", render: ({ receivable }) => receivable.reference_number },
-  { key: "branch", label: "Branch", render: ({ receivable }) => receivable.branch },
+  { key: "branch", label: "Branch", render: ({ branchLabel }) => branchLabel },
   { key: "contact", label: "Contact", render: ({ customer }) => customer?.contact },
   { key: "contactPerson", label: "Contact person", render: ({ customer }) => customer?.contact_person },
 ];
 
-const ReceivableEntryDetail = ({ receivable, customer }: IProps) => {
+const ReceivableEntryDetail = ({ receivable, customer, branchLabel }: IProps) => {
   const due = dueStatusOf(receivable.due_date);
 
   return (
@@ -39,7 +41,7 @@ const ReceivableEntryDetail = ({ receivable, customer }: IProps) => {
         amount={ledgerBalance(receivable)}
         badge={<StatusTag label={due.label} color={due.color} />}
       />
-      <DetailRows record={{ receivable, customer }} items={receivableItems} />
+      <DetailRows record={{ receivable, customer, branchLabel }} items={receivableItems} />
     </>
   );
 };

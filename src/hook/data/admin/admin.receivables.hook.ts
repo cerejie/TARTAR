@@ -15,6 +15,7 @@ import { useIsPhone } from "../../common/breakpoint.hook";
 import { useModal } from "../../common/modal.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSegment } from "../../common/segment.hook";
+import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useCustomerListHook } from "../party/customer.list.hook";
 
@@ -55,6 +56,7 @@ const isDueToday = (receivable: IReceivable) => daysUntil(receivable.due_date) =
 
 export const useAdminReceivablesHook = () => {
   const { branch } = useBranchScopeHook();
+  const { branchName } = useBranchListHook();
   const { customers } = useCustomerListHook();
   const isPhone = useIsPhone();
   const { segment, setSegment } = useSegment(
@@ -102,6 +104,7 @@ export const useAdminReceivablesHook = () => {
     retry: alertsQuery.refetch,
     selected,
     customer: customer ?? null,
+    branchLabel: selected ? branchName(selected.branch) : null,
     phoneHref: phoneHrefOf(customer?.contact),
     sheetOpen: modal.visible,
     split: !isPhone,

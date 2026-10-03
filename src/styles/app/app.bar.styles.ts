@@ -23,7 +23,7 @@ export const appBarTitle =
 export const appBarActions = "ml-auto flex shrink-0 items-center gap-1 md:gap-2";
 
 export const appTabBar =
-  "order-last shrink-0 px-3 pt-2 pb-safe select-none [view-transition-name:app-tab-bar] md:order-first md:w-24 md:rounded-panel md:bg-panel md:p-0 md:py-3 md:shadow-panel";
+  "order-last shrink-0 px-3 pt-2 pb-safe select-none [view-transition-name:app-tab-bar] md:order-first md:w-28 md:rounded-panel md:bg-panel md:p-0 md:py-3 md:shadow-panel";
 
 export const appTabList =
   "mx-auto grid max-w-xl auto-cols-fr grid-flow-col overflow-hidden rounded-panel bg-panel shadow-panel md:flex md:flex-col md:gap-1 md:overflow-visible md:rounded-none md:bg-transparent md:px-2 md:shadow-none";
@@ -43,10 +43,12 @@ export const appTabItem = cva(
 
 export const appTabIcon = "relative flex h-7 w-10 items-center justify-center [&_svg]:size-5";
 
+export const appTabLabel = "max-w-full truncate";
+
 export const appTabBadge = "ring-2 ring-panel";
 
 export const appTabIndicator =
-  "absolute bottom-0 left-1/2 h-1 w-10 -translate-x-1/2 rounded-t-full bg-brand md:top-1/2 md:bottom-auto md:left-0 md:h-8 md:w-1 md:translate-x-0 md:-translate-y-1/2 md:rounded-t-none md:rounded-r-full";
+  "absolute bottom-0 left-1/2 h-1 w-10 -translate-x-1/2 rounded-t-full bg-brand md:top-1/2 md:bottom-auto md:-left-2 md:h-8 md:w-1 md:translate-x-0 md:-translate-y-1/2 md:rounded-t-none md:rounded-r-full";
 
 export const accountSheetList = "flex flex-col gap-1 pb-3";
 

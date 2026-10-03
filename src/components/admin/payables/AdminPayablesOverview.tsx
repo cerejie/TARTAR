@@ -31,6 +31,7 @@ const AdminPayablesOverview = () => {
         <PayableEntrySheet
           open={payables.sheetOpen}
           entry={payables.selected}
+          branchLabel={payables.branchLabel}
           openPath={payables.openPath}
           split={payables.split}
           onClose={payables.closeSheet}

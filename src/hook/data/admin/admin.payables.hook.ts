@@ -20,6 +20,7 @@ import { useIsPhone } from "../../common/breakpoint.hook";
 import { useModal } from "../../common/modal.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSegment } from "../../common/segment.hook";
+import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 
 import type { ISegmentOption } from "../../../models/common/segment.model";
@@ -66,6 +67,7 @@ const isSameEntry = (first: IAdminPayableEntry, second: IAdminPayableEntry | nul
 
 export const useAdminPayablesHook = () => {
   const { branch } = useBranchScopeHook();
+  const { branchName } = useBranchListHook();
   const isPhone = useIsPhone();
   const { segment, setSegment } = useSegment(
     adminPayablesSegmentKey,
@@ -113,6 +115,7 @@ export const useAdminPayablesHook = () => {
     error: activeQuery.error,
     retry: activeQuery.refetch,
     selected,
+    branchLabel: selected ? branchName(selected.record.branch) : null,
     sheetOpen: modal.visible,
     split: !isPhone,
     isSelected: (row: IAdminPayableRow) => modal.visible && isSameEntry(row.entry, selected),
