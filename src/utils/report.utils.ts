@@ -385,6 +385,8 @@ export const disbursementPrintDocument = (
 
 const voucherNoOf = (row: IDisbursement) => row.voucher?.voucher_no ?? "—";
 
+const checkNumberOf = (row: IDisbursement) => row.voucher?.check_number ?? "—";
+
 const supplierOf = (row: IDisbursement) =>
   row.voucher?.payee ?? row.supplier?.name ?? "—";
 
@@ -413,6 +415,7 @@ export const purchasePrintDocument = (
         { title: "Due date" },
         { title: "Supplier" },
         { title: "Voucher No." },
+        { title: "Check No." },
         { title: "Payment" },
         { title: "Amount to pay", numeric: true },
       ],
@@ -420,6 +423,7 @@ export const purchasePrintDocument = (
         formatDate(row.due_date),
         supplierOf(row),
         voucherNoOf(row),
+        checkNumberOf(row),
         row.payable ? ledgerStatusLabels[row.payable.status] : "—",
         formatMoney(amountToPayOf(row)),
       ]),
@@ -430,6 +434,7 @@ export const purchasePrintDocument = (
       columns: [
         { title: "Voucher date" },
         { title: "Voucher No." },
+        { title: "Check No." },
         { title: "Supplier" },
         { title: "Voucher status" },
         { title: "Amount to pay", numeric: true },
@@ -437,6 +442,7 @@ export const purchasePrintDocument = (
       rows: vouchered.map((row) => [
         formatDate(row.voucher?.created_at),
         voucherNoOf(row),
+        checkNumberOf(row),
         supplierOf(row),
         row.voucher ? voucherStatusLabels[row.voucher.status] : "—",
         formatMoney(amountToPayOf(row)),

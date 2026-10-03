@@ -316,7 +316,12 @@ describe("purchasePrintDocument", () => {
       type: "purchase",
       amount: 500,
       due_date: "2026-10-20",
-      voucher: voucherFixture({ voucher_no: "PV-1", amount: 450 }),
+      voucher: voucherFixture({
+        voucher_no: "PV-1",
+        amount: 450,
+        type: "check",
+        check_number: "000123",
+      }),
       payable: { status: "partial", amount: 450, paid_amount: 100 },
     }),
   ];
@@ -338,9 +343,12 @@ describe("purchasePrintDocument", () => {
       "Purchase vouchers",
     ]);
     expect(document_.tables[0]?.rows).toEqual([
-      ["Oct 20, 2026", "Payee", "PV-1", "Partial", formatMoney(450)],
+      ["Oct 20, 2026", "Payee", "PV-1", "000123", "Partial", formatMoney(450)],
     ]);
-    expect(document_.tables[1]?.rows.map((row) => row[1])).toEqual(["PV-2", "—"]);
+    expect(document_.tables[1]?.rows.map((row) => row.slice(1, 3))).toEqual([
+      ["PV-2", "—"],
+      ["—", "—"],
+    ]);
   });
 
   it("totals each section by the amount to pay", () => {

@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-04 (P2 done)
+Updated: 2026-10-04 (P3 done)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -262,16 +262,24 @@ Given by the user on 2026-10-03 unless marked otherwise.
   vouchers" (existing `getDisbursementAll` with `dateBasis: "voucher"`), each with count + amount-to-pay total —
   `purchasePrintDocument` in `utils/report.utils.ts` (tested), wired in `disbursement.list.hook.ts`. No migration.
 
+- [x] P3 Purchase check number (Development v2.72): no client-only path — the purchase and its voucher are one RPC
+  write (one `runWrite`, queued offline); a follow-up voucher update would not be atomic and cannot be queued (voucher
+  id unknown offline). Proposal `.claude/state/proposals/migration-34-purchase-check-number.sql`: `p_check_number`
+  (last, default null) on create + update and their wrappers, stored only when the voucher is a check (field shown only
+  when Paid from = bank account; the check constraint stays); also fixes `app.sync_voucher_from_tx`, which kept
+  `check_bank` when a purchase moved from bank to cash (the constraint would reject that edit). Display shipped: the
+  purchase record sheet voucher section shows "Check number" when set (`PurchasesTable.tsx`), the purchases period
+  print has a "Check No." column in both sections (`report.utils.ts` `checkNumberOf`, tested). Vouchers table detail,
+  admin payable detail and the voucher print already showed it. Input waits for the migration (USER DECISIONS).
 ## Next
-1. P3 Purchase check number.
-2. M1 Mobile list rows instead of cards.
-3. M2 Receivables / Payables: Payments tab replaces By customer / By supplier.
-4. M3 Mobile form interaction (iOS / Android keyboard, inputs, dropdowns in modals).
-5. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
-6. O2 Offline branch scopes, details and month change.
-7. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
+1. M1 Mobile list rows instead of cards.
+2. M2 Receivables / Payables: Payments tab replaces By customer / By supplier.
+3. M3 Mobile form interaction (iOS / Android keyboard, inputs, dropdowns in modals).
+4. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
+5. O2 Offline branch scopes, details and month change.
+6. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
    exercise them: the QA accounts see one branch).
-8. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+7. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
@@ -280,12 +288,13 @@ Given by the user on 2026-10-03 unless marked otherwise.
     `collection` rows convert (A customer_payment, recommended / B keep / C cash_deposit) and the check constraint
     that blocks new ones. Also confirm C1's Cash In rule: only verified customer payments count (pending ones are
     left out, like unverified sales in `countedAmountOf`).
-  - Purchase check-number migration proposal, if P3 needs one (`.claude/state/proposals/migration-34-purchase-check-number.sql`)
-    — the input ships after it is applied.
+  - Purchase check-number migration proposal (written by P3, `.claude/state/proposals/migration-34-purchase-check-number.sql`)
+    — approve it (field only when Paid from = bank account; also fixes the bank → cash edit trigger bug), then the
+    input ships (client follow-up listed at the end of the proposal).
   - The archived audit roadmap's Open items: H1 sign-ups off, H2 max rows, SEC-03 CSP enforce, SEC-05 send-push
     redeploy, QA-02 / DATA-01 RPC migrations — see `.claude/state/ROADMAP-AUDIT-2026-10-03-DONE.md` § Open.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.71 (P2 Period print month + year, purchases print) · Uncommitted: none · Last check: P2, build + lint clean, tests 138 / 138, sweep admin + emp + acc desk + phone on /sales /purchases /expenses /reports, purchases print popup probe (Oct 2026 with rows, Jan 2021 empty) for all three roles. Run any sweep or probe
+Branch: mobilel-app-native · Last commit Development v2.72 (P3 Purchase check number — display + migration-34 proposal) · Uncommitted: none · Last check: P3, build + lint clean, tests 138 / 138, sweep admin + emp desk + phone on /purchases /vouchers /payables /admin/payables, purchases print popup probe (Check No. column). Run any sweep or probe
 with Bash `run_in_background` and `timeout` 3600000.

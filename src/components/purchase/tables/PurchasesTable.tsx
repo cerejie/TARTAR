@@ -335,6 +335,12 @@ const PurchasesTable = () => {
           render: (row) =>
             row.voucher && voucherTypeLabels[row.voucher.type],
         },
+        {
+          key: "check_number",
+          hidden: (row) => !row.voucher?.check_number,
+          label: "Check number",
+          render: (row) => row.voucher?.check_number,
+        },
         ...voucherBreakdownItems<IDisbursement>((row) => row.voucher),
       ],
     },
