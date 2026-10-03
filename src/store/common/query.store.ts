@@ -9,10 +9,12 @@ import { isKeyUnder } from "../../keys/query.keys";
 import { failureKindOf } from "../../utils/write.utils";
 import type {
   IQueryEntry,
+  IQueryFetcher,
+  IQueryReader,
   IQuerySpec,
 } from "../../models/common/query.model";
 
-type ICachedQuery = Pick<IQueryEntry, "data" | "updatedAt">;
+type ICachedQuery<T = unknown> = Pick<IQueryEntry<T>, "data" | "updatedAt">;
 
 type IRequest = { id: number; result: Promise<unknown> };
 
@@ -23,10 +25,10 @@ type States = {
 };
 
 type Actions = {
-  run: <T>(key: string, fetcher: () => Promise<T>) => Promise<T | undefined>;
+  run: <T>(key: string, fetcher: IQueryFetcher<T>) => Promise<T | undefined>;
   refresh: <T>(
     key: string,
-    fetcher: () => Promise<T>
+    fetcher: IQueryFetcher<T>
   ) => Promise<T | undefined>;
   prime: (queries: readonly IQuerySpec[]) => void;
   warm: (queries: readonly IQuerySpec[]) => void;
@@ -67,13 +69,13 @@ const initialValues: States = {
   statusWatchers: {},
 };
 
-const fetchers = new Map<string, () => Promise<unknown>>();
+const fetchers = new Map<string, IQueryFetcher<unknown>>();
 
 const primedKeys = new Set<string>();
 
 const requests = new Map<string, IRequest>();
 
-const backgroundFetchers = new Map<string, () => Promise<unknown>>();
+const backgroundFetchers = new Map<string, IQueryFetcher<unknown>>();
 
 const staleBackgroundKeys = new Set<string>();
 
@@ -143,15 +145,52 @@ export const useQueryStore = create<States & Actions>((set, get) => {
     return true;
   };
 
+  const derivedOf = <T>(
+    fetcher: IQueryFetcher<T>
+  ): ICachedQuery<T> | undefined => {
+    if (!fetcher.offline) return undefined;
+
+    const readTimes: number[] = [];
+    const read: IQueryReader = (datasetKey) => {
+      const entry = get().entries[datasetKey];
+      if (entry?.data === undefined) return undefined;
+
+      readTimes.push(entry.updatedAt);
+      return entry.data;
+    };
+    const data = fetcher.offline(read);
+    if (data === undefined) return undefined;
+
+    return { data, updatedAt: readTimes.length > 0 ? Math.min(...readTimes) : 0 };
+  };
+
+  const settleDerived = <T>(
+    key: string,
+    id: number,
+    derived: ICachedQuery<T>
+  ): T | undefined => {
+    settle(key, id, (current) => ({
+      ...current,
+      data: derived.data,
+      loading: false,
+      error: null,
+      updatedAt: derived.updatedAt,
+    }));
+    return derived.data;
+  };
+
   const load = async <T>(
     key: string,
     id: number,
-    fetcher: () => Promise<T>
+    fetcher: IQueryFetcher<T>
   ): Promise<T | undefined> => {
     await cacheReady;
 
     if (!navigator.onLine) {
       const cached = get().entries[key]?.data as T | undefined;
+      const derived = cached === undefined ? derivedOf(fetcher) : undefined;
+      if (derived) return settleDerived(key, id, derived);
+
       settle(key, id, (current) => ({
         ...current,
         loading: false,
@@ -178,6 +217,11 @@ export const useQueryStore = create<States & Actions>((set, get) => {
       return data;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      const derived =
+        get().entries[key]?.data === undefined && isNetworkFailure(error, message)
+          ? derivedOf(fetcher)
+          : undefined;
+      if (derived) return settleDerived(key, id, derived);
 
       settle(key, id, (current) => {
         const keepsCachedData =
@@ -195,7 +239,7 @@ export const useQueryStore = create<States & Actions>((set, get) => {
 
   const start = <T>(
     key: string,
-    fetcher: () => Promise<T>
+    fetcher: IQueryFetcher<T>
   ): Promise<T | undefined> => {
     fetchers.set(key, fetcher);
     requestCount += 1;
@@ -249,7 +293,7 @@ export const useQueryStore = create<States & Actions>((set, get) => {
   return {
     ...initialValues,
 
-    run: <T>(key: string, fetcher: () => Promise<T>) => {
+    run: <T>(key: string, fetcher: IQueryFetcher<T>) => {
       const pending = requests.get(key);
       if (!pending) return start(key, fetcher);
 

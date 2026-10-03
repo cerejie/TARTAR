@@ -11,9 +11,18 @@ export interface IQueryState<T> extends IQueryEntry<T> {
   refetch: () => void;
 }
 
+export type IQueryReader = (key: string) => unknown;
+
+export type IOfflineDerive<T> = (read: IQueryReader) => T | undefined;
+
+export interface IQueryFetcher<T> {
+  (): Promise<T>;
+  offline?: IOfflineDerive<T>;
+}
+
 export type IQuerySpec<T = unknown> = readonly [
   key: string,
-  fetcher: () => Promise<T>,
+  fetcher: IQueryFetcher<T>,
 ];
 
 export interface IQueryOptions {

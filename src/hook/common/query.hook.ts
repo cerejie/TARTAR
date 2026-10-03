@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type {
+  IQueryFetcher,
   IQueryOptions,
   IQueryState,
 } from "../../models/common/query.model";
@@ -10,7 +11,7 @@ import {
 
 export const useQuery = <T>(
   key: string,
-  fetcher: () => Promise<T>,
+  fetcher: IQueryFetcher<T>,
   options: IQueryOptions = {}
 ): IQueryState<T> => {
   const enabled = options.enabled ?? true;

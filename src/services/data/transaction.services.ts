@@ -27,7 +27,10 @@ import {
 } from "../../models/data/transaction/transaction.response";
 import type { IVoucher } from "../../models/data/voucher/voucher.response";
 import { runWrite } from "../../store/common/sync.store";
-import { applyLedgerFilters } from "../../utils/filter.utils";
+import {
+  applyLedgerFilters,
+  transactionFilterColumns,
+} from "../../utils/filter.utils";
 import { everyRow, everyRowIn } from "../../utils/page.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 import { breakdownTotalsOf } from "../../utils/voucher.utils";
@@ -47,12 +50,6 @@ const columns = `
   sale_status, created_by, created_at, version,
   customer:customers(name), supplier:suppliers(name)
 `;
-
-const transactionColumns = {
-  date: "txn_date",
-  amount: "amount",
-  type: "type",
-};
 
 const dueDateColumns = {
   date: "due_date",
@@ -183,7 +180,7 @@ const transactionServices = {
     pagination: IPaginationRequest
   ): Promise<IPaginationResponse<ITransaction>> => {
     const base = supabase.from(table).select(columns, { count: "exact" });
-    const query = applyLedgerFilters(base, filters, transactionColumns);
+    const query = applyLedgerFilters(base, filters, transactionFilterColumns);
     const { from, to } = pageRange(pagination);
     const sort = pagination.sort ?? defaultSort;
 
@@ -206,7 +203,7 @@ const transactionServices = {
       applyLedgerFilters(
         supabase.from(table).select(columns),
         filters,
-        transactionColumns
+        transactionFilterColumns
       ).order("txn_date", { ascending: false })
     ),
 

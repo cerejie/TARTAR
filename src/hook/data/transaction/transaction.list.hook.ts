@@ -38,7 +38,19 @@ import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
-import { filterPeriodLabel, pageFiltersOf } from "../../../utils/filter.utils";
+import {
+  datasetFiltersOf,
+  datasetSourcesOf,
+  derivedPage,
+  derivedRows,
+  matchesLedgerFilters,
+  withOfflineDerive,
+} from "../../../utils/dataset.utils";
+import {
+  filterPeriodLabel,
+  pageFiltersOf,
+  transactionFilterColumns,
+} from "../../../utils/filter.utils";
 import { todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
 import { derivePaymentValues } from "../../../utils/payment.utils";
@@ -92,6 +104,14 @@ const normalize = (values: ITransactionInput): ITransactionInput => ({
   supplier_id: supplierTypes.includes(values.type) ? values.supplier_id : null,
 });
 
+const transactionSummaryKeyOf = (filters: ILedgerFilters) =>
+  scopedKey(transactionSummaryKey, JSON.stringify(filters));
+
+const matchesTransactionFilters =
+  (filters: ILedgerFilters) =>
+  <Row extends ITransaction>(row: Row) =>
+    matchesLedgerFilters(row, filters, transactionFilterColumns);
+
 export const transactionListQueryOf = (
   filters: ILedgerFilters,
   pagination: IPaginationRequest,
@@ -104,14 +124,34 @@ export const transactionListQueryOf = (
     pagination.pageSize,
     sortOption?.key
   ),
-  () => transactionServices.getList(filters, { ...pagination, sort: sortOption }),
+  withOfflineDerive(
+    () =>
+      transactionServices.getList(filters, { ...pagination, sort: sortOption }),
+    derivedPage(
+      datasetSourcesOf(transactionSummaryKeyOf, [
+        filters,
+        datasetFiltersOf(filters),
+      ]),
+      filters,
+      matchesTransactionFilters(filters),
+      sortOption,
+      pagination
+    )
+  ),
 ];
 
 export const transactionSummaryQueryOf = (
   filters: ILedgerFilters
 ): IQuerySpec<IDisbursement[]> => [
-  scopedKey(transactionSummaryKey, JSON.stringify(filters)),
-  () => transactionServices.getAllWithVouchers(filters),
+  transactionSummaryKeyOf(filters),
+  withOfflineDerive(
+    () => transactionServices.getAllWithVouchers(filters),
+    derivedRows(
+      datasetSourcesOf(transactionSummaryKeyOf, [datasetFiltersOf(filters)]),
+      filters,
+      matchesTransactionFilters(filters)
+    )
+  ),
 ];
 
 export const useTransactionListHook = () => {

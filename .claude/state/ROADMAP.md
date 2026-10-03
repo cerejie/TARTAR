@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-04 (M3 done)
+Updated: 2026-10-04 (O1 done)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -306,12 +306,29 @@ Given by the user on 2026-10-03 unless marked otherwise.
   on coarse pointers (no iOS focus zoom at any width), native select in the 44px touch-target list, dark
   `color-scheme` for the native controls. Viewport meta unchanged (`interactive-widget=resizes-content`).
 
+- [x] O1 Offline variants of the paged lists (Development v2.77): offline (or on a network failure) a list / summary key
+  miss now derives the exact variant from a cached dataset instead of "not saved". `IQueryFetcher` (`models/common/query.model.ts`)
+  carries an optional `offline` deriver; `store/common/query.store.ts` `load` calls it on a miss (`derivedOf` /
+  `settleDerived`: in memory only, never persisted, `updatedAt` = the dataset's, so the "saved at" banner stays honest);
+  `useQuery` / `run` / `refresh` take the fetcher type. Pure helpers in new `src/utils/dataset.utils.ts` (tested in
+  `dataset.utils.test.ts`): `coversFilters` (dataset filters ⊆ request; dated datasets only for the same date basis and a
+  range inside theirs), `matchesLedgerFilters` (mirrors `applyLedgerFilters`), `matchesLedgerStatus` (mirrors
+  `applyStatusFilter`), `isWithinDays` (voucher-date basis), `sortRowsBy` (column + created_at desc, Postgres null order),
+  `pageOfRows`, `derivedRows` / `derivedPage`, `withOfflineDerive`. Datasets = the existing summaries (transactions,
+  sales, purchases, expenses, ledger, all-time per branch scope) + new `voucherDatasetQueryOf` (`voucherServices.getAll`)
+  and `paymentDatasetQueryOf` (all-time `getAllInPeriod` per kind), primed in `prime.view.hook.ts`. Wired in the
+  `…QueryOf` specs of `transaction` / `sale` / `disbursement` / `voucher` / `ledger` / `payment` list hooks (lists and
+  their summaries, so stat cards follow the filter) and `reportCustomerPaymentQueryOf` (report-payments for any report
+  type, from the receivable payments dataset). Purchases with date basis "Paid" stay honestly not saved (needs the
+  server RPC). Filter column maps moved to `utils/filter.utils.ts` (`transactionFilterColumns`, `voucherFilterColumns`,
+  `ledgerFilterColumns`, `ledgerSearchColumnsOf`) and the services import them. Trim (300) unchanged: +3 keys per branch.
+  Write queue untouched.
+
 ## Next
-1. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
-2. O2 Offline branch scopes, details and month change.
-3. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
+1. O2 Offline branch scopes, details and month change.
+2. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
    exercise them: the QA accounts see one branch).
-4. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+3. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
@@ -328,5 +345,5 @@ Given by the user on 2026-10-03 unless marked otherwise.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.76 (M3 Mobile form interaction) · Uncommitted: none · Last check: M3, build + lint clean, tests 138 / 138, Playwright phone / tablet emulation probe of the purchase, expense, sale, transaction and receivable forms, sweep emp phone + desk on the form routes. Run any sweep or probe
+Branch: mobilel-app-native · Last commit Development v2.77 (O1 Offline variants of the paged lists) · Uncommitted: none · Last check: O1, build + lint clean, tests 156 / 156, offline probe admin phone + desk (V9 method) on every list: page 2 / load more, each sort, This month, name search — 0 "not saved". Run any sweep or probe
 with Bash `run_in_background` and `timeout` 3600000.

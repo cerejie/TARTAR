@@ -24,7 +24,10 @@ import type {
   IPaginationRequest,
   IPaginationResponse,
 } from "../../../models/common/pagination.model";
-import type { IQuerySpec } from "../../../models/common/query.model";
+import type {
+  IOfflineDerive,
+  IQuerySpec,
+} from "../../../models/common/query.model";
 import type { ISortOption } from "../../../models/common/table.model";
 import type { IDateRange } from "../../../models/common/period.model";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
@@ -39,6 +42,15 @@ import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
+import {
+  datasetFiltersOf,
+  datasetSourcesOf,
+  derivedPage,
+  derivedRows,
+  isWithinDays,
+  matchesLedgerFilters,
+  withOfflineDerive,
+} from "../../../utils/dataset.utils";
 import { isDisbursementEditLocked } from "../../../utils/disbursement.utils";
 import {
   filterPeriodLabel,
@@ -75,6 +87,42 @@ export const pendingVoucherCount = (rows: readonly IDisbursement[]) =>
 export const sumDisbursements = (rows: readonly IDisbursement[]) =>
   sumCounted(rows);
 
+const disbursementSummaryKeyOfKind =
+  (kind: DisbursementKind) => (filters: ILedgerFilters) =>
+    scopedKey(disbursementSummaryKeyOf(kind), JSON.stringify(filters));
+
+const dateBasisOfKind = (kind: DisbursementKind, filters: ILedgerFilters) =>
+  kind === "purchase" ? filters.dateBasis : undefined;
+
+const matchesDisbursementFilters =
+  (kind: DisbursementKind, filters: ILedgerFilters) =>
+  (row: IDisbursement): boolean => {
+    const basis = dateBasisOfKind(kind, filters);
+    const needsVoucher = !!filters.voucherStatus || basis === "voucher";
+    if (needsVoucher && !row.voucher) return false;
+    if (filters.voucherStatus && row.voucher?.status !== filters.voucherStatus)
+      return false;
+
+    const txnFilters = basis
+      ? { ...filters, dateFrom: undefined, dateTo: undefined }
+      : filters;
+
+    return (
+      matchesLedgerFilters(row, txnFilters) &&
+      (basis !== "voucher" ||
+        isWithinDays(row.voucher?.created_at, filters.dateFrom, filters.dateTo))
+    );
+  };
+
+const derivableBy =
+  <T>(
+    kind: DisbursementKind,
+    filters: ILedgerFilters,
+    derive: IOfflineDerive<T>
+  ): IOfflineDerive<T> =>
+  (read) =>
+    dateBasisOfKind(kind, filters) === "paid" ? undefined : derive(read);
+
 export const disbursementListQueryOf = (
   kind: DisbursementKind,
   filters: ILedgerFilters,
@@ -88,19 +136,48 @@ export const disbursementListQueryOf = (
     pagination.pageSize,
     sortOption?.key
   ),
-  () =>
-    transactionServices.getDisbursementList(kind, filters, {
-      ...pagination,
-      sort: sortOption,
-    }),
+  withOfflineDerive(
+    () =>
+      transactionServices.getDisbursementList(kind, filters, {
+        ...pagination,
+        sort: sortOption,
+      }),
+    derivableBy(
+      kind,
+      filters,
+      derivedPage(
+        datasetSourcesOf(disbursementSummaryKeyOfKind(kind), [
+          { ...filters, voucherStatus: undefined },
+          datasetFiltersOf(filters),
+        ]),
+        filters,
+        matchesDisbursementFilters(kind, filters),
+        sortOption,
+        pagination
+      )
+    )
+  ),
 ];
 
 export const disbursementSummaryQueryOf = (
   kind: DisbursementKind,
   filters: ILedgerFilters
 ): IQuerySpec<IDisbursement[]> => [
-  scopedKey(disbursementSummaryKeyOf(kind), JSON.stringify(filters)),
-  () => transactionServices.getDisbursementAll(kind, filters),
+  disbursementSummaryKeyOfKind(kind)(filters),
+  withOfflineDerive(
+    () => transactionServices.getDisbursementAll(kind, filters),
+    derivableBy(
+      kind,
+      filters,
+      derivedRows(
+        datasetSourcesOf(disbursementSummaryKeyOfKind(kind), [
+          datasetFiltersOf(filters),
+        ]),
+        filters,
+        matchesDisbursementFilters(kind, filters)
+      )
+    )
+  ),
 ];
 
 export const useDisbursementListHook = (

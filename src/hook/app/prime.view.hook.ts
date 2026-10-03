@@ -58,7 +58,10 @@ import {
   ledgerSummaryQueryOf,
 } from "../data/ledger/ledger.list.hook";
 import { supplierSummaryKey } from "../data/ledger/supplier.ledger.hook";
-import { paymentListQueryOf } from "../data/payment/payment.list.hook";
+import {
+  paymentDatasetQueryOf,
+  paymentListQueryOf,
+} from "../data/payment/payment.list.hook";
 import {
   reportCustomerPaymentQueryOf,
   reportPayableQueryOf,
@@ -77,7 +80,10 @@ import {
   transactionListQueryOf,
   transactionSummaryQueryOf,
 } from "../data/transaction/transaction.list.hook";
-import { voucherListQueryOf } from "../data/voucher/voucher.list.hook";
+import {
+  voucherDatasetQueryOf,
+  voucherListQueryOf,
+} from "../data/voucher/voucher.list.hook";
 import type { IPermissions } from "../../models/common/permission.model";
 import type { IQuerySpec } from "../../models/common/query.model";
 import type { IBranch } from "../../models/data/branch/branch.response";
@@ -153,14 +159,16 @@ const disbursementQueriesOf = (
   ),
 ];
 
-const voucherQueriesOf = (branch: string | null): IQuerySpec[] =>
-  withAllTab(voucherStatusValues).map((voucherStatus) =>
+const voucherQueriesOf = (branch: string | null): IQuerySpec[] => [
+  voucherDatasetQueryOf(branch),
+  ...withAllTab(voucherStatusValues).map((voucherStatus) =>
     voucherListQueryOf(
       scopedFilters({ ...defaultFiltersOf("vouchers"), voucherStatus }, branch),
       firstPage,
       voucherSortOptions.at(0)
     )
-  );
+  ),
+];
 
 const paymentQueryOf = (kind: PaymentKind, branch: string | null): IQuerySpec =>
   paymentListQueryOf(
@@ -180,6 +188,7 @@ const receivableQueriesOf = (branch: string | null): IQuerySpec[] => {
       scopedFilters({ ...defaults, status: undefined }, branch)
     ),
     paymentQueryOf("receivable", branch),
+    paymentDatasetQueryOf("receivable", branch),
     [customerSummaryKey, receivableServices.getCustomerSummaries],
     ...withAllTab(ledgerStatusFilterValues).map((status) =>
       ledgerListQueryOf(
@@ -203,6 +212,7 @@ const payableQueriesOf = (branch: string | null): IQuerySpec[] => {
       scopedFilters({ ...defaults, status: undefined }, branch)
     ),
     paymentQueryOf("payable", branch),
+    paymentDatasetQueryOf("payable", branch),
     [supplierSummaryKey, payableServices.getPartySummaries],
     ...withAllTab(payableStatusValues).map((status) =>
       ledgerListQueryOf(

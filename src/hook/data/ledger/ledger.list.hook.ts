@@ -48,8 +48,18 @@ import {
   useAccountStore,
 } from "../../../store/data/account/account.store";
 import {
+  datasetFiltersOf,
+  datasetSourcesOf,
+  derivedPage,
+  derivedRows,
+  matchesLedgerFilters,
+  matchesLedgerStatus,
+  withOfflineDerive,
+} from "../../../utils/dataset.utils";
+import {
   filterPeriodLabel,
   ledgerFilterScopeOf,
+  ledgerSearchColumnsOf,
   scopedFilters,
 } from "../../../utils/filter.utils";
 import {
@@ -130,8 +140,25 @@ type ILedgerReads<Row extends ILedgerRow> = Pick<
   "getList" | "getAll"
 >;
 
+type ILedgerScope = ILedgerListConfig<ILedgerRow, FieldValues>["scope"];
+
+const ledgerSummaryKeyOfScope =
+  (scope: ILedgerScope) => (filters: ILedgerFilters) =>
+    scopedKey(ledgerSummaryKey, scope, JSON.stringify(filters));
+
+const matchesLedgerRowFilters =
+  (scope: ILedgerScope, filters: ILedgerFilters) =>
+  <Row extends ILedgerRow>(row: Row) =>
+    matchesLedgerFilters(
+      row,
+      filters,
+      ledgerSearchColumnsOf(
+        scope === "payables" ? "supplier_name" : "customer_name"
+      )
+    ) && matchesLedgerStatus(row, filters.status, todayIso());
+
 export const ledgerListQueryOf = <Row extends ILedgerRow>(
-  scope: ILedgerListConfig<Row, FieldValues>["scope"],
+  scope: ILedgerScope,
   services: ILedgerReads<Row>,
   filters: ILedgerFilters,
   pagination: IPaginationRequest,
@@ -144,16 +171,37 @@ export const ledgerListQueryOf = <Row extends ILedgerRow>(
     pagination.pageSize,
     sortOption?.key
   ),
-  () => services.getList(filters, { ...pagination, sort: sortOption }),
+  withOfflineDerive(
+    () => services.getList(filters, { ...pagination, sort: sortOption }),
+    derivedPage(
+      datasetSourcesOf(ledgerSummaryKeyOfScope(scope), [
+        { ...filters, status: undefined },
+        datasetFiltersOf(filters),
+      ]),
+      filters,
+      matchesLedgerRowFilters(scope, filters),
+      sortOption,
+      pagination
+    )
+  ),
 ];
 
 export const ledgerSummaryQueryOf = <Row extends ILedgerRow>(
-  scope: ILedgerListConfig<Row, FieldValues>["scope"],
+  scope: ILedgerScope,
   services: ILedgerReads<Row>,
   filters: ILedgerFilters
 ): IQuerySpec<Row[]> => [
-  scopedKey(ledgerSummaryKey, scope, JSON.stringify(filters)),
-  () => services.getAll(filters),
+  ledgerSummaryKeyOfScope(scope)(filters),
+  withOfflineDerive(
+    () => services.getAll(filters),
+    derivedRows(
+      datasetSourcesOf(ledgerSummaryKeyOfScope(scope), [
+        datasetFiltersOf(filters),
+      ]),
+      filters,
+      matchesLedgerRowFilters(scope, filters)
+    )
+  ),
 ];
 
 export const useLedgerListHook = <

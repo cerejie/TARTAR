@@ -15,7 +15,10 @@ import {
   paymentPaginationKey,
   paymentSortKey,
 } from "../../../keys/table.keys";
-import type { ILedgerFilters } from "../../../models/common/filter.model";
+import type {
+  IFilterColumns,
+  ILedgerFilters,
+} from "../../../models/common/filter.model";
 import type {
   IPaginationRequest,
   IPaginationResponse,
@@ -36,6 +39,13 @@ import { useWithPendingRows } from "../../common/pending.hook";
 import { useQuery } from "../../common/query.hook";
 import { useSortOption } from "../../common/sort.hook";
 import {
+  datasetFiltersOf,
+  datasetSourcesOf,
+  derivedPage,
+  matchesLedgerFilters,
+  withOfflineDerive,
+} from "../../../utils/dataset.utils";
+import {
   paymentFilterScopeOf,
   scopedFilters,
 } from "../../../utils/filter.utils";
@@ -43,6 +53,33 @@ import { isEmptyDetailValue, joinDetailParts } from "../../../utils/detail.utils
 import { formatDate, formatMoney } from "../../../utils/format.utils";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useUserListHook } from "../user/user.list.hook";
+
+const paymentFilterColumns: IFilterColumns = { date: "paid_at" };
+
+export const paymentDatasetKeyOf =
+  (kind: PaymentKind) => (filters: ILedgerFilters) =>
+    scopedKey(paymentListKey, kind, "dataset", JSON.stringify(filters));
+
+export const matchesPaymentFilters =
+  (filters: ILedgerFilters) => (row: ILedgerPayment) =>
+    matchesLedgerFilters(
+      row,
+      { branch: filters.branch, dateFrom: filters.dateFrom, dateTo: filters.dateTo },
+      paymentFilterColumns
+    ) &&
+    (!filters.paymentStatus || row.status === filters.paymentStatus);
+
+export const paymentDatasetQueryOf = (
+  kind: PaymentKind,
+  branch: string | null
+): IQuerySpec<ILedgerPayment[]> => {
+  const filters = scopedFilters({}, branch);
+
+  return [
+    paymentDatasetKeyOf(kind)(filters),
+    () => paymentServices.getAllInPeriod(kind, filters),
+  ];
+};
 
 export const paymentListQueryOf = (
   kind: PaymentKind,
@@ -58,7 +95,17 @@ export const paymentListQueryOf = (
     pagination.pageSize,
     sortOption?.key
   ),
-  () => paymentServices.getList(kind, filters, { ...pagination, sort: sortOption }),
+  withOfflineDerive(
+    () =>
+      paymentServices.getList(kind, filters, { ...pagination, sort: sortOption }),
+    derivedPage(
+      datasetSourcesOf(paymentDatasetKeyOf(kind), [datasetFiltersOf(filters)]),
+      filters,
+      matchesPaymentFilters(filters),
+      sortOption,
+      pagination
+    )
+  ),
 ];
 
 export const usePaymentListHook = (

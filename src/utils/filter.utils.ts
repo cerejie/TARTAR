@@ -24,7 +24,30 @@ interface IStatusChainable {
 
 type IPageStatusField = "saleStatus" | "voucherStatus";
 
-const defaultColumns: IFilterColumns = { date: "txn_date", amount: "amount" };
+export const defaultFilterColumns: IFilterColumns = {
+  date: "txn_date",
+  amount: "amount",
+};
+
+export const transactionFilterColumns: IFilterColumns = {
+  ...defaultFilterColumns,
+  type: "type",
+};
+
+export const voucherFilterColumns: IFilterColumns = {
+  date: "created_at",
+  amount: "amount",
+  search: "payee",
+};
+
+export const ledgerFilterColumns: IFilterColumns = {
+  date: "due_date",
+  amount: "amount",
+};
+
+export const ledgerSearchColumnsOf = (
+  nameColumn: "customer_name" | "supplier_name"
+): IFilterColumns => ({ ...ledgerFilterColumns, search: nameColumn });
 
 const likeWildcards = /[\\%_]/g;
 
@@ -34,7 +57,7 @@ export const containsPattern = (term: string): string =>
 export const applyLedgerFilters = <T>(
   query: T,
   filters: ILedgerFilters,
-  columns: IFilterColumns = defaultColumns
+  columns: IFilterColumns = defaultFilterColumns
 ): T => {
   let scoped = query as IChainable;
   const chain = (next: unknown) => {

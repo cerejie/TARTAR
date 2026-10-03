@@ -26,6 +26,12 @@ import {
 } from "../../../services/data/ledger.services";
 import paymentServices from "../../../services/data/payment.services";
 import transactionServices from "../../../services/data/transaction.services";
+import {
+  datasetFiltersOf,
+  datasetSourcesOf,
+  derivedRows,
+  withOfflineDerive,
+} from "../../../utils/dataset.utils";
 import { periodLabel, rangeFor, reportBody } from "../../../utils/report.utils";
 import { printReport } from "../../../utils/print.utils";
 import { useQuery } from "../../common/query.hook";
@@ -33,6 +39,10 @@ import { useSearchParam } from "../../common/search.param.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useExpenseCategoryListHook } from "../expense-category/expense.category.list.hook";
+import {
+  matchesPaymentFilters,
+  paymentDatasetKeyOf,
+} from "../payment/payment.list.hook";
 import { useReportSummaryHook } from "./report.summary.hook";
 
 const isUnpaid = (row: ILedgerRow) => row.status !== "paid";
@@ -55,19 +65,37 @@ export const reportTransactionQueryOf = (
   },
 ];
 
+const reportPeriodFiltersOf = (
+  type: ReportType,
+  branch: string | null
+): ILedgerFilters => {
+  const { from, to } = rangeFor(type);
+  return { dateFrom: from, dateTo: to, ...branchFilterOf(branch) };
+};
+
 export const reportCustomerPaymentQueryOf = (
   type: ReportType,
   branch: string | null
 ): IQuerySpec<ILedgerPayment[]> => [
   scopedKey(reportPaymentKey, type, branch),
-  () => {
-    const { from, to } = rangeFor(type);
-    return paymentServices.getAllInPeriod("receivable", {
-      dateFrom: from,
-      dateTo: to,
-      ...branchFilterOf(branch),
-    });
-  },
+  withOfflineDerive(
+    () =>
+      paymentServices.getAllInPeriod(
+        "receivable",
+        reportPeriodFiltersOf(type, branch)
+      ),
+    (read) => {
+      const filters = reportPeriodFiltersOf(type, branch);
+
+      return derivedRows(
+        datasetSourcesOf(paymentDatasetKeyOf("receivable"), [
+          datasetFiltersOf(filters),
+        ]),
+        filters,
+        matchesPaymentFilters(filters)
+      )(read);
+    }
+  ),
 ];
 
 export const reportReceivableQueryOf = (

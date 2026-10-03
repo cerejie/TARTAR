@@ -30,6 +30,14 @@ import type { ITransactionAudit } from "../../../models/data/transaction/transac
 import saleServices from "../../../services/data/sale.services";
 import transactionServices from "../../../services/data/transaction.services";
 import {
+  datasetFiltersOf,
+  datasetSourcesOf,
+  derivedPage,
+  derivedRows,
+  matchesLedgerFilters,
+  withOfflineDerive,
+} from "../../../utils/dataset.utils";
+import {
   filterPeriodLabel,
   pageFiltersOf,
   scopedFilters,
@@ -71,6 +79,13 @@ const summarize = (rows: readonly ISale[]): ISaleSummary => ({
   rejected: rows.filter((row) => row.sale_status === "rejected").length,
 });
 
+const saleSummaryKeyOf = (filters: ILedgerFilters) =>
+  scopedKey(saleSummaryKey, JSON.stringify(filters));
+
+const matchesSaleFilters = (filters: ILedgerFilters) => (row: ISale) =>
+  matchesLedgerFilters(row, filters) &&
+  (!filters.saleStatus || row.sale_status === filters.saleStatus);
+
 export const saleListQueryOf = (
   filters: ILedgerFilters,
   pagination: IPaginationRequest,
@@ -83,14 +98,33 @@ export const saleListQueryOf = (
     pagination.pageSize,
     sortOption?.key
   ),
-  () => saleServices.getList(filters, { ...pagination, sort: sortOption }),
+  withOfflineDerive(
+    () => saleServices.getList(filters, { ...pagination, sort: sortOption }),
+    derivedPage(
+      datasetSourcesOf(saleSummaryKeyOf, [
+        { ...filters, saleStatus: undefined },
+        datasetFiltersOf(filters),
+      ]),
+      filters,
+      matchesSaleFilters(filters),
+      sortOption,
+      pagination
+    )
+  ),
 ];
 
 export const saleSummaryQueryOf = (
   filters: ILedgerFilters
 ): IQuerySpec<ISale[]> => [
-  scopedKey(saleSummaryKey, JSON.stringify(filters)),
-  () => saleServices.getAll(filters),
+  saleSummaryKeyOf(filters),
+  withOfflineDerive(
+    () => saleServices.getAll(filters),
+    derivedRows(
+      datasetSourcesOf(saleSummaryKeyOf, [datasetFiltersOf(filters)]),
+      filters,
+      matchesSaleFilters(filters)
+    )
+  ),
 ];
 
 export const useSaleListHook = () => {

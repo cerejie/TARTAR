@@ -24,6 +24,8 @@ import { runWrite } from "../../store/common/sync.store";
 import {
   applyLedgerFilters,
   applyStatusFilter,
+  ledgerFilterColumns,
+  ledgerSearchColumnsOf,
   scopeToBranch,
 } from "../../utils/filter.utils";
 import { everyRow } from "../../utils/page.utils";
@@ -38,8 +40,6 @@ interface ILedgerConfig<Input> {
   getName: (values: Input) => string;
   getPartyId: (values: Input) => string | null | undefined;
 }
-
-const ledgerColumns = { date: "due_date", amount: "amount" };
 
 const defaultSort: ISortState = { column: "due_date", direction: "ascending" };
 
@@ -65,7 +65,7 @@ const makeLedgerServices = <Row, Input extends { branch: string; amount: number;
   config: ILedgerConfig<Input>
 ) => {
   const noun = config.table.slice(0, -1);
-  const columns = { ...ledgerColumns, search: config.nameColumn };
+  const columns = ledgerSearchColumnsOf(config.nameColumn);
 
   return {
     getList: async (
@@ -261,7 +261,7 @@ export const receivableServices = {
             .eq("customer_name", customer.customerName);
 
       return applyStatusFilter(
-        applyLedgerFilters(scoped, filters, ledgerColumns),
+        applyLedgerFilters(scoped, filters, ledgerFilterColumns),
         filters.status
       ).order("due_date", { ascending: true });
     };

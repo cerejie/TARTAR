@@ -47,7 +47,17 @@ import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
-import { scopedFilters } from "../../../utils/filter.utils";
+import {
+  datasetFiltersOf,
+  datasetSourcesOf,
+  derivedPage,
+  matchesLedgerFilters,
+  withOfflineDerive,
+} from "../../../utils/dataset.utils";
+import {
+  scopedFilters,
+  voucherFilterColumns,
+} from "../../../utils/filter.utils";
 import { formatMoney, todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
 import { derivePaymentValues } from "../../../utils/payment.utils";
@@ -131,6 +141,21 @@ const asApproved = (voucher: IVoucher): IVoucher => ({
   status: "approved",
 });
 
+const voucherDatasetKeyOf = (filters: ILedgerFilters) =>
+  scopedKey(voucherListKey, "dataset", JSON.stringify(filters));
+
+const matchesVoucherFilters = (filters: ILedgerFilters) => (row: IVoucher) =>
+  matchesLedgerFilters(row, filters, voucherFilterColumns) &&
+  (!filters.voucherStatus || row.status === filters.voucherStatus);
+
+export const voucherDatasetQueryOf = (
+  branch: string | null
+): IQuerySpec<IVoucher[]> => {
+  const filters = scopedFilters({}, branch);
+
+  return [voucherDatasetKeyOf(filters), () => voucherServices.getAll(filters)];
+};
+
 export const voucherListQueryOf = (
   filters: ILedgerFilters,
   pagination: IPaginationRequest,
@@ -143,7 +168,16 @@ export const voucherListQueryOf = (
     pagination.pageSize,
     sortOption?.key
   ),
-  () => voucherServices.getList(filters, { ...pagination, sort: sortOption }),
+  withOfflineDerive(
+    () => voucherServices.getList(filters, { ...pagination, sort: sortOption }),
+    derivedPage(
+      datasetSourcesOf(voucherDatasetKeyOf, [datasetFiltersOf(filters)]),
+      filters,
+      matchesVoucherFilters(filters),
+      sortOption,
+      pagination
+    )
+  ),
 ];
 
 export const useVoucherListHook = () => {

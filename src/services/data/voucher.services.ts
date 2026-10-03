@@ -1,5 +1,5 @@
 import { voucherKindCategory, withholdingRates } from "../../enums/voucher.enum";
-import type { IFilterColumns, ILedgerFilters } from "../../models/common/filter.model";
+import type { ILedgerFilters } from "../../models/common/filter.model";
 import {
   pageRange,
   type IPaginationRequest,
@@ -12,19 +12,17 @@ import type {
   IVoucherSignatories,
 } from "../../models/data/voucher/voucher.response";
 import { runWrite } from "../../store/common/sync.store";
-import { applyLedgerFilters } from "../../utils/filter.utils";
+import {
+  applyLedgerFilters,
+  voucherFilterColumns,
+} from "../../utils/filter.utils";
+import { everyRow } from "../../utils/page.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 import { breakdownTotalsOf } from "../../utils/voucher.utils";
 import { queuedAtOf, queuedInsertOf } from "../../utils/write.utils";
 import type { IQueuedWrite } from "../../models/common/write.model";
 
 const table = "vouchers";
-
-const voucherColumns: IFilterColumns = {
-  date: "created_at",
-  amount: "amount",
-  search: "payee",
-};
 
 const defaultSort: ISortState = { column: "created_at", direction: "descending" };
 
@@ -83,7 +81,7 @@ const voucherServices = {
     pagination: IPaginationRequest
   ): Promise<IPaginationResponse<IVoucher>> => {
     const base = supabase.from(table).select("*", { count: "exact" });
-    const filtered = applyLedgerFilters(base, filters, voucherColumns);
+    const filtered = applyLedgerFilters(base, filters, voucherFilterColumns);
     const query = filters.voucherStatus
       ? filtered.eq("status", filters.voucherStatus)
       : filtered;
@@ -102,6 +100,23 @@ const voucherServices = {
       pageSize: pagination.pageSize,
       totalCount: count ?? 0,
     };
+  },
+
+  getAll: async (filters: ILedgerFilters = {}): Promise<IVoucher[]> => {
+    const rows = await everyRow<IVoucher>(() => {
+      const filtered = applyLedgerFilters(
+        supabase.from(table).select("*"),
+        filters,
+        voucherFilterColumns
+      );
+      const query = filters.voucherStatus
+        ? filtered.eq("status", filters.voucherStatus)
+        : filtered;
+
+      return query.order("created_at", { ascending: false });
+    });
+
+    return withSignatories(rows);
   },
 
   create: (values: IVoucherInput, createdBy: string | null) =>
