@@ -115,14 +115,9 @@ export const useUserManageHook = () => {
     }
   );
 
-  const approveResetMutation = useMutation(
-    (id: string) => userServices.decidePasswordReset(id, true),
-    { successMessage: "New password approved", invalidate }
-  );
-
-  const rejectResetMutation = useMutation(
-    (id: string) => userServices.decidePasswordReset(id, false),
-    { successMessage: "Password reset rejected", invalidate }
+  const dismissResetMutation = useMutation(
+    (id: string) => userServices.dismissPasswordReset(id),
+    { successMessage: "Password request dismissed", invalidate }
   );
 
   const canManageUser = (user: IUser) => manageableRoles.includes(user.role);
@@ -211,23 +206,18 @@ export const useUserManageHook = () => {
       onConfirm: () => rejectMutation.mutate(user.id),
     });
 
-  const resetApprovalMessageOf = (user: IUser) =>
-    `Requested ${formatDateTime(user.password_reset_requested_at)}. Anyone who knows this email can send a request, so confirm with ${displayName(user)} directly that they asked for it before approving. Their old password stops working; they sign in with the one requested.`;
+  const resetRequestHintOf = (user: IUser | undefined) =>
+    user?.password_reset_requested_at
+      ? `Requested ${formatDateTime(user.password_reset_requested_at)}. Anyone who knows this email can send a request — confirm with ${displayName(user)} directly, then give them this password yourself.`
+      : undefined;
 
-  const confirmResetDecision = (user: IUser, approve: boolean) =>
+  const confirmDismissReset = (user: IUser) =>
     openConfirm({
-      kind: approve ? "confirm" : "delete",
-      title: approve
-        ? `Approve ${displayName(user)}'s new password?`
-        : `Reject ${displayName(user)}'s password reset?`,
-      message: approve
-        ? resetApprovalMessageOf(user)
-        : "Their current password stays; the requested one is discarded.",
-      okText: approve ? "Approve" : "Reject",
-      onConfirm: () =>
-        approve
-          ? approveResetMutation.mutate(user.id)
-          : rejectResetMutation.mutate(user.id),
+      kind: "delete",
+      title: `Dismiss ${displayName(user)}'s password request?`,
+      message: "Their current password stays as it is.",
+      okText: "Dismiss",
+      onConfirm: () => dismissResetMutation.mutate(user.id),
     });
 
   const confirmRemove = (user: IUser) =>
@@ -278,7 +268,8 @@ export const useUserManageHook = () => {
     resetPasswordMutation,
     canManageUser,
     confirmReject,
-    confirmResetDecision,
+    confirmDismissReset,
+    resetRequestHintOf,
     confirmRemove,
   };
 };

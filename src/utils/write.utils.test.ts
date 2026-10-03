@@ -237,6 +237,22 @@ describe("prepareWrite", () => {
   it("adds no idempotency key to an rpc outside the replay-safe list", () => {
     const write = prepareWrite(
       {
+        label: "Save customer details",
+        kind: "rpc",
+        fn: "save_customer_details",
+        args: { p_customer_id: "customer-1" },
+      },
+      "user-1"
+    );
+
+    expect(queuedRpcArgsOf(write, "save_customer_details")).toEqual({
+      p_customer_id: "customer-1",
+    });
+  });
+
+  it("stamps a transaction edit so a replay is not read as a conflict", () => {
+    const write = prepareWrite(
+      {
         label: "Edit transaction",
         kind: "rpc",
         fn: "update_transaction_with_voucher",
@@ -246,6 +262,7 @@ describe("prepareWrite", () => {
     );
 
     expect(queuedRpcArgsOf(write, "update_transaction_with_voucher")).toEqual({
+      p_idempotency_key: write.id,
       p_transaction_id: "transaction-1",
     });
   });

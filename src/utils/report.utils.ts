@@ -99,14 +99,12 @@ export const periodLabel = (
 export const cashFlowRows = (
   transactions: readonly IDisbursement[]
 ): ICashFlowRow[] =>
-  [...cashInflowTypes, ...cashOutflowTypes]
-    .filter((type) => type !== "collection")
-    .map((type) => ({
-      key: type,
-      label: transactionTypeLabels[type],
-      direction: cashInflowTypes.includes(type) ? "Inflow" : "Outflow",
-      total: sumBy(transactions, (transaction) => transaction.type === type),
-    }));
+  [...cashInflowTypes, ...cashOutflowTypes].map((type) => ({
+    key: type,
+    label: transactionTypeLabels[type],
+    direction: cashInflowTypes.includes(type) ? "Inflow" : "Outflow",
+    total: sumBy(transactions, (transaction) => transaction.type === type),
+  }));
 
 export const expenseRows = (
   transactions: readonly IDisbursement[],

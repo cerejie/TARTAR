@@ -37,12 +37,15 @@ import type { IUser } from "../../../models/data/account/account.response";
 import { nowrapCell } from "../../../styles/table/table.styles";
 import { formatDate } from "../../../utils/format.utils";
 
-const resetFields: IFieldConfig<IResetPasswordInput>[] = [
+const resetFieldsOf = (
+  hint: string | undefined
+): IFieldConfig<IResetPasswordInput>[] => [
   {
     name: "password",
-    label: "New password",
+    label: "Temporary password",
     type: "password",
     required: true,
+    hint,
   },
 ];
 
@@ -87,7 +90,8 @@ const UsersTable = () => {
     resetPasswordMutation,
     canManageUser,
     confirmReject,
-    confirmResetDecision,
+    confirmDismissReset,
+    resetRequestHintOf,
     confirmRemove,
   } = useUserManageHook();
 
@@ -120,19 +124,19 @@ const UsersTable = () => {
       ...(resetRequested
         ? [
             {
-              key: "approve-reset",
-              label: "Approve new password",
+              key: "set-password",
+              label: "Set new password",
               icon: <LockKeyholeOpen />,
               priority: isPending ? undefined : ("primary" as const),
-              onSelect: () => confirmResetDecision(user, true),
+              onSelect: () => resetModal.openModal(user),
             },
             {
-              key: "reject-reset",
-              label: "Reject password reset",
+              key: "dismiss-reset",
+              label: "Dismiss password request",
               icon: <LockKeyhole />,
               priority: isPending ? undefined : ("secondary" as const),
               danger: true,
-              onSelect: () => confirmResetDecision(user, false),
+              onSelect: () => confirmDismissReset(user),
             },
           ]
         : []),
@@ -143,12 +147,16 @@ const UsersTable = () => {
         priority: isPending || resetRequested ? "secondary" : "primary",
         onSelect: () => editModal.openModal(user),
       },
-      {
-        key: "reset",
-        label: "Reset password",
-        icon: <KeyRound />,
-        onSelect: () => resetModal.openModal(user),
-      },
+      ...(resetRequested
+        ? []
+        : [
+            {
+              key: "reset",
+              label: "Reset password",
+              icon: <KeyRound />,
+              onSelect: () => resetModal.openModal(user),
+            },
+          ]),
       {
         key: "delete",
         label: isSelf ? "You cannot delete your own account" : "Delete user",
@@ -265,7 +273,7 @@ const UsersTable = () => {
             ? `Reset password · ${displayName(resetModal.modal.data)}`
             : "Reset password"
         }
-        fields={resetFields}
+        fields={resetFieldsOf(resetRequestHintOf(resetModal.modal.data))}
         schema={resetPasswordSchema}
         defaultValues={{ password: "" }}
         submitting={resetPasswordMutation.loading}

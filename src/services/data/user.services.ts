@@ -32,12 +32,9 @@ const userServices = {
     return (data ?? []) as IUserDisplayName[];
   },
 
-  decidePasswordReset: async (id: string, approve: boolean): Promise<void> => {
+  dismissPasswordReset: async (id: string): Promise<void> => {
     const { error } = await onlineOnly(
-      supabase.rpc("decide_password_reset", {
-        p_user_id: id,
-        p_approve: approve,
-      })
+      supabase.rpc("dismiss_password_reset", { p_user_id: id })
     );
     if (error) throw toError(error);
   },

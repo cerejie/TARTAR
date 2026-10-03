@@ -11,6 +11,7 @@ const uniqueViolationCode = "23505";
 
 const idempotentRpcs: ReadonlySet<string> = new Set([
   "create_transaction_with_voucher",
+  "update_transaction_with_voucher",
   "record_ledger_payment",
   "mark_payable_paid",
   "mark_sale_deposited",

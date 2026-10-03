@@ -55,33 +55,48 @@ const supabase = createClient(
 
 const pushSecret = requiredEnv("PUSH_SECRET");
 
+type IDelivery = {
+  endpoint: string;
+  outcome: "sent" | "gone" | "failed";
+};
+
 const sendTo = async (
   subscription: IPushSubscriptionRow,
   payload: string
-): Promise<string | null> => {
+): Promise<IDelivery> => {
+  const { endpoint } = subscription;
   try {
     await webpush.sendNotification(
       {
-        endpoint: subscription.endpoint,
+        endpoint,
         keys: { p256dh: subscription.p256dh, auth: subscription.auth },
       },
       payload,
       { TTL: 60 * 60 * 24 }
     );
-    return null;
+    return { endpoint, outcome: "sent" };
   } catch (error) {
     const statusCode = statusCodeOf(error);
-    return statusCode !== null && goneStatusCodes.includes(statusCode)
-      ? subscription.endpoint
-      : null;
+    const gone = statusCode !== null && goneStatusCodes.includes(statusCode);
+    return { endpoint, outcome: gone ? "gone" : "failed" };
   }
+};
+
+const encoder = new TextEncoder();
+
+const isSameSecret = (given: string | null): boolean => {
+  if (given === null) return false;
+  const left = encoder.encode(given);
+  const right = encoder.encode(pushSecret);
+  if (left.length !== right.length) return false;
+  return left.reduce((diff, byte, index) => diff | (byte ^ right[index]), 0) === 0;
 };
 
 Deno.serve(async (request) => {
   if (request.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
-  if (request.headers.get("x-push-secret") !== pushSecret) {
+  if (!isSameSecret(request.headers.get("x-push-secret"))) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -105,19 +120,22 @@ Deno.serve(async (request) => {
     tag: input.tag,
   });
   const subscriptions = (data ?? []) as IPushSubscriptionRow[];
-  const results = await Promise.all(
+  const deliveries = await Promise.all(
     subscriptions.map((subscription) => sendTo(subscription, payload))
   );
-  const goneEndpoints = results.filter(
-    (endpoint): endpoint is string => endpoint !== null
-  );
+  const countOf = (outcome: IDelivery["outcome"]): number =>
+    deliveries.filter((delivery) => delivery.outcome === outcome).length;
+  const goneEndpoints = deliveries
+    .filter((delivery) => delivery.outcome === "gone")
+    .map((delivery) => delivery.endpoint);
 
   if (goneEndpoints.length > 0) {
     await supabase.from("push_subscriptions").delete().in("endpoint", goneEndpoints);
   }
 
   return Response.json({
-    sent: subscriptions.length - goneEndpoints.length,
+    sent: countOf("sent"),
+    failed: countOf("failed"),
     removed: goneEndpoints.length,
   });
 });

@@ -52,7 +52,6 @@ export const transactionTypeColors: Record<TransactionType, StatusColor> = {
 export const cashInflowTypes: TransactionType[] = [
   "sale",
   "customer_payment",
-  "collection",
   "cash_deposit",
 ];
 

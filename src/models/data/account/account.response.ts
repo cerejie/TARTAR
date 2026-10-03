@@ -34,6 +34,15 @@ export interface ICustomLoginResponse {
   user: IAuthUser;
 }
 
+export type LoginStatus = "ok" | "invalid" | "locked" | "pending" | "rejected";
+
+export interface ILoginResult {
+  status: LoginStatus;
+  token?: string;
+  user?: IAuthUser;
+  retry_at?: string;
+}
+
 export type AccountPanel = "profile" | "password" | "install" | "notifications";
 
 export const accountPanelTitles: Record<AccountPanel, string> = {

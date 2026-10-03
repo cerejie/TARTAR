@@ -54,7 +54,7 @@ describe("sumBy", () => {
 describe("cashFlowTotals", () => {
   it("splits counted amounts into inflow and outflow", () => {
     expect(cashFlowTotals(periodTransactions)).toEqual({
-      inflow: 1550,
+      inflow: 1500,
       outflow: 1290,
     });
   });
@@ -85,13 +85,13 @@ describe("cashFlowRows", () => {
     ]);
   });
 
-  it("leaves collections out of the rows while the inflow total includes them", () => {
+  it("adds up to the inflow total, with collections counted in neither", () => {
     const inflowRowsTotal = rows
       .filter((row) => row.direction === "Inflow")
       .reduce((total, row) => total + row.total, 0);
 
     expect(inflowRowsTotal).toBe(1500);
-    expect(cashFlowTotals(periodTransactions).inflow - inflowRowsTotal).toBe(50);
+    expect(cashFlowTotals(periodTransactions).inflow).toBe(inflowRowsTotal);
   });
 });
 

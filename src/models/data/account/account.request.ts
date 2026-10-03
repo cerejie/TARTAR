@@ -41,14 +41,6 @@ export type IRegisterInput = z.infer<typeof registerSchema>;
 export const forgotEmailSchema = z.object({ email: emailField });
 export type IForgotEmailInput = z.infer<typeof forgotEmailSchema>;
 
-export const forgotPasswordSchema = z
-  .object({
-    password: passwordField,
-    confirm_password: z.string(),
-  })
-  .refine(passwordsMatch, passwordMismatchIssue);
-export type IForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
-
 export const changePasswordSchema = z
   .object({
     current_password: z.string().min(1, "Enter your current password"),

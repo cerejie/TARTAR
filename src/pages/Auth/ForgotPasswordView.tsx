@@ -1,4 +1,4 @@
-import { Hourglass, Lock, LockKeyhole, Mail } from "lucide-react";
+import { Hourglass, Mail } from "lucide-react";
 import AuthShell from "../../components/auth/AuthShell";
 import AuthSuccessPanel from "../../components/auth/AuthSuccessPanel";
 import AppButton from "../../components/common/button/AppButton";
@@ -11,10 +11,7 @@ import {
   authSubmit,
 } from "../../styles/layout/public.styles";
 import type { IFieldConfig } from "../../models/common/field.model";
-import type {
-  IForgotEmailInput,
-  IForgotPasswordInput,
-} from "../../models/data/account/account.request";
+import type { IForgotEmailInput } from "../../models/data/account/account.request";
 
 const emailFields: IFieldConfig<IForgotEmailInput>[] = [
   {
@@ -27,75 +24,22 @@ const emailFields: IFieldConfig<IForgotEmailInput>[] = [
   },
 ];
 
-const passwordFields: IFieldConfig<IForgotPasswordInput>[] = [
-  {
-    name: "password",
-    label: "New password",
-    type: "password",
-    placeholder: "At least 6 characters",
-    icon: <Lock />,
-  },
-  {
-    name: "confirm_password",
-    label: "Confirm new password",
-    type: "password",
-    placeholder: "Type the password again",
-    icon: <LockKeyhole />,
-  },
-];
-
 const ForgotPasswordView = () => {
-  const {
-    step,
-    email,
-    emailControl,
-    passwordControl,
-    emailMutation,
-    passwordMutation,
-    backToSignIn,
-    onEmailSubmit,
-    onPasswordSubmit,
-  } = useAccountForgotHook();
+  const { step, control, requestMutation, backToSignIn, onSubmit } =
+    useAccountForgotHook();
 
   if (step === "done") {
     return (
       <AuthShell
         title="Request sent"
-        subtitle="Your new password is not active yet."
+        subtitle="Your password has not changed yet."
       >
         <AuthSuccessPanel
           icon={<Hourglass />}
-          title="Waiting for admin approval"
-          message="Please contact your admin. Once they approve the request, sign in with your new password."
+          title="Contact your administrator"
+          message="If an approved account uses that email, your administrator now sees the request. They will give you a temporary password — sign in with it, then change it in Account settings."
           onBack={backToSignIn}
         />
-      </AuthShell>
-    );
-  }
-
-  if (step === "password") {
-    return (
-      <AuthShell title="Set a new password" subtitle={`For ${email}`}>
-        <form className={authForm} onSubmit={onPasswordSubmit} noValidate>
-          {passwordFields.map((field) => (
-            <FormField key={field.name} config={field} control={passwordControl} />
-          ))}
-
-          <AppButton
-            type="submit"
-            loading={passwordMutation.loading}
-            className={authSubmit}
-          >
-            Request password reset
-          </AppButton>
-        </form>
-
-        <p className={authAlt}>
-          Remembered it?
-          <AppButton variant="link" className={authAltLink} onPress={backToSignIn}>
-            Sign in
-          </AppButton>
-        </p>
       </AuthShell>
     );
   }
@@ -103,19 +47,19 @@ const ForgotPasswordView = () => {
   return (
     <AuthShell
       title="Forgot password"
-      subtitle="Enter the email you sign in with."
+      subtitle="Enter the email you sign in with. Your administrator sets a new password for you."
     >
-      <form className={authForm} onSubmit={onEmailSubmit} noValidate>
+      <form className={authForm} onSubmit={onSubmit} noValidate>
         {emailFields.map((field) => (
-          <FormField key={field.name} config={field} control={emailControl} />
+          <FormField key={field.name} config={field} control={control} />
         ))}
 
         <AppButton
           type="submit"
-          loading={emailMutation.loading}
+          loading={requestMutation.loading}
           className={authSubmit}
         >
-          Continue
+          Request a new password
         </AppButton>
       </form>
 

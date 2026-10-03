@@ -3,7 +3,11 @@ import type {
   ILoginInput,
   IRegisterInput,
 } from "../../models/data/account/account.request";
-import type { ICustomLoginResponse } from "../../models/data/account/account.response";
+import type {
+  ICustomLoginResponse,
+  ILoginResult,
+} from "../../models/data/account/account.response";
+import { formatTime } from "../../utils/format.utils";
 import {
   assertOnline,
   onlineOnly,
@@ -13,23 +17,25 @@ import {
   toError,
 } from "../../utils/supabase.utils";
 
-const accountNotApprovedCode = "28000";
-const invalidCredentialsCode = "28P01";
 const developerRole = "developer";
 const invalidCredentialsMessage = "Invalid email or password.";
 const wrongCurrentPasswordMessage = "Current password is incorrect";
+const pendingAccountMessage =
+  "Your account is waiting for administrator approval.";
+const rejectedAccountMessage =
+  "Your registration was declined — contact an administrator.";
 
-const approvalMessages: Record<string, string> = {
-  "account is pending":
-    "Your account is waiting for administrator approval.",
-  "account is rejected":
-    "Your registration was declined — contact an administrator.",
+const lockedAccountMessage = (retryAt: string | undefined): string =>
+  retryAt
+    ? `Too many wrong passwords. Try again at ${formatTime(retryAt)}, or ask an administrator to reset your password.`
+    : "Too many wrong passwords. Try again later, or ask an administrator to reset your password.";
+
+const loginRefusalOf = (result: ILoginResult): string => {
+  if (result.status === "locked") return lockedAccountMessage(result.retry_at);
+  if (result.status === "pending") return pendingAccountMessage;
+  if (result.status === "rejected") return rejectedAccountMessage;
+  return invalidCredentialsMessage;
 };
-
-const toLoginError = (error: { code?: string; message: string }): Error =>
-  error.code === accountNotApprovedCode
-    ? new Error(approvalMessages[error.message] ?? error.message)
-    : toError(error);
 
 const loginDeveloper = async (values: ILoginInput): Promise<void> => {
   const { error } = await supabase.auth.signInWithPassword({
@@ -50,20 +56,24 @@ const accountServices = {
     setCustomToken(null);
 
     const { data, error } = await onlineOnly(
-      supabase.rpc("login_email", {
+      supabase.rpc("login_account", {
         p_email: values.email,
         p_password: values.password,
       })
     );
-    if (error?.code === invalidCredentialsCode) {
+    if (error) throw toError(error);
+
+    const result = data as ILoginResult;
+    if (result.status === "invalid") {
       await loginDeveloper(values);
       return null;
     }
-    if (error) throw toLoginError(error);
+    if (result.status !== "ok" || !result.token || !result.user) {
+      throw new Error(loginRefusalOf(result));
+    }
 
-    const response = data as ICustomLoginResponse;
-    setCustomToken(response.token);
-    return response;
+    setCustomToken(result.token);
+    return { token: result.token, user: result.user };
   },
 
   restoreCustomToken: (token: string | null): void => setCustomToken(token),
@@ -82,26 +92,9 @@ const accountServices = {
     if (error) throw toError(error);
   },
 
-  emailExists: async (email: string): Promise<boolean> => {
-    const { data, error } = await onlineOnly(
-      supabase.rpc("account_email_exists", {
-        p_email: email,
-      })
-    );
-    if (error) throw toError(error);
-
-    return data === true;
-  },
-
-  requestPasswordReset: async (
-    email: string,
-    password: string
-  ): Promise<void> => {
+  requestPasswordHelp: async (email: string): Promise<void> => {
     const { error } = await onlineOnly(
-      supabase.rpc("request_password_reset", {
-        p_email: email,
-        p_password: password,
-      })
+      supabase.rpc("request_password_help", { p_email: email })
     );
     if (error) throw toError(error);
   },
