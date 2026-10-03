@@ -183,9 +183,10 @@ const DataTable = <T extends object>({
 
   const clientLastPage = Math.max(1, Math.ceil(sortedRows.length / pageSize));
   const clientPage = Math.min(clientPagination.pageNumber, clientLastPage);
+  const firstClientRow = isCompact ? 0 : (clientPage - 1) * pageSize;
   const rows = pagination
     ? sortedRows
-    : sortedRows.slice((clientPage - 1) * pageSize, clientPage * pageSize);
+    : sortedRows.slice(firstClientRow, clientPage * pageSize);
 
   const isFocusedRow = useRowFocus(rows.map(resolveRowKey));
 
@@ -466,13 +467,21 @@ const DataTable = <T extends object>({
         />
       ) : null}
 
-      {!pagination && sortedRows.length > pageSize ? (
+      {isCompact && !pagination && !loading && sortedRows.length > pageSize ? (
+        <LoadMoreSentinel
+          loadedCount={rows.length}
+          totalCount={sortedRows.length}
+          loading={false}
+          onLoadMore={() => setClientPagination({ pageNumber: clientPage + 1 })}
+        />
+      ) : null}
+
+      {!isCompact && !pagination && sortedRows.length > pageSize ? (
         <TablePagination
           pagination={{ pageNumber: clientPage, pageSize }}
           totalCount={sortedRows.length}
           onPageChange={(pageNumber) => setClientPagination({ pageNumber })}
           showSizeChanger={false}
-          visibleOnPhone
         />
       ) : null}
     </div>

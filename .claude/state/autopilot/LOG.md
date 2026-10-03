@@ -124,3 +124,12 @@
 - Supplier ledger sheet with no actions on phone → footer undefined (AppModal Close) rather than an empty footer; F5 (R2) removes Close
 - Tablet portrait search height → h-9 like the other pills there; h-10 only below md
 - Verification: yarn build + yarn lint clean; emulated-viewport checked (390 light/dark, 820, 1440: search 160→262px on focus, Filters/Sort 40x40 side by side, no badge from search, Payments badge gone, no Print on phone, x-overflow 0, no page errors), physical device unconfirmed
+
+## 2026-10-03 — R2 Ledger sheets infinite scroll on phone → Development v2.38
+- Leftover tree (user deleted STOP to re-authorize) → committed with R2 as instructed by the dispatch
+- Mechanism → client-paged DataTable in card mode grows its slice via the existing LoadMoreSentinel (one change in DataTable covers party list, Records and Payments lists) rather than per-table server paging (no service/hook change, lists are small lookups)
+- Breakpoint → isCompact (card mode), same as the existing server-paged load-more path, so phone and tablet-portrait card lists behave alike; desktop/tablet landscape keep TablePagination
+- TablePagination visibleOnPhone → removed (no caller left)
+- F5 Close → AppModal on phone omits the footer when none is passed (X closes); global on phone, tablet keeps Close (L1)
+- Visual check → skipped: QA_PASSWORD not provided in this dispatch; compiled, visuals unconfirmed
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)

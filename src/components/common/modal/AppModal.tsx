@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/utils/cn.utils";
 import AppButton from "../button/AppButton";
-import { useIsCompact } from "../../../hook/common/breakpoint.hook";
+import {
+  useIsCompact,
+  useIsPhone,
+} from "../../../hook/common/breakpoint.hook";
 import type { ModalSize, SheetKind } from "../../../models/common/view.model";
 import {
   drawerBody,
@@ -52,6 +55,7 @@ const AppModal = ({
   children,
 }: IProps) => {
   const isCompact = useIsCompact();
+  const isPhone = useIsPhone();
 
   const actions = footer ?? (
     <AppButton variant="outline" onPress={onClose}>
@@ -79,7 +83,9 @@ const AppModal = ({
 
         {pinned ? <div className={drawerPinned}>{pinned}</div> : null}
 
-        <SheetFooter className={drawerFooter}>{actions}</SheetFooter>
+        {isPhone && !footer ? null : (
+          <SheetFooter className={drawerFooter}>{actions}</SheetFooter>
+        )}
       </Sheet>
     );
   }

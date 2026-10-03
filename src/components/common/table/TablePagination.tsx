@@ -38,7 +38,6 @@ type IProps = {
   totalCount: number;
   onPageChange: (pageNumber: number, pageSize: number) => void;
   showSizeChanger?: boolean;
-  visibleOnPhone?: boolean;
 };
 
 const pageSizes = [8, 16, 32, 64] as const;
@@ -48,7 +47,6 @@ const TablePagination = ({
   totalCount,
   onPageChange,
   showSizeChanger = true,
-  visibleOnPhone = false,
 }: IProps) => {
   const isCompact = useIsCompact();
   const { pageNumber, pageSize } = pagination;
@@ -63,7 +61,7 @@ const TablePagination = ({
     if (size) onPageChange(1, size);
   };
 
-  if (isCompact && !visibleOnPhone) return null;
+  if (isCompact) return null;
 
   return (
     <div className={tablePagination}>
