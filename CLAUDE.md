@@ -425,7 +425,7 @@ it; do not convert them wholesale unprompted.
   prop, so unconverted tables keep working.
 - **Thin pages**: `pages/{Branches,Users,Vouchers}` still declare their own columns;
   move them into a feature table when you touch one.
-- **Ledger tables**: Receivables and Payables render `LedgerSummaryCards`,
-  `LedgerRecordsTable`, `LedgerPaymentsTable` and `RecordPaymentModal`; `LedgerManager` is
-  gone. `LedgerPartiesTable` is migrated but not mounted yet.
+- **Ledger tables**: Receivables and Payables render `LedgerSummaryCards` and a Records /
+  Payments view switch (`LedgerRecordsTable` or `PayableRecordsTable`, `LedgerPaymentsTable`);
+  party grouping lives in the Customer / Supplier Ledger. `LedgerManager` is gone.
 - **Comments** are fully stripped. Keep it that way.

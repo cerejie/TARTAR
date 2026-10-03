@@ -127,7 +127,7 @@ const paymentRowHint = (row: ILedgerRow) =>
 
 type ILedgerReads<Row extends ILedgerRow> = Pick<
   ILedgerServices<Row, never>,
-  "getList" | "getAll" | "getPartySummaries"
+  "getList" | "getAll"
 >;
 
 export const ledgerListQueryOf = <Row extends ILedgerRow>(
@@ -154,15 +154,6 @@ export const ledgerSummaryQueryOf = <Row extends ILedgerRow>(
 ): IQuerySpec<Row[]> => [
   scopedKey(ledgerSummaryKey, scope, JSON.stringify(filters)),
   () => services.getAll(filters),
-];
-
-export const ledgerPartyQueryOf = <Row extends ILedgerRow>(
-  scope: ILedgerListConfig<Row, FieldValues>["scope"],
-  services: ILedgerReads<Row>,
-  branch: string | null
-): IQuerySpec<ILedgerPartySummary[]> => [
-  scopedKey(ledgerPartyKey, scope, branch),
-  () => services.getPartySummaries(branch),
 ];
 
 export const useLedgerListHook = <
@@ -218,10 +209,6 @@ export const useLedgerListHook = <
 
   const summaryQuery = useQuery(
     ...ledgerSummaryQueryOf(config.scope, config.services, summaryFilters)
-  );
-
-  const partyQuery = useQuery(
-    ...ledgerPartyQueryOf(config.scope, config.services, scopeBranch)
   );
 
   const paymentTarget = paymentModal.modal.data;
@@ -323,15 +310,8 @@ export const useLedgerListHook = <
     ),
   };
 
-  const searchTerm = (filters.search ?? "").trim().toLowerCase();
-  const parties = (partyQuery.data ?? []).filter((party) =>
-    party.partyName.toLowerCase().includes(searchTerm)
-  );
-
   const openPaymentFor = (row: Row) =>
     paymentModal.openModal({ party: config.partyOf(row), rows: [row] });
-  const openPaymentForParty = (party: ILedgerPartyKey) =>
-    paymentModal.openModal({ party });
 
   return {
     permissions,
@@ -353,11 +333,6 @@ export const useLedgerListHook = <
     summaryError: summaryQuery.error,
     retrySummary: summaryQuery.refetch,
     summaryPeriod: filterPeriodLabel(effectiveFilters),
-    parties,
-    partiesLoading: partyQuery.isInitialLoading,
-    partiesRefreshing: partyQuery.isRefreshing,
-    partiesError: partyQuery.error,
-    retryParties: partyQuery.refetch,
     branchName,
     userNameOf,
     formModal,
@@ -374,6 +349,5 @@ export const useLedgerListHook = <
     paymentDefaults,
     paymentMutation,
     openPaymentFor,
-    openPaymentForParty,
   };
 };

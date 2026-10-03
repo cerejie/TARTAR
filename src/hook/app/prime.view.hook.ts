@@ -55,7 +55,6 @@ import {
 import { customerSummaryKey } from "../data/ledger/customer.ledger.hook";
 import {
   ledgerListQueryOf,
-  ledgerPartyQueryOf,
   ledgerSummaryQueryOf,
 } from "../data/ledger/ledger.list.hook";
 import { supplierSummaryKey } from "../data/ledger/supplier.ledger.hook";
@@ -180,7 +179,6 @@ const receivableQueriesOf = (branch: string | null): IQuerySpec[] => {
       receivableServices,
       scopedFilters({ ...defaults, status: undefined }, branch)
     ),
-    ledgerPartyQueryOf("receivables", receivableServices, branch),
     paymentQueryOf("receivable", branch),
     [customerSummaryKey, receivableServices.getCustomerSummaries],
     ...withAllTab(ledgerStatusFilterValues).map((status) =>
@@ -204,7 +202,6 @@ const payableQueriesOf = (branch: string | null): IQuerySpec[] => {
       payableServices,
       scopedFilters({ ...defaults, status: undefined }, branch)
     ),
-    ledgerPartyQueryOf("payables", payableServices, branch),
     paymentQueryOf("payable", branch),
     [supplierSummaryKey, payableServices.getPartySummaries],
     ...withAllTab(payableStatusValues).map((status) =>

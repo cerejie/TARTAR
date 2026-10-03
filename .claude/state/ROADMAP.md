@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-04 (M1 done)
+Updated: 2026-10-04 (M2 done)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -280,15 +280,23 @@ Given by the user on 2026-10-03 unless marked otherwise.
   `cardGrid` removed (DataTable + the three ledger tables) — a native list is one column. `RecordDetailSheet` unchanged.
   Labels no longer show on the row, so due-date metas got `cardPrefix: "Due"` (`PurchasesTable.tsx`,
   `CustomerLedgerView.tsx`, `SupplierLedgerView.tsx`).
+- [x] M2 Receivables / Payables Payments tab (Development v2.75): `ledgerViewValues` = records / payments with static
+  `ledgerViewLabels` (`enums/ledger.enum.ts`); `useLedgerViewHook` takes no scope (`hook/data/ledger/ledger.view.hook.ts`);
+  `LedgerViewTabs` (no props) switches Records / Payments; `LedgerRecordsSection.tsx` renders `LedgerPaymentsTable`
+  on Payments (kind from the scope) and the records table otherwise; `LedgerStatusTabs` hides on Payments (payment
+  status lives in the payments filter popover); `ReceivablesView.tsx` / `PayablesView.tsx` no longer stack the payments
+  table under the records. Deleted `components/ledger/tables/LedgerPartiesTable.tsx`, the `ledgerPartyQueryOf` /
+  `partyQuery` / `parties*` / `openPaymentForParty` returns in `ledger.list.hook.ts` and their priming in
+  `prime.view.hook.ts` (the Payments tab was already primed by `paymentQueryOf`). Kept `ledgerPartyKey` and
+  `getPartySummaries` — the Supplier Ledger (`supplier.ledger.hook.ts`, `supplier.detail.hook.ts`) still reads them.
 
 ## Next
-1. M2 Receivables / Payables: Payments tab replaces By customer / By supplier.
-2. M3 Mobile form interaction (iOS / Android keyboard, inputs, dropdowns in modals).
-3. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
-4. O2 Offline branch scopes, details and month change.
-5. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
+1. M3 Mobile form interaction (iOS / Android keyboard, inputs, dropdowns in modals).
+2. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
+3. O2 Offline branch scopes, details and month change.
+4. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
    exercise them: the QA accounts see one branch).
-6. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+5. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
@@ -305,5 +313,5 @@ Given by the user on 2026-10-03 unless marked otherwise.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.74 (M1 Mobile list rows) · Uncommitted: none · Last check: M1, build + lint clean, tests 138 / 138, sweep admin + emp + acc phone + tabP on every list route. Run any sweep or probe
+Branch: mobilel-app-native · Last commit Development v2.75 (M2 Payments tab) · Uncommitted: none · Last check: M2, build + lint clean, tests 138 / 138, sweep admin + emp + acc phone + desk on /receivables, /payables. Run any sweep or probe
 with Bash `run_in_background` and `timeout` 3600000.

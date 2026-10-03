@@ -1,4 +1,4 @@
-import LedgerPartiesTable from "../tables/LedgerPartiesTable";
+import LedgerPaymentsTable from "../tables/LedgerPaymentsTable";
 import LedgerRecordsTable from "../tables/LedgerRecordsTable";
 import PayableRecordsTable from "../tables/PayableRecordsTable";
 import type { LedgerScope } from "../../../hook/data/ledger/ledger.scope.hook";
@@ -9,9 +9,14 @@ type IProps = {
 };
 
 const LedgerRecordsSection = ({ scope }: IProps) => {
-  const { view } = useLedgerViewHook(scope);
+  const { view } = useLedgerViewHook();
 
-  if (view === "parties") return <LedgerPartiesTable scope={scope} />;
+  if (view === "payments")
+    return (
+      <LedgerPaymentsTable
+        kind={scope === "payables" ? "payable" : "receivable"}
+      />
+    );
 
   return scope === "payables" ? (
     <PayableRecordsTable />

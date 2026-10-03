@@ -21,14 +21,14 @@ type IProps = {
 };
 
 const LedgerStatusTabs = ({ scope }: IProps) => {
-  const { view } = useLedgerViewHook(scope);
+  const { view } = useLedgerViewHook();
   const { value, changeValue } = useFilterField(
     ledgerFilterScopeOf(scope),
     "status",
     ledgerPaginationKey(scope)
   );
 
-  if (view === "parties") return null;
+  if (view === "payments") return null;
 
   if (scope === "payables")
     return (

@@ -5,19 +5,17 @@ import CustomerLedgerButton from "../../components/ledger/menus/CustomerLedgerBu
 import LedgerStatusTabs from "../../components/ledger/menus/LedgerStatusTabs";
 import LedgerViewTabs from "../../components/ledger/menus/LedgerViewTabs";
 import RecordPaymentModal from "../../components/ledger/modal/RecordPaymentModal";
-import LedgerPaymentsTable from "../../components/ledger/tables/LedgerPaymentsTable";
 import LedgerRecordsSection from "../../components/ledger/views/LedgerRecordsSection";
 
 const ReceivablesView = () => {
   return (
     <ContentView
       tabs={<LedgerStatusTabs scope="receivables" />}
-      toolbar={<LedgerViewTabs scope="receivables" />}
+      toolbar={<LedgerViewTabs />}
       actions={<CustomerLedgerButton />}
     >
       <LedgerSummaryCards scope="receivables" />
       <LedgerRecordsSection scope="receivables" />
-      <LedgerPaymentsTable kind="receivable" />
       <RecordPaymentModal scope="receivables" />
       <CustomerLedgerModal />
     </ContentView>
