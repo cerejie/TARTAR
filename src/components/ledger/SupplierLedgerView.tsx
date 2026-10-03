@@ -32,6 +32,10 @@ import {
   nowrapCell,
 } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
+import {
+  ledgerRecordSubtitleOf,
+  ledgerRecordTitleOf,
+} from "../../utils/ledger.utils";
 import { printStatement } from "../../utils/print.utils";
 import SheetActions from "../common/app/SheetActions";
 import AppButton from "../common/button/AppButton";
@@ -42,12 +46,17 @@ import StatusTag from "../common/status/StatusTag";
 import DataTable from "../common/table/DataTable";
 import RowActionMenu from "../common/table/RowActionMenu";
 import PaymentsPanel from "../payment/PaymentsPanel";
+import LedgerPartyHero from "./cards/LedgerPartyHero";
 import LedgerPartyOverview from "./cards/LedgerPartyOverview";
+import LedgerAmountCell from "./tables/cells/LedgerAmountCell";
+import LedgerPartySheet from "./views/LedgerPartySheet";
 
 const SupplierLedgerView = () => {
   const {
     supplier,
     detailOpen,
+    partyTab,
+    setPartyTab,
     permissions,
     rows,
     listLoading,
@@ -76,17 +85,15 @@ const SupplierLedgerView = () => {
       branchName
     );
 
-  const ledgerActions: IRowAction[] = isPhone
-    ? []
-    : [
-        {
-          key: "print",
-          label: "Print statement",
-          icon: <Printer />,
-          priority: "secondary",
-          onSelect: printLedgerStatement,
-        },
-      ];
+  const ledgerActions: IRowAction[] = [
+    {
+      key: "print",
+      label: "Print statement",
+      icon: <Printer />,
+      priority: "secondary",
+      onSelect: printLedgerStatement,
+    },
+  ];
 
   const actionsOf = (row: IPayable): IRowAction[] =>
     permissions.encodeTransactions
@@ -101,6 +108,49 @@ const SupplierLedgerView = () => {
           },
         ]
       : [];
+
+  const statusColumn: IDataTableColumn<IPayable> = {
+    title: "Status",
+    mobile: "status",
+    key: "status",
+    render: (_, row) => {
+      const status = payableStatusOf(row);
+      return (
+        <StatusTag
+          color={payableStatusColors[status]}
+          label={payableStatusLabels[status]}
+        />
+      );
+    },
+  };
+
+  const phoneColumns: IDataTableColumn<IPayable>[] = [
+    {
+      title: "Record",
+      key: "record",
+      render: (_, row) => ledgerRecordTitleOf(row),
+    },
+    {
+      title: "Due date",
+      key: "due",
+      mobile: "subtitle",
+      render: (_, row) => ledgerRecordSubtitleOf(row),
+    },
+    {
+      title: "Amount",
+      key: "amount",
+      mobile: "amount",
+      align: "right",
+      render: (_, row) => (
+        <LedgerAmountCell
+          amount={row.amount}
+          paidAmount={row.paid_amount}
+          paid={row.status === "paid"}
+        />
+      ),
+    },
+    statusColumn,
+  ];
 
   const columns: IDataTableColumn<IPayable>[] = [
     {
@@ -134,20 +184,7 @@ const SupplierLedgerView = () => {
       align: "right",
       render: (_, row) => formatMoney(payableAmountDueOf(row)),
     },
-    {
-      title: "Status",
-      mobile: "status",
-      key: "status",
-      render: (_, row) => {
-        const status = payableStatusOf(row);
-        return (
-          <StatusTag
-            color={payableStatusColors[status]}
-            label={payableStatusLabels[status]}
-          />
-        );
-      },
-    },
+    statusColumn,
     ...(permissions.isManager
       ? [
           {
@@ -227,6 +264,67 @@ const SupplierLedgerView = () => {
     </div>
   );
 
+  const recordsList = (
+    <>
+      <FilterToolbar>
+        <LedgerFilterBar
+          scope="supplier-ledger"
+          showStatus
+          statusValues={payableStatusValues}
+          layout="popover"
+        />
+      </FilterToolbar>
+
+      <DataTable<IPayable>
+        columns={isPhone ? phoneColumns : columns}
+        data={rows}
+        loading={listLoading}
+        pageSize={5}
+        expansionKey={ledgerExpansionKey("supplier-ledger")}
+        detailSections={detailSections}
+        detailTitle={() => "Payable"}
+        detailActions={actionsOf}
+        emptyText="No payables match the filters"
+        emptyHint={filteredEmptyHint}
+        rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
+      />
+    </>
+  );
+
+  const paymentsList = (
+    <PaymentsPanel
+      kind="payable"
+      party={{
+        partyId: supplier.partyId,
+        partyName: supplier.partyName,
+      }}
+    />
+  );
+
+  if (isPhone) {
+    return (
+      <LedgerPartySheet
+        open={detailOpen}
+        title="Supplier ledger"
+        hero={
+          <LedgerPartyHero
+            name={supplier.partyName}
+            summary={summary}
+            summaryLoading={summaryLoading}
+            lastPayment={lastPayment}
+            unpaidNoun="unpaid"
+          />
+        }
+        tab={partyTab}
+        onTabChange={setPartyTab}
+        records={recordsList}
+        payments={paymentsList}
+        actions={[]}
+        onClose={closeSupplierDetail}
+      />
+    );
+  }
+
   const content = (
     <>
       {isCompact ? null : ledgerHeader}
@@ -241,37 +339,10 @@ const SupplierLedgerView = () => {
 
       {isCompact ? <h3 className={ledgerSectionTitle}>Records</h3> : null}
 
-      <FilterToolbar>
-        <LedgerFilterBar
-          scope="supplier-ledger"
-          showStatus
-          statusValues={payableStatusValues}
-          layout="popover"
-        />
-      </FilterToolbar>
-
-      <DataTable<IPayable>
-        columns={columns}
-        data={rows}
-        loading={listLoading}
-        pageSize={5}
-        expansionKey={ledgerExpansionKey("supplier-ledger")}
-        detailSections={detailSections}
-        detailTitle={() => "Payable"}
-        detailActions={actionsOf}
-        emptyText="No payables match the filters"
-        emptyHint={filteredEmptyHint}
-        rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
-      />
+      {recordsList}
 
       <h3 className={ledgerSectionTitle}>Payments</h3>
-      <PaymentsPanel
-        kind="payable"
-        party={{
-          partyId: supplier.partyId,
-          partyName: supplier.partyName,
-        }}
-      />
+      {paymentsList}
     </>
   );
 
@@ -282,11 +353,7 @@ const SupplierLedgerView = () => {
       open={detailOpen}
       title={supplier.partyName}
       kind="flow"
-      footer={
-        ledgerActions.length > 0 ? (
-          <SheetActions actions={ledgerActions} />
-        ) : undefined
-      }
+      footer={<SheetActions actions={ledgerActions} />}
       onClose={closeSupplierDetail}
     >
       <div className={ledgerPane}>{content}</div>

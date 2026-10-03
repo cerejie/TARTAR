@@ -38,6 +38,10 @@ export const useCustomerDetailHook = () => {
   const detailOpen = useLedgerStore((state) => state.ledgerDetailOpen);
   const selection = useLedgerStore((state) => state.ledgerSelection);
   const setSelection = useLedgerStore((state) => state.setLedgerSelection);
+  const selecting = useLedgerStore((state) => state.ledgerSelecting);
+  const setSelecting = useLedgerStore((state) => state.setLedgerSelecting);
+  const partyTab = useLedgerStore((state) => state.ledgerPartyTab);
+  const setPartyTab = useLedgerStore((state) => state.setLedgerPartyTab);
 
   const paymentModal = useModal(customerPaymentModalKey);
   const infoModal = useModal(customerInfoModalKey);
@@ -87,6 +91,7 @@ export const useCustomerDetailHook = () => {
   );
 
   const rows = listQuery.data ?? [];
+  const hasUnpaidRows = rows.some((row) => row.status !== "paid");
   const selectedRows = rows.filter(
     (row) => selection.includes(row.id) && row.status !== "paid"
   );
@@ -105,6 +110,7 @@ export const useCustomerDetailHook = () => {
       invalidate: [receivableListKey, paymentListKey],
       onSuccess: () => {
         paymentModal.closeModal();
+        setSelecting(false);
         setSelection([]);
       },
     }
@@ -118,6 +124,11 @@ export const useCustomerDetailHook = () => {
     selection,
     selectedRows,
     setSelection,
+    selecting,
+    setSelecting,
+    partyTab,
+    setPartyTab,
+    hasUnpaidRows,
     summary,
     summaryLoading: summaryQuery.loading,
     listLoading: listQuery.loading,

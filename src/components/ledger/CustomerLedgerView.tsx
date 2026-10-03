@@ -4,6 +4,7 @@ import {
   FileText,
   Info,
   Printer,
+  X,
 } from "lucide-react";
 import type { IRowAction } from "../../models/common/action.model";
 import type { IDetailSection } from "../../models/common/detail.model";
@@ -36,6 +37,10 @@ import {
 } from "../../styles/ledger/ledger.styles";
 import { dataTableRowOverdue } from "../../styles/table/table.styles";
 import { formatDate, formatMoney } from "../../utils/format.utils";
+import {
+  ledgerRecordSubtitleOf,
+  ledgerRecordTitleOf,
+} from "../../utils/ledger.utils";
 import { printStatement } from "../../utils/print.utils";
 import SheetActions from "../common/app/SheetActions";
 import AppButton from "../common/button/AppButton";
@@ -45,9 +50,12 @@ import RequirePermission from "../common/guard/RequirePermission";
 import AppModal from "../common/modal/AppModal";
 import DataTable from "../common/table/DataTable";
 import PaymentsPanel from "../payment/PaymentsPanel";
+import LedgerPartyHero from "./cards/LedgerPartyHero";
 import LedgerPartyOverview from "./cards/LedgerPartyOverview";
 import CustomerInfoModal from "./CustomerInfoModal";
 import PaymentAllocationModal from "./PaymentAllocationModal";
+import LedgerAmountCell from "./tables/cells/LedgerAmountCell";
+import LedgerPartySheet from "./views/LedgerPartySheet";
 
 const CustomerLedgerView = () => {
   const {
@@ -58,6 +66,11 @@ const CustomerLedgerView = () => {
     selection,
     selectedRows,
     setSelection,
+    selecting,
+    setSelecting,
+    partyTab,
+    setPartyTab,
+    hasUnpaidRows,
     summary,
     summaryLoading,
     listLoading,
@@ -126,23 +139,101 @@ const CustomerLedgerView = () => {
           },
         ]
       : []),
-    ...(isPhone
-      ? []
-      : [
-          {
-            key: "print",
-            label: "Print statement",
-            icon: <Printer />,
-            priority: "secondary" as const,
-            onSelect: printLedgerStatement,
-          },
-        ]),
+    {
+      key: "print",
+      label: "Print statement",
+      icon: <Printer />,
+      priority: "secondary" as const,
+      onSelect: printLedgerStatement,
+    },
     {
       key: "info",
       label: "Customer information",
       icon: <Info />,
       onSelect: () => infoModal.openModal(),
     },
+  ];
+
+  const phoneActions: IRowAction[] = selecting
+    ? [
+        {
+          key: "pay-selected",
+          label:
+            selectedRows.length === 0
+              ? "Select receivables to pay"
+              : `Pay ${selectedRows.length} selected`,
+          icon: <CircleDollarSign />,
+          priority: "primary",
+          disabled: selectedRows.length === 0,
+          onSelect: () => paymentModal.openModal(),
+        },
+        {
+          key: "cancel-selection",
+          label: "Cancel",
+          icon: <X />,
+          priority: "secondary",
+          onSelect: () => setSelecting(false),
+        },
+      ]
+    : [
+        ...(permissions.encodeTransactions
+          ? [
+              {
+                key: "payment",
+                label: "Record payment",
+                icon: <CircleDollarSign />,
+                priority: "primary" as const,
+                disabled: !hasUnpaidRows,
+                onSelect: () => setSelecting(true),
+              },
+            ]
+          : []),
+        {
+          key: "info",
+          label: "Customer information",
+          icon: <Info />,
+          onSelect: () => infoModal.openModal(),
+        },
+      ];
+
+  const statusColumn: IDataTableColumn<IReceivable> = {
+    title: "Status",
+    mobile: "status",
+    dataIndex: "status",
+    render: (status: IReceivable["status"], row) =>
+      isLedgerOverdue(row) ? (
+        <StatusTag color="negative" label="Overdue" />
+      ) : (
+        <StatusTag color={ledgerStatusColors[status]} label={ledgerStatusLabels[status]} />
+      ),
+  };
+
+  const phoneColumns: IDataTableColumn<IReceivable>[] = [
+    {
+      title: "Record",
+      key: "record",
+      render: (_, row) => ledgerRecordTitleOf(row),
+    },
+    {
+      title: "Due date",
+      key: "due",
+      mobile: "subtitle",
+      render: (_, row) => ledgerRecordSubtitleOf(row),
+    },
+    {
+      title: "Balance",
+      key: "balance",
+      mobile: "amount",
+      align: "right",
+      render: (_, row) => (
+        <LedgerAmountCell
+          amount={row.amount}
+          paidAmount={row.paid_amount}
+          paid={row.status === "paid"}
+        />
+      ),
+    },
+    statusColumn,
   ];
 
   const columns: IDataTableColumn<IReceivable>[] = [
@@ -190,17 +281,7 @@ const CustomerLedgerView = () => {
       align: "right",
       render: (_, row) => formatMoney(ledgerBalance(row)),
     },
-    {
-      title: "Status",
-      mobile: "status",
-      dataIndex: "status",
-      render: (status: IReceivable["status"], row) =>
-        isLedgerOverdue(row) ? (
-          <StatusTag color="negative" label="Overdue" />
-        ) : (
-          <StatusTag color={ledgerStatusColors[status]} label={ledgerStatusLabels[status]} />
-        ),
-    },
+    statusColumn,
     ...(permissions.isManager
       ? [
           {
@@ -301,20 +382,8 @@ const CustomerLedgerView = () => {
     </div>
   );
 
-  const content = (
+  const recordsList = (
     <>
-      {isCompact ? null : ledgerHeader}
-
-      <LedgerPartyOverview
-        summary={summary}
-        summaryLoading={summaryLoading}
-        lastPayment={lastPayment}
-        lastPaymentLoading={lastPaymentLoading}
-        unpaidLabel="Unpaid transactions"
-      />
-
-      {isCompact ? <h3 className={ledgerSectionTitle}>Records</h3> : null}
-
       <FilterToolbar>
         <LedgerFilterBar
           scope="customer-ledger"
@@ -325,7 +394,7 @@ const CustomerLedgerView = () => {
       </FilterToolbar>
 
       <DataTable<IReceivable>
-        columns={columns}
+        columns={isPhone ? phoneColumns : columns}
         data={rows}
         loading={listLoading}
         pageSize={5}
@@ -336,22 +405,31 @@ const CustomerLedgerView = () => {
         emptyText="No receivables match the filters"
         emptyHint={filteredEmptyHint}
         rowClassName={(row) => (isLedgerOverdue(row) ? dataTableRowOverdue : "")}
-        rowSelection={{
-          selectedRowKeys: selection,
-          onChange: (keys) => setSelection(keys as string[]),
-          getCheckboxProps: (row) => ({ disabled: row.status === "paid" }),
-        }}
+        rowSelection={
+          isPhone && !selecting
+            ? undefined
+            : {
+                selectedRowKeys: selection,
+                onChange: (keys) => setSelection(keys as string[]),
+                getCheckboxProps: (row) => ({ disabled: row.status === "paid" }),
+              }
+        }
       />
+    </>
+  );
 
-      <h3 className={ledgerSectionTitle}>Payments</h3>
-      <PaymentsPanel
-        kind="receivable"
-        party={{
-          partyId: customer.customerId,
-          partyName: customer.customerName,
-        }}
-      />
+  const paymentsList = (
+    <PaymentsPanel
+      kind="receivable"
+      party={{
+        partyId: customer.customerId,
+        partyName: customer.customerName,
+      }}
+    />
+  );
 
+  const modals = (
+    <>
       <CustomerInfoModal
         open={infoModal.modal.visible}
         customer={customer}
@@ -374,6 +452,56 @@ const CustomerLedgerView = () => {
         onSubmit={(values) => void recordPaymentMutation.mutate(values)}
         onClose={paymentModal.closeModal}
       />
+    </>
+  );
+
+  if (isPhone) {
+    return (
+      <>
+        <LedgerPartySheet
+          open={detailOpen}
+          title="Customer ledger"
+          hero={
+            <LedgerPartyHero
+              name={customer.customerName}
+              summary={summary}
+              summaryLoading={summaryLoading}
+              lastPayment={lastPayment}
+              unpaidNoun="unpaid"
+            />
+          }
+          tab={partyTab}
+          onTabChange={setPartyTab}
+          records={recordsList}
+          payments={paymentsList}
+          actions={phoneActions}
+          onClose={closeLedgerDetail}
+        />
+        {modals}
+      </>
+    );
+  }
+
+  const content = (
+    <>
+      {isCompact ? null : ledgerHeader}
+
+      <LedgerPartyOverview
+        summary={summary}
+        summaryLoading={summaryLoading}
+        lastPayment={lastPayment}
+        lastPaymentLoading={lastPaymentLoading}
+        unpaidLabel="Unpaid transactions"
+      />
+
+      {isCompact ? <h3 className={ledgerSectionTitle}>Records</h3> : null}
+
+      {recordsList}
+
+      <h3 className={ledgerSectionTitle}>Payments</h3>
+      {paymentsList}
+
+      {modals}
     </>
   );
 

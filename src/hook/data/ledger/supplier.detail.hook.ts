@@ -29,6 +29,8 @@ export const useSupplierDetailHook = () => {
     (state) => state.closeSupplierDetail
   );
   const detailOpen = useLedgerStore((state) => state.supplierDetailOpen);
+  const partyTab = useLedgerStore((state) => state.ledgerPartyTab);
+  const setPartyTab = useLedgerStore((state) => state.setLedgerPartyTab);
 
   const markPaidModal = useModal<IPayable>(payableMarkPaidModalKey);
   const permissions = usePermissions();
@@ -77,6 +79,8 @@ export const useSupplierDetailHook = () => {
   return {
     supplier,
     detailOpen,
+    partyTab,
+    setPartyTab,
     permissions,
     rows: listQuery.data ?? [],
     listLoading: listQuery.loading,

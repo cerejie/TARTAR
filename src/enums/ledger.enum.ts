@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ISegmentOption } from "../models/common/segment.model";
 import type { ISortOption } from "../models/common/table.model";
 import type { StatusColor } from "../models/common/view.model";
 
@@ -100,3 +101,11 @@ export const paymentSortOptions: readonly ISortOption[] = [
 
 export const ledgerViewValues = ["records", "parties"] as const;
 export type LedgerView = (typeof ledgerViewValues)[number];
+
+export const ledgerPartyTabValues = ["records", "payments"] as const;
+export type LedgerPartyTab = (typeof ledgerPartyTabValues)[number];
+
+export const ledgerPartyTabOptions: readonly ISegmentOption<LedgerPartyTab>[] = [
+  { key: "records", label: "Records" },
+  { key: "payments", label: "Payments" },
+];

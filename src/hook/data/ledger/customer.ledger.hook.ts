@@ -4,7 +4,10 @@ import {
   customerLedgerModalKey,
 } from "../../../keys/modal.keys";
 import { receivableListKey, scopedKey } from "../../../keys/query.keys";
-import type { ICustomerReceivableSummary } from "../../../models/data/ledger/ledger.response";
+import type {
+  ICustomerLedgerKey,
+  ICustomerReceivableSummary,
+} from "../../../models/data/ledger/ledger.response";
 import { receivableServices } from "../../../services/data/ledger.services";
 import { useLedgerStore } from "../../../store/data/ledger/ledger.store";
 import { useModal, useModalActions } from "../../common/modal.hook";
@@ -40,6 +43,14 @@ export const useCustomerLedgerHook = () => {
 
   const detailsTarget = detailsModal.modal.data ?? null;
 
+  const openCustomerLedger = (customer: ICustomerLedgerKey) => {
+    ledgerModal.openModal();
+    setLedgerCustomer({
+      customerId: customer.customerId,
+      customerName: customer.customerName,
+    });
+  };
+
   const close = () => {
     closeModal(customerLedgerModalKey);
     closeModal(customerDetailsModalKey);
@@ -58,6 +69,7 @@ export const useCustomerLedgerHook = () => {
     setSearch,
     recordFor,
     openCustomer: setLedgerCustomer,
+    openCustomerLedger,
     close,
   };
 };

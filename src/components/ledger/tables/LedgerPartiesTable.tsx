@@ -14,6 +14,7 @@ import {
   useLedgerScopeHook,
   type LedgerScope,
 } from "../../../hook/data/ledger/ledger.scope.hook";
+import { useCustomerLedgerHook } from "../../../hook/data/ledger/customer.ledger.hook";
 import { useSupplierLedgerHook } from "../../../hook/data/ledger/supplier.ledger.hook";
 import { customerDetailsModalKey } from "../../../keys/modal.keys";
 import type { IRowAction } from "../../../models/common/action.model";
@@ -40,6 +41,13 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
   const { filters, setFilters } = useLedgerFilters(ledgerFilterScopeOf(scope));
   const detailsModal = useModal<ILedgerPartySummary>(customerDetailsModalKey);
   const { openSupplierLedger } = useSupplierLedgerHook();
+  const { openCustomerLedger } = useCustomerLedgerHook();
+
+  const openCustomerOf = (party: ILedgerPartySummary) =>
+    openCustomerLedger({
+      customerId: party.partyId,
+      customerName: party.partyName,
+    });
 
   const supplierActionsOf = (party: ILedgerPartySummary): IRowAction[] => [
     {
@@ -60,6 +68,12 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
             icon: <CircleDollarSign />,
             disabled: party.unpaidCount === 0,
             onSelect: () => openPaymentForParty(party),
+          },
+          {
+            key: "ledger",
+            label: "View ledger",
+            icon: <BookOpen />,
+            onSelect: () => openCustomerOf(party),
           },
           {
             key: "details",
@@ -132,7 +146,7 @@ const LedgerPartiesTable = ({ scope }: IProps) => {
           error={partiesError}
           onRetry={retryParties}
           rowKey={(party) => party.partyId ?? `name:${party.partyName}`}
-          onRowClick={scope === "payables" ? openSupplierLedger : undefined}
+          onRowClick={scope === "payables" ? openSupplierLedger : openCustomerOf}
           emptyText={`No ${partyLabel.toLowerCase()}s match the current search`}
           emptyHint={searchEmptyHint}
         />

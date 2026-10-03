@@ -35,3 +35,23 @@ export const paymentTotalValue = `${moneyLevel({ level: "amount" })} text-foregr
 export const ledgerIconButton = "max-lg:size-10 max-lg:gap-0 max-lg:rounded-full max-lg:px-0";
 
 export const ledgerIconLabel = "max-lg:sr-only";
+
+export const ledgerPartyHero = "flex flex-col items-center gap-1.5 pt-2 pb-1 text-center";
+
+export const ledgerPartyHeroAvatar = "size-14";
+
+export const ledgerPartyHeroInitials = "bg-brand-soft text-lg font-semibold text-brand";
+
+export const ledgerPartyHeroName = "max-w-full truncate font-heading text-base font-semibold";
+
+export const ledgerPartyHeroCaption = "text-caption text-muted-foreground";
+
+export const ledgerPartyHeroAmount = moneyLevel({ level: "primary" });
+
+export const ledgerPartyHeroAmountSkeleton = "h-9 w-40";
+
+export const ledgerPartyHeroMeta = "max-w-full text-caption text-muted-foreground";
+
+export const ledgerAmountCell = "flex flex-col items-end";
+
+export const ledgerAmountCellOf = moneyLevel({ level: "meta" });

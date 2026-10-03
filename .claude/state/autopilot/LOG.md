@@ -133,3 +133,15 @@
 - F5 Close → AppModal on phone omits the footer when none is passed (X closes); global on phone, tablet keeps Close (L1)
 - Visual check → skipped: QA_PASSWORD not provided in this dispatch; compiled, visuals unconfirmed
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)
+
+## 2026-10-03 — R3 Customer/Supplier detail native redesign on phone → Development v2.39
+- Scope breakpoint → isPhone only; tablet portrait keeps the AppModal sheet with StatCard + rows (L1 locks tablet)
+- Sheet chrome → AppSheet kind="flow" (grab handle, swipe-to-close, title "Customer ledger"/"Supplier ledger"; name lives in the hero) rather than adding a handle to AppModal
+- Hero → new LedgerPartyHero (avatar, name, outstanding big + tone, meta line); LedgerPartyOverview untouched for tablet/desktop
+- Records | Payments → ContextSwitch, tab in ledger.store (no useState); switching to Payments ends selection
+- Card amount → balance, "of <amount>" when partly paid, full amount when paid (display only, no new money rule)
+- Record payment entry → footer primary turns on selection mode; same selection + PaymentAllocationModal as before (no rule change); disabled when no unpaid rows
+- F7 → customer card tap opens the ledger detail via openCustomerLedger (mirrors supplier), plus "View ledger" in the ⋮ menu
+- Payment card "Recorded by —" / ref "—" → deferred to R5 (F13 covers empty fields on all phone cards)
+- Visual check → skipped: QA_PASSWORD not provided; compiled, visuals unconfirmed
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)
