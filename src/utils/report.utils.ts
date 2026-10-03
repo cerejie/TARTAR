@@ -383,6 +383,69 @@ export const disbursementPrintDocument = (
   ],
 });
 
+const voucherNoOf = (row: IDisbursement) => row.voucher?.voucher_no ?? "—";
+
+const supplierOf = (row: IDisbursement) =>
+  row.voucher?.payee ?? row.supplier?.name ?? "—";
+
+export const purchasePrintDocument = (
+  due: readonly IDisbursement[],
+  vouchered: readonly IDisbursement[],
+  range: IDateRange,
+  scope: string
+): IPrintReportDocument => ({
+  title: disbursementTitles.purchase,
+  period: dateRangeLabel(range),
+  scope,
+  stats: [
+    { label: "Purchases due", value: String(due.length) },
+    { label: "Due total", value: formatMoney(sumAmounts(due, amountToPayOf)) },
+    { label: "Vouchers", value: String(vouchered.length) },
+    {
+      label: "Voucher total",
+      value: formatMoney(sumAmounts(vouchered, amountToPayOf)),
+    },
+  ],
+  tables: [
+    {
+      title: "Purchases due",
+      columns: [
+        { title: "Due date" },
+        { title: "Supplier" },
+        { title: "Voucher No." },
+        { title: "Payment" },
+        { title: "Amount to pay", numeric: true },
+      ],
+      rows: due.map((row) => [
+        formatDate(row.due_date),
+        supplierOf(row),
+        voucherNoOf(row),
+        row.payable ? ledgerStatusLabels[row.payable.status] : "—",
+        formatMoney(amountToPayOf(row)),
+      ]),
+      emptyText: "No purchases due in this period",
+    },
+    {
+      title: "Purchase vouchers",
+      columns: [
+        { title: "Voucher date" },
+        { title: "Voucher No." },
+        { title: "Supplier" },
+        { title: "Voucher status" },
+        { title: "Amount to pay", numeric: true },
+      ],
+      rows: vouchered.map((row) => [
+        formatDate(row.voucher?.created_at),
+        voucherNoOf(row),
+        supplierOf(row),
+        row.voucher ? voucherStatusLabels[row.voucher.status] : "—",
+        formatMoney(amountToPayOf(row)),
+      ]),
+      emptyText: "No purchase vouchers created in this period",
+    },
+  ],
+});
+
 export const branchSummaryRows = (
   data: IBranchSummaryData,
   branchNameOf: (slug: string) => string

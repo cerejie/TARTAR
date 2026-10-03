@@ -46,7 +46,10 @@ import {
   scopedFilters,
 } from "../../../utils/filter.utils";
 import { printReport } from "../../../utils/print.utils";
-import { disbursementPrintDocument } from "../../../utils/report.utils";
+import {
+  disbursementPrintDocument,
+  purchasePrintDocument,
+} from "../../../utils/report.utils";
 import { vouchersPath } from "../../../utils/route.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
@@ -191,7 +194,24 @@ export const useDisbursementListHook = (
     { successMessage: `${title} deleted`, invalidate }
   );
 
+  const printPurchases = async (range: IDateRange) => {
+    const rangeFilters = scopedFilters(
+      { dateFrom: range.from, dateTo: range.to },
+      scopeBranch
+    );
+    const [due, vouchered] = await Promise.all([
+      transactionServices.getPurchasesDueAll(rangeFilters),
+      transactionServices.getDisbursementAll(kind, {
+        ...rangeFilters,
+        dateBasis: "voucher",
+      }),
+    ]);
+    printReport(purchasePrintDocument(due, vouchered, range, printScope));
+  };
+
   const printPeriod = async (range: IDateRange) => {
+    if (kind === "purchase") return printPurchases(range);
+
     const rows = await transactionServices.getDisbursementAll(
       kind,
       scopedFilters({ dateFrom: range.from, dateTo: range.to }, scopeBranch)

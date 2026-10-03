@@ -1,11 +1,12 @@
 import { reportSummaryKey, scopedKey } from "../../../keys/query.keys";
 import transactionServices from "../../../services/data/transaction.services";
 import {
-  currentMonth,
-  monthLabelsOf,
-  monthOfRange,
-  monthRangeOf,
-  recentMonths,
+  currentMonthYear,
+  monthYearOf,
+  monthYearOfRange,
+  monthYearRangeOf,
+  recentYears,
+  yearLabelsOf,
 } from "../../../utils/period.utils";
 import { printReport } from "../../../utils/print.utils";
 import {
@@ -17,11 +18,15 @@ import { useLedgerFilters } from "../../common/filter.hook";
 import { useQuery } from "../../common/query.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
-import type { IDateRange } from "../../../models/common/period.model";
+import type {
+  IDateRange,
+  IMonthYear,
+  MonthValue,
+} from "../../../models/common/period.model";
 import type { IQuerySpec } from "../../../models/common/query.model";
 import type { IBranchSummaryData } from "../../../models/data/report/report.response";
 
-export const currentMonthRange = (): IDateRange => monthRangeOf(currentMonth());
+export const currentMonthRange = (): IDateRange => monthYearRangeOf(currentMonthYear());
 
 export const reportSummaryQueryOf = (
   range: IDateRange,
@@ -54,15 +59,27 @@ export const useReportSummaryHook = (enabled: boolean) => {
     : [];
   const summaryTotals = branchSummaryTotals(summaryRows);
 
-  const summaryMonths = recentMonths();
-  const rangeMonth = monthOfRange(range);
-  const summaryMonth =
-    rangeMonth && summaryMonths.includes(rangeMonth) ? rangeMonth : undefined;
+  const summaryYears = recentYears();
+  const rangeMonthYear = monthYearOfRange(range);
+  const summaryMonthYear =
+    rangeMonthYear && summaryYears.includes(rangeMonthYear.year)
+      ? rangeMonthYear
+      : undefined;
+  const anchorMonthYear = summaryMonthYear ?? monthYearOf(range.from);
 
-  const setSummaryMonth = (month: string | undefined) => {
+  const setSummaryMonthYear = (next: IMonthYear) => {
+    const nextRange = monthYearRangeOf(next);
+    setFilters({ dateFrom: nextRange.from, dateTo: nextRange.to });
+  };
+
+  const setSummaryMonth = (month: MonthValue | undefined) => {
     if (!month) return;
-    const next = monthRangeOf(month);
-    setFilters({ dateFrom: next.from, dateTo: next.to });
+    setSummaryMonthYear({ ...anchorMonthYear, month });
+  };
+
+  const setSummaryYear = (year: string | undefined) => {
+    if (!year) return;
+    setSummaryMonthYear({ ...anchorMonthYear, year });
   };
 
   const setSummaryRange = (from: string | undefined, to: string | undefined) =>
@@ -82,10 +99,12 @@ export const useReportSummaryHook = (enabled: boolean) => {
     summaryRows,
     summaryTotals,
     summaryRange: range,
-    summaryMonth,
-    summaryMonths,
-    summaryMonthLabels: monthLabelsOf(summaryMonths),
+    summaryMonth: summaryMonthYear?.month,
+    summaryYear: summaryMonthYear?.year,
+    summaryYears,
+    summaryYearLabels: yearLabelsOf(summaryYears),
     setSummaryMonth,
+    setSummaryYear,
     setSummaryRange,
     printSummary,
     summaryLoading: query.isInitialLoading,

@@ -1,4 +1,5 @@
 import { ArrowLeftRight, ShoppingCart, TrendingDown, TrendingUp } from "lucide-react";
+import { monthLabels, monthValues } from "../../models/common/period.model";
 import { formatMoney } from "../../utils/format.utils";
 import StatCard from "../common/card/StatCard";
 import DateRangeFilter from "../common/filter/DateRangeFilter";
@@ -7,7 +8,10 @@ import FilterToolbar from "../common/filter/FilterToolbar";
 import BentoCell from "../common/view/BentoCell";
 import BentoGrid from "../common/view/BentoGrid";
 import ReportRowsTable from "./tables/ReportRowsTable";
-import type { IDateRange } from "../../models/common/period.model";
+import type {
+  IDateRange,
+  MonthValue,
+} from "../../models/common/period.model";
 import type { IDataTableColumn } from "../../models/common/table.model";
 import type {
   IBranchSummaryRow,
@@ -31,10 +35,12 @@ type IProps = IReportState & {
   rows: IBranchSummaryRow[];
   totals: IBranchSummaryTotals;
   range: IDateRange;
-  month: string | undefined;
-  months: readonly string[];
-  monthLabels: Record<string, string>;
-  onMonthChange: (month: string | undefined) => void;
+  month: MonthValue | undefined;
+  year: string | undefined;
+  years: readonly string[];
+  yearLabels: Record<string, string>;
+  onMonthChange: (month: MonthValue | undefined) => void;
+  onYearChange: (year: string | undefined) => void;
   onRangeChange: (from: string | undefined, to: string | undefined) => void;
 };
 
@@ -43,9 +49,11 @@ const BranchSummaryReport = ({
   totals,
   range,
   month,
-  months,
-  monthLabels,
+  year,
+  years,
+  yearLabels,
   onMonthChange,
+  onYearChange,
   onRangeChange,
   loading,
   refreshing,
@@ -58,11 +66,18 @@ const BranchSummaryReport = ({
     <>
       <FilterToolbar>
         <FilterSelect
-          placeholder="Custom range"
+          placeholder="Month"
           value={month}
-          values={months}
+          values={monthValues}
           labels={monthLabels}
           onChange={onMonthChange}
+        />
+        <FilterSelect
+          placeholder="Year"
+          value={year}
+          values={years}
+          labels={yearLabels}
+          onChange={onYearChange}
         />
         <DateRangeFilter from={range.from} to={range.to} onChange={onRangeChange} />
       </FilterToolbar>

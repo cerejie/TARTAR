@@ -38,9 +38,11 @@ const ReportsView = () => {
     summaryTotals,
     summaryRange,
     summaryMonth,
-    summaryMonths,
-    summaryMonthLabels,
+    summaryYear,
+    summaryYears,
+    summaryYearLabels,
     setSummaryMonth,
+    setSummaryYear,
     setSummaryRange,
   } = useReportHook();
   const isCompact = useIsCompact();
@@ -55,9 +57,11 @@ const ReportsView = () => {
         totals={summaryTotals}
         range={summaryRange}
         month={summaryMonth}
-        months={summaryMonths}
-        monthLabels={summaryMonthLabels}
+        year={summaryYear}
+        years={summaryYears}
+        yearLabels={summaryYearLabels}
         onMonthChange={setSummaryMonth}
+        onYearChange={setSummaryYear}
         onRangeChange={setSummaryRange}
         {...state}
       />

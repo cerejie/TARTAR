@@ -1,17 +1,17 @@
 import dayjs from "dayjs";
 import { formatDate } from "./format.utils";
-import { quickDateValues } from "../models/common/period.model";
+import { monthValues, quickDateValues } from "../models/common/period.model";
 import type {
   IDateRange,
+  IMonthYear,
   IPeriodPrintInput,
   PrintPeriod,
   QuickDate,
 } from "../models/common/period.model";
 
 const isoFormat = "YYYY-MM-DD";
-const monthFormat = "YYYY-MM";
-const monthLabelFormat = "MMMM YYYY";
-const recentMonthCount = 12;
+const yearFormat = "YYYY";
+const recentYearCount = 6;
 const daysInWeek = 7;
 const mondayOffset = 6;
 
@@ -36,10 +36,7 @@ export const rangeOfPeriod = (values: IPeriodPrintInput): IDateRange => {
     };
   }
 
-  return {
-    from: anchor.startOf("month").format(isoFormat),
-    to: anchor.endOf("month").format(isoFormat),
-  };
+  return monthYearRangeOf(values);
 };
 
 export const dateRangeLabel = (range: IDateRange): string =>
@@ -47,35 +44,41 @@ export const dateRangeLabel = (range: IDateRange): string =>
     ? formatDate(range.from)
     : `${formatDate(range.from)} – ${formatDate(range.to)}`;
 
-export const currentMonth = (): string => dayjs().format(monthFormat);
+export const monthYearOf = (date: string): IMonthYear => {
+  const anchor = dayjs(date);
+  return { month: monthValues[anchor.month()], year: anchor.format(yearFormat) };
+};
 
-export const monthRangeOf = (month: string): IDateRange => {
-  const anchor = dayjs(`${month}-01`);
+export const currentMonthYear = (): IMonthYear =>
+  monthYearOf(dayjs().format(isoFormat));
+
+export const monthYearRangeOf = ({ month, year }: IMonthYear): IDateRange => {
+  const anchor = dayjs(`${year}-${month}-01`);
   return {
     from: anchor.startOf("month").format(isoFormat),
     to: anchor.endOf("month").format(isoFormat),
   };
 };
 
-export const recentMonths = (): string[] =>
-  Array.from({ length: recentMonthCount }, (_, index) =>
-    dayjs().subtract(index, "month").format(monthFormat)
-  );
-
-export const monthLabelsOf = (
-  months: readonly string[]
-): Record<string, string> =>
-  Object.fromEntries(
-    months.map((month) => [month, dayjs(`${month}-01`).format(monthLabelFormat)])
-  );
-
-export const monthOfRange = (range: IDateRange): string | undefined => {
-  const month = dayjs(range.from).format(monthFormat);
-  const wholeMonth = monthRangeOf(month);
+export const monthYearOfRange = (range: IDateRange): IMonthYear | undefined => {
+  const monthYear = monthYearOf(range.from);
+  const wholeMonth = monthYearRangeOf(monthYear);
   return wholeMonth.from === range.from && wholeMonth.to === range.to
-    ? month
+    ? monthYear
     : undefined;
 };
+
+export const recentYears = (): string[] => {
+  const thisYear = dayjs().year();
+  return Array.from({ length: recentYearCount }, (_, index) =>
+    String(thisYear - index)
+  );
+};
+
+export const yearLabelsOf = (
+  years: readonly string[]
+): Record<string, string> =>
+  Object.fromEntries(years.map((year) => [year, year]));
 
 export const monthToDateRange = (monthsAgo: number): IDateRange => {
   const anchor = dayjs().subtract(monthsAgo, "month");
@@ -92,6 +95,7 @@ export const quickDateRangeOf = (quickDate: QuickDate): IDateRange => {
     date: today,
     date_from: today,
     date_to: today,
+    ...monthYearOf(today),
   });
 };
 

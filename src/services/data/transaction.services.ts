@@ -54,6 +54,11 @@ const transactionColumns = {
   type: "type",
 };
 
+const dueDateColumns = {
+  date: "due_date",
+  amount: "amount",
+};
+
 const breakdownArgs = (values: IDisbursementInput) => {
   const totals = breakdownTotalsOf(values);
 
@@ -288,6 +293,22 @@ const transactionServices = {
       disbursementQuery(kind, filters, paidIds).order("txn_date", {
         ascending: false,
       })
+    );
+
+    return withVouchers(rows);
+  },
+
+  getPurchasesDueAll: async (
+    filters: ILedgerFilters = {}
+  ): Promise<IDisbursement[]> => {
+    const rows = await everyRow<ITransaction>(() =>
+      applyLedgerFilters(
+        supabase.from(table).select(columns).eq("type", "purchase"),
+        filters,
+        dueDateColumns
+      )
+        .not("due_date", "is", null)
+        .order("due_date", { ascending: true })
     );
 
     return withVouchers(rows);

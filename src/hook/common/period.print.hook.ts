@@ -1,11 +1,18 @@
 import {
+  monthLabels,
+  monthValues,
   periodPrintSchema,
   printPeriodLabels,
   printPeriodValues,
 } from "../../models/common/period.model";
 import { todayIso } from "../../utils/format.utils";
 import { toOptions } from "../../utils/option.utils";
-import { rangeOfPeriod } from "../../utils/period.utils";
+import {
+  currentMonthYear,
+  rangeOfPeriod,
+  recentYears,
+  yearLabelsOf,
+} from "../../utils/period.utils";
 import { useModal } from "./modal.hook";
 import { useMutation } from "./mutation.hook";
 import type { DefaultValues } from "react-hook-form";
@@ -16,8 +23,13 @@ import type {
 } from "../../models/common/period.model";
 
 const isCustom = (values: IPeriodPrintInput) => values.period === "custom";
+const isMonthly = (values: IPeriodPrintInput) => values.period === "monthly";
+const isDated = (values: IPeriodPrintInput) =>
+  !isCustom(values) && !isMonthly(values);
 
-const periodPrintFields: IFieldConfig<IPeriodPrintInput>[] = [
+const periodPrintFieldsOf = (
+  years: readonly string[]
+): IFieldConfig<IPeriodPrintInput>[] => [
   {
     name: "period",
     label: "Period",
@@ -31,8 +43,28 @@ const periodPrintFields: IFieldConfig<IPeriodPrintInput>[] = [
     label: "Date",
     type: "date",
     required: true,
-    hint: "Weekly prints Monday to Sunday of this date; monthly prints its whole month.",
-    hidden: isCustom,
+    hint: "Weekly prints Monday to Sunday of this date.",
+    hidden: (values) => !isDated(values),
+  },
+  {
+    name: "month",
+    label: "Month",
+    type: "select",
+    span: "half",
+    required: true,
+    allowClear: false,
+    options: toOptions(monthValues, monthLabels),
+    hidden: (values) => !isMonthly(values),
+  },
+  {
+    name: "year",
+    label: "Year",
+    type: "select",
+    span: "half",
+    required: true,
+    allowClear: false,
+    options: toOptions(years, yearLabelsOf(years)),
+    hidden: (values) => !isMonthly(values),
   },
   {
     name: "date_from",
@@ -55,6 +87,7 @@ const periodPrintFields: IFieldConfig<IPeriodPrintInput>[] = [
 const periodPrintDefaultsOf = (): DefaultValues<IPeriodPrintInput> => ({
   period: "monthly",
   date: todayIso(),
+  ...currentMonthYear(),
   date_from: todayIso(),
   date_to: todayIso(),
 });
@@ -74,7 +107,7 @@ export const usePeriodPrint = (
     open: modal.visible,
     closeModal,
     periodPrintSchema,
-    periodPrintFields,
+    periodPrintFields: periodPrintFieldsOf(recentYears()),
     periodPrintDefaults: periodPrintDefaultsOf(),
     submitting: printMutation.loading,
     submitPrint: (values: IPeriodPrintInput) => {

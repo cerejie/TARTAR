@@ -17,8 +17,10 @@ import {
   expenseRows,
   orderedLedger,
   periodTotals,
+  purchasePrintDocument,
   sumBy,
 } from "./report.utils";
+import { formatMoney } from "./format.utils";
 
 const longPastDue = "2000-01-01";
 const farFutureDue = "2999-01-01";
@@ -304,5 +306,57 @@ describe("branch summary", () => {
   it("nets the whole data set", () => {
     expect(branchSummaryNet(data)).toBe(110);
     expect(branchSummaryNet({ sales: [], purchases: [], expenses: [] })).toBe(0);
+  });
+});
+
+describe("purchasePrintDocument", () => {
+  const range = { from: "2026-10-01", to: "2026-10-31" };
+  const due = [
+    disbursementFixture({
+      type: "purchase",
+      amount: 500,
+      due_date: "2026-10-20",
+      voucher: voucherFixture({ voucher_no: "PV-1", amount: 450 }),
+      payable: { status: "partial", amount: 450, paid_amount: 100 },
+    }),
+  ];
+  const vouchered = [
+    disbursementFixture({
+      type: "purchase",
+      amount: 300,
+      voucher: voucherFixture({ voucher_no: "PV-2", amount: 300, status: "pending" }),
+    }),
+    disbursementFixture({ type: "purchase", amount: 200 }),
+  ];
+
+  it("prints the due purchases and the vouchers as two tables", () => {
+    const document_ = purchasePrintDocument(due, vouchered, range, "Main");
+
+    expect(document_.scope).toBe("Main");
+    expect(document_.tables.map((table) => table.title)).toEqual([
+      "Purchases due",
+      "Purchase vouchers",
+    ]);
+    expect(document_.tables[0]?.rows).toEqual([
+      ["Oct 20, 2026", "Payee", "PV-1", "Partial", formatMoney(450)],
+    ]);
+    expect(document_.tables[1]?.rows.map((row) => row[1])).toEqual(["PV-2", "—"]);
+  });
+
+  it("totals each section by the amount to pay", () => {
+    expect(
+      purchasePrintDocument(due, vouchered, range, "Main").stats
+    ).toEqual([
+      { label: "Purchases due", value: "1" },
+      { label: "Due total", value: formatMoney(450) },
+      { label: "Vouchers", value: "2" },
+      { label: "Voucher total", value: formatMoney(500) },
+    ]);
+  });
+
+  it("says when a section is empty", () => {
+    const document_ = purchasePrintDocument([], [], range, "Main");
+    expect(document_.tables.every((table) => table.rows.length === 0)).toBe(true);
+    expect(document_.tables[0]?.emptyText).toBe("No purchases due in this period");
   });
 });
