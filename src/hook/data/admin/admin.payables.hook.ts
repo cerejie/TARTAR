@@ -102,21 +102,28 @@ export const useAdminPayablesHook = () => {
     }));
 
   const activeQuery = segment === "checks" ? checksQuery : alertsQuery;
-  const selected = modal.data ?? null;
+  const rows = rowsBySegment[segment] ?? [];
+  const selected =
+    rows.find((row) => isSameEntry(row.entry, modal.data ?? null))?.entry ?? null;
+
+  const changeSegment = (value: AdminPayableSegment) => {
+    closeModal();
+    setSegment(value);
+  };
 
   return {
     segment,
     segmentOptions,
-    setSegment,
+    setSegment: changeSegment,
     caption: adminPayableSegmentCaptions[segment],
-    rows: rowsBySegment[segment] ?? [],
+    rows,
     loading: activeQuery.isInitialLoading,
     refreshing: activeQuery.isRefreshing,
     error: activeQuery.error,
     retry: activeQuery.refetch,
     selected,
     branchLabel: selected ? branchName(selected.record.branch) : null,
-    sheetOpen: modal.visible,
+    sheetOpen: modal.visible && selected !== null,
     split: !isPhone,
     isSelected: (row: IAdminPayableRow) => modal.visible && isSameEntry(row.entry, selected),
     openPath: selected ? openPathOf(selected) : payablesPath,

@@ -24,6 +24,7 @@ import {
   dataCardFoot,
   dataCardGrid,
   dataCardHead,
+  dataCardHeadChevron,
   dataCardHeading,
   dataCardLabel,
   dataCardList,
@@ -204,6 +205,9 @@ const DataTableCards = <T,>({
     const isSelected = rowSelection?.selectedRowKeys.includes(key) ?? false;
     const focused = isFocusedRow(key);
     const pressTitle = pressOf(row, key);
+    const hasCardBody = statuses.length > 0 || cardMetas.length > 0;
+    const headChevron = pressTitle !== undefined && !hasCardBody;
+    const footChevron = pressTitle !== undefined && hasCardBody;
     const titleContent = titles.map((field) => (
       <span key={field.id}>{field.content}</span>
     ));
@@ -258,6 +262,10 @@ const DataTableCards = <T,>({
               {field.content}
             </span>
           ))}
+
+          {headChevron ? (
+            <ChevronRight className={dataCardHeadChevron} aria-hidden="true" />
+          ) : null}
         </div>
 
         {cardMetas.length > 0 ? (
@@ -271,7 +279,7 @@ const DataTableCards = <T,>({
           </dl>
         ) : null}
 
-        {statuses.length > 0 || pressTitle ? (
+        {statuses.length > 0 || footChevron ? (
           <div className={dataCardFoot}>
             <div className={dataCardTags}>
               {statuses.map((field) => (
@@ -279,7 +287,7 @@ const DataTableCards = <T,>({
               ))}
             </div>
 
-            {pressTitle ? (
+            {footChevron ? (
               <ChevronRight className={dataCardChevron} aria-hidden="true" />
             ) : null}
           </div>

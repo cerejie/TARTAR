@@ -87,17 +87,24 @@ export const useAdminReceivablesHook = () => {
       count: rowsBySegment[value]?.length,
     }));
 
-  const selected = modal.data ?? null;
+  const rows = rowsBySegment[segment] ?? [];
+  const selected =
+    rows.find((row) => row.record.id === modal.data?.id)?.record ?? null;
   const customer: ICustomer | undefined = selected?.customer_id
     ? customers.find((candidate) => candidate.id === selected.customer_id)
     : undefined;
 
+  const changeSegment = (value: AdminReceivableSegment) => {
+    closeModal();
+    setSegment(value);
+  };
+
   return {
     segment,
     segmentOptions,
-    setSegment,
+    setSegment: changeSegment,
     caption: adminReceivableSegmentCaptions[segment],
-    rows: rowsBySegment[segment] ?? [],
+    rows,
     loading: alertsQuery.isInitialLoading,
     refreshing: alertsQuery.isRefreshing,
     error: alertsQuery.error,
@@ -106,7 +113,7 @@ export const useAdminReceivablesHook = () => {
     customer: customer ?? null,
     branchLabel: selected ? branchName(selected.branch) : null,
     phoneHref: phoneHrefOf(customer?.contact),
-    sheetOpen: modal.visible,
+    sheetOpen: modal.visible && selected !== null,
     split: !isPhone,
     isSelected: (row: IAdminReceivableRow) =>
       modal.visible && row.record.id === selected?.id,

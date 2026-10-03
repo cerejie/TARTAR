@@ -124,6 +124,8 @@ export const dataCardValue = "min-w-0 break-words text-foreground";
 
 export const dataCardChevron = "ml-auto size-4 shrink-0 text-muted-foreground/60";
 
+export const dataCardHeadChevron = "size-4 shrink-0 self-center text-muted-foreground/60";
+
 export const dataCardSkeletonHead = "flex items-center justify-between gap-3";
 
 export const dataCardSkeletonTitle = "h-4 w-2/5";

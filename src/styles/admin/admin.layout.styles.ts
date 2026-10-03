@@ -16,4 +16,5 @@ export const adminPageTitle =
 
 export const adminTabStack = "flex flex-col gap-4 md:gap-6";
 
-export const adminSplit = "flex flex-col gap-4 md:grid md:grid-cols-2 md:items-start md:gap-6";
+export const adminSplit =
+  "flex flex-col gap-4 md:grid md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-start md:gap-4 lg:grid-cols-2 lg:gap-6";

@@ -360,3 +360,13 @@
 - Cache trim → 120 → 300 entries (admin primes ~62 plus lookups; 120 left no room for visited variants)
 - Probe method → remote hosts aborted + `navigator.onLine` false instead of `context.setOffline` (the dev server must keep serving lazy chunks, as the production service worker does); no writes performed, 0 write requests seen
 - Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), tests 113 / 113; probe before 12 / 17 admin routes with offline cards, after 0 on admin / emp / acc phone + admin desk and on 26 tabs clicked offline; looked at four contact sheets and two full shots; probed offline in dev, installed-PWA cold start unconfirmed
+
+## 2026-10-03 — V10 Sweep leftovers → Development v2.66
+- File plan → one style constant per finding (UI-18 `adminSplit`, UI-19 `metricTileSubLine`), one shared card rule (UI-20), selection derived in the two admin hooks (UI-21) (Simple tier, layout / UI state only, reversible)
+- UI-18 width → asymmetric `3fr / 2fr` split from md, equal halves from lg (narrower rail rejected: undoes V5; stacking the pane under the list rejected: the selected detail would land off-screen); first try `6fr / 5fr` fixed the name but still cut "RCV-QAT-2609-0001", so widened to `3fr / 2fr` after the shot
+- UI-19 → let the hint wrap (two-line clamp) rather than shorten the copy ("new this week" keeps its meaning)
+- UI-20 → fix in `DataTableCards` (chevron moves into the head row when a pressable card has no tags and no metas) rather than inventing a supplier status tag to "match" the customer card (a tag would need a new label rule; the defect is the empty row); cards with tags or metas unchanged
+- UI-21 → selection derived from the visible rows (covers a record leaving the list on refresh) + segment change closes the sheet (a real clear, not one that reappears on switching back)
+- Sweep side effect → a host network drop put the phone run offline for ~37 surfaces; V9's cache served every page (banner + rows), recorded as a harness/host artifact
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), tests 113 / 113; swept admin phone + tabP + desk, 144 surfaces, 1 harness timeout, 23 / 23 sheets viewed; probe for 820 truncation, tabP detail panes, phone supplier picker and desk tab switch; swept, device unconfirmed
+- Next roadmap item is USER DECISIONS → hard-stop, STOP written

@@ -265,9 +265,29 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   — showing data saved …"). Admin priming is ~62 requests and took 25–45 s on localhost. Probed offline in dev,
   installed-PWA cold start unconfirmed.
 
+- [x] V10 Sweep leftovers (UI-18 … UI-21) → Development v2.66: UI-18 `src/styles/admin/admin.layout.styles.ts`
+  `adminSplit` is `3fr / 2fr` with `gap-4` from md and back to equal halves with `gap-6` at lg — at 820 the list column
+  is ~386 px (was 318), names and "RCV-QAT-2609-0001" show in full, the detail pane still fits (a 21-character payable
+  reference keeps its ellipsis in the list and wraps at hyphens in the pane). UI-19 `src/styles/app/app.styles.ts`
+  `metricTileSubLine` wraps to two lines (`line-clamp-2 text-pretty`) instead of truncating. UI-20
+  `src/components/common/table/DataTableCards.tsx` — a pressable card with no status tags and no meta fields puts its
+  chevron in the head row (`dataCardHeadChevron`, `styles/table/table.styles.ts`) instead of an empty foot row; cards
+  with tags or metas unchanged (Master Data supplier / bank cards checked). UI-21
+  `hook/data/admin/admin.{receivables,payables}.hook.ts` — the selection is derived from the visible rows (a record
+  that leaves the list drops out of the pane / sheet) and a segment change closes the sheet. Build + lint clean, tests
+  113 / 113. Swept admin phone + tabP + desk on `/admin`, `/admin/receivables`, `/admin/payables`, `/payables`,
+  `/master-data` (temporary config; 144 surfaces, 1 failed — a `page.goto` timeout during a host network drop, retried
+  by the next surface; 23 / 23 sheets viewed). The drop put the phone run offline from #9 to #45: those pages show
+  V9's "Offline — showing data saved" banner with rows and stat cards (harness/host artifact, not a defect). Looked:
+  sheets admin-phone-01 … 09, admin-tabP-01, full shots tabP + desk `/admin/receivables`, desk Due today after a
+  selection (pane cleared); phone Weekly / Monthly tiles read "+₱4,500.00 new / this week". Probe (scratch
+  `tartar-sweep-v10/probe/probe.mjs`): 0 truncated labels on `/admin/receivables` at 820, tabP detail panes for a
+  receivable and a near-due payable, phone Supplier Ledger picker (one row per supplier, chevron beside the amount),
+  desk select → switch tab → pane empty on both admin pages. Swept, device unconfirmed.
+
 ## Next
-1. V10 Sweep leftovers.
-2. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. USER DECISIONS — hard-stop, not an autopilot phase: see Open. Every visual phase (V1 … V10) is done; when the
+   Open items are settled, delete this file and rename `.claude/state/ROADMAP-PWA-SUSPENDED.md` back.
 
 ## Open
 - Offline scope left by V9 (decide): a page beyond the first, a non-default sort, a custom date / search filter, a
@@ -288,6 +308,6 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
 
 ## State
 Branch: mobilel-app-native (main was fast-forwarded to v2.63 at 18:14 for a deploy; autopilot stays on this branch)
-· Last commit Development v2.65 (V9 offline cached data) · Uncommitted: none · Last check: V9 offline probe, admin /
-emp / acc phone + admin desk, 0 offline cards, 2026-10-03; build + lint clean, tests 113 / 113. Autopilot running
-from V10. Run any sweep or probe with Bash `run_in_background` and `timeout` 3600000.
+· Last commit Development v2.66 (V10 sweep leftovers) · Uncommitted: none · Last check: V10 sweep (admin phone /
+tabP / desk, 144 surfaces) + probe, 2026-10-03; build + lint clean, tests 113 / 113. Autopilot stopped at USER
+DECISIONS (`.claude/state/autopilot/STOP`). Run any sweep or probe with Bash `run_in_background` and `timeout` 3600000.

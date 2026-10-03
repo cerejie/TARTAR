@@ -20,7 +20,7 @@ export const metricTileIcon =
 export const metricTileValue =
   "truncate font-heading text-xl font-semibold tracking-tight tabular-nums sm:text-2xl md:text-3xl lg:text-2xl xl:text-3xl";
 
-export const metricTileSubLine = "truncate text-xs text-muted-foreground";
+export const metricTileSubLine = "line-clamp-2 text-xs text-pretty text-muted-foreground";
 
 export const metricTileSkeletonLabel = "h-4 w-1/2";
 
