@@ -135,11 +135,20 @@ user. Any of them may be overturned; say so and the phase is replanned.
   selector keeps its name / sort order. `src/components/master-data/tables/*.tsx` — a `FilterToolbar` +
   `SearchInput` above each table and a "no match" empty state. Still client-paged at 8 (lookup lists stay
   unpaged). Compiled, visuals unconfirmed.
+- [x] F8 Unit tests (v2.52): `vitest` ^3.2 (devDependency, the line that supports Vite 5) + `yarn test`
+  (`vitest run`); `vitest.config.ts` (node environment, `src/**/*.test.ts`, the `@` alias — the app's PWA /
+  Tailwind plugins stay out of test runs), listed in `tsconfig.node.json`. 92 tests in 5 files, all passing,
+  characterising current behaviour with no rule changed: `src/utils/voucher.utils.test.ts` (VAT, withholding,
+  return, centavo rounding, override, stored-voucher breakdown), `src/utils/write.utils.test.ts` (id and
+  idempotency-key stamping, write targets, replayed insert / slug insert, unmatched update / delete, failure
+  kinds — Supabase mocked, no env needed), `src/models/data/transaction/transaction.response.test.ts`
+  (`sumCounted`), `src/utils/report.utils.test.ts` (cash flow, period, expense and branch totals),
+  `src/utils/search.utils.test.ts`. `src/utils/fixture.utils.ts` holds the shared row builders. Tests are
+  type-checked by `yarn build`. `utils/disbursement.utils.ts` is not covered (not in the F8 list).
 
 ## Next
-1. F8 Unit tests — audit § TEST-01.
-2. F9 Entry bundle — audit § PERF-03.
-3. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
+1. F9 Entry bundle — audit § PERF-03.
+2. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
     delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
 
 ## Open
@@ -167,7 +176,12 @@ user. Any of them may be overturned; say so and the phase is replanned.
   Error copy for codes not in the map is one generic line; add a code to `serverCodeMessages` when a real
   one shows up.
 - SEC-05: `send-push` failure counting needs an Edge Function redeploy by the user.
+- Cash Flow report (found by the F8 tests, rule not changed): "Cash In" counts `collection` transactions,
+  but the "Cash Flow by Category" table has no Collection row, so with collections in the period the inflow
+  rows add up to less than the Cash In stat. Decide: add a Collection row, or leave collections out of Cash In.
+- Tests not yet written: `utils/disbursement.utils.ts`, the print-document builders in `report.utils.ts`,
+  `rangeFor` / `periodLabel` (date-dependent). No CI runs `yarn test` yet.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.51 (F7) · Uncommitted: none · Last check:
-yarn build + yarn lint clean 2026-10-03.
+Branch: mobile-app-native-newlook · Last commit Development v2.52 (F8) · Uncommitted: none · Last check:
+yarn build + yarn lint clean, yarn test 92 / 92 passing, 2026-10-03.

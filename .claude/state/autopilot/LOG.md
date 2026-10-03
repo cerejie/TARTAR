@@ -248,3 +248,16 @@
 - Page size → still client-paged at 8; DataTable already clamps the page when results shrink
 - `tsconfig.app.tsbuildinfo` → committed (tracked file, changed only by the new source file in its list; leaving it would leave the tree dirty)
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, visuals unconfirmed
+
+## 2026-10-03 — F8 Unit tests → Development v2.52
+- File plan → vitest + `yarn test`, one `*.test.ts` beside each unit under test, one shared fixture file (Simple tier, no app code touched, reversible by deleting the files)
+- vitest version → ^3.2 (the repo is on Vite 5; vitest 4 needs Vite 6+, and upgrading Vite is out of scope)
+- Config → a separate `vitest.config.ts` (node environment, `src/**/*.test.ts`, `@` alias) rather than a `test` block in `vite.config.ts` (keeps the PWA and Tailwind plugins out of test runs and `.claude/state/audit` scripts out of discovery)
+- Test location and name → colocated `<file>.test.ts` (no `tests/` tree; the pair stays together, `tsc -b` type-checks them, nothing imports them so the bundle is unchanged)
+- `write.utils` imports the Supabase client, which throws without env → `vi.mock("./supabase.utils")` with a small fake server, so the tests need no `.env.local` and make no network call
+- Shared row builders → `src/utils/fixture.utils.ts` (voucher, disbursement, category, payable), used by two test files (duplication is a defect here)
+- Extra target → `search.utils` (pure, cheap, named in the F7 hand-off); `disbursement.utils` left out (not in the roadmap's F8 list) and recorded in Open
+- Date-dependent helpers (`rangeFor`, `periodLabel`, formatted money / dates in print documents) → not tested (locale and clock dependent; totals are what F8 names); overdue ordering tested with year-2000 / year-2999 due dates
+- Float sums → asserted to the centavo with `toBeCloseTo`, not pinned to the raw binary float (characterises the rule, not the representation)
+- Cash Flow rows vs Cash In total → the tests pin today's behaviour (collections counted in Cash In, no Collection row); whether that is intended is a business rule, so it is recorded in Open, not changed
+- Verification: yarn test 92 / 92 passing on the first run (no expectation had to be bent, no money-math bug found); yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)
