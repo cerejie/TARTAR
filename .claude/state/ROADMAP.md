@@ -87,6 +87,21 @@ Given by the user on 2026-10-03 unless marked otherwise.
   Postgres enum value needs a type rebuild — say so). No data dropped. Check: sweep ROLES=admin,acc DEVICES=desk,phone
   on `/transactions` (type filter, form type options), `/reports` (Cash Flow), `/receivables`, `/admin/receivables`;
   look for any "Collection".
+- N1 Account notifications toggle (user report 2026-10-03, mid-run): on `/account` the Notifications setting must be a
+  toggle (on / off). Bug: a user who accidentally disallowed notifications has no way to turn them back on short of
+  deleting and reinstalling the app. Required: a switch that reads "on" only when permission is granted and the push
+  subscription is active, "off" otherwise (denied, default, unsubscribed); tapping it on requests permission /
+  subscribes, tapping it off unsubscribes. Browser fact to design around: once `Notification.permission` is
+  `denied`, the page cannot re-prompt — so with denied permission the switch stays off and tapping it must show the
+  exact steps to re-allow (per platform: iOS installed PWA → Settings › Notifications › TARTAR; Android Chrome → site
+  settings; desktop → the address-bar lock), and the switch re-reads permission on `visibilitychange` / focus and via
+  `navigator.permissions.query({ name: "notifications" })` `onchange`, so it flips on by itself after the user allows
+  it. Also check the "default" state after a dismissed prompt re-prompts. Files: `components/account/modal/NotificationsSheet.tsx`,
+  `components/account/views/NotificationsToggle.tsx`, `models/common/push.model.ts` (`pushModeNotes`), the
+  `usePushNotifications` hook (`note` / `canToggle`), `services/data/push.services.ts`, state in a zustand store (no
+  useState). Use the shadcn `switch` via a common primitive. Check: sweep ROLES=admin,emp DEVICES=phone,desk on
+  `/account` (Notifications sheet), plus a Playwright probe with `context.grantPermissions` / a denied context to see
+  the on, off and denied states; real-device permission flow stays unconfirmed.
 - P1 Print title = branch: `utils/print.utils.ts:294,384,403` ("TARTAR" in the h1 and `<title>`). Thread the active
   branch scope's name (the top-bar branch scope; `useBranchListHook().branchName`) into every print document; design
   the all-branches case (decide with decision-making: "All branches" vs the branch list vs one header per branch) and
@@ -177,13 +192,14 @@ Given by the user on 2026-10-03 unless marked otherwise.
   `.claude/state/proposals/migration-33-collection.sql` (convert → customer_payment recommended, check constraint).
 
 ## Next
-1. P1 Print title = branch.
-2. P2 Period print month + year and the purchases print filter.
-3. P3 Purchase check number.
-4. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
-5. O2 Offline branch scopes, details and month change.
-6. Z Final re-sweep + offline probe, all roles.
-7. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. N1 Account notifications toggle.
+2. P1 Print title = branch.
+3. P2 Period print month + year and the purchases print filter.
+4. P3 Purchase check number.
+5. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
+6. O2 Offline branch scopes, details and month change.
+7. Z Final re-sweep + offline probe, all roles.
+8. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
