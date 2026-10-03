@@ -23,10 +23,10 @@ const receivableItems: readonly IDetailItem<IReceivableDetail>[] = [
   { key: "dueDate", label: "Due date", render: ({ receivable }) => formatDate(receivable.due_date) },
   { key: "amount", label: "Amount", render: ({ receivable }) => formatMoney(receivable.amount) },
   { key: "paid", label: "Paid", render: ({ receivable }) => formatMoney(receivable.paid_amount) },
-  { key: "reference", label: "Reference", render: ({ receivable }) => receivable.reference_number || "—" },
+  { key: "reference", label: "Reference", render: ({ receivable }) => receivable.reference_number },
   { key: "branch", label: "Branch", render: ({ receivable }) => receivable.branch },
-  { key: "contact", label: "Contact", render: ({ customer }) => customer?.contact ?? "—" },
-  { key: "contactPerson", label: "Contact person", render: ({ customer }) => customer?.contact_person ?? "—" },
+  { key: "contact", label: "Contact", render: ({ customer }) => customer?.contact },
+  { key: "contactPerson", label: "Contact person", render: ({ customer }) => customer?.contact_person },
 ];
 
 const ReceivableEntryDetail = ({ receivable, customer }: IProps) => {

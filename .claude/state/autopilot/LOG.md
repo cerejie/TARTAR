@@ -280,3 +280,13 @@
 - Findings → UI-01 … UI-17, none needs a migration or a business rule; phases V1–V8 ordered by severity, carried USER DECISIONS kept as the final hard-stop
 - Unresolved "Recorded by" user → hide the row (locked in the roadmap; overturnable)
 - Verification: 1,221 surfaces, 0 failed, 183 / 183 contact sheets viewed; app code untouched, so build / lint not rerun
+
+## 2026-10-03 — V1 Detail placeholders → Development v2.57
+- File plan → one rule in `utils/detail.utils.ts` (`visibleDetailItems` drops a row whose rendered value is null / undefined / false / blank / "—") + drop redundant detail fallbacks (Simple tier, reversible, no rule or schema change)
+- Where the empty check runs → on `item.render(record)` inside `visibleDetailItems` (renders are pure and cheap; keeps the three callers unchanged)
+- `userNameOf` returning "—" → kept for table cells (locked: "—" stays in tables); the shared rule hides it in detail rows, so no nullable variant was needed
+- Composite "user · date" rows (sale deposited / reviewed, payment verified hint) → `joinDetailParts` keeps only known parts, so an unresolved user shows the date alone and an empty pair hides the row
+- UI-17 Payables "Recorded by" column of dashes → hide the column when no row on the page resolves a recorder (derived `showRecordedBy` in `payment.list.hook.ts`); root cause looks like null `created_by` on older rows (services pass it) — left as the Open hypothesis
+- Redundant `hidden: (row) => !row.created_by` predicates → left in place (harmless, minimal diff)
+- Sweep killed at the 10-min background cap after admin phone → reran emp alone with a 1-hour timeout; admin checked from full-size shots
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), yarn test 99 / 99; swept admin phone 231 + emp phone 175 / 0 failed; looked at emp sheets 03, 09, 13 and five admin full shots — no "—" detail rows; swept, device unconfirmed; UI-17 desk compiled, visuals unconfirmed

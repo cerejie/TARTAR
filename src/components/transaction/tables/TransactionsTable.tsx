@@ -182,7 +182,7 @@ const TransactionsTable = () => {
         {
           key: "reference",
           label: "Reference",
-          render: (row) => row.reference_number || "—",
+          render: (row) => row.reference_number,
         },
         {
           key: "branch",
@@ -192,12 +192,12 @@ const TransactionsTable = () => {
         {
           key: "description",
           label: "Description",
-          render: (row) => row.description || "—",
+          render: (row) => row.description,
         },
         {
           key: "farm_section",
           label: "Farm section",
-          render: (row) => row.farm_section || "—",
+          render: (row) => row.farm_section,
         },
       ],
     },
@@ -219,7 +219,7 @@ const TransactionsTable = () => {
         {
           key: "party",
           label: "Customer or supplier",
-          render: (row) => row.customer?.name || row.supplier?.name || "—",
+          render: (row) => row.customer?.name || row.supplier?.name,
         },
       ],
     },

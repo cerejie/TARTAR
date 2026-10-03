@@ -320,27 +320,25 @@ const VouchersTable = () => {
         {
           key: "due_date",
           label: "Payable due date",
-          render: (voucher) =>
-            voucher.due_date ? formatDate(voucher.due_date) : "—",
+          render: (voucher) => formatDate(voucher.due_date),
         },
         {
           key: "check_bank",
           hidden: (voucher) => voucher.type !== "check",
           label: "Bank issuing",
-          render: (voucher) => voucher.check_bank || "—",
+          render: (voucher) => voucher.check_bank,
         },
         {
           key: "check_number",
           hidden: (voucher) => voucher.type !== "check",
           label: "Check number",
-          render: (voucher) => voucher.check_number || "—",
+          render: (voucher) => voucher.check_number,
         },
         {
           key: "check_due_date",
           hidden: (voucher) => voucher.type !== "check",
           label: "Check due date",
-          render: (voucher) =>
-            voucher.check_due_date ? formatDate(voucher.check_due_date) : "—",
+          render: (voucher) => formatDate(voucher.check_due_date),
         },
       ],
     },
@@ -364,8 +362,7 @@ const VouchersTable = () => {
         {
           key: "approved_at",
           label: "Decided at",
-          render: (voucher) =>
-            voucher.approved_at ? formatDateTime(voucher.approved_at) : "—",
+          render: (voucher) => formatDateTime(voucher.approved_at),
         },
         {
           key: "rejection_reason",

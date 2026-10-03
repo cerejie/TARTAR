@@ -35,6 +35,7 @@ import type { IRowAction } from "../../../models/common/action.model";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import type { ISale } from "../../../models/data/sale/sale.response";
 import { nowrapCell } from "../../../styles/table/table.styles";
+import { joinDetailParts } from "../../../utils/detail.utils";
 import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
 
 const SalesTable = () => {
@@ -74,9 +75,7 @@ const SalesTable = () => {
   const isPhone = useIsPhone();
 
   const reviewerOf = (row: ISale) =>
-    row.verified_by
-      ? `${userNameOf(row.verified_by)} · ${formatDateTime(row.verified_at)}`
-      : "—";
+    joinDetailParts([userNameOf(row.verified_by), formatDateTime(row.verified_at)]);
 
   const actionsOf = (row: ISale): IRowAction[] => {
     const undeposited = row.sale_status === "undeposited";
@@ -244,9 +243,10 @@ const SalesTable = () => {
           key: "deposited_by",
           label: "Deposited by",
           render: (row) =>
-            row.deposited_by
-              ? `${userNameOf(row.deposited_by)} · ${formatDateTime(row.deposited_at)}`
-              : "—",
+            joinDetailParts([
+              userNameOf(row.deposited_by),
+              formatDateTime(row.deposited_at),
+            ]),
         },
         {
           key: "reviewed_by",
@@ -269,7 +269,7 @@ const SalesTable = () => {
         {
           key: "reference",
           label: "Reference",
-          render: (row) => row.reference_number || "—",
+          render: (row) => row.reference_number,
         },
         {
           key: "branch",
@@ -289,12 +289,12 @@ const SalesTable = () => {
         {
           key: "farm_section",
           label: "Farm section",
-          render: (row) => row.farm_section || "—",
+          render: (row) => row.farm_section,
         },
         {
           key: "description",
           label: "Description",
-          render: (row) => row.description || "—",
+          render: (row) => row.description,
         },
       ],
     },

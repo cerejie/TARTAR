@@ -275,12 +275,12 @@ const ExpensesTable = () => {
         {
           key: "farm_section",
           label: "Farm section",
-          render: (row) => row.farm_section || "—",
+          render: (row) => row.farm_section,
         },
         {
           key: "description",
           label: "Description",
-          render: (row) => row.description || "—",
+          render: (row) => row.description,
         },
         {
           key: "recorded_at",
@@ -298,18 +298,18 @@ const ExpensesTable = () => {
           key: "voucher_status",
           label: "Voucher status",
           render: (row) =>
-            row.voucher ? voucherStatusLabels[row.voucher.status] : "—",
+            row.voucher && voucherStatusLabels[row.voucher.status],
         },
         {
           key: "voucher_no",
           label: "Voucher no.",
-          render: (row) => row.voucher?.voucher_no || "—",
+          render: (row) => row.voucher?.voucher_no,
         },
         {
           key: "voucher_type",
           label: "Voucher type",
           render: (row) =>
-            row.voucher ? voucherTypeLabels[row.voucher.type] : "—",
+            row.voucher && voucherTypeLabels[row.voucher.type],
         },
         ...voucherBreakdownItems<IDisbursement>((row) => row.voucher),
       ],

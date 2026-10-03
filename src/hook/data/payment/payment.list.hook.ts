@@ -33,6 +33,7 @@ import {
   paymentFilterScopeOf,
   scopedFilters,
 } from "../../../utils/filter.utils";
+import { isEmptyDetailValue, joinDetailParts } from "../../../utils/detail.utils";
 import { formatDate, formatMoney } from "../../../utils/format.utils";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useUserListHook } from "../user/user.list.hook";
@@ -119,7 +120,10 @@ export const usePaymentListHook = (
 
   const verifiedHintOf = (payment: ILedgerPayment) =>
     payment.verified_by && payment.status !== "pending"
-      ? `${userNameOf(payment.verified_by)} · ${formatDate(payment.verified_at)}`
+      ? joinDetailParts([
+          userNameOf(payment.verified_by),
+          formatDate(payment.verified_at),
+        ])
       : undefined;
 
   const approvePayment = (payment: ILedgerPayment) => {
@@ -152,9 +156,15 @@ export const usePaymentListHook = (
       onConfirm: () => rejectMutation.mutate(payment.id),
     });
 
+  const payments = party ? partyQuery.data ?? [] : pendingPayments;
+  const showRecordedBy = payments.some(
+    (payment) => !isEmptyDetailValue(userNameOf(payment.created_by))
+  );
+
   return {
     permissions,
-    payments: party ? partyQuery.data ?? [] : pendingPayments,
+    payments,
+    showRecordedBy,
     totalCount: listQuery.data?.totalCount ?? 0,
     pagination,
     goToPage,

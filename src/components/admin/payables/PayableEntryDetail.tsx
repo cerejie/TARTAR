@@ -19,9 +19,9 @@ type IProps = {
 
 const checkItems: readonly IDetailItem<IVoucher>[] = [
   { key: "checkDate", label: "Check date", render: (check) => formatDate(check.check_due_date) },
-  { key: "bank", label: "Bank", render: (check) => check.check_bank ?? "—" },
-  { key: "checkNumber", label: "Check no.", render: (check) => check.check_number ?? "—" },
-  { key: "voucherNumber", label: "Voucher no.", render: (check) => check.voucher_no ?? "—" },
+  { key: "bank", label: "Bank", render: (check) => check.check_bank },
+  { key: "checkNumber", label: "Check no.", render: (check) => check.check_number },
+  { key: "voucherNumber", label: "Voucher no.", render: (check) => check.voucher_no },
   { key: "branch", label: "Branch", render: (check) => check.branch },
 ];
 
@@ -29,7 +29,7 @@ const payableItems: readonly IDetailItem<IPayable>[] = [
   { key: "dueDate", label: "Due date", render: (payable) => formatDate(payable.due_date) },
   { key: "amount", label: "Amount", render: (payable) => formatMoney(payable.amount) },
   { key: "paid", label: "Paid", render: (payable) => formatMoney(payable.paid_amount) },
-  { key: "reference", label: "Reference", render: (payable) => payable.reference_number || "—" },
+  { key: "reference", label: "Reference", render: (payable) => payable.reference_number },
   { key: "branch", label: "Branch", render: (payable) => payable.branch },
 ];
 

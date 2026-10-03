@@ -103,17 +103,30 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
 - [x] Visual audit written 2026-10-03: `.claude/state/AUDIT-VISUAL-2026-10-03.md` — 1,221 surfaces, 0 failed,
   183 / 183 contact sheets viewed; sweep script fixed (main page no longer closed, sheets inline their shots,
   tabs clicked by index after scroll-into-view).
+- [x] V1 Detail placeholders (UI-01, UI-17) → Development v2.57: `src/utils/detail.utils.ts` (`isEmptyDetailValue`,
+  `joinDetailParts`; `visibleDetailItems` drops a row whose rendered value is null / "" / "—", so empty sections
+  drop too) + `src/utils/detail.utils.test.ts`; "—" fallbacks removed from detail renders in
+  `components/{sale,transaction,purchase,expense,voucher}/tables/*Table.tsx`, `components/ledger/{Customer,Supplier}LedgerView.tsx`,
+  `components/admin/{receivables/ReceivableEntryDetail,payables/PayableEntryDetail}.tsx`; sale deposited / reviewed
+  rows and the payment verified hint join only known parts (`hook/data/payment/payment.list.hook.ts`);
+  `LedgerPaymentsTable.tsx` drops the "Recorded by" column when no row on the page resolves a recorder (UI-17).
+  `userNameOf` keeps "—" for table cells (the shared rule hides it in detail rows). Build + lint clean, tests 99 / 99.
+  Swept admin phone (231 surfaces; run hit the 10-min background cap before contact sheets, so full-size shots
+  read instead) + emp phone (175 / 0 failed, 22 sheets). Looked: emp sheets 03 (/sales), 09 (/expenses), 13
+  (/receivables); admin full shots receivables-card-unpaid-0, sales-card-all-0, sales-card-deposited-0,
+  transactions-card-all-0, admin-receivables-toolbar-qa-customer-a — no "—" row, undeposited sale has no deposit
+  section, no "Recorded by —", admin receivable has no Contact rows. UI-17 desk table not swept (phone-only
+  phase): compiled, desk visual unconfirmed. Swept, device unconfirmed.
 
 ## Next
-1. V1 Detail placeholders.
-2. V2 Edit history.
-3. V3 Action groups.
-4. V4 Date labels.
-5. V5 Admin app.
-6. V6 Reports.
-7. V7 Ledger modals.
-8. V8 Full re-sweep.
-9. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. V2 Edit history.
+2. V3 Action groups.
+3. V4 Date labels.
+4. V5 Admin app.
+5. V6 Reports.
+6. V7 Ledger modals.
+7. V8 Full re-sweep.
+8. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
@@ -128,5 +141,6 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   user not returned by `user_display_names`. V1 hides the dash either way.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.56 (visual audit) · Uncommitted: none · Last check:
-sweep 1,221 / 0 failed, 2026-10-03. Autopilot running from V1.
+Branch: mobilel-app-native · Last commit Development v2.57 (V1 detail placeholders) · Uncommitted: none · Last check:
+V1 sweep admin+emp phone, 2026-10-03. Autopilot running from V2. A sweep of more than one role can exceed a
+10-minute background timeout — run it with `timeout` 3600000.

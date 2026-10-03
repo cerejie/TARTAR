@@ -309,7 +309,7 @@ const CustomerLedgerView = () => {
         {
           key: "reference",
           label: "Reference",
-          render: (row) => row.reference_number || "—",
+          render: (row) => row.reference_number,
         },
         {
           key: "branch",

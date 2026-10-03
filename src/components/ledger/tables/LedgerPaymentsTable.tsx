@@ -40,6 +40,7 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
     statusLabels,
     verb,
     userNameOf,
+    showRecordedBy,
     verifiedHintOf,
     approvePayment,
     rejectPayment,
@@ -87,7 +88,7 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
         />
       ),
     },
-    ...(permissions.isManager
+    ...(permissions.isManager && showRecordedBy
       ? [
           {
             title: "Recorded by",
@@ -95,6 +96,10 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
             render: (_: unknown, payment: ILedgerPayment) =>
               userNameOf(payment.created_by),
           },
+        ]
+      : []),
+    ...(permissions.isManager
+      ? [
           {
             title: "Action",
             key: "actions",
