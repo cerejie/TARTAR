@@ -1,10 +1,12 @@
 import { useSyncExternalStore } from "react";
 import type { DeviceClass } from "../../models/common/view.model";
+import { isTextEntry } from "../../utils/keyboard.utils";
 
 const phoneMediaQuery =
   "(width < 48rem), (width < 64rem) and (height < 30rem)";
 const tabletPortraitMediaQuery = "(width < 64rem) and (orientation: portrait)";
 const desktopMediaQuery = "(width >= 64rem)";
+const coarsePointerQuery = "(pointer: coarse)";
 
 const deviceMediaQueries = [
   phoneMediaQuery,
@@ -21,11 +23,22 @@ const subscribeDevice = (onChange: () => void) => {
     medias.forEach((media) => media.removeEventListener("change", onChange));
 };
 
-const readDevice = (): DeviceClass => {
+const measureDevice = (): DeviceClass => {
   if (matches(phoneMediaQuery)) return "phone";
   if (matches(desktopMediaQuery)) return "desktop";
   if (matches(tabletPortraitMediaQuery)) return "tabletPortrait";
   return "tabletLandscape";
+};
+
+let settledDevice: DeviceClass | null = null;
+
+const isTouchTyping = () =>
+  matches(coarsePointerQuery) && isTextEntry(document.activeElement);
+
+const readDevice = (): DeviceClass => {
+  if (settledDevice && isTouchTyping()) return settledDevice;
+  settledDevice = measureDevice();
+  return settledDevice;
 };
 
 const readServerDevice = (): DeviceClass => "desktop";

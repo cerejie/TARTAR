@@ -25,6 +25,11 @@ export const fieldNumberInput =
 
 export const fieldRequired = "text-destructive";
 
+export const fieldNativeSelect = "w-full has-data-empty:text-muted-foreground";
+
+export const fieldNativeDate =
+  "appearance-none text-left [&::-webkit-date-and-time-value]:text-left";
+
 export const fieldDateTrigger = "w-full justify-start font-normal";
 
 export const fieldDatePlaceholder = "text-muted-foreground";

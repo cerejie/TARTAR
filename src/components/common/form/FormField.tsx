@@ -38,9 +38,14 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/cn.utils";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import type {
   IFieldConfig,
   IFieldOption,
@@ -53,6 +58,8 @@ import {
   fieldDateTrigger,
   fieldLabelHidden,
   fieldMultiselectTrigger,
+  fieldNativeDate,
+  fieldNativeSelect,
   fieldNumberInput,
   fieldRequired,
   fieldSelectClearable,
@@ -118,6 +125,7 @@ const renderControl = <TValues extends FieldValues>(
   config: IFieldConfig<TValues>,
   field: IFieldBinding<TValues>,
   invalid: boolean,
+  native: boolean,
   enterKeyHint?: IEnterKeyHint
 ) => {
   const fieldId = String(config.name);
@@ -183,6 +191,35 @@ const renderControl = <TValues extends FieldValues>(
         </InputGroup>
       );
     case "select":
+      if (native) {
+        const selected = asText(field.value);
+
+        return (
+          <NativeSelect
+            id={fieldId}
+            name={field.name}
+            ref={field.ref}
+            aria-invalid={invalid}
+            value={selected}
+            data-empty={selected === "" || undefined}
+            className={fieldNativeSelect}
+            onChange={(event) =>
+              field.onChange(event.target.value === "" ? undefined : event.target.value)
+            }
+            onBlur={field.onBlur}
+          >
+            <NativeSelectOption value="" disabled={!config.allowClear}>
+              {selectPlaceholder(config)}
+            </NativeSelectOption>
+            {options.map((option) => (
+              <NativeSelectOption key={option.value} value={option.value}>
+                {option.label}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        );
+      }
+
       return (
         <Combobox
           value={asText(field.value) || null}
@@ -302,6 +339,24 @@ const renderControl = <TValues extends FieldValues>(
     case "date": {
       const selected = asDate(field.value);
 
+      if (native) {
+        return (
+          <Input
+            id={fieldId}
+            name={field.name}
+            ref={field.ref}
+            type="date"
+            aria-invalid={invalid}
+            className={fieldNativeDate}
+            value={selected?.toString() ?? ""}
+            onChange={(event) =>
+              field.onChange(event.target.value || (config.required ? "" : null))
+            }
+            onBlur={field.onBlur}
+          />
+        );
+      }
+
       return (
         <PopoverTrigger>
           <Button id={fieldId} variant="outline" className={fieldDateTrigger}>
@@ -370,6 +425,8 @@ const FormField = <TValues extends FieldValues>({
   control,
   enterKeyHint,
 }: IProps<TValues>) => {
+  const native = useIsCompact();
+
   if (config.type === "checkbox") {
     return (
       <Controller
@@ -418,7 +475,7 @@ const FormField = <TValues extends FieldValues>({
             {config.label}
             {config.required ? <span className={fieldRequired}>*</span> : null}
           </FieldLabel>
-          {renderControl(config, field, fieldState.invalid, enterKeyHint)}
+          {renderControl(config, field, fieldState.invalid, native, enterKeyHint)}
           {config.hint ? <FieldDescription>{config.hint}</FieldDescription> : null}
           <FieldError errors={[fieldState.error]} />
         </Field>

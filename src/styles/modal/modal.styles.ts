@@ -28,15 +28,15 @@ export const modalPinned = "-mx-6 border-t border-border px-6";
 export const modalFooter = `flex-wrap -mx-6 -mb-6 rounded-b-sheet border-t border-border bg-muted/50 px-6 py-4 ${modalActionSize}`;
 
 export const drawerContent =
-  "max-h-[calc(92dvh-var(--keyboard-inset))] rounded-t-sheet bg-panel data-[side=bottom]:bottom-(--keyboard-inset)";
+  "max-h-[calc(0.92*var(--visual-viewport-height))] rounded-t-sheet bg-panel data-[side=bottom]:bottom-(--keyboard-inset)";
 
 export const drawerKind = cva("", {
   variants: {
     kind: {
       action: "",
       detail: "data-[side=bottom]:min-h-[60dvh]",
-      form: "data-[side=bottom]:h-[calc(100dvh-var(--keyboard-inset)-max(env(safe-area-inset-top),0.75rem))] max-h-none",
-      flow: "data-[side=bottom]:h-[calc(100dvh-var(--keyboard-inset))] max-h-none rounded-t-none",
+      form: "data-[side=bottom]:h-[calc(var(--visual-viewport-height)-max(env(safe-area-inset-top),0.75rem))] max-h-none",
+      flow: "data-[side=bottom]:h-(--visual-viewport-height) max-h-none rounded-t-none",
     },
   },
   defaultVariants: { kind: "action" },
@@ -45,11 +45,12 @@ export const drawerKind = cva("", {
 export const drawerHeaderRuled =
   "border-b border-border pr-14 [&_[data-slot=sheet-title]]:text-base [&_[data-slot=sheet-title]]:font-semibold [&_[data-slot=sheet-title]]:leading-8";
 
-export const drawerBody = "min-h-0 flex-1 overflow-y-auto px-4 py-1";
+export const drawerBody =
+  "min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-1 [&_:is(input,textarea)]:scroll-mt-14 [&_:is(input,textarea)]:scroll-mb-4";
 
 export const drawerPinned = "border-t border-border px-4";
 
-export const drawerFooter = `border-t border-border bg-muted/50 pb-safe ${modalActionSize} [&_[data-slot=button][data-variant=default]]:h-12`;
+export const drawerFooter = `border-t border-border bg-muted/50 pb-safe ${modalActionSize} [&_[data-slot=button][data-variant=default]]:h-12 in-data-keyboard-open:flex-row in-data-keyboard-open:py-3 in-data-keyboard-open:*:flex-1 in-data-keyboard-open:[&_[data-slot=button][data-variant=default]]:h-11`;
 
 export const confirmContent = "rounded-sheet bg-panel ring-border shadow-overlay";
 

@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-04 (M2 done)
+Updated: 2026-10-04 (M3 done)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -290,13 +290,28 @@ Given by the user on 2026-10-03 unless marked otherwise.
   `prime.view.hook.ts` (the Payments tab was already primed by `paymentQueryOf`). Kept `ledgerPartyKey` and
   `getPartySummaries` — the Supplier Ledger (`supplier.ledger.hook.ts`, `supplier.detail.hook.ts`) still reads them.
 
+- [x] M3 Mobile form interaction (Development v2.76): audit (Playwright iPhone 13 / Pixel 7 / 820×1180 touch, keyboard
+  simulated by shrinking the viewport) found: the focused field ended under the keyboard behind a stacked two-button
+  footer (~100px of form visible); `select` was a React Aria ComboBox input (tap = keyboard + floating popover) and
+  `date` a floating calendar popover inside the sheet; on a touch tablet the keyboard turned the viewport landscape,
+  so `useIsCompact` flipped Sheet → Dialog mid-typing (remount, focus lost). Fixes, shared primitives only:
+  `FormField.tsx` renders `select` as the native `ui/native-select` and `date` as a native `<input type="date">`
+  wherever the sheet presents (compact) — creatable / multiselect stay comboboxes (typing is the point); styles
+  `fieldNativeSelect` / `fieldNativeDate` (`styles/form/form.styles.ts`). `hook/common/breakpoint.hook.ts` holds the
+  device class while a touch user types (`isTextEntry` in new `utils/keyboard.utils.ts`). `hook/app/keyboard.hook.ts`
+  also writes `--visual-viewport-height`, sets `data-keyboard-open` on `<html>` while a touch user types, and scrolls
+  the focused field into view on focus and on viewport resize. `styles/modal/modal.styles.ts`: sheet heights from
+  `--visual-viewport-height` (top stays visible when iOS pans the viewport), body `overscroll-contain` + field scroll
+  margins, footer actions in one compact row while the keyboard is open. `theme.css`: token default, 16px field text
+  on coarse pointers (no iOS focus zoom at any width), native select in the 44px touch-target list, dark
+  `color-scheme` for the native controls. Viewport meta unchanged (`interactive-widget=resizes-content`).
+
 ## Next
-1. M3 Mobile form interaction (iOS / Android keyboard, inputs, dropdowns in modals).
-2. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
-3. O2 Offline branch scopes, details and month change.
-4. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
+1. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
+2. O2 Offline branch scopes, details and month change.
+3. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
    exercise them: the QA accounts see one branch).
-5. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+4. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
@@ -313,5 +328,5 @@ Given by the user on 2026-10-03 unless marked otherwise.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.75 (M2 Payments tab) · Uncommitted: none · Last check: M2, build + lint clean, tests 138 / 138, sweep admin + emp + acc phone + desk on /receivables, /payables. Run any sweep or probe
+Branch: mobilel-app-native · Last commit Development v2.76 (M3 Mobile form interaction) · Uncommitted: none · Last check: M3, build + lint clean, tests 138 / 138, Playwright phone / tablet emulation probe of the purchase, expense, sale, transaction and receivable forms, sweep emp phone + desk on the form routes. Run any sweep or probe
 with Bash `run_in_background` and `timeout` 3600000.
