@@ -164,6 +164,7 @@ const VouchersTable = () => {
               key: "reject",
               label: "Reject voucher",
               icon: <X />,
+              priority: "secondary" as const,
               danger: true,
               onSelect: () => rejectModal.openModal(voucher),
             },

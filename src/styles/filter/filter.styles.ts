@@ -56,7 +56,7 @@ export const filterSectionTitle = "text-label font-semibold text-muted-foregroun
 export const filterSections = "flex flex-col gap-5";
 
 export const filterSheetFooter =
-  "grid grid-cols-2 border-t border-border bg-muted/50 pb-safe [&_[data-slot=button]]:h-11";
+  "grid grid-cols-2 gap-2 [&_[data-slot=button][data-variant]]:h-12";
 
 export const filterField = "gap-1.5 *:w-full!";
 

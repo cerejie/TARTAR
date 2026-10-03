@@ -145,3 +145,12 @@
 - Payment card "Recorded by —" / ref "—" → deferred to R5 (F13 covers empty fields on all phone cards)
 - Visual check → skipped: QA_PASSWORD not provided; compiled, visuals unconfirmed
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)
+
+## 2026-10-03 — R4 Sheets and stat tiles polish → Development v2.40
+- F9 footer → fix once in SheetActions (all detail sheets): unprioritised danger actions move into the ⋮ More menu, matching the Sale footer shape (primary full width + secondary + ⋮)
+- Reject next to Approve/Verify → stays visible: `priority: "secondary"` danger renders as a destructive row button (Sales, Vouchers, Users); hiding a workflow decision in ⋮ was rejected
+- "Recorded by —" on record detail → hidden when created_by is empty (ledger + payable); unknown-user lookup still shows "—"
+- F10 → FilterPopover compact branch reuses AppSheet (handle, swipe, Sort's header) instead of a bespoke Sheet; footer kept as Reset | Show results grid
+- F11 → statCaption line-clamp-2 under the 12rem container query (same trigger as the old truncate), no phone-only hook needed
+- Visual check → skipped: QA_PASSWORD not provided; compiled, visuals unconfirmed
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)

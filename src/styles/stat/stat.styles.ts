@@ -22,7 +22,7 @@ export const statIcon =
 
 export const statChipRow = "flex flex-wrap items-center gap-2";
 
-export const statCaption = "text-xs text-muted-foreground @max-[12rem]/stat:truncate";
+export const statCaption = "text-xs text-muted-foreground @max-[12rem]/stat:line-clamp-2";
 
 export const statSkeletonTitle = "h-4 w-3/5";
 

@@ -158,8 +158,6 @@ export const sheetActions =
 
 export const sheetActionsRow = "flex items-center gap-2";
 
-export const sheetActionsDanger = "ml-auto flex items-center gap-2";
-
 export const branchSheetList = "max-h-[60dvh]";
 
 export const appPull = "flex items-end justify-center overflow-hidden";

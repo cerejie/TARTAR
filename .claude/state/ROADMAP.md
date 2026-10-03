@@ -159,19 +159,27 @@ acc: no Vouchers/Branches/Master Data/Users; non-admins land on /transactions).
   `useCustomerLedgerHook().openCustomerLedger` (mirrors `openSupplierLedger`). Payment cards'
   "Recorded by —" / ref "—" left to R5 (F13). Visual check not run (no QA password); compiled,
   visuals unconfirmed.
+- R4 Sheets and stat tiles polish (F9–F11) -> `components/common/app/SheetActions.tsx`: danger
+  actions without a priority join the ⋮ "More actions" menu (after a separator, destructive
+  variant) instead of a right-aligned danger button; a danger action with `priority: "secondary"`
+  stays a visible destructive button in the row. Reject actions paired with an approve/verify
+  primary got `priority: "secondary"` (Sales, Vouchers, Users account + password reset) so they stay
+  visible. `sheetActionsDanger` removed. Ledger + payable record detail hide "Recorded by" when
+  `created_by` is empty. F10: phone/tablet-portrait `FilterPopover` renders through `AppSheet`
+  (grab handle, swipe, same header as Sort), footer Reset | Show results (`filterSheetFooter`).
+  F11: `statCaption` clamps to two lines in narrow tiles (`@max-[12rem]/stat:line-clamp-2`).
+  Visual check not run (no QA password); compiled, visuals unconfirmed.
 
 ## Next
-1. R4 Sheets and stat tiles polish — F9, F10, F11 (ledger record detail footer, Filters sheet
-   chrome, two-line stat captions on phone).
-2. R5 Phone card content — F12, F13, F14, F15 (Master Data segment fit, omit empty fields,
+1. R5 Phone card content — F12, F13, F14, F15 (Master Data segment fit, omit empty fields,
    transaction card description line, "records" copy).
-3. R6 Tablet portrait ledger grid — F16 (tablet portrait only; phone and desktop unchanged).
-4. RZ Final sweep: re-run the R0 browse on every route for all three roles at phone + tablet
+2. R6 Tablet portrait ledger grid — F16 (tablet portrait only; phone and desktop unchanged).
+3. RZ Final sweep: re-run the R0 browse on every route for all three roles at phone + tablet
    portrait, fix small regressions, then rename `ROADMAP-PWA-SUSPENDED.md` back to `ROADMAP.md`
    (delete this file; its record is git history + LOG.md) and hard-stop: the PWA Next item 1 is
    the device test script, which needs the user.
 
 ## State
-- Last commit: Development v2.39 (R3 party detail native sheet on phone). Previous: v2.38 (R2), v2.37 (pause), v2.36 (R1), v2.35 (R0). Audit harness lives only in the R0 worker's
+- Last commit: Development v2.40 (R4 sheets + stat tiles polish). Previous: v2.39 (R3), v2.38 (R2), v2.37 (pause), v2.36 (R1), v2.35 (R0). Audit harness lives only in the R0 worker's
   scratchpad (`lib.mjs` login + faked writes, `sweep.mjs`, `ledger.mjs`, `party2.mjs`,
   `detail.mjs`); `.claude/state/audit/d10.mjs` is the committed equivalent to copy from.

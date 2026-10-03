@@ -157,6 +157,7 @@ const PayableRecordsTable = () => {
         {
           key: "recorded_by",
           label: "Recorded by",
+          hidden: (row) => !row.created_by,
           render: (row) => userNameOf(row.created_by),
         },
       ],

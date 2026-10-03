@@ -126,6 +126,7 @@ const SalesTable = () => {
               key: "reject",
               label: "Reject",
               icon: <Ban />,
+              priority: "secondary" as const,
               danger: true,
               onSelect: () => rejectModal.openModal(row),
             },

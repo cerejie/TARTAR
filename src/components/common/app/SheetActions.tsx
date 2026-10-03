@@ -1,6 +1,5 @@
 import {
   sheetActions,
-  sheetActionsDanger,
   sheetActionsRow,
 } from "../../../styles/app/app.styles";
 import AppButton from "../button/AppButton";
@@ -17,13 +16,13 @@ const SheetActions = ({ actions }: IProps) => {
     (action) => !action.danger && action.priority === "primary"
   );
   const secondary = actions.filter(
-    (action) => !action.danger && action.priority === "secondary"
+    (action) => action.priority === "secondary"
   );
-  const tertiary = actions.filter(
-    (action) => !action.danger && action.priority === undefined
-  );
-  const destructive = actions.filter((action) => action.danger);
-  const hasRow = secondary.length + tertiary.length + destructive.length > 0;
+  const overflow = [
+    ...actions.filter((action) => !action.danger && action.priority === undefined),
+    ...actions.filter((action) => action.danger && action.priority === undefined),
+  ];
+  const hasRow = secondary.length + overflow.length > 0;
 
   return (
     <div className={sheetActions}>
@@ -39,7 +38,7 @@ const SheetActions = ({ actions }: IProps) => {
           {secondary.map((action) => (
             <AppButton
               key={action.key}
-              variant="outline"
+              variant={action.danger ? "destructive" : "outline"}
               disabled={action.disabled}
               onPress={action.onSelect}
             >
@@ -48,23 +47,7 @@ const SheetActions = ({ actions }: IProps) => {
             </AppButton>
           ))}
 
-          <RowActionMenu actions={tertiary} label="More actions" />
-
-          {destructive.length > 0 ? (
-            <div className={sheetActionsDanger}>
-              {destructive.map((action) => (
-                <AppButton
-                  key={action.key}
-                  variant="destructive"
-                  disabled={action.disabled}
-                  onPress={action.onSelect}
-                >
-                  {action.icon}
-                  {action.label}
-                </AppButton>
-              ))}
-            </div>
-          ) : null}
+          <RowActionMenu actions={overflow} label="More actions" />
         </div>
       ) : null}
     </div>

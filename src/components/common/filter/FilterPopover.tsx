@@ -9,12 +9,6 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import { useModal } from "../../../hook/common/modal.hook";
 import { filterSheetModalKey } from "../../../keys/modal.keys";
@@ -30,11 +24,7 @@ import {
   filterSections,
   filterSheetFooter,
 } from "../../../styles/filter/filter.styles";
-import {
-  drawerBody,
-  drawerContent,
-  drawerHeaderRuled,
-} from "../../../styles/modal/modal.styles";
+import AppSheet from "../app/AppSheet";
 
 type IProps = {
   activeCount: number;
@@ -46,10 +36,6 @@ type IProps = {
 const FilterPopover = ({ activeCount, onReset, quick, children }: IProps) => {
   const isCompact = useIsCompact();
   const sheet = useModal(filterSheetModalKey(useId()));
-
-  const handleOpenChange = (next: boolean) => {
-    if (!next) sheet.closeModal();
-  };
 
   const trigger = (
     <Button
@@ -92,21 +78,19 @@ const FilterPopover = ({ activeCount, onReset, quick, children }: IProps) => {
     return (
       <>
         {trigger}
-        <Sheet
-          side="bottom"
-          isOpen={sheet.modal.visible}
-          onOpenChange={handleOpenChange}
-          className={drawerContent}
+        <AppSheet
+          open={sheet.modal.visible}
+          title="Filters"
+          footer={
+            <div className={filterSheetFooter}>
+              {resetButton("outline", "default")}
+              <Button onPress={sheet.closeModal}>Show results</Button>
+            </div>
+          }
+          onClose={sheet.closeModal}
         >
-          <SheetHeader className={drawerHeaderRuled}>
-            <SheetTitle>Filters</SheetTitle>
-          </SheetHeader>
-          <div className={drawerBody}>{body}</div>
-          <SheetFooter className={filterSheetFooter}>
-            {resetButton("outline", "default")}
-            <Button onPress={sheet.closeModal}>Show results</Button>
-          </SheetFooter>
-        </Sheet>
+          {body}
+        </AppSheet>
       </>
     );
   }
