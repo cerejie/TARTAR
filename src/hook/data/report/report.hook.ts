@@ -92,7 +92,7 @@ export const useReportHook = () => {
   );
 
   const { from, to } = rangeFor(type);
-  const { branch, branchName } = useBranchScopeHook();
+  const { branch, branchName, printScope } = useBranchScopeHook();
   const { branchName: branchNameOf } = useBranchListHook();
   const { expenseCategories } = useExpenseCategoryListHook();
   const isSummary = type === "summary";
@@ -150,7 +150,7 @@ export const useReportHook = () => {
     printReport({
       title: `${reportTypeLabels[type]} Report`,
       period: periodLabel(type, from, to),
-      scope: branchName ?? "All branches",
+      scope: printScope,
       ...reportBody(type, {
         transactions,
         customerPayments,

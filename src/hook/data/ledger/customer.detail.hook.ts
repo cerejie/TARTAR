@@ -49,7 +49,7 @@ export const useCustomerDetailHook = () => {
   const createdBy = useAccountStore(selectUserId);
   const permissions = usePermissions();
   const { branchName } = useBranchListHook();
-  const { branch: scopeBranch } = useBranchScopeHook();
+  const { branch: scopeBranch, printScope } = useBranchScopeHook();
   const { userNameOf } = useUserListHook();
   const { filters } = useLedgerFilters("customer-ledger");
 
@@ -136,6 +136,7 @@ export const useCustomerDetailHook = () => {
     lastPaymentLoading: lastPaymentQuery.loading,
     payments: paymentsQuery.data ?? [],
     branchName,
+    printScope,
     userNameOf,
     paymentModal,
     infoModal,

@@ -115,7 +115,7 @@ export const useSaleListHook = () => {
   const { userById, userNameOf } = useUserListHook();
   const { paymentLabelOf } = useBankAccountListHook();
   const { labelOf: incomeSourceLabelOf } = useIncomeSourceListHook();
-  const { branch: scopeBranch, branchName: scopeName } = useBranchScopeHook();
+  const { branch: scopeBranch, printScope } = useBranchScopeHook();
   const printModal = useModal(salePrintModalKey);
 
   const effectiveFilters = pageFiltersOf(filters, scopeBranch, "saleStatus");
@@ -179,7 +179,7 @@ export const useSaleListHook = () => {
     const sales = await saleServices.getAll(
       scopedFilters({ dateFrom: range.from, dateTo: range.to }, scopeBranch)
     );
-    printReport(salesPrintDocument(sales, range, scopeName ?? "All branches"));
+    printReport(salesPrintDocument(sales, range, printScope));
   };
 
   return {

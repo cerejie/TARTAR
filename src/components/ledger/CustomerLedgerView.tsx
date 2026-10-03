@@ -82,6 +82,7 @@ const CustomerLedgerView = () => {
     lastPaymentLoading,
     payments,
     branchName,
+    printScope,
     userNameOf,
     paymentModal,
     infoModal,
@@ -102,7 +103,8 @@ const CustomerLedgerView = () => {
       summary,
       rows,
       payments,
-      branchName
+      branchName,
+      printScope
     );
 
   const payReceivable = (row: IReceivable) => {

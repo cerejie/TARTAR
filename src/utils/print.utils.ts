@@ -242,7 +242,8 @@ export const printStatement = (
     | undefined,
   rows: readonly (IReceivable | IPayable)[],
   payments: ILedgerPayment[],
-  branchName: (slug: string) => string
+  branchName: (slug: string) => string,
+  scope: string
 ): void => {
   const labels = statementLabels[kind];
   const ledgerRows = rows
@@ -291,7 +292,7 @@ export const printStatement = (
   </style>
 </head>
 <body>
-  <h1>TARTAR</h1>
+  <h1>${escapeHtml(scope)}</h1>
   <div class="sub">${labels.title} · generated ${formatDateTime(
     new Date().toISOString()
   )}</div>
@@ -381,7 +382,7 @@ export const printReport = (document_: IPrintReportDocument): void => {
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>${escapeHtml(document_.title)} — TARTAR</title>
+  <title>${escapeHtml(document_.title)} — ${escapeHtml(document_.scope)}</title>
   <style>@page { margin: 14mm; }${baseStyles}
     body { padding: 32px; }
     h2 { margin: 26px 0 8px; font-size: 15px; }
@@ -400,10 +401,10 @@ export const printReport = (document_: IPrintReportDocument): void => {
   </style>
 </head>
 <body>
-  <h1>TARTAR</h1>
+  <h1>${escapeHtml(document_.scope)}</h1>
   <div class="sub">${escapeHtml(document_.title)} · ${escapeHtml(
       document_.period
-    )} · ${escapeHtml(document_.scope)}</div>
+    )}</div>
   ${stats ? `<div class="stats">${stats}</div>` : ""}
   ${document_.tables.map(renderTable).join("")}
   <div class="foot">Generated ${formatDateTime(new Date().toISOString())}</div>

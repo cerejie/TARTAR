@@ -38,7 +38,7 @@ export const reportSummaryQueryOf = (
 
 export const useReportSummaryHook = (enabled: boolean) => {
   const { filters, setFilters } = useLedgerFilters("report-summary");
-  const { branch, branchName } = useBranchScopeHook();
+  const { branch, printScope } = useBranchScopeHook();
   const { branchName: branchNameOf } = useBranchListHook();
 
   const monthRange = currentMonthRange();
@@ -74,7 +74,7 @@ export const useReportSummaryHook = (enabled: boolean) => {
         summaryRows,
         summaryTotals,
         range,
-        branchName ?? "All branches"
+        printScope
       )
     );
 

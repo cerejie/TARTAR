@@ -35,7 +35,7 @@ export const useSupplierDetailHook = () => {
   const markPaidModal = useModal<IPayable>(payableMarkPaidModalKey);
   const permissions = usePermissions();
   const { branchName } = useBranchListHook();
-  const { branch: scopeBranch } = useBranchScopeHook();
+  const { branch: scopeBranch, printScope } = useBranchScopeHook();
   const { userNameOf } = useUserListHook();
   const { filters } = useLedgerFilters("supplier-ledger");
 
@@ -90,6 +90,7 @@ export const useSupplierDetailHook = () => {
     lastPaymentLoading: paymentsQuery.loading,
     payments,
     branchName,
+    printScope,
     userNameOf,
     openMarkPaid: markPaidModal.openModal,
     closeSupplierDetail,

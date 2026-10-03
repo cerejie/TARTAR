@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-04 (N1 done)
+Updated: 2026-10-04 (P1 done)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -202,14 +202,23 @@ Given by the user on 2026-10-03 unless marked otherwise.
   which re-prompts; status listener re-reads on `visibilitychange`, window `focus` and the Permissions API `change`;
   `enableRequested` (persisted in `store/common/push.store.ts`) makes a blocked → allowed change subscribe by itself.
 
+- [x] P1 Print title = branch (Development v2.70): `printReport` h1 and `<title>` = the scope title, sub line =
+  title · period (`utils/print.utils.ts`); `printStatement` takes the scope too (`CustomerLedgerView.tsx`,
+  `SupplierLedgerView.tsx` via `customer.detail.hook.ts` / `supplier.detail.hook.ts`). Scope title = `printScope` from
+  `useBranchScopeHook` (`hook/data/branch/branch.scope.hook.ts`) via pure `branchScopeTitleOf` in new
+  `src/utils/branch.utils.ts` (tested in `branch.utils.test.ts`): scoped branch name; else the only visible branch, or
+  the visible names joined " · " for limited access; "All branches" when every branch is visible. Callers:
+  `sale.list.hook.ts`, `disbursement.list.hook.ts`, `report.hook.ts`, `report.summary.hook.ts`. Voucher print already
+  heads with its own branch's legal name — unchanged.
+
 ## Next
-1. P1 Print title = branch.
-2. P2 Period print month + year and the purchases print filter.
-3. P3 Purchase check number.
-4. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
-5. O2 Offline branch scopes, details and month change.
-6. Z Final re-sweep + offline probe, all roles.
-7. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. P2 Period print month + year and the purchases print filter.
+2. P3 Purchase check number.
+3. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
+4. O2 Offline branch scopes, details and month change.
+5. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
+   exercise them: the QA accounts see one branch).
+6. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
@@ -225,5 +234,5 @@ Given by the user on 2026-10-03 unless marked otherwise.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.69 (N1 Account notifications toggle) · Uncommitted: none · Last check: N1, build + lint clean, tests 121 / 121, swept admin + emp phone + desk on /account, permission probe (on / off / dismissed / denied → allowed). Run any sweep or probe
+Branch: mobilel-app-native · Last commit Development v2.70 (P1 Print title = branch) · Uncommitted: none · Last check: P1, build + lint clean, tests 126 / 126, print popup probe admin + emp + acc (sales, expenses, purchases, report, voucher). Run any sweep or probe
 with Bash `run_in_background` and `timeout` 3600000.

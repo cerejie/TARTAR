@@ -7,6 +7,7 @@ import {
 } from "../../../store/data/account/account.store";
 import { useBranchStore } from "../../../store/data/branch/branch.store";
 import { useSearch } from "../../common/search.hook";
+import { branchScopeTitleOf } from "../../../utils/branch.utils";
 import { useBranchListHook } from "./branch.list.hook";
 import type { IBranch } from "../../../models/data/branch/branch.response";
 
@@ -23,13 +24,18 @@ export const useBranchScopeHook = () => {
   const canScope = useAccountStore(selectCanScopeBranch);
   const stored = useBranchStore((state) => state.branchFilter);
   const setBranch = useBranchStore((state) => state.setBranchFilter);
-  const { branches, isInitialLoading } = useBranchListHook();
+  const { branches, allBranchOptions, isInitialLoading } = useBranchListHook();
   const { search, setSearch } = useSearch(branchScopeSearchKey);
 
   const branch = scopedBranchOf(stored, canScope, branches);
   const branchName = branch
     ? branches.find((item) => item.slug === branch)?.name ?? branch
     : null;
+  const printScope = branchScopeTitleOf(
+    branchName,
+    branches.map((item) => item.name),
+    allBranchOptions.length
+  );
 
   return {
     enabled: canScope,
@@ -37,6 +43,7 @@ export const useBranchScopeHook = () => {
     canManage: isManager,
     branch,
     branchName,
+    printScope,
     setBranch,
     branches,
     search,

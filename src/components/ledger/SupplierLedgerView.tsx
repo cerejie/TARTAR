@@ -67,6 +67,7 @@ const SupplierLedgerView = () => {
     lastPaymentLoading,
     payments,
     branchName,
+    printScope,
     userNameOf,
     openMarkPaid,
     closeSupplierDetail,
@@ -83,7 +84,8 @@ const SupplierLedgerView = () => {
       summary,
       rows,
       payments,
-      branchName
+      branchName,
+      printScope
     );
 
   const ledgerActions: IRowAction[] = [

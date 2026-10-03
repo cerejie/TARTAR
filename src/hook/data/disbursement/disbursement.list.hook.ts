@@ -131,7 +131,7 @@ export const useDisbursementListHook = (
   const { branchName } = useBranchListHook();
   const { userById, userNameOf } = useUserListHook();
   const { paymentLabelOf } = useBankAccountListHook();
-  const { branch: scopeBranch, branchName: scopeName } = useBranchScopeHook();
+  const { branch: scopeBranch, printScope } = useBranchScopeHook();
   const printModalKey = periodPrintModalKey(scope);
   const printModal = useModal(printModalKey);
   const form = useDisbursementFormHook(kind);
@@ -197,7 +197,7 @@ export const useDisbursementListHook = (
       scopedFilters({ dateFrom: range.from, dateTo: range.to }, scopeBranch)
     );
     printReport(
-      disbursementPrintDocument(kind, rows, range, scopeName ?? "All branches")
+      disbursementPrintDocument(kind, rows, range, printScope)
     );
   };
 
