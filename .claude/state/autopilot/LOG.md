@@ -227,3 +227,12 @@
 - Throwing `onSuccess` → write stays saved, entry not marked failed, one warning toast "Saved… do not save again — reload" with the cause as description (not swallowed; avoids the double save QA-03 describes)
 - Push offer offline → checked at call time from the network store, before `markPromptOffered`, so the one-time offer is kept for the next online save
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, error copy not triggered against a real server error, visuals unconfirmed
+
+## 2026-10-03 — F6 Touch + layout → Development v2.50
+- File plan → one selector list in theme.css, a `stackExtra` prop on SectionCard with its class in card.styles, one prop on SalesOverviewCard (Simple tier, four files, style-only, reversible)
+- Which option slots get 44px → select-item, combobox-item, dropdown-menu-item, dropdown-menu-sub-trigger, command-item (every listbox / menu row the ui set ships; command-item included because the branch scope list is one); labels and separators left alone (not targets)
+- How → `min-height` in the existing coarse `:where` list, not a padding change or an edit to components/ui (generated files stay untouched; zero specificity; desktop density unchanged)
+- Where the stacking lives → a `stackExtra` boolean on SectionCard with the class in card.styles.ts, not a class passed in from dashboard.styles.ts (the head grid belongs to the primitive; a feature should not know CardAction's grid placement) — so dashboard.styles.ts is unchanged, unlike the roadmap's file list
+- Stack for every card or opt-in → opt-in (NotificationsCard's extra is a short link that fits beside its title)
+- Breakpoint → below `md`, as the roadmap states; the switch is already `w-full` below `lg`, so it fills the row
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, visuals unconfirmed

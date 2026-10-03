@@ -12,7 +12,15 @@ export const sectionCardRoot = cva("h-full", {
 
 export const sectionCardTitle = "font-heading font-semibold";
 
-export const sectionCardExtra = "flex items-center gap-2";
+export const sectionCardExtra = cva("flex items-center gap-2", {
+  variants: {
+    stacked: {
+      true: "max-md:col-span-full max-md:row-span-1 max-md:row-start-3 max-md:mt-2 max-md:justify-self-stretch",
+      false: "",
+    },
+  },
+  defaultVariants: { stacked: false },
+});
 
 export const sectionCardBody = "flex-1";
 

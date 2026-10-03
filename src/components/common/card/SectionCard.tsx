@@ -26,6 +26,7 @@ type IProps = {
   title?: string;
   subtitle?: string;
   extra?: ReactNode;
+  stackExtra?: boolean;
   flush?: boolean;
   dense?: boolean;
   footer?: ReactNode;
@@ -39,6 +40,7 @@ const SectionCard = ({
   title,
   subtitle,
   extra,
+  stackExtra = false,
   flush = false,
   dense = false,
   footer,
@@ -78,7 +80,9 @@ const SectionCard = ({
             <CardDescription>{subtitle}</CardDescription>
           ) : null}
           {extra ? (
-            <CardAction className={sectionCardExtra}>{extra}</CardAction>
+            <CardAction className={sectionCardExtra({ stacked: stackExtra })}>
+              {extra}
+            </CardAction>
           ) : null}
         </CardHeader>
       ) : null}

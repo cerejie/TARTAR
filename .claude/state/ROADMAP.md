@@ -120,13 +120,19 @@ user. Any of them may be overturned; say so and the phase is replanned.
   stays saved and a warning toast says not to save again. `src/hook/common/push.hook.ts` — `usePushOffer`
   does nothing while offline and does not spend the one-time offer. Compiled, error copy not triggered
   against a real server error, visuals unconfirmed.
+- [x] F6 Touch + layout (v2.50): `src/styles/common/theme.css` — the coarse-pointer rule now gives
+  `select-item`, `combobox-item`, `dropdown-menu-item`, `dropdown-menu-sub-trigger` and `command-item` a
+  2.75rem (44px) minimum height; fine pointers are unchanged. `src/components/common/card/SectionCard.tsx`
+  + `src/styles/card/card.styles.ts` — `stackExtra` moves the head's `extra` to its own full-width row below
+  `md` (`sectionCardExtra` is now a `cva` with `stacked`); `src/components/dashboard/SalesOverviewCard.tsx`
+  sets it, so the period pills sit under the title on phones instead of clipping. `dashboard.styles.ts`
+  needed no change. Compiled, visuals unconfirmed (not checked on a phone).
 
 ## Next
-1. F6 Touch + layout — audit § MOB-01, UI-01.
-2. F7 Master Data search — audit § UX-02.
-3. F8 Unit tests — audit § TEST-01.
-4. F9 Entry bundle — audit § PERF-03.
-5. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
+1. F7 Master Data search — audit § UX-02.
+2. F8 Unit tests — audit § TEST-01.
+3. F9 Entry bundle — audit § PERF-03.
+4. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
     delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
 
 ## Open
@@ -156,5 +162,5 @@ user. Any of them may be overturned; say so and the phase is replanned.
 - SEC-05: `send-push` failure counting needs an Edge Function redeploy by the user.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.49 (F5) · Uncommitted: none · Last check:
+Branch: mobile-app-native-newlook · Last commit Development v2.50 (F6) · Uncommitted: none · Last check:
 yarn build + yarn lint clean 2026-10-03.

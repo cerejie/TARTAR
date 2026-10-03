@@ -43,6 +43,7 @@ const SalesOverviewCard = ({
       subtitle={salesPeriodSubtitles[salesPeriod]}
       error={error}
       onRetry={onRetry}
+      stackExtra
       extra={
         <ContextSwitch
           label="Sales period"
