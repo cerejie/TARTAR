@@ -204,3 +204,14 @@
 - Lookup lists (customers, suppliers, branches, categories, users) → out of scope (roadmap names aggregates, reports and `getAll` only)
 - Home → new `src/utils/page.utils.ts` rather than `supabase.utils.ts` (that file is the client and its errors; paging is a separate job)
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, totals not compared against real data
+
+## 2026-10-03 — F4 Client security hardening → Development v2.48
+- File plan → vercel.json headers, reset-approval confirm copy, one `containsPattern` escape helper (Simple tier, all reversible, no schema or rule change)
+- Frame protection → enforced now as `X-Frame-Options: DENY` plus an enforced CSP holding only `frame-ancestors 'none'` (a report-only policy with no report endpoint blocks nothing, and that one directive cannot blank the app)
+- Full CSP → report-only as locked; `style-src 'unsafe-inline'` kept (React Aria, recharts and the print window set inline styles), `script-src 'self'` only
+- Supabase origin in the CSP → `https://*.supabase.co` + `wss://*.supabase.co` rather than reading the project URL out of .env (no secret file read; a custom domain is noted in Open)
+- Permissions-Policy → camera, microphone, geolocation, payment, usb all off (the app uses none; push is not governed by it)
+- Reset-approval copy → request time via existing `formatDateTime` + "confirm with <name> directly" + why (anyone who knows the email can request); reject copy unchanged
+- Escape helper home → `utils/filter.utils.ts` `containsPattern`, reused by party.services search too (the only other `ilike`); filter field and query keys untouched
+- `*` wildcard → not handled (PostgREST has no escape for it); recorded in Open
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); headers not checked on a deploy; compiled, visuals unconfirmed

@@ -26,6 +26,7 @@ import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
+import { formatDateTime } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useConfirm } from "../../common/confirmation.hook";
@@ -210,6 +211,9 @@ export const useUserManageHook = () => {
       onConfirm: () => rejectMutation.mutate(user.id),
     });
 
+  const resetApprovalMessageOf = (user: IUser) =>
+    `Requested ${formatDateTime(user.password_reset_requested_at)}. Anyone who knows this email can send a request, so confirm with ${displayName(user)} directly that they asked for it before approving. Their old password stops working; they sign in with the one requested.`;
+
   const confirmResetDecision = (user: IUser, approve: boolean) =>
     openConfirm({
       kind: approve ? "confirm" : "delete",
@@ -217,7 +221,7 @@ export const useUserManageHook = () => {
         ? `Approve ${displayName(user)}'s new password?`
         : `Reject ${displayName(user)}'s password reset?`,
       message: approve
-        ? "Their old password stops working; they sign in with the one they requested."
+        ? resetApprovalMessageOf(user)
         : "Their current password stays; the requested one is discarded.",
       okText: approve ? "Approve" : "Reject",
       onConfirm: () =>

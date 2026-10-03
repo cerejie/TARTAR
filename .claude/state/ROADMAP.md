@@ -101,15 +101,22 @@ user. Any of them may be overturned; say so and the phase is replanned.
   are chunked. `src/services/data/dashboard.services.ts` — summary, overview, sales series, branch monitor,
   due alerts, pending reviews and due checks all read every row. No query key or filter field changed.
   Compiled, totals not compared against `select sum(...)` on real data.
+- [x] F4 Client security hardening (v2.48): `vercel.json` — enforced `X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` and a `Content-Security-Policy` holding
+  only `frame-ancestors 'none'`; the full policy (self, `*.supabase.co` over https/wss, inline styles, data /
+  blob images) ships as `Content-Security-Policy-Report-Only`. `src/hook/data/user/user.manage.hook.ts` — the
+  reset-approval confirm states when the request was made and to confirm with the person first.
+  `src/utils/filter.utils.ts` — `containsPattern` escapes `\`, `%`, `_`; used by `applyLedgerFilters` and
+  `src/services/data/party.services.ts`. Headers not checked with `curl -I` on a preview; compiled, visuals
+  unconfirmed.
 
 ## Next
-1. F4 Client security hardening — audit § SEC-03, SEC-01, SEC-04.
-2. F5 Failure experience — audit § UX-01, QA-03, UX-03.
-3. F6 Touch + layout — audit § MOB-01, UI-01.
-4. F7 Master Data search — audit § UX-02.
-5. F8 Unit tests — audit § TEST-01.
-6. F9 Entry bundle — audit § PERF-03.
-7. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
+1. F5 Failure experience — audit § UX-01, QA-03, UX-03.
+2. F6 Touch + layout — audit § MOB-01, UI-01.
+3. F7 Master Data search — audit § UX-02.
+4. F8 Unit tests — audit § TEST-01.
+5. F9 Entry bundle — audit § PERF-03.
+6. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
     delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
 
 ## Open
@@ -126,8 +133,14 @@ user. Any of them may be overturned; say so and the phase is replanned.
   max rows, or a few hundred ids in the URL, that one filter is still incomplete. The clean fix is an RPC
   change (migration). Lookup lists (customers, suppliers, branches, categories, users) are still single
   unpaged reads.
+- SEC-03 follow-up (user, preview deploy): `curl -I` the preview URL, open the app with the console open, and
+  once no CSP report-only violation shows, rename `Content-Security-Policy-Report-Only` to
+  `Content-Security-Policy` in `vercel.json` (merging `frame-ancestors 'none'` into it). If the Supabase
+  project uses a custom domain, add it to `connect-src` first.
+- SEC-04 remainder: PostgREST also reads `*` as a wildcard in `ilike` and has no escape for it, so a search
+  for `*` still matches everything.
 - SEC-05: `send-push` failure counting needs an Edge Function redeploy by the user.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.47 (F3) · Uncommitted: none · Last check:
+Branch: mobile-app-native-newlook · Last commit Development v2.48 (F4) · Uncommitted: none · Last check:
 yarn build + yarn lint clean 2026-10-03.

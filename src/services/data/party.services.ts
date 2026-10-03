@@ -6,6 +6,7 @@ import type {
 } from "../../models/data/party/party.response";
 import type { ICustomerLedgerKey } from "../../models/data/ledger/ledger.response";
 import { runWrite } from "../../store/common/sync.store";
+import { containsPattern } from "../../utils/filter.utils";
 import { supabase, toError } from "../../utils/supabase.utils";
 
 type PartyTable = "customers" | "suppliers";
@@ -25,7 +26,7 @@ const makePartyServices = <Row extends IParty>(table: PartyTable) => {
   return {
     getList: async (search?: string): Promise<Row[]> => {
       let query = supabase.from(table).select(columns);
-      if (search) query = query.ilike("name", `%${search}%`);
+      if (search) query = query.ilike("name", containsPattern(search));
 
       const { data, error } = await query.order("name", { ascending: true });
       if (error) throw toError(error);

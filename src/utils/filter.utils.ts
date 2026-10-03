@@ -24,6 +24,11 @@ interface IStatusChainable {
 
 const defaultColumns: IFilterColumns = { date: "txn_date", amount: "amount" };
 
+const likeWildcards = /[\\%_]/g;
+
+export const containsPattern = (term: string): string =>
+  `%${term.replace(likeWildcards, "\\$&")}%`;
+
 export const applyLedgerFilters = <T>(
   query: T,
   filters: ILedgerFilters,
@@ -40,9 +45,11 @@ export const applyLedgerFilters = <T>(
   if (filters.supplierId) chain(scoped.eq("supplier_id", filters.supplierId));
   if (columns.type && filters.type) chain(scoped.eq(columns.type, filters.type));
   if (filters.referenceNumber)
-    chain(scoped.ilike("reference_number", `%${filters.referenceNumber}%`));
+    chain(
+      scoped.ilike("reference_number", containsPattern(filters.referenceNumber))
+    );
   if (columns.search && filters.search)
-    chain(scoped.ilike(columns.search, `%${filters.search}%`));
+    chain(scoped.ilike(columns.search, containsPattern(filters.search)));
   if (filters.dateFrom) chain(scoped.gte(columns.date, filters.dateFrom));
   if (filters.dateTo) chain(scoped.lte(columns.date, filters.dateTo));
 
