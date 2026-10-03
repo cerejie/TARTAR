@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import pushServices from "../../services/data/push.services";
 import { selectInstalled, useInstallStore } from "../../store/common/install.store";
+import { selectOnline, useNetworkStore } from "../../store/common/network.store";
 import {
   selectPushPermission,
   selectPushPromptDismissed,
@@ -185,6 +186,7 @@ export const usePushOffer = () => {
 
   return () => {
     if (isManager || mode !== "off" || promptDismissed || promptOffered) return;
+    if (!selectOnline(useNetworkStore.getState())) return;
     markPromptOffered();
     toast("Get a notification when it is decided?", {
       duration: offerDurationMs,

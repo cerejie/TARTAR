@@ -110,13 +110,23 @@ user. Any of them may be overturned; say so and the phase is replanned.
   `src/services/data/party.services.ts`. Headers not checked with `curl -I` on a preview; compiled, visuals
   unconfirmed.
 
+- [x] F5 Failure experience (v2.49): `src/utils/error.utils.ts` — `plainServerMessage` turns a Postgres /
+  PostgREST error code into plain copy (constraint, format, timeout, busy, not-found, session-expired, RLS
+  permission; any other code gets one generic line); messages the database functions wrote themselves
+  (`P0001`, and `42501` / `28000` / `28P01` raised with their own text) pass through unchanged.
+  `src/utils/supabase.utils.ts` — `toError` uses it and keeps the raw error as `cause`; network failures keep
+  their raw text because `query.store.ts` detects them by the `TypeError` prefix to keep cached data offline.
+  `src/hook/common/mutation.hook.ts` — `onSuccess` runs after the write has settled; if it throws, the write
+  stays saved and a warning toast says not to save again. `src/hook/common/push.hook.ts` — `usePushOffer`
+  does nothing while offline and does not spend the one-time offer. Compiled, error copy not triggered
+  against a real server error, visuals unconfirmed.
+
 ## Next
-1. F5 Failure experience — audit § UX-01, QA-03, UX-03.
-2. F6 Touch + layout — audit § MOB-01, UI-01.
-3. F7 Master Data search — audit § UX-02.
-4. F8 Unit tests — audit § TEST-01.
-5. F9 Entry bundle — audit § PERF-03.
-6. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
+1. F6 Touch + layout — audit § MOB-01, UI-01.
+2. F7 Master Data search — audit § UX-02.
+3. F8 Unit tests — audit § TEST-01.
+4. F9 Entry bundle — audit § PERF-03.
+5. USER DECISIONS — hard-stop, not an autopilot phase (schema change / business rule): see Open. Then
     delete this file and rename ROADMAP-PWA-SUSPENDED.md back to ROADMAP.md.
 
 ## Open
@@ -139,8 +149,12 @@ user. Any of them may be overturned; say so and the phase is replanned.
   project uses a custom domain, add it to `connect-src` first.
 - SEC-04 remainder: PostgREST also reads `*` as a wildcard in `ilike` and has no escape for it, so a search
   for `*` still matches everything.
+- UX-01 remainder: a network failure still reaches a toast as the browser's raw text (`TypeError: Failed to
+  fetch`) — rewording it needs `query.store.ts` to stop detecting network failures by that prefix first.
+  Error copy for codes not in the map is one generic line; add a code to `serverCodeMessages` when a real
+  one shows up.
 - SEC-05: `send-push` failure counting needs an Edge Function redeploy by the user.
 
 ## State
-Branch: mobile-app-native-newlook · Last commit Development v2.48 (F4) · Uncommitted: none · Last check:
+Branch: mobile-app-native-newlook · Last commit Development v2.49 (F5) · Uncommitted: none · Last check:
 yarn build + yarn lint clean 2026-10-03.

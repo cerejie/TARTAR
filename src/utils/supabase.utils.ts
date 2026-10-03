@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { plainServerMessage } from "./error.utils";
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -60,22 +61,15 @@ export const supabase = createClient(url, anonKey, {
   global: { fetch: customFetch },
 });
 
-const constraintMessages: Record<string, string> = {
-  "23503":
-    "This record is still used by other records, so it cannot be deleted.",
-  "23505": "A record with these details already exists.",
-};
-
 export const toError = (error: unknown): Error => {
-  if (error instanceof Error) return error;
-
   if (error && typeof error === "object" && "message" in error) {
-    const code =
-      "code" in error ? String((error as { code: unknown }).code) : "";
-    return new Error(
-      constraintMessages[code] ??
-        String((error as { message: unknown }).message)
-    );
+    const code = "code" in error ? String(error.code) : "";
+    const message = String(error.message);
+    const plainMessage = plainServerMessage(code, message);
+
+    if (plainMessage) return new Error(plainMessage, { cause: error });
+    if (error instanceof Error) return error;
+    return new Error(message);
   }
 
   return new Error("Unexpected error");

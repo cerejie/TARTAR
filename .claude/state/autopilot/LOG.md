@@ -215,3 +215,15 @@
 - Escape helper home → `utils/filter.utils.ts` `containsPattern`, reused by party.services search too (the only other `ilike`); filter field and query keys untouched
 - `*` wildcard → not handled (PostgREST has no escape for it); recorded in Open
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); headers not checked on a deploy; compiled, visuals unconfirmed
+
+## 2026-10-03 — F5 Failure experience → Development v2.49
+- File plan → error copy map in error.utils, `toError` wiring, `onSuccess` moved out of the write's try, offline guard in `usePushOffer` (Simple tier, four files, all reversible, no schema or rule change)
+- Which server messages to reword → only machine-generated ones, by error code; text the database functions raise themselves (`P0001`, and the custom `42501` / `28000` / `28P01` raises) passes through (it is already plain copy and carries the business rule — rewording it would invent or hide one)
+- `42501` → reworded to "You do not have permission to do this" only when the text is Postgres's own (row-level security / permission denied); authored "not authorized to…" messages kept
+- Unmapped codes → one generic "could not complete this" line rather than the raw text (the audit's point is no raw server text on screen)
+- Developer detail → raw error kept as `cause` on the new Error; no `console.error` (src has no console calls today)
+- Network failures → left as raw text in `toError` (query.store keeps cached data offline by matching the `TypeError` prefix; rewording would regress offline reads; `ErrorState` already shows offline copy) — recorded in Open
+- Home of the map → `utils/error.utils.ts`, called from `toError` (roadmap names both files; supabase.utils stays the client)
+- Throwing `onSuccess` → write stays saved, entry not marked failed, one warning toast "Saved… do not save again — reload" with the cause as description (not swallowed; avoids the double save QA-03 describes)
+- Push offer offline → checked at call time from the network store, before `markPromptOffered`, so the one-time offer is kept for the next online save
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing); compiled, error copy not triggered against a real server error, visuals unconfirmed
