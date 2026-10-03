@@ -154,3 +154,12 @@
 - F11 → statCaption line-clamp-2 under the 12rem container query (same trigger as the old truncate), no phone-only hook needed
 - Visual check → skipped: QA_PASSWORD not provided; compiled, visuals unconfirmed
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)
+
+## 2026-10-03 — R5 Phone card content → Development v2.41
+- F13 scope → one filter in DataTableCards (empty / "—" content dropped from every card role) instead of per-table render changes; desktop tables untouched
+- F13 detail sheet → the phone record detail sheet's card fields share the filter (empty lines omitted there too, matching R4's "Recorded by" hide)
+- F14 line → compact-only "Summary" subtitle: customer/supplier name, else description; no new data, desktop columns unchanged
+- F12 fit → 4-option segmented switches get text-xs + 4px padding on phone only (label kept "Categories"); 2–3 option switches unchanged
+- F15 copy → attention default noun "record" (counts are ledger rows); admin check items say "check"
+- Visual check → skipped: QA_PASSWORD not provided; compiled, visuals unconfirmed
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)

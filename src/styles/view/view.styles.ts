@@ -38,6 +38,13 @@ export const contextSwitchItem = cva("", {
       chips:
         "shrink-0 rounded-pill px-4 data-selected:border-brand data-selected:bg-brand data-selected:text-on-brand data-selected:hover:bg-brand-deep data-selected:hover:text-on-brand data-selected:focus-visible:text-on-brand dark:data-selected:text-on-brand",
     },
+    dense: {
+      true: "max-sm:text-xs max-sm:group-data-[spacing=0]/toggle-group:px-1",
+      false: "",
+    },
+  },
+  defaultVariants: {
+    dense: false,
   },
 });
 

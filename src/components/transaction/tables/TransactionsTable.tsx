@@ -17,6 +17,7 @@ import {
   transactionTypeColors,
   transactionTypeLabels,
 } from "../../../enums/transaction.enum";
+import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import { useConfirm } from "../../../hook/common/confirmation.hook";
 import { useTransactionListHook } from "../../../hook/data/transaction/transaction.list.hook";
 import { transactionExpansionKey } from "../../../keys/table.keys";
@@ -27,13 +28,16 @@ import {
   type ITransactionInput,
 } from "../../../models/data/transaction/transaction.request";
 import type { ITransaction } from "../../../models/data/transaction/transaction.response";
-import { nowrapCell } from "../../../styles/table/table.styles";
+import { dataCardLine, nowrapCell } from "../../../styles/table/table.styles";
 import {
   formatDate,
   formatDateTime,
   formatMoney,
   formatTime,
 } from "../../../utils/format.utils";
+
+const summaryOf = (row: ITransaction) =>
+  row.customer?.name ?? row.supplier?.name ?? row.description;
 
 const TransactionsTable = () => {
   const {
@@ -63,6 +67,7 @@ const TransactionsTable = () => {
   } = useTransactionListHook();
 
   const openConfirm = useConfirm();
+  const isCompact = useIsCompact();
 
   const actionsOf = (row: ITransaction): IRowAction[] => [
     {
@@ -97,6 +102,19 @@ const TransactionsTable = () => {
       className: nowrapCell,
       render: (value: string) => formatTime(value),
     },
+    ...(isCompact
+      ? [
+          {
+            title: "Summary",
+            key: "summary",
+            mobile: "subtitle" as const,
+            render: (_: unknown, row: ITransaction) => {
+              const summary = summaryOf(row);
+              return summary ? <span className={dataCardLine}>{summary}</span> : null;
+            },
+          },
+        ]
+      : []),
     {
       title: "Type",
       dataIndex: "type",

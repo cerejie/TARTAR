@@ -25,7 +25,7 @@ export const toAttentionItem = (
   amounts: readonly number[],
   tone: NotificationTone,
   path: string,
-  noun = "account"
+  noun = "record"
 ): IAttentionItem => ({
   key,
   name,

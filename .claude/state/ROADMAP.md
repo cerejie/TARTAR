@@ -169,17 +169,26 @@ acc: no Vouchers/Branches/Master Data/Users; non-admins land on /transactions).
   (grab handle, swipe, same header as Sort), footer Reset | Show results (`filterSheetFooter`).
   F11: `statCaption` clamps to two lines in narrow tiles (`@max-[12rem]/stat:line-clamp-2`).
   Visual check not run (no QA password); compiled, visuals unconfirmed.
+- R5 Phone card content (F12–F15) -> F13: `components/common/table/DataTableCards.tsx` drops any
+  card field (title/subtitle/amount/status/meta, and the phone detail sheet's card fields) whose
+  rendered content is empty or "—", so every phone/tablet-portrait card omits empty fields
+  (Suppliers contact/address, payment ref, "Recorded by —"); desktop tables keep the dash.
+  F14: `TransactionsTable` adds a compact-only (`useIsCompact`) "Summary" subtitle — customer or
+  supplier name, else description — truncated (`dataCardLine` in `styles/table/table.styles.ts`).
+  F12: `ContextSwitch` passes `dense` when a segmented switch has 4 options; `contextSwitchItem`
+  `dense` = `max-sm:text-xs` + 4px segment padding on phone (`styles/view/view.styles.ts`).
+  F15: `toAttentionItem` default noun "account" -> "record" (`utils/attention.utils.ts`); admin
+  check items pass "check" (`hook/data/admin/admin.home.hook.ts`). Visual check not run (no QA
+  password); compiled, visuals unconfirmed.
 
 ## Next
-1. R5 Phone card content — F12, F13, F14, F15 (Master Data segment fit, omit empty fields,
-   transaction card description line, "records" copy).
-2. R6 Tablet portrait ledger grid — F16 (tablet portrait only; phone and desktop unchanged).
-3. RZ Final sweep: re-run the R0 browse on every route for all three roles at phone + tablet
+1. R6 Tablet portrait ledger grid — F16 (tablet portrait only; phone and desktop unchanged).
+2. RZ Final sweep: re-run the R0 browse on every route for all three roles at phone + tablet
    portrait, fix small regressions, then rename `ROADMAP-PWA-SUSPENDED.md` back to `ROADMAP.md`
    (delete this file; its record is git history + LOG.md) and hard-stop: the PWA Next item 1 is
    the device test script, which needs the user.
 
 ## State
-- Last commit: Development v2.40 (R4 sheets + stat tiles polish). Previous: v2.39 (R3), v2.38 (R2), v2.37 (pause), v2.36 (R1), v2.35 (R0). Audit harness lives only in the R0 worker's
+- Last commit: Development v2.41 (R5 phone card content). Previous: v2.40 (R4), v2.39 (R3), v2.38 (R2), v2.37 (pause), v2.36 (R1), v2.35 (R0). Audit harness lives only in the R0 worker's
   scratchpad (`lib.mjs` login + faked writes, `sweep.mjs`, `ledger.mjs`, `party2.mjs`,
   `detail.mjs`); `.claude/state/audit/d10.mjs` is the committed equivalent to copy from.

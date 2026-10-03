@@ -101,6 +101,8 @@ export const dataCardTitlePress =
 
 export const dataCardSubtitle = "text-xs text-muted-foreground";
 
+export const dataCardLine = "block truncate";
+
 export const dataCardAmount =
   `${moneyLevel({ level: "amount" })} flex shrink-0 flex-col items-end gap-0.5`;
 

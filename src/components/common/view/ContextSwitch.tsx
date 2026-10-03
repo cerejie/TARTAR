@@ -28,6 +28,7 @@ const ContextSwitch = <T extends string>({
 }: IProps<T>) => {
   const isSegmented = options.length <= segmentedOptionLimit;
   const presentation = isSegmented ? "segmented" : "chips";
+  const dense = options.length === segmentedOptionLimit;
 
   const handleSelectionChange = (keys: Selection) => {
     if (keys === "all") return;
@@ -50,7 +51,7 @@ const ContextSwitch = <T extends string>({
         <ToggleGroupItem
           key={option.key}
           id={option.key}
-          className={contextSwitchItem({ presentation })}
+          className={contextSwitchItem({ presentation, dense })}
         >
           {isSegmented ? <SelectionIndicator className={contextSwitchThumb} /> : null}
           <span className={contextSwitchLabel}>{option.label}</span>

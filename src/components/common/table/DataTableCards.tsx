@@ -47,6 +47,10 @@ import TableEmptyState from "./TableEmptyState";
 
 const skeletonCards = 5;
 const cardMetaLimit = 2;
+const emptyMark = "—";
+
+const isEmptyContent = (content: ReactNode) =>
+  content === null || content === undefined || content === "" || content === emptyMark;
 
 type IProps<T> = {
   columns: readonly IDataTableColumn<T>[];
@@ -148,17 +152,12 @@ const DataTableCards = <T,>({
 
   const cardFieldsOf = (row: T, rowIndex: number): ICardFields => {
     const fieldsOf = (role: IColumnMobileRole): ICardField[] =>
-      columns.flatMap((column, index) =>
-        mobileRoleOf(column, index) === role
-          ? [
-              {
-                id: columnId(column, index),
-                title: column.title,
-                content: renderContent(column, row, rowIndex),
-              },
-            ]
-          : []
-      );
+      columns.flatMap((column, index) => {
+        if (mobileRoleOf(column, index) !== role) return [];
+        const content = renderContent(column, row, rowIndex);
+        if (isEmptyContent(content)) return [];
+        return [{ id: columnId(column, index), title: column.title, content }];
+      });
 
     return {
       titles: fieldsOf("title"),

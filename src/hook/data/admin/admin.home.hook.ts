@@ -71,7 +71,8 @@ const attentionItemsOf = (
       "Past-dated checks, unpaid",
       checkAmountsOf(checks, true),
       "negative",
-      adminPayablesPath
+      adminPayablesPath,
+      "check"
     ),
     toAttentionItem(
       "near-due-receivables",
@@ -92,7 +93,8 @@ const attentionItemsOf = (
       "Checks due this week",
       checkAmountsOf(checks, false),
       "warning",
-      adminPayablesPath
+      adminPayablesPath,
+      "check"
     ),
   ].filter((item) => item.count > 0);
 };
