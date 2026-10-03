@@ -197,7 +197,6 @@ const PayableRecordsTable = () => {
         onRetry={retry}
         pagination={pagination}
         detachedPagination
-        cardGrid
         totalCount={totalCount}
         onPageChange={goToPage}
         expansionKey={ledgerExpansionKey("payables")}

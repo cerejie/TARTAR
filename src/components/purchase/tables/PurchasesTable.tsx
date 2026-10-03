@@ -231,6 +231,7 @@ const PurchasesTable = () => {
     {
       title: "Due date",
       dataIndex: "due_date",
+      cardPrefix: "Due",
       className: nowrapCell,
       render: (_, row) => dueDateLabelOf(row),
     },

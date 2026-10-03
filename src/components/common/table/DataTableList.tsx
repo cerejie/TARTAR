@@ -1,11 +1,12 @@
-import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
+import { Fragment } from "react";
 import { Button as PressArea } from "react-aria-components";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn.utils";
 import { focusedRowProps } from "../../../hook/common/focus.hook";
 import { useModal } from "../../../hook/common/modal.hook";
+import type { ReactNode } from "react";
 import type { IRowAction } from "../../../models/common/action.model";
 import type { IDetailSection } from "../../../models/common/detail.model";
 import type {
@@ -16,40 +17,36 @@ import type {
   IDataTableSelection,
 } from "../../../models/common/table.model";
 import {
-  dataCard,
-  dataCardAmount,
-  dataCardChevron,
-  dataCardField,
-  dataCardFocused,
-  dataCardFoot,
-  dataCardGrid,
-  dataCardHead,
-  dataCardHeadChevron,
-  dataCardHeading,
-  dataCardLabel,
-  dataCardList,
-  dataCardListFrame,
-  dataCardMeta,
-  dataCardRaised,
-  dataCardSelected,
-  dataCardSkeletonAmount,
-  dataCardSkeletonHead,
-  dataCardSkeletonMeta,
-  dataCardSkeletonTitle,
-  dataCardSubtitle,
-  dataCardTags,
-  dataCardTitle,
-  dataCardTitlePress,
-  dataCardValue,
+  dataList,
+  dataListAmount,
+  dataListChevron,
+  dataListFrame,
+  dataListMain,
+  dataListRaised,
+  dataListRow,
+  dataListRowFocused,
+  dataListRowSelected,
+  dataListSecondary,
+  dataListSecondaryItem,
+  dataListSeparator,
+  dataListSkeletonAmount,
+  dataListSkeletonMain,
+  dataListSkeletonMeta,
+  dataListSkeletonTitle,
+  dataListTags,
+  dataListTitle,
+  dataListTitlePress,
+  dataListTrail,
 } from "../../../styles/table/table.styles";
 import ErrorState from "../status/ErrorState";
 import RefreshBar from "../status/RefreshBar";
 import RecordDetailSheet from "./RecordDetailSheet";
 import TableEmptyState from "./TableEmptyState";
 
-const skeletonCards = 5;
+const skeletonRows = 5;
 const defaultCardMetaLimit = 2;
 const emptyMark = "—";
+const secondarySeparator = "·";
 
 const isEmptyContent = (content: ReactNode) =>
   content === null || content === undefined || content === "" || content === emptyMark;
@@ -64,7 +61,6 @@ type IProps<T> = {
   onRetry?: () => void;
   emptyText: string;
   emptyHint?: string;
-  cardGrid?: boolean;
   cardMetaLimit?: number;
   resolveRowKey: (row: T) => string;
   renderContent: (column: IDataTableColumn<T>, row: T, rowIndex: number) => ReactNode;
@@ -85,17 +81,17 @@ const mobileRoleOf = <T,>(column: IDataTableColumn<T>, index: number): IColumnMo
   return index === 0 ? "title" : "meta";
 };
 
-const SkeletonCard = () => (
-  <li className={dataCard}>
-    <span className={dataCardSkeletonHead}>
-      <Skeleton className={dataCardSkeletonTitle} />
-      <Skeleton className={dataCardSkeletonAmount} />
+const SkeletonRow = () => (
+  <li className={dataListRow}>
+    <span className={dataListSkeletonMain}>
+      <Skeleton className={dataListSkeletonTitle} />
+      <Skeleton className={dataListSkeletonMeta} />
     </span>
-    <Skeleton className={dataCardSkeletonMeta} />
+    <Skeleton className={dataListSkeletonAmount} />
   </li>
 );
 
-const DataTableCards = <T,>({
+const DataTableList = <T,>({
   columns,
   rows,
   label,
@@ -105,7 +101,6 @@ const DataTableCards = <T,>({
   onRetry,
   emptyText,
   emptyHint,
-  cardGrid,
   cardMetaLimit = defaultCardMetaLimit,
   resolveRowKey,
   renderContent,
@@ -120,7 +115,6 @@ const DataTableCards = <T,>({
   detailActions,
 }: IProps<T>) => {
   const detailSheet = useModal<string>(detailSheetKey);
-  const listClassName = cn(dataCardList, cardGrid && dataCardGrid);
   const sections = detailSections ?? [];
   const metaCount = columns.filter(
     (column, index) => mobileRoleOf(column, index) === "meta"
@@ -131,9 +125,9 @@ const DataTableCards = <T,>({
 
   if (loading) {
     return (
-      <ul className={listClassName} aria-busy>
-        {Array.from({ length: skeletonCards }, (_, index) => (
-          <SkeletonCard key={index} />
+      <ul className={dataList} aria-busy>
+        {Array.from({ length: skeletonRows }, (_, index) => (
+          <SkeletonRow key={index} />
         ))}
       </ul>
     );
@@ -157,17 +151,18 @@ const DataTableCards = <T,>({
     rowSelection.onChange(selected ? [...others, key] : others);
   };
 
-  const cardFieldsOf = (row: T, rowIndex: number): ICardFields => {
+  const cardFieldsOf = (row: T, rowIndex: number, labelledMetas = false): ICardFields => {
     const fieldsOf = (role: IColumnMobileRole): ICardField[] =>
       columns.flatMap((column, index) => {
         if (mobileRoleOf(column, index) !== role) return [];
         const content = renderContent(column, row, rowIndex);
         if (isEmptyContent(content)) return [];
+        const showsPrefix = column.cardPrefix !== undefined && !(labelledMetas && role === "meta");
         return [
           {
             id: columnId(column, index),
             title: column.title,
-            content: column.cardPrefix ? (
+            content: showsPrefix ? (
               <>
                 {column.cardPrefix} {content}
               </>
@@ -194,20 +189,18 @@ const DataTableCards = <T,>({
     return undefined;
   };
 
-  const renderCard = (row: T, rowIndex: number) => {
+  const renderRow = (row: T, rowIndex: number) => {
     const key = resolveRowKey(row);
     const { titles, subtitles, amounts, statuses, metas, actions } = cardFieldsOf(
       row,
       rowIndex
     );
-    const cardMetas = opensDetail ? metas.slice(0, cardMetaLimit) : metas;
+    const rowMetas = opensDetail ? metas.slice(0, cardMetaLimit) : metas;
+    const secondaries = [...subtitles, ...rowMetas];
 
     const isSelected = rowSelection?.selectedRowKeys.includes(key) ?? false;
     const focused = isFocusedRow(key);
     const pressTitle = pressOf(row, key);
-    const hasCardBody = statuses.length > 0 || cardMetas.length > 0;
-    const headChevron = pressTitle !== undefined && !hasCardBody;
-    const footChevron = pressTitle !== undefined && hasCardBody;
     const titleContent = titles.map((field) => (
       <span key={field.id}>{field.content}</span>
     ));
@@ -216,82 +209,73 @@ const DataTableCards = <T,>({
       <li
         key={key}
         className={cn(
-          dataCard,
-          isSelected && dataCardSelected,
+          dataListRow,
+          isSelected && dataListRowSelected,
           rowClassName?.(row),
-          focused && dataCardFocused
+          focused && dataListRowFocused
         )}
         {...(focused ? focusedRowProps : {})}
       >
-        <div className={dataCardHead}>
-          {rowSelection ? (
-            <Checkbox
-              aria-label="Select row"
-              className={dataCardRaised}
-              isSelected={isSelected}
-              isDisabled={rowSelection.getCheckboxProps?.(row).disabled}
-              onChange={(selected) => toggleSelection(key, selected)}
-            />
-          ) : null}
+        {rowSelection ? (
+          <Checkbox
+            aria-label="Select row"
+            className={dataListRaised}
+            isSelected={isSelected}
+            isDisabled={rowSelection.getCheckboxProps?.(row).disabled}
+            onChange={(selected) => toggleSelection(key, selected)}
+          />
+        ) : null}
 
-          <div className={dataCardHeading}>
-            {pressTitle ? (
-              <PressArea className={dataCardTitlePress} onPress={pressTitle}>
-                {titleContent}
-              </PressArea>
-            ) : (
-              <span className={dataCardTitle}>{titleContent}</span>
-            )}
-            {subtitles.map((field) => (
-              <span key={field.id} className={dataCardSubtitle}>
-                {field.content}
-              </span>
-            ))}
-          </div>
-
-          {amounts.length > 0 ? (
-            <div className={dataCardAmount}>
-              {amounts.map((field) => (
-                <span key={field.id}>{field.content}</span>
+        <div className={dataListMain}>
+          {pressTitle ? (
+            <PressArea className={dataListTitlePress} onPress={pressTitle}>
+              {titleContent}
+            </PressArea>
+          ) : (
+            <span className={dataListTitle}>{titleContent}</span>
+          )}
+          {secondaries.length > 0 ? (
+            <span className={dataListSecondary}>
+              {secondaries.map((field, index) => (
+                <Fragment key={field.id}>
+                  {index > 0 ? (
+                    <span className={dataListSeparator} aria-hidden="true">
+                      {secondarySeparator}
+                    </span>
+                  ) : null}
+                  <span className={dataListSecondaryItem}>{field.content}</span>
+                </Fragment>
               ))}
-            </div>
-          ) : null}
-
-          {actions.map((field) => (
-            <span key={field.id} className={dataCardRaised}>
-              {field.content}
             </span>
-          ))}
-
-          {headChevron ? (
-            <ChevronRight className={dataCardHeadChevron} aria-hidden="true" />
           ) : null}
         </div>
 
-        {cardMetas.length > 0 ? (
-          <dl className={dataCardMeta}>
-            {cardMetas.map((field) => (
-              <div key={field.id} className={dataCardField}>
-                <dt className={dataCardLabel}>{field.title}</dt>
-                <dd className={dataCardValue}>{field.content}</dd>
-              </div>
-            ))}
-          </dl>
-        ) : null}
-
-        {statuses.length > 0 || footChevron ? (
-          <div className={dataCardFoot}>
-            <div className={dataCardTags}>
-              {statuses.map((field) => (
-                <span key={field.id}>{field.content}</span>
-              ))}
-            </div>
-
-            {footChevron ? (
-              <ChevronRight className={dataCardChevron} aria-hidden="true" />
+        {amounts.length > 0 || statuses.length > 0 ? (
+          <div className={dataListTrail}>
+            {amounts.length > 0 ? (
+              <span className={dataListAmount}>
+                {amounts.map((field) => (
+                  <span key={field.id}>{field.content}</span>
+                ))}
+              </span>
+            ) : null}
+            {statuses.length > 0 ? (
+              <span className={dataListTags}>
+                {statuses.map((field) => (
+                  <span key={field.id}>{field.content}</span>
+                ))}
+              </span>
             ) : null}
           </div>
         ) : null}
+
+        {actions.map((field) => (
+          <span key={field.id} className={dataListRaised}>
+            {field.content}
+          </span>
+        ))}
+
+        {pressTitle ? <ChevronRight className={dataListChevron} aria-hidden="true" /> : null}
       </li>
     );
   };
@@ -303,10 +287,10 @@ const DataTableCards = <T,>({
 
   return (
     <>
-      <div className={dataCardListFrame}>
+      <div className={dataListFrame}>
         {refreshing ? <RefreshBar placement="above" /> : null}
-        <ul className={listClassName} aria-label={label} aria-busy={refreshing}>
-          {rows.map(renderCard)}
+        <ul className={dataList} aria-label={label} aria-busy={refreshing}>
+          {rows.map(renderRow)}
         </ul>
       </div>
 
@@ -315,7 +299,7 @@ const DataTableCards = <T,>({
           open={detailSheet.modal.visible}
           title={detailRow && detailTitle ? detailTitle(detailRow) : "Details"}
           record={detailRow}
-          fields={detailRow ? cardFieldsOf(detailRow, detailIndex) : undefined}
+          fields={detailRow ? cardFieldsOf(detailRow, detailIndex, true) : undefined}
           sections={sections}
           actions={detailRow && detailActions ? detailActions(detailRow) : []}
           onClose={detailSheet.closeModal}
@@ -325,4 +309,4 @@ const DataTableCards = <T,>({
   );
 };
 
-export default DataTableCards;
+export default DataTableList;

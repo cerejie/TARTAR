@@ -78,61 +78,51 @@ export const dataTableEmpty = "py-8";
 
 export const dataTableLoadingAnnounce = "sr-only";
 
-export const dataCardListFrame = "relative";
+export const dataListFrame = "relative";
 
-export const dataCardList = "flex flex-col gap-2.5";
+export const dataList = "flex flex-col divide-y divide-border border-y border-border";
 
-export const dataCardGrid = "md:max-lg:portrait:grid md:max-lg:portrait:grid-cols-2";
+export const dataListRow =
+  "relative flex min-h-14 items-center gap-3 px-1 py-3 text-sm transition-colors has-data-pressed:bg-muted/70 has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring has-data-focus-visible:ring-inset";
 
-export const dataCard =
-  "relative flex flex-col gap-2.5 rounded-card border border-border/60 bg-card p-3.5 text-sm shadow-card has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring";
+export const dataListRowSelected = "bg-brand-mist";
 
-export const dataCardSelected = "border-brand bg-brand-mist";
+export const dataListRowFocused =
+  "bg-brand-mist ring-2 ring-brand/30 ring-inset animate-row-focus motion-reduce:animate-none";
 
-export const dataCardFocused =
-  "border-brand bg-brand-mist ring-2 ring-brand/30 animate-row-focus motion-reduce:animate-none";
+export const dataListMain = "flex min-w-0 flex-1 flex-col gap-0.5";
 
-export const dataCardHead = "flex items-start gap-3";
+export const dataListTitle = "min-w-0 truncate text-left font-semibold text-foreground";
 
-export const dataCardHeading = "flex min-w-0 flex-1 flex-col gap-0.5";
+export const dataListTitlePress =
+  "min-w-0 truncate text-left font-semibold text-foreground outline-none after:absolute after:inset-0";
 
-export const dataCardTitle = "min-w-0 text-left font-semibold break-words text-foreground";
+export const dataListSecondary =
+  "flex min-w-0 items-center gap-1.5 overflow-hidden text-xs whitespace-nowrap text-muted-foreground";
 
-export const dataCardTitlePress =
-  "min-w-0 text-left font-semibold break-words text-foreground outline-none after:absolute after:inset-0 after:rounded-card";
+export const dataListSecondaryItem = "min-w-0 truncate first:shrink-0 first:max-w-[60%]";
 
-export const dataCardSubtitle = "text-xs text-muted-foreground";
+export const dataListSeparator = "shrink-0 text-muted-foreground/60";
+
+export const dataListTrail = "flex max-w-[45%] shrink-0 flex-col items-end gap-1 text-right";
+
+export const dataListAmount = `${moneyLevel({ level: "amount" })} flex flex-col items-end`;
+
+export const dataListTags = "flex items-center justify-end gap-1";
+
+export const dataListRaised = "relative z-10";
+
+export const dataListChevron = "size-4 shrink-0 text-muted-foreground/60";
 
 export const dataCardLine = "block truncate";
 
-export const dataCardAmount =
-  `${moneyLevel({ level: "amount" })} flex shrink-0 flex-col items-end gap-0.5`;
+export const dataListSkeletonMain = "flex flex-1 flex-col gap-2";
 
-export const dataCardRaised = "relative z-10";
+export const dataListSkeletonTitle = "h-4 w-2/5";
 
-export const dataCardFoot = "flex items-center justify-between gap-2";
+export const dataListSkeletonAmount = "h-4 w-16";
 
-export const dataCardTags = "flex min-w-0 flex-wrap items-center gap-1.5";
-
-export const dataCardMeta = "grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs";
-
-export const dataCardField = "flex min-w-0 flex-col gap-0.5";
-
-export const dataCardLabel = "text-xs text-muted-foreground";
-
-export const dataCardValue = "min-w-0 break-words text-foreground";
-
-export const dataCardChevron = "ml-auto size-4 shrink-0 text-muted-foreground/60";
-
-export const dataCardHeadChevron = "size-4 shrink-0 self-center text-muted-foreground/60";
-
-export const dataCardSkeletonHead = "flex items-center justify-between gap-3";
-
-export const dataCardSkeletonTitle = "h-4 w-2/5";
-
-export const dataCardSkeletonAmount = "h-4 w-1/4";
-
-export const dataCardSkeletonMeta = "h-3 w-3/5";
+export const dataListSkeletonMeta = "h-3 w-3/5";
 
 export const leadCell = "inline-flex items-center gap-2";
 

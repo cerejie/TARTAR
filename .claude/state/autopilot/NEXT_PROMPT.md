@@ -1,5 +1,5 @@
 AUTOPILOT — continue the Collection removal, print fixes, offline completeness roadmap at .claude/state/ROADMAP.md,
-start M1 Mobile list rows instead of cards (Next item 1). Branch mobilel-app-native. Last commit Development v2.72 (P3 Purchase check number), pushed.
-Follow the roadmap's session protocol: read only the paths M1 cites (Phases § M1: DataTableCards.tsx, table.styles.ts, table.model.ts card roles; the mobile design memory).
+start M2 Receivables / Payables Payments tab (Next item 1). Branch mobilel-app-native. Last commit Development v2.74 (M1 Mobile list rows instead of cards), pushed.
+Follow the roadmap's session protocol: read only the paths M2 cites (Phases § M2: components/ledger/** tab definitions, LedgerRecordsTable.tsx, PayableRecordsTable.tsx, LedgerPaymentsTable.tsx, LedgerPartiesTable.tsx, hook/data/ledger/*.list.hook.ts, the tab enum, hook/app/prime.view.hook.ts).
 Decide the file plan with decision-making; do not wait for a go.
-P3 shipped display only; the check-number input waits for migration-34 (USER DECISIONS) — do not add it.
+M1 renamed DataTableCards → DataTableList and removed the `cardGrid` prop; mobile rows show no meta labels, so date metas need a `cardPrefix` to stay readable.

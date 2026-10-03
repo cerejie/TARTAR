@@ -169,6 +169,7 @@ const SupplierLedgerView = () => {
     {
       title: "Due date",
       dataIndex: "due_date",
+      cardPrefix: "Due",
       className: nowrapCell,
       render: (value: string) => formatDate(value),
     },

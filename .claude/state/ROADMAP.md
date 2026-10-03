@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-04 (P3 done)
+Updated: 2026-10-04 (M1 done)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -271,15 +271,24 @@ Given by the user on 2026-10-03 unless marked otherwise.
   purchase record sheet voucher section shows "Check number" when set (`PurchasesTable.tsx`), the purchases period
   print has a "Check No." column in both sections (`report.utils.ts` `checkNumberOf`, tested). Vouchers table detail,
   admin payable detail and the voucher print already showed it. Input waits for the migration (USER DECISIONS).
+- [x] M1 Mobile list rows instead of cards (Development v2.74): `components/common/table/DataTableCards.tsx` renamed
+  `DataTableList.tsx` (mounted by `DataTable.tsx` wherever cards rendered: phone + tablet portrait) — each row is a
+  full-width hairline-separated list row: optional checkbox, title, one muted secondary line (subtitles + metas,
+  capped by `cardMetaLimit` when the row opens the detail sheet, values joined by "·", truncated), trailing amount over
+  status, row actions, chevron when pressable; list skeleton rows; press / focus / selected / overdue tints on the row.
+  Styles `dataCard*` → `dataList*` in `styles/table/table.styles.ts` (`dataCardLine` kept, TransactionsTable uses it).
+  `cardGrid` removed (DataTable + the three ledger tables) — a native list is one column. `RecordDetailSheet` unchanged.
+  Labels no longer show on the row, so due-date metas got `cardPrefix: "Due"` (`PurchasesTable.tsx`,
+  `CustomerLedgerView.tsx`, `SupplierLedgerView.tsx`).
+
 ## Next
-1. M1 Mobile list rows instead of cards.
-2. M2 Receivables / Payables: Payments tab replaces By customer / By supplier.
-3. M3 Mobile form interaction (iOS / Android keyboard, inputs, dropdowns in modals).
-4. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
-5. O2 Offline branch scopes, details and month change.
-6. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
+1. M2 Receivables / Payables: Payments tab replaces By customer / By supplier.
+2. M3 Mobile form interaction (iOS / Android keyboard, inputs, dropdowns in modals).
+3. O1 Offline variants of the paged lists (include the new `report-payments` key and `payments` in the datasets).
+4. O2 Offline branch scopes, details and month change.
+5. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
    exercise them: the QA accounts see one branch).
-7. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+6. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
@@ -296,5 +305,5 @@ Given by the user on 2026-10-03 unless marked otherwise.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.72 (P3 Purchase check number — display + migration-34 proposal) · Uncommitted: none · Last check: P3, build + lint clean, tests 138 / 138, sweep admin + emp desk + phone on /purchases /vouchers /payables /admin/payables, purchases print popup probe (Check No. column). Run any sweep or probe
+Branch: mobilel-app-native · Last commit Development v2.74 (M1 Mobile list rows) · Uncommitted: none · Last check: M1, build + lint clean, tests 138 / 138, sweep admin + emp + acc phone + tabP on every list route. Run any sweep or probe
 with Bash `run_in_background` and `timeout` 3600000.

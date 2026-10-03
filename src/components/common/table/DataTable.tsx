@@ -63,7 +63,7 @@ import {
 import ErrorState from "../status/ErrorState";
 import StatusTag from "../status/StatusTag";
 import { rowDetailSheetModalKey } from "../../../keys/modal.keys";
-import DataTableCards from "./DataTableCards";
+import DataTableList from "./DataTableList";
 import LoadMoreSentinel from "./LoadMoreSentinel";
 import RowDetailPanel from "./RowDetailPanel";
 import TableEmptyState from "./TableEmptyState";
@@ -93,7 +93,6 @@ type IProps<T> = {
   detailActions?: (row: T) => readonly IRowAction[];
   emptyText?: string;
   emptyHint?: string;
-  cardGrid?: boolean;
   cardMetaLimit?: number;
   rowSelection?: IDataTableSelection<T>;
   rowClassName?: (row: T) => string;
@@ -143,7 +142,6 @@ const DataTable = <T extends object>({
   detailActions,
   emptyText = "No records",
   emptyHint,
-  cardGrid,
   cardMetaLimit,
   rowSelection,
   rowClassName,
@@ -420,7 +418,7 @@ const DataTable = <T extends object>({
   return (
     <div className={dataTableRoot}>
       {isCompact ? (
-        <DataTableCards<T>
+        <DataTableList<T>
           columns={columns}
           rows={rows}
           label={label}
@@ -430,7 +428,6 @@ const DataTable = <T extends object>({
           onRetry={onRetry}
           emptyText={emptyText}
           emptyHint={emptyHint}
-          cardGrid={cardGrid}
           cardMetaLimit={cardMetaLimit}
           resolveRowKey={resolveRowKey}
           renderContent={renderContent}
