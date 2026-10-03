@@ -370,3 +370,11 @@
 - Sweep side effect → a host network drop put the phone run offline for ~37 surfaces; V9's cache served every page (banner + rows), recorded as a harness/host artifact
 - Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), tests 113 / 113; swept admin phone + tabP + desk, 144 surfaces, 1 harness timeout, 23 / 23 sheets viewed; probe for 820 truncation, tabP detail panes, phone supplier picker and desk tab switch; swept, device unconfirmed
 - Next roadmap item is USER DECISIONS → hard-stop, STOP written
+
+## 2026-10-03 — Stage 1: new roadmap (conductor) → Development v2.67
+- User's answers to the Visual roadmap's Open list → collection removal (YES, everything), offline scope (YES, all variants), Migration 32 + archived Open items later
+- Visual roadmap → archived as ROADMAP-VISUAL-2026-10-03-DONE.md (user's instruction, overrides the STOP note's "rename PWA back")
+- Collection removal → one phase C1, not split by layer (12 app hits; no hit in print or report code)
+- User's three extra requests (print title = branch, period print month + year + purchases filter, purchase check number) → phases P1–P3 between collection and offline, so the offline phases also cover any new query the print work adds
+- Migration-needing work (collection rows, purchase check number) → proposal under .claude/state/proposals/, client work that does not depend on it ships, the proposal waits in USER DECISIONS (user: "make it a USER DECISIONS hard-stop", i.e. at the end) — keeps the offline phases unblocked
+- Offline → two phases (O1 paged-list variants, O2 branches / details / month change), then Z full re-sweep + offline probe for all three roles
