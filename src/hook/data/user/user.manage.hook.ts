@@ -109,7 +109,7 @@ export const useUserManageHook = () => {
     (payload: { id: string; password: string }) =>
       accountServices.setUserPassword(payload.id, payload.password),
     {
-      successMessage: "Password reset",
+      successMessage: "New password set",
       invalidate,
       onSuccess: resetModal.closeModal,
     }

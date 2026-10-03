@@ -22,34 +22,45 @@ const SheetActions = ({ actions }: IProps) => {
     ...actions.filter((action) => !action.danger && action.priority === undefined),
     ...actions.filter((action) => action.danger && action.priority === undefined),
   ];
-  const hasRow = secondary.length + overflow.length > 0;
+  const menu =
+    overflow.length > 0 ? (
+      <RowActionMenu actions={overflow} label="More actions" />
+    ) : null;
+  const primaryButton = primary ? (
+    <AppButton disabled={primary.disabled} onPress={primary.onSelect}>
+      {primary.icon}
+      {primary.label}
+    </AppButton>
+  ) : null;
+
+  if (secondary.length === 0) {
+    return (
+      <div className={sheetActions}>
+        <div className={sheetActionsRow}>
+          {primaryButton}
+          {menu}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={sheetActions}>
-      {primary ? (
-        <AppButton disabled={primary.disabled} onPress={primary.onSelect}>
-          {primary.icon}
-          {primary.label}
-        </AppButton>
-      ) : null}
-
-      {hasRow ? (
-        <div className={sheetActionsRow}>
-          {secondary.map((action) => (
-            <AppButton
-              key={action.key}
-              variant={action.danger ? "destructive" : "outline"}
-              disabled={action.disabled}
-              onPress={action.onSelect}
-            >
-              {action.icon}
-              {action.label}
-            </AppButton>
-          ))}
-
-          <RowActionMenu actions={overflow} label="More actions" />
-        </div>
-      ) : null}
+      {primaryButton}
+      <div className={sheetActionsRow}>
+        {secondary.map((action) => (
+          <AppButton
+            key={action.key}
+            variant={action.danger ? "destructive" : "outline"}
+            disabled={action.disabled}
+            onPress={action.onSelect}
+          >
+            {action.icon}
+            {action.label}
+          </AppButton>
+        ))}
+        {menu}
+      </div>
     </div>
   );
 };

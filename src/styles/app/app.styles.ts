@@ -154,9 +154,10 @@ export const recordSheetSectionChevron =
   "ml-auto transition-transform group-aria-expanded/section-toggle:rotate-180";
 
 export const sheetActions =
-  "flex w-full flex-col gap-2 [&_[data-slot=button][data-variant=default]]:h-12 [&_[data-slot=button][data-variant=default]]:w-full [&_[data-slot=button][data-size^=icon]]:size-11 [&_[data-slot=button][data-size^=icon]]:px-0";
+  "flex w-full flex-col gap-2 [&_[data-slot=button]]:h-12 [&>[data-slot=button]]:w-full [&_[data-slot=button][data-size^=icon]]:size-12 [&_[data-slot=button][data-size^=icon]]:shrink-0 [&_[data-slot=button][data-size^=icon]]:px-0";
 
-export const sheetActionsRow = "flex items-center gap-2";
+export const sheetActionsRow =
+  "flex w-full items-center gap-2 [&>[data-slot=button]:not([data-size^=icon])]:min-w-0 [&>[data-slot=button]:not([data-size^=icon])]:flex-1";
 
 export const branchSheetList = "max-h-[60dvh]";
 

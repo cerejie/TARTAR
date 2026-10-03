@@ -152,7 +152,7 @@ const UsersTable = () => {
         : [
             {
               key: "reset",
-              label: "Reset password",
+              label: "Set new password",
               icon: <KeyRound />,
               onSelect: () => resetModal.openModal(user),
             },
@@ -270,14 +270,14 @@ const UsersTable = () => {
         open={resetModal.modal.visible}
         title={
           resetModal.modal.data
-            ? `Reset password · ${displayName(resetModal.modal.data)}`
-            : "Reset password"
+            ? `Set new password · ${displayName(resetModal.modal.data)}`
+            : "Set new password"
         }
         fields={resetFieldsOf(resetRequestHintOf(resetModal.modal.data))}
         schema={resetPasswordSchema}
         defaultValues={{ password: "" }}
         submitting={resetPasswordMutation.loading}
-        submitText="Reset password"
+        submitText="Set password"
         onSubmit={(values) => {
           if (resetModal.modal.data)
             void resetPasswordMutation.mutate({

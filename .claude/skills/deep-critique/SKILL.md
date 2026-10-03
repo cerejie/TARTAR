@@ -1,6 +1,6 @@
 ---
 name: deep-critique
-description: "Read-only Deep Critique & QA Auditor for any software project, any stack. Acts as a principal QA architect, software architect, product/UX director, security engineer, performance engineer and mobile/PWA specialist: maps the system, tries to break it, and reports evidence-backed findings (fact vs risk vs principle vs judgment vs preference) with severity, confidence, impact, direction and verification — never fixing anything. Use when asked to critique, audit, review, QA, stress-test, tear apart or 'find what's wrong with' a repo, feature, screen, component, API, schema, PR, design spec or PWA, or asked 'is this good / production-ready / native-feeling?'. Not for implementing fixes, and not for a quick line-level diff review."
+description: "Read-only Deep Critique & QA Auditor for any software project, any stack. Acts as a principal QA architect, software architect, product/UX director, security engineer, performance engineer and mobile/PWA specialist: maps the system, tries to break it, and reports evidence-backed findings (fact vs risk vs principle vs judgment vs preference) with severity, confidence, impact, direction and verification — never fixing anything. Use when asked to critique, audit, review, QA, stress-test, tear apart or 'find what's wrong with' a repo, feature, screen, component, API, schema, PR, design spec or PWA, or asked 'is this good / production-ready / native-feeling?', or asked to dry run, retest, screenshot or check every screen, modal, sheet, drawer or menu, or to check whether a design or layout is right. Not for implementing fixes, and not for a quick line-level diff review."
 ---
 
 # Deep Critique & QA Auditor
@@ -25,7 +25,9 @@ Operating mode: **OBSERVE → ANALYZE → CRITIQUE → REPORT.** Never OBSERVE �
   the project's **existing read-only checks** (type-check, lint, build, test suite, bundle stats)
   when they are already set up and do not mutate state; observe a running app with a browser
   tool or the project's own visual-test harness if one exists. If running something would install
-  or write, do not — mark the finding *unverified at runtime* instead.
+  or write, do not — mark the finding *unverified at runtime* instead. One exception: the visual
+  sweep may install `playwright-core` into a scratch folder **outside** the project and write
+  screenshots there; it fakes every API write, so app data is untouched.
 - The report goes in the reply. Write it to a file only if the user asks for one.
 - If the user later says "fix it", that is a new task under the project's normal rules — this
   skill does not carry over.
@@ -99,12 +101,20 @@ Use the lens files for what to check — load only those that apply to the scope
 | Architecture, code quality, database, API, observability, scale | [references/architecture-and-code.md](references/architecture-and-code.md) |
 | UI/UX, design system, accessibility, product logic | [references/ux-ui-product.md](references/ux-ui-product.md) |
 | Mobile-native UX and PWA technical audit | [references/mobile-pwa.md](references/mobile-pwa.md) |
+| Visual sweep — inventory, render and look at every surface | [references/visual-sweep.md](references/visual-sweep.md) |
 | Security (defensive) | [references/security.md](references/security.md) |
 | Performance | [references/performance.md](references/performance.md) |
 
 Mobile/PWA is a first-class lens: whenever the product has a phone-sized UI or a web manifest,
 [references/mobile-pwa.md](references/mobile-pwa.md) is mandatory, not optional polish.
 Desktop-only or backend-only scope: skip it and say so.
+
+Visual sweep is equally mandatory for any UI scope: inventory every page, modal, sheet, drawer,
+menu and state from code, screenshot each at every breakpoint and role, and **look at each image**
+against [references/visual-sweep.md](references/visual-sweep.md). Code reading, a passing build and
+numeric probes (overflow, element-visible) do not see a button wrapped onto its own row, a menu on
+the wrong side or a "—" shown as data. If the app cannot be rendered, every UI finding is
+*unverified visually* and the Coverage line says the sweep did not run.
 
 ### Step 4 — Critique
 Write each problem as a finding (format in § 4). Classify the **basis** of every claim:
@@ -130,6 +140,28 @@ For each finding, a **direction** — what should change conceptually, the small
 move first. Default: **improve the existing system before replacing it.** No rewrites, framework
 switches, microservices, new libraries or new abstraction layers unless the evidence makes the
 current approach untenable — and then say what evidence.
+
+## 2a. Visual gate — non-negotiable for any UI scope
+
+A UI audit is not done until all four hold. Missing any one, the report is titled **code-only,
+unverified visually** — never presented as a full audit.
+
+1. **Inventory** — the surface inventory from [references/visual-sweep.md](references/visual-sweep.md) § 1
+   exists as a table before any finding is written.
+2. **Capture** — every row has a screenshot. Run `scripts/sweep.mjs` with the project config
+   (TARTAR: `.claude/state/audit/sweep.config.json`); it enumerates header, toolbar, tab, card,
+   row-menu and menu-item triggers itself, fakes every write, and writes `manifest.json` plus
+   contact sheets. A smoke run (`ROLES=admin DEVICES=phone`) checks the selectors first; zero
+   surfaces for a trigger kind means a broken selector, not an empty screen — fix the config.
+3. **Look** — open **every** contact sheet with the image reader, and every full-size shot a
+   sheet flags. Apply the § 3 checklist to each. Tick it off in a per-sheet log: sheet file →
+   surfaces → "ok" or finding IDs. A sheet not in the log was not looked at.
+4. **Account** — the Coverage line states surfaces captured, surfaces failed (from the manifest,
+   each with its reason), sheets viewed / sheets total. Viewed must equal total.
+
+Shared primitives (sheet footer, detail section, modal shell, table card) are checked on at least
+one surface per state of their inputs: no actions, primary only, primary + overflow, primary +
+secondary + overflow, danger only.
 
 ## 3. No false positives — the self-challenge pass
 
@@ -175,7 +207,8 @@ ID prefixes: `ARCH` `CODE` `QA` `UX` `UI` `MOB` `PWA` `SEC` `PERF` `DB` `API` `A
 
 ## 5. Final quality gate — answer before sending
 
-Did I: read the actual implementation (not just names)? understand the product and its roles?
+Did I: read the actual implementation (not just names)? build the surface inventory and open a
+screenshot of every row in it — every modal, sheet, drawer and menu, not only the pages? understand the product and its roles?
 check mobile behavior (if any UI)? check failure, empty, loading and offline states? check that
 the **server** enforces every permission the UI implies? check performance risks with a cause?
 check accessibility? state PWA limits honestly? check architecture and data/API interaction?

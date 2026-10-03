@@ -1,0 +1,51 @@
+{
+  "base": "http://localhost:5199",
+  "out": "C:/Users/CER/AppData/Local/Temp/tartar-sweep",
+  "loginPath": "/login",
+  "homePath": "/",
+  "login": { "emailLabel": "Email", "passwordLabel": "Password" },
+  "roles": {
+    "admin": "qaadmin2@qa.test",
+    "emp": "qaemp2@qa.test",
+    "acc": "qaacc1@qa.test"
+  },
+  "apiPattern": "supabase\\.co/(rest|functions)/",
+  "readRpcs": ["login_account", "user_display_names", "my_authority_role", "purchase_ids_paid_between", "voucher_signatories"],
+  "skipItems": [],
+  "devices": [
+    { "id": "phone", "w": 390, "h": 844, "touch": true, "cards": true, "deep": true, "dark": true },
+    { "id": "tabP", "w": 820, "h": 1180, "touch": true, "cards": true, "deep": false },
+    { "id": "tabL", "w": 1180, "h": 820, "touch": true, "deep": false },
+    { "id": "desk", "w": 1440, "h": 900, "deep": true, "dark": true }
+  ],
+  "selectors": {
+    "signedIn": "[data-slot=sidebar-wrapper], [data-slot=sidebar], [data-slot=sidebar-container]",
+    "overlay": "[role=dialog], [role=alertdialog], [role=menu], [role=listbox], [data-slot=popover-content]",
+    "headerTriggers": "header button",
+    "toolbarTriggers": "main button:not(tbody button):not(ul[aria-label] button):not([role=tab]):not([role=radio]):not([aria-label*=page i])",
+    "tabs": "main [role=radio], main [role=tab]",
+    "cards": "main ul[aria-label] > li button",
+    "rowMenus": "main tbody tr td:last-child button[aria-label]",
+    "menuItems": "[role=menuitem]",
+    "sheetMenuTrigger": "[role=dialog] button[aria-label='More actions']"
+  },
+  "routes": [
+    { "path": "/" },
+    { "path": "/transactions" },
+    { "path": "/sales" },
+    { "path": "/purchases" },
+    { "path": "/expenses" },
+    { "path": "/vouchers" },
+    { "path": "/receivables" },
+    { "path": "/payables" },
+    { "path": "/reports" },
+    { "path": "/branches" },
+    { "path": "/master-data" },
+    { "path": "/users" },
+    { "path": "/account" },
+    { "path": "/admin", "roles": ["admin"] },
+    { "path": "/admin/payables", "roles": ["admin"] },
+    { "path": "/admin/receivables", "roles": ["admin"] },
+    { "path": "/admin/notifications", "roles": ["admin"] }
+  ]
+}
