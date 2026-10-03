@@ -262,6 +262,7 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
           onRetry={retry}
           pagination={pagination}
           detachedPagination
+          cardGrid
           totalCount={totalCount}
           onPageChange={goToPage}
           expansionKey={ledgerExpansionKey(scope)}

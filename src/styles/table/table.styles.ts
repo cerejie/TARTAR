@@ -82,6 +82,8 @@ export const dataCardListFrame = "relative";
 
 export const dataCardList = "flex flex-col gap-2.5";
 
+export const dataCardGrid = "md:max-lg:portrait:grid md:max-lg:portrait:grid-cols-2";
+
 export const dataCard =
   "relative flex flex-col gap-2.5 rounded-card border border-border/60 bg-card p-3.5 text-sm shadow-card has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring";
 

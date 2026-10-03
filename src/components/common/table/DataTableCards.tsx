@@ -22,6 +22,7 @@ import {
   dataCardField,
   dataCardFocused,
   dataCardFoot,
+  dataCardGrid,
   dataCardHead,
   dataCardHeading,
   dataCardLabel,
@@ -62,6 +63,7 @@ type IProps<T> = {
   onRetry?: () => void;
   emptyText: string;
   emptyHint?: string;
+  cardGrid?: boolean;
   resolveRowKey: (row: T) => string;
   renderContent: (column: IDataTableColumn<T>, row: T, rowIndex: number) => ReactNode;
   columnId: (column: IDataTableColumn<T>, index: number) => string;
@@ -101,6 +103,7 @@ const DataTableCards = <T,>({
   onRetry,
   emptyText,
   emptyHint,
+  cardGrid,
   resolveRowKey,
   renderContent,
   columnId,
@@ -114,6 +117,7 @@ const DataTableCards = <T,>({
   detailActions,
 }: IProps<T>) => {
   const detailSheet = useModal<string>(detailSheetKey);
+  const listClassName = cn(dataCardList, cardGrid && dataCardGrid);
   const sections = detailSections ?? [];
   const metaCount = columns.filter(
     (column, index) => mobileRoleOf(column, index) === "meta"
@@ -124,7 +128,7 @@ const DataTableCards = <T,>({
 
   if (loading) {
     return (
-      <ul className={dataCardList} aria-busy>
+      <ul className={listClassName} aria-busy>
         {Array.from({ length: skeletonCards }, (_, index) => (
           <SkeletonCard key={index} />
         ))}
@@ -279,7 +283,7 @@ const DataTableCards = <T,>({
     <>
       <div className={dataCardListFrame}>
         {refreshing ? <RefreshBar placement="above" /> : null}
-        <ul className={dataCardList} aria-label={label} aria-busy={refreshing}>
+        <ul className={listClassName} aria-label={label} aria-busy={refreshing}>
           {rows.map(renderCard)}
         </ul>
       </div>

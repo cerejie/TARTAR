@@ -163,3 +163,9 @@
 - F15 copy → attention default noun "record" (counts are ledger rows); admin check items say "check"
 - Visual check → skipped: QA_PASSWORD not provided; compiled, visuals unconfirmed
 - Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)
+
+## 2026-10-03 — R6 Tablet portrait ledger grid → Development v2.42
+- F16 trigger → CSS `md:max-lg:portrait:` variant on the card list (exact match of `useDeviceClass` tabletPortrait) instead of a new JS hook; no re-render, phone and desktop untouched
+- F16 scope → opt-in `cardGrid` prop on DataTable, passed only by the /receivables + /payables page tables (records + payments); other card lists unchanged (L1)
+- Visual check → skipped: QA_PASSWORD not provided; compiled, visuals unconfirmed
+- Verification: yarn build + yarn lint clean (lint warnings only in .claude/state/audit scripts, pre-existing)
