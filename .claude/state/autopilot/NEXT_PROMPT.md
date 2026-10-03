@@ -1,6 +1,5 @@
-AUTOPILOT — continue the Visual fixes roadmap at .claude/state/ROADMAP.md, start V2 Edit history
-(Next item 1). Branch mobilel-app-native. Last commit Development v2.57 (V1 detail placeholders), pushed.
-Follow the roadmap's session protocol: read only the audit finding V2 cites (.claude/state/AUDIT-VISUAL-2026-10-03.md
-§ [UI-02]; grep for its heading to get the line range). Decide the file plan with decision-making; do not wait for a go.
-Close the phase with the protocol's step 5 visual check (re-sweep ROLES=admin,acc DEVICES=desk; run it with Bash timeout 3600000 in the background — 600000 killed the V1 sweep mid-run).
-`utils/detail.utils.ts` now has `isEmptyDetailValue` / `joinDetailParts`; reuse them for "Set to X" / empty old values.
+AUTOPILOT — continue the Visual fixes roadmap at .claude/state/ROADMAP.md, start V3 Action groups
+(Next item 1). Branch mobilel-app-native. Last commit Development v2.58 (V2 edit history), pushed.
+Follow the roadmap's session protocol: read only the audit findings V3 cites (.claude/state/AUDIT-VISUAL-2026-10-03.md
+§ [UI-03] line 135, [UI-10] 205, [UI-11] 210, [UI-12] 214; grep each heading for its range). Decide the file plan with decision-making; do not wait for a go.
+Close the phase with the protocol's step 5 visual check (ROLES=admin,emp DEVICES=phone,desk; run the sweep with Bash run_in_background and timeout 3600000, then wait with an until-loop on an EXIT marker — a two-role two-device sweep runs well past 10 minutes).

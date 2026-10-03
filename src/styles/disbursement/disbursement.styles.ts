@@ -10,4 +10,4 @@ export const auditWhen = "font-medium text-foreground";
 
 export const auditChanges = "flex list-disc flex-col gap-1 pl-6";
 
-export const auditField = "rounded-sm bg-muted px-1 py-0.5 font-mono text-xs";
+export const auditField = "font-medium text-foreground";

@@ -290,3 +290,13 @@
 - Redundant `hidden: (row) => !row.created_by` predicates → left in place (harmless, minimal diff)
 - Sweep killed at the 10-min background cap after admin phone → reran emp alone with a 1-hour timeout; admin checked from full-size shots
 - Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), yarn test 99 / 99; swept admin phone 231 + emp phone 175 / 0 failed; looked at emp sheets 03, 09, 13 and five admin full shots — no "—" detail rows; swept, device unconfirmed; UI-17 desk compiled, visuals unconfirmed
+
+## 2026-10-03 — V2 Edit history → Development v2.58
+- File plan → one pure util `utils/audit.utils.ts` (field label map + per-field formatter + change summary) with `audit.utils.test.ts`, `IAuditChangeLine` beside `ITransactionAudit`, the modal maps lines; no hook or service change (Simple tier, reversible, no rule or schema change)
+- Value formatting → status / type / cash-account label maps, `amount` → `formatMoney`, `*_at` → `formatDateTime`, `*_date` → `formatDate`, `*_by` → `userNameOf`, other enums humanised, booleans Yes / No, anything else raw
+- `*_id` fields (customer, supplier, bank account) → no resolver in the modal, so the line reads "<Label>: Changed" rather than printing a UUID (no extra lookups fetched for a rare edit)
+- Unresolved user in a `*_by` field → treated as no value (same rule as V1), so the line falls back to "Set to …" / "Changed"
+- Null old → "Set to X"; null new → "Cleared (was X)"; untracked keys (`id`, `created_at`, `updated_at`, `version`) skipped
+- `verified_by` / `verified_at` labelled "Reviewed by / at" to match the sale sheet's wording
+- Field name styling → `auditField` becomes plain medium-weight text with a colon (no `code` chip)
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), yarn test 106 / 106; swept admin + acc desk 385 / 0 failed, 65 sheets; looked at acc sheet 04 and four full edit-history shots — readable labels, dates, names; swept, device unconfirmed

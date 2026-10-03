@@ -121,3 +121,9 @@ export interface ITransactionAudit {
   edited_at: string;
   changes: Record<string, { old: unknown; new: unknown }>;
 }
+
+export interface IAuditChangeLine {
+  field: string;
+  label: string;
+  summary: string;
+}

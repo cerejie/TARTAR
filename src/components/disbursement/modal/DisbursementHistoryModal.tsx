@@ -12,6 +12,7 @@ import {
   auditMeta,
   auditWhen,
 } from "../../../styles/disbursement/disbursement.styles";
+import { auditChangeLines } from "../../../utils/audit.utils";
 import {
   formatDate,
   formatDateTime,
@@ -61,10 +62,10 @@ const DisbursementHistoryModal = ({
               by {userNameOf(entry.edited_by)}
             </p>
             <ul className={auditChanges}>
-              {Object.entries(entry.changes).map(([field, change]) => (
-                <li key={field}>
-                  <code className={auditField}>{field.replaceAll("_", " ")}</code>{" "}
-                  {String(change.old ?? "—")} → {String(change.new ?? "—")}
+              {auditChangeLines(entry.changes, userNameOf).map((line) => (
+                <li key={line.field}>
+                  <span className={auditField}>{line.label}:</span>{" "}
+                  {line.summary}
                 </li>
               ))}
             </ul>

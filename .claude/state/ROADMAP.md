@@ -117,16 +117,24 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   transactions-card-all-0, admin-receivables-toolbar-qa-customer-a — no "—" row, undeposited sale has no deposit
   section, no "Recorded by —", admin receivable has no Contact rows. UI-17 desk table not swept (phone-only
   phase): compiled, desk visual unconfirmed. Swept, device unconfirmed.
+- [x] V2 Edit history (UI-02) → Development v2.58: `src/utils/audit.utils.ts` (`auditFieldLabel`, `formatAuditValue`,
+  `describeAuditChange`, `auditChangeLines`) + `src/utils/audit.utils.test.ts`; `IAuditChangeLine` in
+  `models/data/transaction/transaction.response.ts`; `components/disbursement/modal/DisbursementHistoryModal.tsx`
+  renders "<Label>: <summary>" ("Set to X", "Cleared (was X)", "X → Y", "Changed" for unresolvable `*_id`);
+  `styles/disbursement/disbursement.styles.ts` `auditField` is plain medium text (no code chip). Build + lint clean,
+  tests 106 / 106. Swept admin + acc desk (385 surfaces, 0 failed, 65 sheets). Looked: acc sheet 04 (/sales
+  undeposited + deposited edit history), full shots admin sales verified, acc sales rejected, acc purchases approved,
+  admin expenses approved edit history — labels, formatted dates, user names, no UUID / ISO / "—"; seeded expenses and
+  purchases have no edits ("No edits recorded."), same component. Swept, device unconfirmed (phone not swept).
 
 ## Next
-1. V2 Edit history.
-2. V3 Action groups.
-3. V4 Date labels.
-4. V5 Admin app.
-5. V6 Reports.
-6. V7 Ledger modals.
-7. V8 Full re-sweep.
-8. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. V3 Action groups.
+2. V4 Date labels.
+3. V5 Admin app.
+4. V6 Reports.
+5. V7 Ledger modals.
+6. V8 Full re-sweep.
+7. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
@@ -141,6 +149,6 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   user not returned by `user_display_names`. V1 hides the dash either way.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.57 (V1 detail placeholders) · Uncommitted: none · Last check:
-V1 sweep admin+emp phone, 2026-10-03. Autopilot running from V2. A sweep of more than one role can exceed a
+Branch: mobilel-app-native · Last commit Development v2.58 (V2 edit history) · Uncommitted: none · Last check:
+V2 sweep admin+acc desk, 2026-10-03. Autopilot running from V3. A sweep of more than one role can exceed a
 10-minute background timeout — run it with `timeout` 3600000.
