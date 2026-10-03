@@ -18,6 +18,7 @@ type IProps<T> = IReportState & {
   rows: readonly T[];
   rowKey?: keyof T;
   emptyText?: string;
+  cardMetaLimit?: number;
   rowClassName?: (row: T) => string;
 };
 
@@ -27,6 +28,7 @@ const ReportRowsTable = <T extends object>({
   rows,
   rowKey,
   emptyText,
+  cardMetaLimit,
   rowClassName,
   loading,
   refreshing,
@@ -46,6 +48,7 @@ const ReportRowsTable = <T extends object>({
     onRetry,
     rowKey,
     emptyText,
+    cardMetaLimit,
     rowClassName,
   };
 

@@ -94,6 +94,7 @@ type IProps<T> = {
   emptyText?: string;
   emptyHint?: string;
   cardGrid?: boolean;
+  cardMetaLimit?: number;
   rowSelection?: IDataTableSelection<T>;
   rowClassName?: (row: T) => string;
   pendingKeysOf?: (row: T) => readonly (string | null | undefined)[];
@@ -143,6 +144,7 @@ const DataTable = <T extends object>({
   emptyText = "No records",
   emptyHint,
   cardGrid,
+  cardMetaLimit,
   rowSelection,
   rowClassName,
   pendingKeysOf,
@@ -429,6 +431,7 @@ const DataTable = <T extends object>({
           emptyText={emptyText}
           emptyHint={emptyHint}
           cardGrid={cardGrid}
+          cardMetaLimit={cardMetaLimit}
           resolveRowKey={resolveRowKey}
           renderContent={renderContent}
           columnId={columnId}

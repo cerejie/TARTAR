@@ -47,7 +47,7 @@ import RecordDetailSheet from "./RecordDetailSheet";
 import TableEmptyState from "./TableEmptyState";
 
 const skeletonCards = 5;
-const cardMetaLimit = 2;
+const defaultCardMetaLimit = 2;
 const emptyMark = "—";
 
 const isEmptyContent = (content: ReactNode) =>
@@ -64,6 +64,7 @@ type IProps<T> = {
   emptyText: string;
   emptyHint?: string;
   cardGrid?: boolean;
+  cardMetaLimit?: number;
   resolveRowKey: (row: T) => string;
   renderContent: (column: IDataTableColumn<T>, row: T, rowIndex: number) => ReactNode;
   columnId: (column: IDataTableColumn<T>, index: number) => string;
@@ -104,6 +105,7 @@ const DataTableCards = <T,>({
   emptyText,
   emptyHint,
   cardGrid,
+  cardMetaLimit = defaultCardMetaLimit,
   resolveRowKey,
   renderContent,
   columnId,

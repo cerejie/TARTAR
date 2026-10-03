@@ -17,6 +17,8 @@ import type {
 
 const renderMoney = (value: number) => formatMoney(value);
 
+const netComponentCount = 3;
+
 const columns: IDataTableColumn<IBranchSummaryRow>[] = [
   { title: "Branch", mobile: "title", dataIndex: "branchName" },
   { title: "Sales", dataIndex: "sales", align: "right", render: renderMoney },
@@ -110,6 +112,7 @@ const BranchSummaryReport = ({
         columns={columns}
         rows={rows}
         rowKey="branch"
+        cardMetaLimit={netComponentCount}
         loading={loading}
         refreshing={refreshing}
         error={error}

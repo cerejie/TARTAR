@@ -42,9 +42,9 @@ const ContentView = ({
     <div className={contentView}>
       <div className={viewHead}>
         <h1 className={viewTitle}>{title}</h1>
-        {meta || tabs || actions ? (
+        {meta ? <span className={viewMeta}>{meta}</span> : null}
+        {tabs || actions ? (
           <div className={viewHeadActions}>
-            {meta ? <span className={viewMeta}>{meta}</span> : null}
             {tabs ? (
               <div data-slot="view-tabs" className={viewTabs}>
                 {tabs}

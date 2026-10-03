@@ -18,7 +18,7 @@ export const viewHeadDivider =
 
 export const viewToolbar = "flex min-w-0 flex-wrap items-center gap-2";
 
-export const viewMeta = "text-sm text-muted-foreground";
+export const viewMeta = "shrink-0 whitespace-nowrap text-sm text-muted-foreground";
 
 export const contextSwitch = cva("", {
   variants: {

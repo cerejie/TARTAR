@@ -166,11 +166,25 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   x 17–21, item 24–120, widest label 74 px. The sweep opens no admin payable sheet: its branch row is compiled,
   visual unconfirmed. Swept, device unconfirmed.
 
+- [x] V6 Reports (UI-06, UI-07) → Development v2.62: `src/components/common/view/ContentView.tsx` renders `meta` as a
+  sibling of the h1 instead of inside the tabs / actions group, and `viewMeta` (`styles/view/view.styles.ts`) is
+  `shrink-0 whitespace-nowrap` — the period stays on one line at the right of the title and the tab strip gets the
+  whole second row (Dashboard's date is unchanged). `cardMetaLimit` prop on `components/common/table/{DataTable,DataTableCards}.tsx`
+  (default 2), passed through `components/report/tables/ReportRowsTable.tsx`; `BranchSummaryReport.tsx` sets it to 3 so
+  the phone card shows Sales, Expenses and Purchases under Net (and no longer opens a detail sheet for one hidden
+  field). `sweep.config.json` `/reports` has `"settle": 4000`. Build + lint clean, tests 107 / 107. Swept admin
+  phone + tabL + desk, `/reports` only (30 surfaces, 0 failed, 6 sheets). Looked: sheets admin-desk-01, admin-desk-02,
+  admin-phone-01, admin-tabL-01, full shot admin desk Weekly — desk 1440: period one line top-right, all eight tabs
+  visible before Print; tabL 1180: tabs on their own row, the strip scrolls under Print (last chip partly hidden —
+  the locked scrolling-chip design); phone card: Sales ₱4,475.00, Expenses ₱9,149.00, Purchases ₱10,384.28, Net
+  −₱15,058.28. `settle` only delays the route load: desk Weekly / Monthly and phone Daily / Weekly tab shots are still
+  skeleton or blank captures (harness timing; Daily, Cash Flow, Receivables and phone Monthly rendered). Swept,
+  device unconfirmed.
+
 ## Next
-1. V6 Reports.
-2. V7 Ledger modals.
-3. V8 Full re-sweep.
-4. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+1. V7 Ledger modals.
+2. V8 Full re-sweep.
+3. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - Migration 32 (SEC-01 / SEC-02, shipped client-side in Development v2.54) waits for the production deploy — the
@@ -185,7 +199,7 @@ Taken by Claude on 2026-10-03, standing in for the user — not given by the use
   user not returned by `user_display_names`. V1 hides the dash either way.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.61 (V5 admin app) · Uncommitted: none · Last check:
-V5 sweep admin phone+tabP+tabL+desk, 2026-10-03. Autopilot running from V6. A sweep of more than one role or
+Branch: mobilel-app-native · Last commit Development v2.62 (V6 reports) · Uncommitted: none · Last check:
+V6 sweep admin phone+tabL+desk (/reports only), 2026-10-03. Autopilot running from V7. A sweep of more than one role or
 device can exceed a 10-minute background timeout — run it with `timeout` 3600000 (the four-device admin sweep
 took about 25 minutes).

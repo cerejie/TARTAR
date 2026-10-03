@@ -326,3 +326,10 @@
 - UI-09 scope → admin payable + due-check sheets printed the same slug, fixed with the receivable sheet (same defect, same hook pattern)
 - Branch lookup → `useBranchListHook().branchName` in the hook (falls back to the slug for an unknown branch), not a new service call
 - Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing); swept admin phone + tabP + tabL + desk 523 / 0 failed, 79 sheets; looked at four sheets, rail zoomed on 12 pages, two full receivable-sheet shots; payable sheet branch row compiled, visuals unconfirmed; swept, device unconfirmed
+
+## 2026-10-03 — V6 Reports → Development v2.62
+- File plan → period fix in the shared `ContentView` head + `viewMeta`, card fix as an optional `cardMetaLimit` on `DataTable` set by the Branch Summary table (Simple tier, UI only, reversible)
+- Where the period goes → stays in the title row as a sibling of the h1, out of the tabs / actions group (moving it to the toolbar row rejected: it would also move the Dashboard date, which shares `meta`)
+- Tab strip → no change to `ContextSwitch`; freeing the row is enough for all eight tabs at 1440, and at 1180 it scrolls (the roadmap accepts "or scrolls"; the chip clip is the locked design)
+- UI-07 → per-table `cardMetaLimit` of 3 rather than raising the global limit of 2 (a global change would alter every card with three metas); the card then needs no detail sheet
+- Verification: yarn build + yarn lint clean (warnings only in .claude/state/audit scripts, pre-existing), tests 107 / 107; swept admin phone + tabL + desk on /reports 30 / 0 failed, 6 sheets; looked at four sheets and one full shot; some report-tab shots still skeleton (harness timing); swept, device unconfirmed
