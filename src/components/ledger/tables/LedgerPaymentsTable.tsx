@@ -4,8 +4,8 @@ import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
 import StatusTag from "../../common/status/StatusTag";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
+import NameCell from "../../common/table/NameCell";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
 import PaymentRowActions from "../../payment/menus/PaymentRowActions";
@@ -58,8 +58,7 @@ const LedgerPaymentsTable = ({ kind }: IProps) => {
     {
       title: partyLabel,
       dataIndex: "party_name",
-      skeleton: "avatar",
-      render: (name: string) => <AvatarCell name={name} />,
+      render: (name: string) => <NameCell name={name} />,
     },
     {
       title: "Amount",

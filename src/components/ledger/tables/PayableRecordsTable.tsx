@@ -5,8 +5,9 @@ import FilterToolbar from "../../common/filter/FilterToolbar";
 import LedgerFilterBar from "../../common/filter/LedgerFilterBar";
 import SortSelect from "../../common/filter/SortSelect";
 import StatusTag from "../../common/status/StatusTag";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
+import DueDateCell from "../../common/table/DueDateCell";
+import NameCell from "../../common/table/NameCell";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
@@ -35,7 +36,6 @@ import {
   nowrapCell,
 } from "../../../styles/table/table.styles";
 import {
-  formatDate,
   formatDateTime,
   formatMoney,
 } from "../../../utils/format.utils";
@@ -85,16 +85,17 @@ const PayableRecordsTable = () => {
       cardPrefix: "Due",
       dataIndex: "due_date",
       className: nowrapCell,
-      render: (value: string) => formatDate(value),
+      render: (value: string, row) => (
+        <DueDateCell date={value} unpaid={row.status !== "paid"} />
+      ),
     },
     {
       title: "Supplier",
       mobile: "title",
       key: "party",
-      skeleton: "avatar",
-      listRender: (row) => <AvatarCell name={row.supplier_name} />,
+      listRender: (row) => <NameCell name={row.supplier_name} />,
       render: (_, row) => (
-        <AvatarCell
+        <NameCell
           name={row.supplier_name}
           hint={row.reference_number ?? undefined}
         />

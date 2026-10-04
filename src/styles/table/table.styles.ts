@@ -80,7 +80,8 @@ export const dataTableLoadingAnnounce = "sr-only";
 
 export const dataListFrame = "relative";
 
-export const dataList = "flex flex-col divide-y divide-border border-y border-border";
+export const dataList =
+  "flex flex-col divide-y divide-foreground/10 border-y border-foreground/10";
 
 export const dataListRow =
   "relative flex min-h-14 items-center gap-3 px-1 py-3 text-sm transition-colors has-data-pressed:bg-muted/70 has-data-focus-visible:ring-2 has-data-focus-visible:ring-ring has-data-focus-visible:ring-inset";
@@ -199,11 +200,19 @@ export const avatarCell = "inline-flex min-w-0 max-w-full items-center gap-3";
 
 export const avatarCellFallback = "bg-brand-soft text-xs font-semibold text-brand";
 
-export const avatarCellText = "flex min-w-0 flex-col";
+export const nameCell = "flex min-w-0 flex-col";
 
-export const avatarCellName = "truncate font-medium";
+export const nameCellName = cva("truncate font-medium", {
+  variants: { compact: { true: "text-[0.8125rem]", false: "" } },
+  defaultVariants: { compact: false },
+});
 
-export const avatarCellHint = "truncate text-xs text-muted-foreground";
+export const nameCellHint = cva("truncate text-muted-foreground", {
+  variants: { compact: { true: "text-[0.6875rem]", false: "text-xs" } },
+  defaultVariants: { compact: false },
+});
+
+export const dataListLabel = "max-w-full truncate text-xs font-medium text-muted-foreground";
 
 export const nowrapCell = "whitespace-nowrap";
 
@@ -236,3 +245,8 @@ export const progressCellPercent = "text-xs text-muted-foreground";
 export const progressCellTrack = "h-0.75 bg-track";
 
 export const truncateCell = "lg:block lg:max-w-44 lg:truncate";
+
+export const dueDateCell = cva("", {
+  variants: { unpaid: { true: "font-semibold text-danger", false: "" } },
+  defaultVariants: { unpaid: false },
+});

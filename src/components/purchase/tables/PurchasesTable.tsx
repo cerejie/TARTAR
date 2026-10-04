@@ -20,6 +20,7 @@ import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
 import PeriodPrintModal from "../../common/modal/PeriodPrintModal";
 import DataTable from "../../common/table/DataTable";
+import DueDateCell from "../../common/table/DueDateCell";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
 import TablePanel from "../../common/table/TablePanel";
@@ -56,10 +57,10 @@ import {
 import { formatDate, formatDateTime, formatMoney } from "../../../utils/format.utils";
 import { voucherBreakdownItems } from "../../../utils/voucher.utils";
 
-const dueDateLabelOf = (row: IDisbursement) => {
-  if (row.voucher?.status === "rejected") return "—";
-  if (!row.due_date || row.payable?.status === "paid") return "—";
-  return formatDate(row.due_date);
+const dueDateOf = (row: IDisbursement) => {
+  if (row.voucher?.status === "rejected") return null;
+  if (row.payable?.status === "paid") return null;
+  return row.due_date;
 };
 
 const PurchasesTable = () => {
@@ -243,7 +244,10 @@ const PurchasesTable = () => {
       dataIndex: "due_date",
       cardPrefix: "Due",
       className: nowrapCell,
-      render: (_, row) => dueDateLabelOf(row),
+      render: (_, row) => {
+        const dueDate = dueDateOf(row);
+        return dueDate ? <DueDateCell date={dueDate} unpaid /> : "—";
+      },
     },
     ...(permissions.isManager
       ? [

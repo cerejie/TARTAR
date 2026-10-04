@@ -8,8 +8,8 @@ import FilterToolbar from "../../common/filter/FilterToolbar";
 import SearchInput from "../../common/filter/SearchInput";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
+import NameCell from "../../common/table/NameCell";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePanel from "../../common/table/TablePanel";
 import { useBankAccountManageHook } from "../../../hook/data/bank/bank.account.manage.hook";
@@ -76,8 +76,7 @@ const BankAccountsTable = () => {
     {
       title: "Bank",
       key: "bank",
-      skeleton: "avatar",
-      render: (_, account) => <AvatarCell name={account.bank?.name ?? "—"} />,
+      render: (_, account) => <NameCell name={account.bank?.name ?? "—"} />,
     },
     { title: "Account name", dataIndex: "account_name" },
     {

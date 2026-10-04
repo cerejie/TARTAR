@@ -28,6 +28,7 @@ import {
 } from "../../../store/data/account/account.store";
 import { formatDateTime } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
+import { useAvatarUrls } from "../../account/account.avatar.hook";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useConfirm } from "../../common/confirmation.hook";
 import { useModal } from "../../common/modal.hook";
@@ -45,6 +46,7 @@ export const useUserManageHook = () => {
   const approveModal = useModal<IUser>(userApproveModalKey);
 
   const permissions = usePermissions();
+  const avatarUrlOf = useAvatarUrls();
   const currentUserId = useAccountStore(selectUserId);
   const { allBranchOptions, branchName } = useBranchListHook();
   const openConfirm = useConfirm();
@@ -241,6 +243,7 @@ export const useUserManageHook = () => {
   };
 
   return {
+    avatarUrlOf,
     users,
     loading,
     refreshing,

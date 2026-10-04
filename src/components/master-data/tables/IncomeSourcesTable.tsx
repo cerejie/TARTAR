@@ -8,8 +8,8 @@ import FilterToolbar from "../../common/filter/FilterToolbar";
 import SearchInput from "../../common/filter/SearchInput";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
+import NameCell from "../../common/table/NameCell";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePanel from "../../common/table/TablePanel";
 import {
@@ -78,8 +78,7 @@ const IncomeSourcesTable = () => {
     {
       title: "Income source",
       dataIndex: "name",
-      skeleton: "avatar",
-      render: (name: string) => <AvatarCell name={name} />,
+      render: (name: string) => <NameCell name={name} />,
     },
     { title: "Order", dataIndex: "sort", align: "center" },
     {

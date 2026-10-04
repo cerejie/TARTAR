@@ -34,7 +34,7 @@ import {
   type IUpdateUserInput,
 } from "../../../models/data/account/account.request";
 import type { IUser } from "../../../models/data/account/account.response";
-import { nowrapCell } from "../../../styles/table/table.styles";
+import { dataListLabel, nowrapCell } from "../../../styles/table/table.styles";
 import { formatDate } from "../../../utils/format.utils";
 
 const resetFieldsOf = (
@@ -63,6 +63,7 @@ const renderApprovalTag = (user: IUser) => {
 
 const UsersTable = () => {
   const {
+    avatarUrlOf,
     users,
     loading,
     refreshing,
@@ -174,18 +175,32 @@ const UsersTable = () => {
       dataIndex: "email",
       skeleton: "avatar",
       render: (_, user) => (
-        <AvatarCell name={displayName(user)} hint={accountHintOf(user)} />
+        <AvatarCell
+          name={displayName(user)}
+          hint={accountHintOf(user)}
+          src={avatarUrlOf(user.id)}
+        />
+      ),
+      listRender: (user) => (
+        <AvatarCell
+          name={displayName(user)}
+          hint={accountHintOf(user)}
+          src={avatarUrlOf(user.id)}
+          compact
+        />
       ),
     },
     {
       title: "Role",
-      mobile: "status",
+      mobile: "amount",
       dataIndex: "role",
       render: (role: UserRole) => <StatusTag label={userRoleLabels[role]} />,
+      listRender: (user) => <span className={dataListLabel}>{userRoleLabels[user.role]}</span>,
     },
     {
       title: "Branches",
       dataIndex: "branch_access",
+      listHidden: true,
       render: (_, user) => branchAccessLabelOf(user),
     },
     {
@@ -198,6 +213,7 @@ const UsersTable = () => {
     {
       title: "Created",
       dataIndex: "created_at",
+      listHidden: true,
       className: nowrapCell,
       render: (value: string) => formatDate(value),
     },

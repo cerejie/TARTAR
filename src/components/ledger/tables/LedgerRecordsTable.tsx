@@ -8,8 +8,9 @@ import SortSelect from "../../common/filter/SortSelect";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import RequirePermission from "../../common/guard/RequirePermission";
 import StatusTag from "../../common/status/StatusTag";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
+import DueDateCell from "../../common/table/DueDateCell";
+import NameCell from "../../common/table/NameCell";
 import ProgressCell from "../../common/table/ProgressCell";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePagination from "../../common/table/TablePagination";
@@ -38,7 +39,6 @@ import {
   nowrapCell,
 } from "../../../styles/table/table.styles";
 import {
-  formatDate,
   formatDateTime,
   formatMoney,
 } from "../../../utils/format.utils";
@@ -121,15 +121,16 @@ const LedgerRecordsTable = ({ scope }: IProps) => {
       cardPrefix: "Due",
       dataIndex: "due_date",
       className: nowrapCell,
-      render: (value: string) => formatDate(value),
+      render: (value: string, row) => (
+        <DueDateCell date={value} unpaid={row.status !== "paid"} />
+      ),
     },
     {
       title: partyLabel,
       mobile: "title",
       key: "party",
-      skeleton: "avatar",
       render: (_, row) => (
-        <AvatarCell
+        <NameCell
           name={partyNameOf(row)}
           hint={row.reference_number ?? undefined}
         />

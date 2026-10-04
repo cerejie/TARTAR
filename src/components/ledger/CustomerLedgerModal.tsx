@@ -16,8 +16,8 @@ import { useIsCompact } from "../../hook/common/breakpoint.hook";
 import SearchInput from "../common/filter/SearchInput";
 import RequirePermission from "../common/guard/RequirePermission";
 import AppModal from "../common/modal/AppModal";
-import AvatarCell from "../common/table/AvatarCell";
 import DataTable from "../common/table/DataTable";
+import NameCell from "../common/table/NameCell";
 import RowActionMenu from "../common/table/RowActionMenu";
 import CustomerDetailsModal from "./CustomerDetailsModal";
 import CustomerInfoTag from "./CustomerInfoTag";
@@ -54,10 +54,9 @@ const CustomerLedgerModal = () => {
     {
       title: "Customer",
       key: "name",
-      skeleton: "avatar",
       sorter: (a, b) => a.customerName.localeCompare(b.customerName),
       render: (_, customer) => (
-        <AvatarCell name={customer.customerName} />
+        <NameCell name={customer.customerName} />
       ),
     },
     {

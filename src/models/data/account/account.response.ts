@@ -19,6 +19,12 @@ export interface IUserDisplayName {
   name: string;
 }
 
+export interface IUserAvatar {
+  id: string;
+  avatar_path: string | null;
+  updated_at: string;
+}
+
 export interface IAuthUser {
   id: string;
   email: string | null;

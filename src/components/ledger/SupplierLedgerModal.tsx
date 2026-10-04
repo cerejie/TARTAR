@@ -13,8 +13,8 @@ import { formatDate, formatMoney } from "../../utils/format.utils";
 import { useIsCompact } from "../../hook/common/breakpoint.hook";
 import SearchInput from "../common/filter/SearchInput";
 import AppModal from "../common/modal/AppModal";
-import AvatarCell from "../common/table/AvatarCell";
 import DataTable from "../common/table/DataTable";
+import NameCell from "../common/table/NameCell";
 import SupplierLedgerView from "./SupplierLedgerView";
 
 const SupplierLedgerModal = () => {
@@ -34,9 +34,8 @@ const SupplierLedgerModal = () => {
     {
       title: "Supplier",
       key: "name",
-      skeleton: "avatar",
       sorter: (a, b) => a.partyName.localeCompare(b.partyName),
-      render: (_, supplier) => <AvatarCell name={supplier.partyName} />,
+      render: (_, supplier) => <NameCell name={supplier.partyName} />,
     },
     {
       title: "Outstanding balance",

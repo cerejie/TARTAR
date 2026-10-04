@@ -18,6 +18,8 @@ import {
 } from "../../utils/supabase.utils";
 
 const developerRole = "developer";
+const avatarBucket = "avatars";
+const avatarFileName = "avatar.webp";
 const invalidCredentialsMessage = "Invalid email or password.";
 const wrongCurrentPasswordMessage = "Current password is incorrect";
 const pendingAccountMessage =
@@ -110,6 +112,31 @@ const accountServices = {
       })
     );
     if (error) throw toError(error);
+  },
+
+  setOwnAvatar: async (userId: string, image: Blob): Promise<void> => {
+    assertOnline();
+
+    const path = `${userId}/${avatarFileName}`;
+    const { error: uploadError } = await supabase.storage
+      .from(avatarBucket)
+      .upload(path, image, { upsert: true, contentType: image.type });
+    if (uploadError) throw toError(uploadError);
+
+    const { error } = await onlineOnly(supabase.rpc("set_own_avatar", { p_path: path }));
+    if (error) throw toError(error);
+  },
+
+  removeOwnAvatar: async (userId: string): Promise<void> => {
+    assertOnline();
+
+    const { error } = await onlineOnly(supabase.rpc("set_own_avatar", { p_path: null }));
+    if (error) throw toError(error);
+
+    const { error: removeError } = await supabase.storage
+      .from(avatarBucket)
+      .remove([`${userId}/${avatarFileName}`]);
+    if (removeError) throw toError(removeError);
   },
 
   changeDeveloperPassword: async (

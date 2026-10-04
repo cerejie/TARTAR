@@ -7,8 +7,8 @@ import type { IDataTableColumn } from "../../../models/common/table.model";
 import FilterToolbar from "../../common/filter/FilterToolbar";
 import SearchInput from "../../common/filter/SearchInput";
 import EntityFormModal from "../../common/form/EntityFormModal";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
+import NameCell from "../../common/table/NameCell";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePanel from "../../common/table/TablePanel";
 import {
@@ -62,9 +62,8 @@ const SuppliersTable = () => {
     {
       title: "Supplier",
       dataIndex: "name",
-      skeleton: "avatar",
       render: (name: string, supplier) => (
-        <AvatarCell name={name} hint={supplier.contact_person ?? undefined} />
+        <NameCell name={name} hint={supplier.contact_person ?? undefined} />
       ),
     },
     {

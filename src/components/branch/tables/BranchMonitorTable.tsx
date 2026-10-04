@@ -1,7 +1,7 @@
 import { Scale } from "lucide-react";
 import type { IDataTableColumn } from "../../../models/common/table.model";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
+import NameCell from "../../common/table/NameCell";
 import TablePanel from "../../common/table/TablePanel";
 import { useBranchManageHook } from "../../../hook/data/branch/branch.manage.hook";
 import { branchMonitorExpansionKey } from "../../../keys/table.keys";
@@ -29,8 +29,7 @@ const columns: IDataTableColumn<IBranchMonitorRow>[] = [
   {
     title: "Branch",
     dataIndex: "branchName",
-    skeleton: "avatar",
-    render: (name: string) => <AvatarCell name={name} />,
+    render: (name: string) => <NameCell name={name} />,
   },
   moneyColumn("Sales", "sales", "amount"),
   moneyColumn("Expenses", "expenses", "meta"),

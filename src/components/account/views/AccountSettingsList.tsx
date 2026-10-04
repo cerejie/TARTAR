@@ -20,6 +20,7 @@ import AccountPanelSheet from "../modal/AccountPanelSheet";
 import ChangePasswordSheet from "../modal/ChangePasswordSheet";
 import NotificationsSheet from "../modal/NotificationsSheet";
 import InstallAppGuide from "./InstallAppGuide";
+import ProfileAvatar from "./ProfileAvatar";
 import ProfileDetails from "./ProfileDetails";
 
 const AccountSettingsList = () => {
@@ -85,6 +86,7 @@ const AccountSettingsList = () => {
       </ListSection>
 
       <AccountPanelSheet panel="profile" description={profileSubtitle}>
+        <ProfileAvatar />
         <ProfileDetails />
       </AccountPanelSheet>
       <ChangePasswordSheet />

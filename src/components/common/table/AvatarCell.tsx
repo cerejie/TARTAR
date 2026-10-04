@@ -1,30 +1,25 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  avatarCell,
-  avatarCellFallback,
-  avatarCellHint,
-  avatarCellName,
-  avatarCellText,
-} from "../../../styles/table/table.styles";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import NameCell from "./NameCell";
+import { avatarCell, avatarCellFallback } from "../../../styles/table/table.styles";
 import { formatInitials } from "../../../utils/format.utils";
 
 type IProps = {
   name: string;
   hint?: string;
+  src?: string;
+  compact?: boolean;
 };
 
-const AvatarCell = ({ name, hint }: IProps) => {
+const AvatarCell = ({ name, hint, src, compact = false }: IProps) => {
   return (
     <span className={avatarCell}>
-      <Avatar>
+      <Avatar size={compact ? "sm" : "default"}>
+        {src ? <AvatarImage src={src} alt={name} /> : null}
         <AvatarFallback className={avatarCellFallback}>
           {formatInitials(name)}
         </AvatarFallback>
       </Avatar>
-      <span className={avatarCellText}>
-        <span className={avatarCellName}>{name}</span>
-        {hint ? <span className={avatarCellHint}>{hint}</span> : null}
-      </span>
+      <NameCell name={name} hint={hint} compact={compact} />
     </span>
   );
 };

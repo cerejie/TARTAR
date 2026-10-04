@@ -26,3 +26,11 @@ export const notificationsBody = "flex flex-col gap-4";
 export const notificationsText = "text-sm text-muted-foreground";
 
 export const settingsList = "flex flex-col gap-5";
+
+export const profileAvatarRow = "flex items-center gap-4 pb-4";
+
+export const profileAvatar = "size-16";
+
+export const profileAvatarFallback = "bg-brand-soft text-lg font-semibold text-brand";
+
+export const profileAvatarActions = "flex flex-wrap items-center gap-2";

@@ -3,8 +3,8 @@ import { firstRecordHint } from "../../../models/common/table.model";
 import type { IDataTableColumn } from "../../../models/common/table.model";
 import EntityFormModal from "../../common/form/EntityFormModal";
 import StatusTag from "../../common/status/StatusTag";
-import AvatarCell from "../../common/table/AvatarCell";
 import DataTable from "../../common/table/DataTable";
+import NameCell from "../../common/table/NameCell";
 import RowActionMenu from "../../common/table/RowActionMenu";
 import TablePanel from "../../common/table/TablePanel";
 import {
@@ -64,9 +64,8 @@ const BranchesTable = () => {
     {
       title: "Branch",
       dataIndex: "name",
-      skeleton: "avatar",
       render: (name: string, branch) => (
-        <AvatarCell name={name} hint={branch.slug} />
+        <NameCell name={name} hint={branch.slug} />
       ),
     },
     {
