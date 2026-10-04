@@ -13,6 +13,7 @@ import {
 } from "../../../keys/table.keys";
 import {
   scopedKey,
+  transactionAuditKey,
   transactionListKey,
   transactionSummaryKey,
 } from "../../../keys/query.keys";
@@ -22,7 +23,10 @@ import type {
   IPaginationRequest,
   IPaginationResponse,
 } from "../../../models/common/pagination.model";
-import type { IQuerySpec } from "../../../models/common/query.model";
+import type {
+  IQueryFetcher,
+  IQuerySpec,
+} from "../../../models/common/query.model";
 import type { ISortOption } from "../../../models/common/table.model";
 import type { BranchSlug } from "../../../models/data/branch/branch.response";
 import type { ITransactionInput } from "../../../models/data/transaction/transaction.request";
@@ -30,6 +34,7 @@ import { countedAmountOf } from "../../../models/data/transaction/transaction.re
 import type {
   IDisbursement,
   ITransaction,
+  ITransactionAudit,
   ITransactionSummary,
 } from "../../../models/data/transaction/transaction.response";
 import type { TransactionType } from "../../../enums/transaction.enum";
@@ -153,6 +158,22 @@ export const transactionSummaryQueryOf = (
     )
   ),
 ];
+
+export const transactionAuditDatasetQueryOf = (): IQuerySpec<
+  ITransactionAudit[]
+> => [transactionAuditKey, transactionServices.getAllAudits];
+
+export const transactionAuditFetcherOf = (
+  transactionId: string
+): IQueryFetcher<ITransactionAudit[]> =>
+  withOfflineDerive(
+    () => transactionServices.getAudit(transactionId),
+    derivedRows(
+      datasetSourcesOf(() => transactionAuditKey, []),
+      {},
+      (audit: ITransactionAudit) => audit.transaction_id === transactionId
+    )
+  );
 
 export const useTransactionListHook = () => {
   const formModal = useModal(transactionFormModalKey);

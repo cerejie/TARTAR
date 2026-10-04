@@ -77,6 +77,7 @@ import {
   saleSummaryQueryOf,
 } from "../data/sale/sale.list.hook";
 import {
+  transactionAuditDatasetQueryOf,
   transactionListQueryOf,
   transactionSummaryQueryOf,
 } from "../data/transaction/transaction.list.hook";
@@ -92,6 +93,7 @@ type IViewScope = {
   permissions: IPermissions;
   branch: string | null;
   branches: IBranch[];
+  canScope: boolean;
 };
 
 const firstPage = new IPaginationFormValue();
@@ -113,18 +115,56 @@ const dashboardQueriesOf = (branch: string | null): IQuerySpec[] => [
   ...overviewPeriodValues.map((period) => adminOverviewQueryOf(branch, period)),
 ];
 
-const transactionQueriesOf = (branch: string | null): IQuerySpec[] => {
-  const filters = pageFiltersOf(defaultFiltersOf("page"), branch);
+const ledgerDatasetFiltersOf = (
+  scope: "receivables" | "payables",
+  branch: string | null
+) =>
+  scopedFilters(
+    { ...defaultFiltersOf(ledgerFilterScopeOf(scope)), status: undefined },
+    branch
+  );
+
+const datasetQueriesOf = (
+  permissions: IPermissions,
+  branch: string | null
+): IQuerySpec[] => {
+  const pageFilters = pageFiltersOf(defaultFiltersOf("page"), branch);
 
   return [
-    transactionListQueryOf(filters, firstPage, transactionSort),
-    transactionSummaryQueryOf(filters),
+    ...(permissions.viewReminders
+      ? [
+          transactionSummaryQueryOf(pageFilters),
+          saleSummaryQueryOf(pageFilters),
+          disbursementSummaryQueryOf("purchase", pageFilters),
+          disbursementSummaryQueryOf("expense", pageFilters),
+          ledgerSummaryQueryOf(
+            "receivables",
+            receivableServices,
+            ledgerDatasetFiltersOf("receivables", branch)
+          ),
+          ledgerSummaryQueryOf(
+            "payables",
+            payableServices,
+            ledgerDatasetFiltersOf("payables", branch)
+          ),
+          paymentDatasetQueryOf("receivable", branch),
+          paymentDatasetQueryOf("payable", branch),
+        ]
+      : []),
+    ...(permissions.createVouchers ? [voucherDatasetQueryOf(branch)] : []),
   ];
 };
 
-const saleQueriesOf = (branch: string | null): IQuerySpec[] => [
-  saleSummaryQueryOf(pageFiltersOf(defaultFiltersOf("page"), branch)),
-  ...withAllTab(saleStatusValues).map((saleStatus) =>
+const transactionQueriesOf = (branch: string | null): IQuerySpec[] => [
+  transactionListQueryOf(
+    pageFiltersOf(defaultFiltersOf("page"), branch),
+    firstPage,
+    transactionSort
+  ),
+];
+
+const saleQueriesOf = (branch: string | null): IQuerySpec[] =>
+  withAllTab(saleStatusValues).map((saleStatus) =>
     saleListQueryOf(
       pageFiltersOf(
         { ...defaultFiltersOf("page"), saleStatus },
@@ -134,18 +174,13 @@ const saleQueriesOf = (branch: string | null): IQuerySpec[] => [
       firstPage,
       transactionSort
     )
-  ),
-];
+  );
 
 const disbursementQueriesOf = (
   kind: DisbursementKind,
   branch: string | null
-): IQuerySpec[] => [
-  disbursementSummaryQueryOf(
-    kind,
-    pageFiltersOf(defaultFiltersOf("page"), branch)
-  ),
-  ...withAllTab(voucherStatusValues).map((voucherStatus) =>
+): IQuerySpec[] =>
+  withAllTab(voucherStatusValues).map((voucherStatus) =>
     disbursementListQueryOf(
       kind,
       pageFiltersOf(
@@ -156,19 +191,16 @@ const disbursementQueriesOf = (
       firstPage,
       transactionSort
     )
-  ),
-];
+  );
 
-const voucherQueriesOf = (branch: string | null): IQuerySpec[] => [
-  voucherDatasetQueryOf(branch),
-  ...withAllTab(voucherStatusValues).map((voucherStatus) =>
+const voucherQueriesOf = (branch: string | null): IQuerySpec[] =>
+  withAllTab(voucherStatusValues).map((voucherStatus) =>
     voucherListQueryOf(
       scopedFilters({ ...defaultFiltersOf("vouchers"), voucherStatus }, branch),
       firstPage,
       voucherSortOptions.at(0)
     )
-  ),
-];
+  );
 
 const paymentQueryOf = (kind: PaymentKind, branch: string | null): IQuerySpec =>
   paymentListQueryOf(
@@ -182,13 +214,7 @@ const receivableQueriesOf = (branch: string | null): IQuerySpec[] => {
   const defaults = defaultFiltersOf(ledgerFilterScopeOf("receivables"));
 
   return [
-    ledgerSummaryQueryOf(
-      "receivables",
-      receivableServices,
-      scopedFilters({ ...defaults, status: undefined }, branch)
-    ),
     paymentQueryOf("receivable", branch),
-    paymentDatasetQueryOf("receivable", branch),
     [customerSummaryKey, receivableServices.getCustomerSummaries],
     ...withAllTab(ledgerStatusFilterValues).map((status) =>
       ledgerListQueryOf(
@@ -206,13 +232,7 @@ const payableQueriesOf = (branch: string | null): IQuerySpec[] => {
   const defaults = defaultFiltersOf(ledgerFilterScopeOf("payables"));
 
   return [
-    ledgerSummaryQueryOf(
-      "payables",
-      payableServices,
-      scopedFilters({ ...defaults, status: undefined }, branch)
-    ),
     paymentQueryOf("payable", branch),
-    paymentDatasetQueryOf("payable", branch),
     [supplierSummaryKey, payableServices.getPartySummaries],
     ...withAllTab(payableStatusValues).map((status) =>
       ledgerListQueryOf(
@@ -250,14 +270,34 @@ const branchQueriesOf = (
   ];
 };
 
-export const viewQueriesOf = ({
+const otherScopeQueriesOf = ({
+  permissions,
+  branch,
+  branches,
+  canScope,
+}: IViewScope): IQuerySpec[] => {
+  if (!canScope) return [];
+
+  const otherScopes = [null, ...branches.map((item) => item.slug)].filter(
+    (scope) => scope !== branch
+  );
+
+  return [
+    ...(branch === null ? [] : datasetQueriesOf(permissions, null)),
+    ...(permissions.viewDashboard ? otherScopes.flatMap(dashboardQueriesOf) : []),
+  ];
+};
+
+const activeScopeQueriesOf = ({
   permissions,
   branch,
   branches,
 }: IViewScope): IQuerySpec[] => [
   ...(permissions.viewDashboard ? dashboardQueriesOf(branch) : []),
+  ...datasetQueriesOf(permissions, branch),
   ...(permissions.viewReminders
     ? [
+        transactionAuditDatasetQueryOf(),
         ...transactionQueriesOf(branch),
         ...saleQueriesOf(branch),
         ...disbursementQueriesOf("purchase", branch),
@@ -271,4 +311,9 @@ export const viewQueriesOf = ({
   ...(permissions.viewBranchMonitoring
     ? branchQueriesOf(branch, branches)
     : []),
+];
+
+export const viewQueriesOf = (scope: IViewScope): IQuerySpec[] => [
+  ...activeScopeQueriesOf(scope),
+  ...otherScopeQueriesOf(scope),
 ];

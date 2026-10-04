@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import {
-  dashboardAlertsKey,
   dashboardChecksKey,
   dashboardOverviewKey,
   scopedKey,
@@ -19,11 +18,15 @@ import {
 import dashboardServices from "../../../services/data/dashboard.services";
 import { balancesOf, toAttentionItem } from "../../../utils/attention.utils";
 import { todayIso } from "../../../utils/format.utils";
+import { currentMonthKey } from "../../../utils/period.utils";
 import { adminPayablesPath, adminReceivablesPath } from "../../../utils/route.utils";
 import { useQuery } from "../../common/query.hook";
 import { useSegment } from "../../common/segment.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
-import { dashboardSalesQueryOf } from "../dashboard/dashboard.hook";
+import {
+  dashboardAlertsQueryOf,
+  dashboardSalesQueryOf,
+} from "../dashboard/dashboard.hook";
 
 import type { IQuerySpec } from "../../../models/common/query.model";
 import type { ISegmentOption } from "../../../models/common/segment.model";
@@ -103,7 +106,7 @@ export const adminOverviewQueryOf = (
   branch: string | null,
   period: OverviewPeriod
 ): IQuerySpec<IDashboardOverview> => [
-  scopedKey(dashboardOverviewKey, branch, period),
+  scopedKey(dashboardOverviewKey, branch, period, currentMonthKey()),
   () => dashboardServices.getOverview(period, branch),
 ];
 
@@ -126,10 +129,7 @@ export const useAdminHomeHook = () => {
   const overviewQuery = useQuery(...adminOverviewQueryOf(branch, period));
   const salesQuery = useQuery(...dashboardSalesQueryOf(branch, salesPeriod));
 
-  const alertsQuery = useQuery<IDueAlerts>(
-    scopedKey(dashboardAlertsKey, branch),
-    () => dashboardServices.getDueAlerts(dueHorizonDays, branch)
-  );
+  const alertsQuery = useQuery(...dashboardAlertsQueryOf(branch));
 
   const checksQuery = useQuery(...adminChecksQueryOf(branch));
 

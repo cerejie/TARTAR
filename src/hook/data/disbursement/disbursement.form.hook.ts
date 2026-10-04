@@ -9,6 +9,7 @@ import {
   expenseCategoryListKey,
   payableListKey,
   supplierListKey,
+  transactionAuditKey,
   voucherListKey,
 } from "../../../keys/query.keys";
 import {
@@ -53,6 +54,7 @@ export const disbursementInvalidateKeys = (kind: DisbursementKind) => [
   supplierListKey,
   expenseCategoryListKey,
   disbursementDetailKey,
+  transactionAuditKey,
 ];
 
 const deriveDisbursementValues = (

@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-04 (O1 done)
+Updated: 2026-10-04 (O2 done)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -324,11 +324,28 @@ Given by the user on 2026-10-03 unless marked otherwise.
   `ledgerFilterColumns`, `ledgerSearchColumnsOf`) and the services import them. Trim (300) unchanged: +3 keys per branch.
   Write queue untouched.
 
+- [x] O2 Offline branch scopes, details and month change (Development v2.78, suggested — not committed in-session):
+  branch scopes: `datasetSourcesOf` (`utils/dataset.utils.ts`, tested) always adds the all-branches dataset as a
+  fallback, so any branch scope derives from the "All branches" datasets (matchers already filter by branch);
+  `prime.view.hook.ts` splits `datasetQueriesOf` (summaries + voucher / payment datasets) from the paged first pages
+  and, for roles that can scope (`canScope`, passed from `prime.hook.ts`), primes the all-branches datasets when a
+  branch is active plus the dashboard keys of every other scope (lists / reports derive). `warm` (`query.store.ts`)
+  now queues only keys not warmed before or still empty, so a scope switch does not refetch the whole set (stale keys
+  still refresh via invalidate / `refetchAll`). Requests in the first 45 s after login: admin 306, acc 140, emp 101.
+  Month change: `currentMonthKey` (`utils/period.utils.ts`) in the dashboard summary / sales / profit / overview keys,
+  the report range in report-transactions / report-payments keys (alerts / checks / reviews carry no period label);
+  reports derive offline — report-transactions / receivables / payables reuse the dataset specs' fetchers, Branch
+  Summary derives from the sale / purchase / expense datasets (`report.summary.hook.ts`). Details: `matchesParty`
+  (tested) + `partyLedgerFetcherOf` (`ledger.list.hook.ts`: customer / supplier ledger, record-payment open rows),
+  `partyPaymentsFetcherOf` (`payment.list.hook.ts`: ledger Payments tabs), customer last payment
+  (`customer.detail.hook.ts`), voucher source (`voucher.detail.hook.ts`, from the disbursement dataset), edit history
+  (new `transactionServices.getAllAudits` dataset `transactionAuditKey`, `transactionAuditFetcherOf`, invalidated by
+  sale / disbursement writes). `admin.home.hook.ts` alerts reuse `dashboardAlertsQueryOf`.
+
 ## Next
-1. O2 Offline branch scopes, details and month change.
-2. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
+1. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
    exercise them: the QA accounts see one branch).
-3. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
+2. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
 - USER DECISIONS (end of run):
@@ -345,5 +362,5 @@ Given by the user on 2026-10-03 unless marked otherwise.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.77 (O1 Offline variants of the paged lists) · Uncommitted: none · Last check: O1, build + lint clean, tests 156 / 156, offline probe admin phone + desk (V9 method) on every list: page 2 / load more, each sort, This month, name search — 0 "not saved". Run any sweep or probe
+Branch: mobilel-app-native · Last commit Development v2.77 (O1 Offline variants of the paged lists) · Uncommitted: O2 (suggested as Development v2.78) · Last check: O2, build + lint clean, tests 160 / 160, offline probe admin / emp / acc phone (V9 method): branch switch QA Test ↔ All branches, customer / supplier ledger, payment detail, edit history, faked month change (Date +28 days, reload) — dashboard honestly not saved, Branch Summary November derived (₱0), lists cached; voucher source not exercised (no rejected voucher in QA data). Previous check O1, build + lint clean, tests 156 / 156, offline probe admin phone + desk (V9 method) on every list: page 2 / load more, each sort, This month, name search — 0 "not saved". Run any sweep or probe
 with Bash `run_in_background` and `timeout` 3600000.

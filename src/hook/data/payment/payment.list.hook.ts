@@ -23,8 +23,15 @@ import type {
   IPaginationRequest,
   IPaginationResponse,
 } from "../../../models/common/pagination.model";
-import type { IQuerySpec } from "../../../models/common/query.model";
-import type { ISortOption } from "../../../models/common/table.model";
+import type {
+  IQueryFetcher,
+  IQuerySpec,
+} from "../../../models/common/query.model";
+import type {
+  ISortOption,
+  ISortState,
+} from "../../../models/common/table.model";
+import type { ILedgerPartyKey } from "../../../models/data/ledger/ledger.response";
 import type {
   ILedgerPayment,
   IPartyFilter,
@@ -42,7 +49,10 @@ import {
   datasetFiltersOf,
   datasetSourcesOf,
   derivedPage,
+  derivedRows,
   matchesLedgerFilters,
+  matchesParty,
+  sortRowsBy,
   withOfflineDerive,
 } from "../../../utils/dataset.utils";
 import {
@@ -68,6 +78,32 @@ export const matchesPaymentFilters =
       paymentFilterColumns
     ) &&
     (!filters.paymentStatus || row.status === filters.paymentStatus);
+
+const latestPaidFirst: ISortState = { column: "paid_at", direction: "descending" };
+
+const partyIdColumnOf = (kind: PaymentKind) =>
+  kind === "receivable" ? "customer_id" : "supplier_id";
+
+const partyFilterOf = (party: ILedgerPartyKey): IPartyFilter =>
+  party.partyId ? { partyId: party.partyId } : { partyName: party.partyName };
+
+export const partyPaymentsFetcherOf = (
+  kind: PaymentKind,
+  party: ILedgerPartyKey
+): IQueryFetcher<ILedgerPayment[]> =>
+  withOfflineDerive(
+    () => paymentServices.getAll(kind, partyFilterOf(party)),
+    (read) => {
+      const rows = derivedRows(
+        datasetSourcesOf(paymentDatasetKeyOf(kind), []),
+        {},
+        (row: ILedgerPayment) =>
+          matchesParty(row, partyIdColumnOf(kind), "party_name", party)
+      )(read);
+
+      return rows && sortRowsBy(rows, latestPaidFirst);
+    }
+  );
 
 export const paymentDatasetQueryOf = (
   kind: PaymentKind,
@@ -135,15 +171,9 @@ export const usePaymentListHook = (
     { enabled: !party, keepPrevious: true }
   );
 
-  const partyFilter: IPartyFilter = party
-    ? party.partyId
-      ? { partyId: party.partyId }
-      : { partyName: party.partyName }
-    : {};
-
   const partyQuery = useQuery<ILedgerPayment[]>(
     scopedKey(paymentListKey, kind, party?.partyId ?? party?.partyName),
-    () => paymentServices.getAll(kind, partyFilter),
+    party ? partyPaymentsFetcherOf(kind, party) : () => Promise.resolve([]),
     { enabled: !!party }
   );
 

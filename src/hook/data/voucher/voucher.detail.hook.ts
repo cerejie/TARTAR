@@ -5,12 +5,31 @@ import {
 import { disbursementDetailKey, scopedKey } from "../../../keys/query.keys";
 import { voucherDisbursementKind } from "../../../models/data/voucher/voucher.response";
 import transactionServices from "../../../services/data/transaction.services";
+import { withOfflineDerive } from "../../../utils/dataset.utils";
+import { scopedFilters } from "../../../utils/filter.utils";
 import { useModal } from "../../common/modal.hook";
 import { useQuery } from "../../common/query.hook";
+import { disbursementSummaryQueryOf } from "../disbursement/disbursement.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
 
+import type { IQueryFetcher } from "../../../models/common/query.model";
 import type { IDisbursement } from "../../../models/data/transaction/transaction.response";
 import type { IVoucher } from "../../../models/data/voucher/voucher.response";
+
+const sourceFetcherOf = (
+  voucher: IVoucher,
+  transactionId: string
+): IQueryFetcher<IDisbursement | null> =>
+  withOfflineDerive(
+    () => transactionServices.getDisbursement(transactionId),
+    (read) =>
+      disbursementSummaryQueryOf(
+        voucherDisbursementKind(voucher),
+        scopedFilters({}, voucher.branch)
+      )[1]
+        .offline?.(read)
+        ?.find((row) => row.id === transactionId)
+  );
 
 export const useVoucherDetailHook = () => {
   const sourceModal = useModal<IVoucher>(voucherSourceModalKey);
@@ -23,7 +42,9 @@ export const useVoucherDetailHook = () => {
 
   const sourceQuery = useQuery<IDisbursement | null>(
     scopedKey(disbursementDetailKey, transactionId),
-    () => transactionServices.getDisbursement(transactionId as string),
+    sourceVoucher && transactionId
+      ? sourceFetcherOf(sourceVoucher, transactionId)
+      : () => Promise.resolve(null),
     { enabled: isSourceOpen }
   );
 

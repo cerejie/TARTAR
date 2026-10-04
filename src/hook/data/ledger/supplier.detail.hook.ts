@@ -6,7 +6,6 @@ import {
 } from "../../../keys/query.keys";
 import { partyKeyOf } from "../../../models/data/ledger/ledger.response";
 import { payableServices } from "../../../services/data/ledger.services";
-import paymentServices from "../../../services/data/payment.services";
 import { useLedgerStore } from "../../../store/data/ledger/ledger.store";
 import { scopedFilters } from "../../../utils/filter.utils";
 import { usePermissions } from "../../account/account.permission.hook";
@@ -15,7 +14,9 @@ import { useModal } from "../../common/modal.hook";
 import { useQuery } from "../../common/query.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
+import { partyPaymentsFetcherOf } from "../payment/payment.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
+import { partyLedgerFetcherOf } from "./ledger.list.hook";
 import { supplierSummaryKey } from "./supplier.ledger.hook";
 import type {
   ILedgerPartySummary,
@@ -44,10 +45,14 @@ export const useSupplierDetailHook = () => {
 
   const listQuery = useQuery<IPayable[]>(
     scopedKey(payableListKey, "ledger", key, JSON.stringify(effectiveFilters)),
-    () =>
-      supplier
-        ? payableServices.getPartyLedger(supplier, effectiveFilters)
-        : Promise.resolve([]),
+    supplier
+      ? partyLedgerFetcherOf(
+          "payables",
+          () => payableServices.getPartyLedger(supplier, effectiveFilters),
+          supplier,
+          effectiveFilters
+        )
+      : () => Promise.resolve([]),
     { enabled: !!supplier }
   );
 
@@ -59,13 +64,7 @@ export const useSupplierDetailHook = () => {
 
   const paymentsQuery = useQuery<ILedgerPayment[]>(
     scopedKey(paymentListKey, "payable", key),
-    () =>
-      paymentServices.getAll(
-        "payable",
-        supplier?.partyId
-          ? { partyId: supplier.partyId }
-          : { partyName: supplier?.partyName ?? "" }
-      ),
+    supplier ? partyPaymentsFetcherOf("payable", supplier) : () => Promise.resolve([]),
     { enabled: !!supplier }
   );
 

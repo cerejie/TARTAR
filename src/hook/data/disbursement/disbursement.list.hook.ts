@@ -79,6 +79,7 @@ import {
   disbursementInvalidateKeys,
   useDisbursementFormHook,
 } from "./disbursement.form.hook";
+import { transactionAuditFetcherOf } from "../transaction/transaction.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
 
 export const pendingVoucherCount = (rows: readonly IDisbursement[]) =>
@@ -240,7 +241,7 @@ export const useDisbursementListHook = (
 
   const auditQuery = useQuery<ITransactionAudit[]>(
     scopedKey(scope, "audit", historyRow?.id),
-    () => transactionServices.getAudit(historyRow?.id as string),
+    historyRow ? transactionAuditFetcherOf(historyRow.id) : () => Promise.resolve([]),
     { enabled: historyModal.modal.visible && !!historyRow }
   );
 

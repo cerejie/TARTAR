@@ -29,6 +29,7 @@ import type {
 } from "../../../models/common/pagination.model";
 import type {
   IMutationResult,
+  IQueryFetcher,
   IQuerySpec,
 } from "../../../models/common/query.model";
 import type { ISortOption } from "../../../models/common/table.model";
@@ -54,6 +55,7 @@ import {
   derivedRows,
   matchesLedgerFilters,
   matchesLedgerStatus,
+  matchesParty,
   withOfflineDerive,
 } from "../../../utils/dataset.utils";
 import {
@@ -156,6 +158,31 @@ const matchesLedgerRowFilters =
         scope === "payables" ? "supplier_name" : "customer_name"
       )
     ) && matchesLedgerStatus(row, filters.status, todayIso());
+
+const partyColumnsOf = (scope: ILedgerScope) =>
+  scope === "payables"
+    ? { idColumn: "supplier_id", nameColumn: "supplier_name" }
+    : { idColumn: "customer_id", nameColumn: "customer_name" };
+
+export const partyLedgerFetcherOf = <Row extends ILedgerRow>(
+  scope: ILedgerScope,
+  fetchLedger: () => Promise<Row[]>,
+  party: ILedgerPartyKey,
+  filters: ILedgerFilters
+): IQueryFetcher<Row[]> => {
+  const { idColumn, nameColumn } = partyColumnsOf(scope);
+  const matchesFilters = matchesLedgerRowFilters(scope, filters);
+
+  return withOfflineDerive(
+    fetchLedger,
+    derivedRows(
+      datasetSourcesOf(ledgerSummaryKeyOfScope(scope), [datasetFiltersOf(filters)]),
+      filters,
+      (row: Row) =>
+        matchesParty(row, idColumn, nameColumn, party) && matchesFilters(row)
+    )
+  );
+};
 
 export const ledgerListQueryOf = <Row extends ILedgerRow>(
   scope: ILedgerScope,
@@ -260,6 +287,7 @@ export const useLedgerListHook = <
   );
 
   const paymentTarget = paymentModal.modal.data;
+  const openRowFilters = scopedFilters({ status: "unpaid" }, scopeBranch);
   const partyLedgerQuery = useQuery<Row[]>(
     scopedKey(
       config.scope,
@@ -267,13 +295,14 @@ export const useLedgerListHook = <
       paymentTarget ? partyKeyOf(paymentTarget.party) : null,
       scopeBranch
     ),
-    () =>
-      paymentTarget
-        ? config.services.getPartyLedger(
-            paymentTarget.party,
-            scopedFilters({ status: "unpaid" }, scopeBranch)
-          )
-        : Promise.resolve([]),
+    paymentTarget
+      ? partyLedgerFetcherOf(
+          config.scope,
+          () => config.services.getPartyLedger(paymentTarget.party, openRowFilters),
+          paymentTarget.party,
+          openRowFilters
+        )
+      : () => Promise.resolve([]),
     {
       enabled:
         paymentModal.modal.visible && !!paymentTarget && !paymentTarget.rows,

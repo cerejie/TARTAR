@@ -25,7 +25,6 @@ import {
   receivableServices,
 } from "../../../services/data/ledger.services";
 import paymentServices from "../../../services/data/payment.services";
-import transactionServices from "../../../services/data/transaction.services";
 import {
   datasetFiltersOf,
   datasetSourcesOf,
@@ -39,10 +38,12 @@ import { useSearchParam } from "../../common/search.param.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useExpenseCategoryListHook } from "../expense-category/expense.category.list.hook";
+import { ledgerSummaryQueryOf } from "../ledger/ledger.list.hook";
 import {
   matchesPaymentFilters,
   paymentDatasetKeyOf,
 } from "../payment/payment.list.hook";
+import { transactionSummaryQueryOf } from "../transaction/transaction.list.hook";
 import { useReportSummaryHook } from "./report.summary.hook";
 
 const isUnpaid = (row: ILedgerRow) => row.status !== "paid";
@@ -50,20 +51,10 @@ const isUnpaid = (row: ILedgerRow) => row.status !== "paid";
 const branchFilterOf = (branch: string | null): ILedgerFilters =>
   branch ? { branch } : {};
 
-export const reportTransactionQueryOf = (
-  type: ReportType,
-  branch: string | null
-): IQuerySpec<IDisbursement[]> => [
-  scopedKey(reportTransactionKey, type, branch),
-  () => {
-    const { from, to } = rangeFor(type);
-    return transactionServices.getAllWithVouchers({
-      dateFrom: from,
-      dateTo: to,
-      ...branchFilterOf(branch),
-    });
-  },
-];
+const rangeKeyOf = (type: ReportType): string[] => {
+  const { from, to } = rangeFor(type);
+  return [from, to];
+};
 
 const reportPeriodFiltersOf = (
   type: ReportType,
@@ -73,11 +64,19 @@ const reportPeriodFiltersOf = (
   return { dateFrom: from, dateTo: to, ...branchFilterOf(branch) };
 };
 
+export const reportTransactionQueryOf = (
+  type: ReportType,
+  branch: string | null
+): IQuerySpec<IDisbursement[]> => [
+  scopedKey(reportTransactionKey, type, branch, ...rangeKeyOf(type)),
+  transactionSummaryQueryOf(reportPeriodFiltersOf(type, branch))[1],
+];
+
 export const reportCustomerPaymentQueryOf = (
   type: ReportType,
   branch: string | null
 ): IQuerySpec<ILedgerPayment[]> => [
-  scopedKey(reportPaymentKey, type, branch),
+  scopedKey(reportPaymentKey, type, branch, ...rangeKeyOf(type)),
   withOfflineDerive(
     () =>
       paymentServices.getAllInPeriod(
@@ -102,14 +101,14 @@ export const reportReceivableQueryOf = (
   branch: string | null
 ): IQuerySpec<IReceivable[]> => [
   scopedKey(reportReceivableKey, branch),
-  () => receivableServices.getAll(branchFilterOf(branch)),
+  ledgerSummaryQueryOf("receivables", receivableServices, branchFilterOf(branch))[1],
 ];
 
 export const reportPayableQueryOf = (
   branch: string | null
 ): IQuerySpec<IPayable[]> => [
   scopedKey(reportPayableKey, branch),
-  () => payableServices.getAll(branchFilterOf(branch)),
+  ledgerSummaryQueryOf("payables", payableServices, branchFilterOf(branch))[1],
 ];
 
 export const useReportHook = () => {

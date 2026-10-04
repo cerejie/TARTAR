@@ -311,12 +311,16 @@ export const useQueryStore = create<States & Actions>((set, get) => {
     },
 
     warm: (queries) => {
+      const warmedKeys = new Set(backgroundFetchers.keys());
       backgroundFetchers.clear();
-      staleBackgroundKeys.clear();
       for (const [key, fetcher] of queries) {
         backgroundFetchers.set(key, fetcher);
-        staleBackgroundKeys.add(key);
+        const isUnwarmed =
+          !warmedKeys.has(key) || get().entries[key]?.data === undefined;
+        if (isUnwarmed) staleBackgroundKeys.add(key);
       }
+      for (const key of staleBackgroundKeys)
+        if (!backgroundFetchers.has(key)) staleBackgroundKeys.delete(key);
       queueBackground();
     },
 

@@ -14,6 +14,7 @@ export const userListKey = "users";
 export const userDisplayNamesKey = "user-display-names";
 export const transactionListKey = "transactions";
 export const transactionSummaryKey = "transaction-summary";
+export const transactionAuditKey = "transaction-audit";
 export const purchaseListKey = "purchases";
 export const purchaseSummaryKey = "purchase-summary";
 export const saleListKey = "sales";

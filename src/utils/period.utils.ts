@@ -10,6 +10,7 @@ import type {
 } from "../models/common/period.model";
 
 const isoFormat = "YYYY-MM-DD";
+const monthKeyFormat = "YYYY-MM";
 const yearFormat = "YYYY";
 const recentYearCount = 6;
 const daysInWeek = 7;
@@ -79,6 +80,8 @@ export const yearLabelsOf = (
   years: readonly string[]
 ): Record<string, string> =>
   Object.fromEntries(years.map((year) => [year, year]));
+
+export const currentMonthKey = (): string => dayjs().format(monthKeyFormat);
 
 export const monthToDateRange = (monthsAgo: number): IDateRange => {
   const anchor = dayjs().subtract(monthsAgo, "month");

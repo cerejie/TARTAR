@@ -16,6 +16,7 @@ import type {
   IQueryReader,
 } from "../models/common/query.model";
 import type { ISortState } from "../models/common/table.model";
+import type { ILedgerPartyKey } from "../models/data/ledger/ledger.response";
 
 export interface IDatasetSource {
   key: string;
@@ -25,6 +26,8 @@ export interface IDatasetSource {
 type IRowMatcher<Row> = (row: Row) => boolean;
 
 const dateFields: readonly (keyof ILedgerFilters)[] = ["dateFrom", "dateTo"];
+
+const allBranchesDataset: ILedgerFilters = {};
 
 const fieldOf = (row: object, column: string): unknown =>
   (row as Record<string, unknown>)[column];
@@ -60,8 +63,17 @@ const isInAmountRange = (value: unknown, filters: ILedgerFilters): boolean => {
 export const datasetSourcesOf = (
   keyOf: (filters: ILedgerFilters) => string,
   candidates: readonly ILedgerFilters[]
-): IDatasetSource[] =>
-  candidates.map((filters) => ({ key: keyOf(filters), filters }));
+): IDatasetSource[] => {
+  const sources = [...candidates, allBranchesDataset].map((filters) => ({
+    key: keyOf(filters),
+    filters,
+  }));
+
+  return sources.filter(
+    (source, index) =>
+      sources.findIndex((candidate) => candidate.key === source.key) === index
+  );
+};
 
 export const datasetFiltersOf = (filters: ILedgerFilters): ILedgerFilters =>
   filters.branch ? { branch: filters.branch } : {};
@@ -102,6 +114,17 @@ export const matchesLedgerFilters = (
     containsText(fieldOf(row, columns.search), filters.search)) &&
   isInDateRange(fieldOf(row, columns.date), filters) &&
   (!columns.amount || isInAmountRange(fieldOf(row, columns.amount), filters));
+
+export const matchesParty = (
+  row: object,
+  idColumn: string,
+  nameColumn: string,
+  party: ILedgerPartyKey
+): boolean =>
+  party.partyId
+    ? fieldOf(row, idColumn) === party.partyId
+    : isMissing(fieldOf(row, idColumn)) &&
+      fieldOf(row, nameColumn) === party.partyName;
 
 export const matchesLedgerStatus = (
   row: { status: string; due_date: string | null },

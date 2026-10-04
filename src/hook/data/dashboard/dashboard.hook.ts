@@ -17,7 +17,7 @@ import {
   pendingVouchersAttentionKey,
   salesToVerifyAttentionKey,
 } from "../../../utils/attention.utils";
-import { monthToDateRange } from "../../../utils/period.utils";
+import { currentMonthKey, monthToDateRange } from "../../../utils/period.utils";
 import { branchSummaryNet } from "../../../utils/report.utils";
 import {
   filterRoutesByPermission,
@@ -60,7 +60,7 @@ const profitOf = async (branch: string | null): Promise<IDashboardProfit> => {
 export const dashboardSummaryQueryOf = (
   branch: string | null
 ): IQuerySpec<IDashboardSummary> => [
-  scopedKey(dashboardSummaryKey, branch),
+  scopedKey(dashboardSummaryKey, branch, currentMonthKey()),
   () => dashboardServices.getSummary(branch),
 ];
 
@@ -68,7 +68,7 @@ export const dashboardSalesQueryOf = (
   branch: string | null,
   salesPeriod: SalesPeriod
 ): IQuerySpec<IDailySalesPoint[]> => [
-  scopedKey(dashboardSalesKey, branch, salesPeriod),
+  scopedKey(dashboardSalesKey, branch, salesPeriod, currentMonthKey()),
   () => dashboardServices.getSalesSeries(salesPeriod, branch),
 ];
 
@@ -89,7 +89,7 @@ export const dashboardReviewsQueryOf = (
 export const dashboardProfitQueryOf = (
   branch: string | null
 ): IQuerySpec<IDashboardProfit> => [
-  scopedKey(dashboardProfitKey, branch),
+  scopedKey(dashboardProfitKey, branch, currentMonthKey()),
   () => profitOf(branch),
 ];
 

@@ -8,8 +8,11 @@ import {
   scopedKey,
 } from "../../../keys/query.keys";
 import type { IRecordPaymentInput } from "../../../models/data/payment/payment.request";
+import type { IQueryFetcher } from "../../../models/common/query.model";
 import type {
+  ICustomerLedgerKey,
   ICustomerReceivableSummary,
+  ILedgerPartyKey,
   IReceivable,
 } from "../../../models/data/ledger/ledger.response";
 import { ledgerKeyOf } from "../../../models/data/ledger/ledger.response";
@@ -21,6 +24,11 @@ import {
   useAccountStore,
 } from "../../../store/data/account/account.store";
 import { useLedgerStore } from "../../../store/data/ledger/ledger.store";
+import {
+  datasetSourcesOf,
+  derivedRows,
+  withOfflineDerive,
+} from "../../../utils/dataset.utils";
 import { scopedFilters } from "../../../utils/filter.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
@@ -29,8 +37,51 @@ import { useMutation } from "../../common/mutation.hook";
 import { useQuery } from "../../common/query.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
+import {
+  partyPaymentsFetcherOf,
+  paymentDatasetKeyOf,
+} from "../payment/payment.list.hook";
+import { transactionSummaryQueryOf } from "../transaction/transaction.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
 import { customerSummaryKey } from "./customer.ledger.hook";
+import { partyLedgerFetcherOf } from "./ledger.list.hook";
+
+const partyOf = (customer: ICustomerLedgerKey): ILedgerPartyKey => ({
+  partyId: customer.customerId,
+  partyName: customer.customerName,
+});
+
+const isVerifiedPaymentOf =
+  (customerId: string) =>
+  (payment: ILedgerPayment): boolean =>
+    payment.customer_id === customerId && payment.status === "verified";
+
+const lastPaymentFetcherOf = (
+  customerId: string | null
+): IQueryFetcher<string | null> =>
+  withOfflineDerive(
+    () => receivableServices.getCustomerLastPayment(customerId),
+    (read) => {
+      if (!customerId) return null;
+
+      const payments = derivedRows(
+        datasetSourcesOf(paymentDatasetKeyOf("receivable"), []),
+        {},
+        isVerifiedPaymentOf(customerId)
+      )(read);
+      const transactions = transactionSummaryQueryOf({ customerId })[1].offline?.(read);
+      if (!payments || !transactions) return undefined;
+
+      const paymentDates = [
+        ...payments.map((payment) => payment.paid_at),
+        ...transactions
+          .filter((transaction) => transaction.type !== "sale")
+          .map((transaction) => transaction.txn_date),
+      ];
+
+      return paymentDates.sort().at(-1) ?? null;
+    }
+  );
 
 export const useCustomerDetailHook = () => {
   const customer = useLedgerStore((state) => state.ledgerCustomer);
@@ -63,7 +114,14 @@ export const useCustomerDetailHook = () => {
       key,
       JSON.stringify(effectiveFilters)
     ),
-    () => receivableServices.getCustomerLedger(customer!, effectiveFilters),
+    customer
+      ? partyLedgerFetcherOf(
+          "receivables",
+          () => receivableServices.getCustomerLedger(customer, effectiveFilters),
+          partyOf(customer),
+          effectiveFilters
+        )
+      : () => Promise.resolve([]),
     { enabled: !!customer }
   );
 
@@ -74,19 +132,15 @@ export const useCustomerDetailHook = () => {
 
   const lastPaymentQuery = useQuery<string | null>(
     scopedKey(receivableListKey, "last-payment", customer?.customerId),
-    () => receivableServices.getCustomerLastPayment(customer?.customerId ?? null),
+    lastPaymentFetcherOf(customer?.customerId ?? null),
     { enabled: !!customer?.customerId }
   );
 
   const paymentsQuery = useQuery<ILedgerPayment[]>(
     scopedKey(paymentListKey, "receivable", key),
-    () =>
-      paymentServices.getAll(
-        "receivable",
-        customer?.customerId
-          ? { partyId: customer.customerId }
-          : { partyName: customer?.customerName ?? "" }
-      ),
+    customer
+      ? partyPaymentsFetcherOf("receivable", partyOf(customer))
+      : () => Promise.resolve([]),
     { enabled: !!customer }
   );
 

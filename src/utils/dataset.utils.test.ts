@@ -8,6 +8,7 @@ import {
   isWithinDays,
   matchesLedgerFilters,
   matchesLedgerStatus,
+  matchesParty,
   pageOfRows,
   sortRowsBy,
 } from "./dataset.utils";
@@ -192,6 +193,27 @@ describe("derived views", () => {
     expect(derive(read)?.map((row) => row.id)).toEqual(["a", "b"]);
   });
 
+  it("falls back to the all-branches dataset for a branch request", () => {
+    const request = { branch: "hardware" };
+    const allBranchesRead = (key: string) =>
+      key === keyOf({}) ? rows : undefined;
+    const derive = derivedRows(
+      datasetSourcesOf(keyOf, [datasetFiltersOf(request)]),
+      request,
+      (row: IRow) => matchesLedgerFilters(row, request)
+    );
+
+    expect(derive(allBranchesRead)?.every((row) => row.branch === "hardware")).toBe(true);
+    expect(derive(allBranchesRead)?.length).toBeGreaterThan(0);
+  });
+
+  it("lists each dataset key once, branch dataset first", () => {
+    expect(datasetSourcesOf(keyOf, [{ branch: "feeds" }, {}]).map((source) => source.key)).toEqual([
+      keyOf({ branch: "feeds" }),
+      keyOf({}),
+    ]);
+  });
+
   it("stays unsaved when no cached dataset covers the request", () => {
     const request = { branch: "hardware" };
     const derive = derivedRows(
@@ -201,5 +223,20 @@ describe("derived views", () => {
     );
 
     expect(derive(read)).toBeUndefined();
+  });
+});
+
+describe("matchesParty", () => {
+  const linked = { customer_id: "c1", customer_name: "Ana" };
+  const walkIn = { customer_id: null, customer_name: "Ana" };
+
+  it("matches a linked party by id only", () => {
+    expect(matchesParty(linked, "customer_id", "customer_name", { partyId: "c1", partyName: "Other" })).toBe(true);
+    expect(matchesParty(walkIn, "customer_id", "customer_name", { partyId: "c1", partyName: "Ana" })).toBe(false);
+  });
+
+  it("matches an unlinked party by name among rows without an id", () => {
+    expect(matchesParty(walkIn, "customer_id", "customer_name", { partyId: null, partyName: "Ana" })).toBe(true);
+    expect(matchesParty(linked, "customer_id", "customer_name", { partyId: null, partyName: "Ana" })).toBe(false);
   });
 });

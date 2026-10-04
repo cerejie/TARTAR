@@ -109,6 +109,7 @@ export const usePrimeViewsHook = () => {
             permissions: derivePermissions(role),
             branch,
             branches: accessibleBranchesOf(loaded, access),
+            canScope,
           })
         );
       })
@@ -117,5 +118,14 @@ export const usePrimeViewsHook = () => {
     return () => {
       superseded = true;
     };
-  }, [online, userId, role, access, branch, branchSlugs, branchesLoaded]);
+  }, [
+    online,
+    userId,
+    role,
+    access,
+    canScope,
+    branch,
+    branchSlugs,
+    branchesLoaded,
+  ]);
 };

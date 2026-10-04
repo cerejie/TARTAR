@@ -13,6 +13,7 @@ import {
   saleListKey,
   saleSummaryKey,
   scopedKey,
+  transactionAuditKey,
   transactionListKey,
   transactionSummaryKey,
 } from "../../../keys/query.keys";
@@ -58,6 +59,7 @@ import { useBankAccountListHook } from "../bank/bank.account.list.hook";
 import { useBranchListHook } from "../branch/branch.list.hook";
 import { useBranchScopeHook } from "../branch/branch.scope.hook";
 import { useIncomeSourceListHook } from "../income-source/income.source.list.hook";
+import { transactionAuditFetcherOf } from "../transaction/transaction.list.hook";
 import { useUserListHook } from "../user/user.list.hook";
 
 export const saleInvalidateKeys = [
@@ -65,6 +67,7 @@ export const saleInvalidateKeys = [
   saleSummaryKey,
   transactionListKey,
   transactionSummaryKey,
+  transactionAuditKey,
 ];
 
 const sumSales = (rows: readonly ISale[], statuses: readonly SaleStatus[]) =>
@@ -178,7 +181,7 @@ export const useSaleListHook = () => {
 
   const auditQuery = useQuery<ITransactionAudit[]>(
     scopedKey(saleListKey, "audit", historyRow?.id),
-    () => transactionServices.getAudit(historyRow?.id as string),
+    historyRow ? transactionAuditFetcherOf(historyRow.id) : () => Promise.resolve([]),
     { enabled: historyModal.modal.visible && !!historyRow }
   );
 

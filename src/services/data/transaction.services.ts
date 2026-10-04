@@ -394,6 +394,14 @@ const transactionServices = {
       },
     }),
 
+  getAllAudits: (): Promise<ITransactionAudit[]> =>
+    everyRow<ITransactionAudit>(() =>
+      supabase
+        .from(auditTable)
+        .select("*")
+        .order("edited_at", { ascending: false })
+    ),
+
   getAudit: async (transactionId: string): Promise<ITransactionAudit[]> => {
     const { data, error } = await supabase
       .from(auditTable)
