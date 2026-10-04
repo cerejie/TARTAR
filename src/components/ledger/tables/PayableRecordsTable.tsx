@@ -92,6 +92,7 @@ const PayableRecordsTable = () => {
       mobile: "title",
       key: "party",
       skeleton: "avatar",
+      listRender: (row) => <AvatarCell name={row.supplier_name} />,
       render: (_, row) => (
         <AvatarCell
           name={row.supplier_name}

@@ -155,7 +155,11 @@ const DataTableList = <T,>({
     const fieldsOf = (role: IColumnMobileRole): ICardField[] =>
       columns.flatMap((column, index) => {
         if (mobileRoleOf(column, index) !== role) return [];
-        const content = renderContent(column, row, rowIndex);
+        if (!labelledMetas && column.listHidden) return [];
+        const content =
+          !labelledMetas && column.listRender
+            ? column.listRender(row)
+            : renderContent(column, row, rowIndex);
         if (isEmptyContent(content)) return [];
         const showsPrefix = column.cardPrefix !== undefined && !(labelledMetas && role === "meta");
         return [

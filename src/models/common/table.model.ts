@@ -35,6 +35,8 @@ export interface IDataTableColumn<T> {
   collapse?: IColumnCollapse;
   sorter?: (left: T, right: T) => number;
   render?(value: unknown, row: T, index: number): ReactNode;
+  listHidden?: boolean;
+  listRender?(row: T): ReactNode;
 }
 
 export interface ICardField {

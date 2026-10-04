@@ -192,6 +192,7 @@ const VouchersTable = () => {
       mobile: "subtitle",
       dataIndex: "voucher_no",
       className: nowrapCell,
+      listRender: (voucher) => voucherTypeLabels[voucher.type],
       render: (value: string | null, voucher) => (
         <span className={stackedCell}>
           {value || "Pending sync"}
@@ -253,6 +254,12 @@ const VouchersTable = () => {
       title: "Status",
       mobile: "status",
       dataIndex: "status",
+      listRender: (voucher) => (
+        <StatusTag
+          color={voucherStatusColors[voucher.status]}
+          label={voucherStatusLabels[voucher.status]}
+        />
+      ),
       render: (status: VoucherStatus, voucher) => (
         <span className={tagRow}>
           <StatusTag

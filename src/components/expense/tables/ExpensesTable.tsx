@@ -174,6 +174,7 @@ const ExpensesTable = () => {
     {
       title: "Date",
       mobile: "subtitle",
+      listHidden: true,
       dataIndex: "txn_date",
       className: nowrapCell,
       render: (value: string) => formatDate(value),
@@ -188,7 +189,7 @@ const ExpensesTable = () => {
     },
     {
       title: "Expense type",
-      mobile: "status",
+      mobile: "subtitle",
       dataIndex: "expense_type",
       render: (value: IDisbursement["expense_type"]) =>
         expenseCategoryLabelOf(value),
@@ -198,6 +199,15 @@ const ExpensesTable = () => {
       mobile: "status",
       key: "voucher_status",
       className: nowrapCell,
+      listRender: (row) =>
+        row.voucher ? (
+          <StatusTag
+            color={voucherStatusColors[row.voucher.status]}
+            label={voucherStatusLabels[row.voucher.status]}
+          />
+        ) : (
+          <StatusTag label="Syncing" />
+        ),
       render: (_, row) =>
         row.voucher ? (
           <span className={tagRow}>

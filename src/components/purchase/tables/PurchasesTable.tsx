@@ -180,6 +180,7 @@ const PurchasesTable = () => {
     {
       title: "Date",
       mobile: "subtitle",
+      listHidden: true,
       dataIndex: "txn_date",
       className: nowrapCell,
       render: (value: string) => formatDate(value),
@@ -197,6 +198,15 @@ const PurchasesTable = () => {
       mobile: "status",
       key: "voucher_status",
       className: nowrapCell,
+      listRender: (row) =>
+        row.voucher ? (
+          <StatusTag
+            color={voucherStatusColors[row.voucher.status]}
+            label={voucherStatusLabels[row.voucher.status]}
+          />
+        ) : (
+          <StatusTag label="Syncing" />
+        ),
       render: (_, row) =>
         row.voucher ? (
           <span className={tagRow}>
