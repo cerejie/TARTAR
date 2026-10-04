@@ -1,10 +1,12 @@
+import { useRef } from "react";
 import type { KeyboardEvent } from "react";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, XIcon } from "lucide-react";
 import { ListBox, ListBoxItem } from "react-aria-components";
 import type { FieldValues } from "react-hook-form";
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
@@ -24,6 +26,7 @@ import {
   fieldSheetEmpty,
   fieldSheetHandle,
   fieldSheetInput,
+  fieldSheetInputClear,
   fieldSheetInputGroup,
   fieldSheetLabel,
   fieldSheetList,
@@ -79,6 +82,12 @@ const FieldSheet = <TValues extends FieldValues>({
   const hasInput = sheetHasInput(config);
   const listOptions = hasInput ? fuzzyOptions(options, draft) : options;
   const typed = draft.trim();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleClearDraft = () => {
+    onDraftChange("");
+    inputRef.current?.focus();
+  };
 
   const handleOpenChange = (next: boolean) => {
     if (!next) onClose();
@@ -140,6 +149,7 @@ const FieldSheet = <TValues extends FieldValues>({
               </InputGroupAddon>
             ) : null}
             <InputGroupInput
+              ref={inputRef}
               id={fieldId}
               autoFocus
               aria-invalid={invalid}
@@ -157,35 +167,45 @@ const FieldSheet = <TValues extends FieldValues>({
               onChange={(event) => onDraftChange(event.target.value)}
               onKeyDown={handleEnter}
             />
+            {draft ? (
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  aria-label="Clear"
+                  size="icon-sm"
+                  className={fieldSheetInputClear}
+                  onPress={handleClearDraft}
+                >
+                  <XIcon />
+                </InputGroupButton>
+              </InputGroupAddon>
+            ) : null}
           </InputGroup>
         ) : null}
 
         {hasList ? (
           <ListBox
             aria-label={config.label}
-            selectionMode="single"
-            selectedKeys={selectedValue ? [selectedValue] : []}
             onAction={handleAction}
-            className={fieldSheetList}
+            className={fieldSheetList({ dropdown: isCreatable })}
             renderEmptyState={() => (
               <div className={fieldSheetEmpty}>{emptyMessageOf(isCreatable, typed)}</div>
             )}
           >
-            {listOptions.map((option) => (
-              <ListBoxItem
-                key={option.value}
-                id={option.value}
-                textValue={option.label}
-                className={fieldSheetOption}
-              >
-                {({ isSelected }) => (
-                  <>
-                    {option.label}
-                    {isSelected ? <CheckIcon className={fieldSheetOptionCheck} /> : null}
-                  </>
-                )}
-              </ListBoxItem>
-            ))}
+            {listOptions.map((option) => {
+              const isPicked = option.value === selectedValue;
+              return (
+                <ListBoxItem
+                  key={option.value}
+                  id={option.value}
+                  textValue={option.label}
+                  aria-current={isPicked || undefined}
+                  className={fieldSheetOption({ dropdown: isCreatable, picked: isPicked })}
+                >
+                  {option.label}
+                  {isPicked ? <CheckIcon className={fieldSheetOptionCheck} /> : null}
+                </ListBoxItem>
+              );
+            })}
           </ListBox>
         ) : null}
 

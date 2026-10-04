@@ -7,7 +7,7 @@ import AccountAvatar from "./AccountAvatar";
 import AccountSheetItems from "./AccountSheetItems";
 
 const AdminUserSheet = () => {
-  const { initial, online } = useProtectedUserHook();
+  const { displayName, initial, avatarUrl, online } = useProtectedUserHook();
   const { sheetOpen, openSheet, closeSheet } = useAdminUserSheetHook();
 
   return (
@@ -18,7 +18,7 @@ const AdminUserSheet = () => {
         className={headerUserTrigger}
         onPress={openSheet}
       >
-        <AccountAvatar initial={initial} online={online} />
+        <AccountAvatar name={displayName} initial={initial} online={online} src={avatarUrl} />
       </AppButton>
       <AppSheet open={sheetOpen} title="Account" onClose={closeSheet}>
         <AccountSheetItems onToggleMode={closeSheet} />

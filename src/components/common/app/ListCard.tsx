@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import { Button as PressArea } from "react-aria-components";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Item,
   ItemActions,
@@ -37,6 +37,7 @@ type IProps = {
   meta?: ReactNode;
   amount?: number;
   icon?: ReactNode;
+  imageSrc?: string;
   amountTone?: Tone;
   badge?: ReactNode;
   unread?: boolean;
@@ -51,6 +52,7 @@ const ListCard = ({
   meta,
   amount,
   icon,
+  imageSrc,
   amountTone = "default",
   badge,
   unread = false,
@@ -73,6 +75,7 @@ const ListCard = ({
           <span className={listCardUnreadDot({ tone: "unread" })} role="img" aria-label="Unread" />
         ) : null}
         <Avatar size="lg">
+          {imageSrc ? <AvatarImage src={imageSrc} alt={name} /> : null}
           <AvatarFallback className={listCardAvatarFallback}>
             {icon ?? formatInitials(name)}
           </AvatarFallback>

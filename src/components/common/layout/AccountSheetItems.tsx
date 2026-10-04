@@ -22,6 +22,7 @@ const AccountSheetItems = ({ onToggleMode }: IProps) => {
     displayName,
     roleLabel,
     initial,
+    avatarUrl,
     online,
     isDark,
     toggleMode,
@@ -37,7 +38,7 @@ const AccountSheetItems = ({ onToggleMode }: IProps) => {
   return (
     <>
       <div className={accountSheetHead}>
-        <AccountAvatar initial={initial} online={online} />
+        <AccountAvatar name={displayName} initial={initial} online={online} src={avatarUrl} />
         <span className={accountSheetText}>
           <span className={accountSheetName}>{displayName}</span>
           <span className={accountSheetRole}>{roleLabel}</span>

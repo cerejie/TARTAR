@@ -1,16 +1,19 @@
-import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   headerUserAvatarFallback,
   headerUserOnline,
 } from "../../../styles/layout/header.styles";
 
 type IProps = {
+  name: string;
   initial: string;
   online: boolean;
+  src?: string;
 };
 
-const AccountAvatar = ({ initial, online }: IProps) => (
+const AccountAvatar = ({ name, initial, online, src }: IProps) => (
   <Avatar size="lg">
+    {src ? <AvatarImage src={src} alt={name} /> : null}
     <AvatarFallback className={headerUserAvatarFallback}>{initial}</AvatarFallback>
     {online ? <AvatarBadge className={headerUserOnline} /> : null}
   </Avatar>

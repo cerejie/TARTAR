@@ -26,6 +26,7 @@ import ProfileDetails from "./ProfileDetails";
 const AccountSettingsList = () => {
   const {
     profileHint,
+    profileAvatarUrl,
     installHint,
     notificationsHint,
     themeHint,
@@ -44,6 +45,7 @@ const AccountSettingsList = () => {
           name="Profile"
           description={profileHint}
           icon={<UserRound />}
+          imageSrc={profileAvatarUrl}
           onPress={() => openPanel("profile")}
         />
         <ListCard

@@ -1,5 +1,4 @@
 import { LogOut, Monitor, Moon, Smartphone, Sun, UserCog } from "lucide-react";
-import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -8,21 +7,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useProtectedUserHook } from "../../../hook/layout/protected.hook";
 import {
-  headerUserAvatarFallback,
   headerUserMenu,
   headerUserName,
-  headerUserOnline,
   headerUserRole,
   headerUserText,
   headerUserTrigger,
 } from "../../../styles/layout/header.styles";
 import AppButton from "../button/AppButton";
+import AccountAvatar from "./AccountAvatar";
 
 const ProtectedUserMenu = () => {
   const {
     displayName,
     roleLabel,
     initial,
+    avatarUrl,
     online,
     isDark,
     toggleMode,
@@ -39,12 +38,12 @@ const ProtectedUserMenu = () => {
         aria-label="Account menu"
         className={headerUserTrigger}
       >
-        <Avatar size="lg">
-          <AvatarFallback className={headerUserAvatarFallback}>
-            {initial}
-          </AvatarFallback>
-          {online ? <AvatarBadge className={headerUserOnline} /> : null}
-        </Avatar>
+        <AccountAvatar
+          name={displayName}
+          initial={initial}
+          online={online}
+          src={avatarUrl}
+        />
         <span className={headerUserText}>
           <span className={headerUserName}>{displayName}</span>
           <span className={headerUserRole}>{roleLabel}</span>

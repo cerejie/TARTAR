@@ -13,6 +13,7 @@ import {
   useThemeStore,
 } from "../../store/common/theme.store";
 import { useAccountStore } from "../../store/data/account/account.store";
+import { useAvatarUrls } from "../account/account.avatar.hook";
 import {
   adminBasePath,
   filterRoutesByPermission,
@@ -155,6 +156,7 @@ export const useProtectedUserHook = () => {
   const { logoutMutation } = useAccountLogoutHook();
   const mode = useThemeStore(selectThemeMode);
   const toggleMode = useThemeStore((state) => state.toggleMode);
+  const avatarUrlOf = useAvatarUrls();
 
   const roleLabel = permissions.role
     ? effectiveRoleLabels[permissions.role]
@@ -166,6 +168,7 @@ export const useProtectedUserHook = () => {
     displayName,
     roleLabel,
     initial: displayName.trim().charAt(0).toUpperCase(),
+    avatarUrl: avatarUrlOf(user?.id),
     online,
     isDark: mode === "dark",
     toggleMode,

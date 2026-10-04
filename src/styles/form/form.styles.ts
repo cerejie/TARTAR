@@ -143,11 +143,34 @@ export const fieldSheetInput = "text-base md:text-base";
 export const fieldSheetTextarea =
   "min-h-28 rounded-xl border-2 border-primary px-4 py-3 text-base focus-visible:border-primary focus-visible:ring-0 md:text-base";
 
-export const fieldSheetList =
-  "-mx-2 flex max-h-[45dvh] flex-col overflow-y-auto overscroll-contain outline-none";
+export const fieldSheetInputClear = "rounded-full text-muted-foreground";
 
-export const fieldSheetOption =
-  "flex min-h-12 cursor-default items-center gap-3 rounded-lg px-2 text-base text-foreground outline-none focus-visible:bg-muted pressed:bg-muted selected:font-semibold selected:text-primary";
+export const fieldSheetList = cva(
+  "flex flex-col overflow-y-auto overscroll-contain outline-none",
+  {
+    variants: {
+      dropdown: {
+        true: "max-h-67 rounded-xl border border-border bg-popover p-1 shadow-md",
+        false: "-mx-2 max-h-[45dvh]",
+      },
+    },
+    defaultVariants: { dropdown: false },
+  }
+);
+
+export const fieldSheetOption = cva(
+  "flex cursor-default items-center gap-3 rounded-lg px-2 text-base text-foreground outline-none focus-visible:bg-muted pressed:bg-muted",
+  {
+    variants: {
+      dropdown: {
+        true: "h-13 shrink-0 px-3 not-last:border-b not-last:border-border/60",
+        false: "min-h-12",
+      },
+      picked: { true: "font-semibold text-primary", false: "" },
+    },
+    defaultVariants: { dropdown: false, picked: false },
+  }
+);
 
 export const fieldSheetOptionCheck = "ml-auto size-4 shrink-0 text-primary";
 

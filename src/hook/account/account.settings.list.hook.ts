@@ -15,11 +15,12 @@ export const useAccountSettingsListHook = () => {
   const { mode: installMode } = useInstallApp();
   const { mode: pushMode } = usePushNotifications();
   const { description: syncHint } = useSyncStatus();
-  const { displayName, roleLabel, isDark, toggleMode } = useProtectedUserHook();
+  const { displayName, roleLabel, avatarUrl, isDark, toggleMode } = useProtectedUserHook();
 
   return {
     profileHint:
       !roleLabel || displayName === roleLabel ? displayName : `${displayName} · ${roleLabel}`,
+    profileAvatarUrl: avatarUrl,
     installHint: installModeSubtitles[installMode],
     notificationsHint: pushModeSubtitles[pushMode],
     themeHint: isDark ? "Dark" : "Light",
