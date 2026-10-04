@@ -5,7 +5,10 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { useProtectedSiderHook } from "../../../hook/layout/protected.hook";
-import { headerLogoMark } from "../../../styles/layout/header.styles";
+import {
+  headerLogoGlyph,
+  headerLogoMark,
+} from "../../../styles/layout/header.styles";
 import { shellSidebar } from "../../../styles/layout/shell.styles";
 import {
   sidebarAccount,
@@ -15,6 +18,8 @@ import {
   sidebarWordmark,
 } from "../../../styles/layout/sidebar.styles";
 import AccountSheetItems from "./AccountSheetItems";
+import BrandMark from "./BrandMark";
+import BrandWordmark from "./BrandWordmark";
 import ProtectedMenu from "./ProtectedMenu";
 
 type IProps = {
@@ -28,9 +33,9 @@ const ProtectedSider = ({ account = false }: IProps) => {
     <Sidebar collapsible={collapsible} className={shellSidebar}>
       <SidebarHeader className={sidebarHeader}>
         <span className={headerLogoMark} aria-hidden="true">
-          T
+          <BrandMark className={headerLogoGlyph} />
         </span>
-        <span className={sidebarWordmark}>TARTAR</span>
+        <BrandWordmark className={sidebarWordmark} />
       </SidebarHeader>
 
       <SidebarContent className={sidebarContent}>

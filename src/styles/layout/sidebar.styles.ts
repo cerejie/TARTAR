@@ -2,7 +2,7 @@ export const sidebarHeader =
   "h-16 shrink-0 flex-row items-center gap-2.5 border-b border-sidebar-border py-0 pr-14 pl-4 wide:hidden";
 
 export const sidebarWordmark =
-  "font-heading text-lg font-semibold tracking-tight text-sidebar-foreground";
+  "h-4 w-auto text-brand";
 
 export const sidebarContent = "gap-1 px-1 py-1 compact:px-3 compact:py-2";
 

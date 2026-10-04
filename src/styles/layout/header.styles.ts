@@ -6,10 +6,12 @@ export const headerMenuButton = "-ml-1 rounded-full";
 export const headerBrand = "flex shrink-0 items-center gap-2.5 max-md:hidden";
 
 export const headerLogoMark =
-  "flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand font-heading text-lg font-bold text-on-brand";
+  "flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand text-on-brand";
+
+export const headerLogoGlyph = "h-auto w-5";
 
 export const headerWordmark =
-  "hidden font-heading text-lg font-semibold tracking-tight text-foreground sm:inline";
+  "hidden h-4 w-auto text-brand sm:block";
 
 export const headerScope = "min-w-0 flex-1 lg:ml-6 lg:flex-none";
 
