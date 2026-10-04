@@ -200,6 +200,7 @@ const DataTableList = <T,>({
       rowIndex
     );
     const rowMetas = opensDetail ? metas.slice(0, cardMetaLimit) : metas;
+    const rowActions = opensDetail && detailActions ? [] : actions;
     const secondaries = [...subtitles, ...rowMetas];
 
     const isSelected = rowSelection?.selectedRowKeys.includes(key) ?? false;
@@ -273,7 +274,7 @@ const DataTableList = <T,>({
           </div>
         ) : null}
 
-        {actions.map((field) => (
+        {rowActions.map((field) => (
           <span key={field.id} className={dataListRaised}>
             {field.content}
           </span>

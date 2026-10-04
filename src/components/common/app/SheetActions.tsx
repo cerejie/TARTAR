@@ -34,10 +34,8 @@ const SheetActions = ({ actions }: IProps) => {
   const rest = actions.filter(
     (action) => action !== primary && !secondary.includes(action)
   );
-  const overflow = [
-    ...rest.filter((action) => !action.danger),
-    ...rest.filter((action) => action.danger),
-  ];
+  const dangers = rest.filter((action) => action.danger && !action.disabled);
+  const overflow = rest.filter((action) => !dangers.includes(action));
   const lead =
     primary === undefined && secondary.length === 0
       ? overflow.find((action) => !action.disabled)
@@ -52,6 +50,9 @@ const SheetActions = ({ actions }: IProps) => {
   const menu = (
     <RowActionMenu actions={menuActions} label="More actions" />
   );
+  const dangerButtons = dangers.map((action) => (
+    <ActionButton key={action.key} action={action} />
+  ));
 
   if (secondary.length === 0) {
     return (
@@ -61,6 +62,7 @@ const SheetActions = ({ actions }: IProps) => {
           {lead ? <ActionButton action={lead} /> : null}
           {menu}
         </div>
+        {dangerButtons}
       </div>
     );
   }
@@ -74,6 +76,7 @@ const SheetActions = ({ actions }: IProps) => {
         ))}
         {menu}
       </div>
+      {dangerButtons}
     </div>
   );
 };
