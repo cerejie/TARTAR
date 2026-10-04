@@ -59,6 +59,12 @@ export const formSectionChevron =
 
 export const fieldLabelHidden = "sr-only";
 
+export const fieldRevealToggle =
+  "relative text-muted-foreground after:absolute after:-inset-1.5 hover:text-foreground";
+
+export const fieldRevealIcon =
+  "size-4.5 animate-in fade-in-0 zoom-in-75 duration-150 motion-reduce:animate-none";
+
 export const formIntro = "flex flex-wrap gap-4 rounded-lg bg-muted p-4";
 
 export const formIntroItem = "flex min-w-30 flex-col gap-0.5";

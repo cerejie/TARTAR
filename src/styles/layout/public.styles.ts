@@ -1,4 +1,4 @@
-export const authPage = "flex min-h-dvh flex-1 bg-app p-safe-0 font-sans text-foreground";
+export const authPage = "flex min-h-dvh flex-1 bg-auth p-safe-0 font-sans text-foreground";
 
 export const authHero =
   "relative my-4 ml-4 hidden w-[clamp(360px,42vw,560px)] flex-col overflow-hidden rounded-panel bg-auth-hero p-12 text-on-brand shadow-panel min-[960px]:flex";
@@ -27,30 +27,37 @@ export const authHeroArt =
 export const authHeroArtSvg = "h-auto w-[520px] max-w-none shrink-0";
 
 export const authMain =
-  "flex flex-1 items-center justify-center px-4 py-6 min-[480px]:px-6 min-[480px]:py-8";
+  "flex min-w-0 flex-1 flex-col items-center px-6 pt-10 pb-8 min-[480px]:px-10 min-[960px]:py-12";
 
-export const authCard =
-  "relative w-full max-w-[440px] gap-0 rounded-panel border border-border bg-panel px-6 py-8 shadow-panel ring-0 animate-in fade-in-0 zoom-in-98 slide-in-from-bottom-4 duration-500 fill-mode-both motion-reduce:animate-none min-[480px]:px-10 min-[480px]:py-11";
+export const authPanel =
+  "my-auto flex w-full max-w-[400px] flex-col animate-in fade-in-0 slide-in-from-bottom-2 duration-500 fill-mode-both motion-reduce:animate-none";
 
-export const authCardBrand = "mb-6 flex items-center gap-2.5 min-[960px]:hidden";
+export const authBrand = "mb-12 flex items-center gap-3 min-[960px]:hidden";
 
 export const authMark =
-  "inline-flex size-[42px] shrink-0 items-center justify-center rounded-lg bg-brand font-heading text-page-title font-bold text-on-brand";
+  "inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand font-heading text-section font-bold text-on-brand shadow-sm shadow-brand/30";
 
 export const authWordmark =
-  "font-heading text-emphasis font-bold tracking-[0.18em] text-foreground";
+  "font-heading text-emphasis font-bold tracking-[0.22em] text-foreground";
 
 export const authTitle =
-  "mb-1.5 font-heading text-page-title font-semibold tracking-tight text-foreground";
+  "font-heading text-hero font-bold tracking-tight text-foreground min-[960px]:text-money-lg";
 
-export const authSubtitle = "block text-sm text-muted-foreground";
+export const authSubtitle =
+  "mt-2 block max-w-[32ch] text-emphasis leading-relaxed text-muted-foreground";
 
-export const authForm = "mt-7 flex flex-col gap-4.5";
+export const authForm = [
+  "mt-9 flex flex-col gap-5",
+  "[&_[data-slot=field-label]]:text-body [&_[data-slot=field-label]]:font-medium [&_[data-slot=field-label]]:text-foreground",
+  "[&_[data-slot=input-group]]:h-13 [&_[data-slot=input-group]]:rounded-xl [&_[data-slot=input-group]]:bg-panel [&_[data-slot=input-group]]:px-1.5 [&_[data-slot=input-group]]:shadow-none",
+  "[&_[data-slot=input-group]]:transition-[border-color,box-shadow] [&_[data-slot=input-group]]:duration-150",
+  "[&_[data-slot=input-group-addon]_svg]:size-5 [&_[data-slot=input-group-control]]:text-base",
+].join(" ");
 
-export const authMeta = "-mt-1.5 mb-1 flex justify-end";
+export const authMeta = "-mt-3 flex justify-end";
 
 export const authHint =
-  "h-auto p-0 text-label font-medium text-muted-foreground hover:text-foreground";
+  "-mr-2 h-11 px-2 text-body font-medium text-brand hover:text-brand-deep";
 
 export const authSuccess = "mt-7 gap-5 border-0 p-0";
 
@@ -60,12 +67,16 @@ export const authSuccessTitle = "font-heading text-lg font-semibold text-foregro
 
 export const authSuccessText = "text-sm leading-relaxed text-muted-foreground";
 
-export const authSubmit = "h-12 w-full rounded-lg text-body font-semibold";
+export const authSubmit =
+  "h-13 w-full rounded-xl text-emphasis font-semibold shadow-md shadow-brand/20 transition-[background-color,transform,box-shadow] duration-150 data-pressed:scale-98 data-pressed:shadow-sm motion-reduce:transition-none [&_svg:not([class*='size-'])]:size-4.5";
+
+export const authDivider =
+  "mt-8 flex items-center gap-4 text-label text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border";
 
 export const authAlt =
-  "mt-6.5 flex flex-wrap items-center justify-center gap-1 border-t border-border pt-5 text-sm text-muted-foreground";
+  "mt-5 flex flex-col items-center gap-0.5 text-body text-muted-foreground";
 
-export const authAltLink = "h-auto p-0 font-semibold";
+export const authAltLink = "h-11 gap-1.5 px-3 text-emphasis font-semibold [&_svg:not([class*='size-'])]:size-4";
 
 export const errorPage = "flex min-h-dvh items-center justify-center bg-app p-safe-6 font-sans text-foreground";
 

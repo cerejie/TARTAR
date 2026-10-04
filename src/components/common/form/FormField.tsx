@@ -46,6 +46,7 @@ import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/cn.utils";
 import FieldSheetControl from "./FieldSheetControl";
+import PasswordControl from "./PasswordControl";
 import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import type {
   IFieldConfig,
@@ -146,19 +147,12 @@ const renderControl = <TValues extends FieldValues>(
       );
     case "password":
       return (
-        <InputGroup>
-          {config.icon ? <InputGroupAddon>{config.icon}</InputGroupAddon> : null}
-          <InputGroupInput
-            {...field}
-            id={fieldId}
-            aria-invalid={invalid}
-            type="password"
-            enterKeyHint={enterKeyHint}
-            value={asText(field.value)}
-            placeholder={config.placeholder}
-            autoComplete={config.autoComplete ?? "new-password"}
-          />
-        </InputGroup>
+        <PasswordControl
+          config={config}
+          field={field}
+          invalid={invalid}
+          enterKeyHint={enterKeyHint}
+        />
       );
     case "number":
     case "amount":

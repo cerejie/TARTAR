@@ -7,6 +7,7 @@ import { useAccountRegisterHook } from "../../hook/account/account.register.hook
 import {
   authAlt,
   authAltLink,
+  authDivider,
   authForm,
   authSubmit,
 } from "../../styles/layout/public.styles";
@@ -84,6 +85,10 @@ const RegisterView = () => {
           Create account
         </AppButton>
       </form>
+
+      <p className={authDivider} aria-hidden="true">
+        or
+      </p>
 
       <p className={authAlt}>
         Already have an account?

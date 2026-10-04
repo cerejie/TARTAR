@@ -1,9 +1,7 @@
 import { CloudCog, FileCheck2, Store } from "lucide-react";
 import type { ReactNode } from "react";
-import { Card } from "@/components/ui/card";
 import {
-  authCard,
-  authCardBrand,
+  authBrand,
   authHero,
   authHeroBody,
   authHeroBrand,
@@ -15,6 +13,7 @@ import {
   authMain,
   authMark,
   authPage,
+  authPanel,
   authSubtitle,
   authTitle,
   authWordmark,
@@ -66,8 +65,8 @@ const AuthShell = ({ title, subtitle, children }: IProps) => {
       </aside>
 
       <main className={authMain}>
-        <Card className={authCard}>
-          <div className={authCardBrand}>
+        <div className={authPanel}>
+          <div className={authBrand}>
             <span className={authMark} aria-hidden="true">
               T
             </span>
@@ -78,7 +77,7 @@ const AuthShell = ({ title, subtitle, children }: IProps) => {
           <p className={authSubtitle}>{subtitle}</p>
 
           {children}
-        </Card>
+        </div>
       </main>
     </div>
   );

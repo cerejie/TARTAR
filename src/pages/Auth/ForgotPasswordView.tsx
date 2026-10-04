@@ -7,6 +7,7 @@ import { useAccountForgotHook } from "../../hook/account/account.forgot.hook";
 import {
   authAlt,
   authAltLink,
+  authDivider,
   authForm,
   authSubmit,
 } from "../../styles/layout/public.styles";
@@ -62,6 +63,10 @@ const ForgotPasswordView = () => {
           Request a new password
         </AppButton>
       </form>
+
+      <p className={authDivider} aria-hidden="true">
+        or
+      </p>
 
       <p className={authAlt}>
         Remembered it?
