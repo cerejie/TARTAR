@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import type { KeyboardEvent } from "react";
 import { CheckIcon, XIcon } from "lucide-react";
 import { ListBox, ListBoxItem } from "react-aria-components";
@@ -60,6 +60,15 @@ const inputModeOf = <TValues extends FieldValues>(
   return config.inputMode;
 };
 
+const focusOnOpen = (element: HTMLInputElement | HTMLTextAreaElement | null) => {
+  if (!element) return undefined;
+  element.focus({ preventScroll: true });
+  const frame = requestAnimationFrame(() => {
+    if (document.activeElement !== element) element.focus({ preventScroll: true });
+  });
+  return () => cancelAnimationFrame(frame);
+};
+
 const emptyMessageOf = (creatable: boolean, typed: string) =>
   creatable && typed ? `No close match. "${typed}" is added as new.` : "No match found.";
 
@@ -83,6 +92,11 @@ const FieldSheet = <TValues extends FieldValues>({
   const listOptions = hasInput ? fuzzyOptions(options, draft) : options;
   const typed = draft.trim();
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const attachInput = useCallback((element: HTMLInputElement | null) => {
+    inputRef.current = element;
+    return focusOnOpen(element);
+  }, []);
 
   const handleClearDraft = () => {
     onDraftChange("");
@@ -130,8 +144,8 @@ const FieldSheet = <TValues extends FieldValues>({
 
         {hasInput && config.type === "textarea" ? (
           <Textarea
+            ref={focusOnOpen}
             id={fieldId}
-            autoFocus
             rows={4}
             aria-invalid={invalid}
             className={fieldSheetTextarea}
@@ -149,9 +163,8 @@ const FieldSheet = <TValues extends FieldValues>({
               </InputGroupAddon>
             ) : null}
             <InputGroupInput
-              ref={inputRef}
+              ref={attachInput}
               id={fieldId}
-              autoFocus
               aria-invalid={invalid}
               type={isNumeric(config.type) ? "number" : "text"}
               inputMode={inputModeOf(config)}
