@@ -31,6 +31,8 @@ export const transactionSchema = z
     description: z.string().trim().max(500).nullable().optional(),
     customer_id: z.string().uuid().nullable().optional(),
     supplier_id: z.string().uuid().nullable().optional(),
+    customer_name: z.string().trim().max(160).nullable().optional(),
+    supplier_name: z.string().trim().max(160).nullable().optional(),
     ...paymentAccountShape,
     income_source: incomeSourceSlugSchema.nullable().optional(),
     expense_type: expenseCategorySlugSchema.nullable().optional(),

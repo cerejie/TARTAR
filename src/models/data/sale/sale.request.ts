@@ -21,6 +21,7 @@ const saleShape = z.object({
   income_source: incomeSourceSlugSchema,
   ...paymentAccountShape,
   customer_id: z.string().uuid().nullable().optional(),
+  customer_name: z.string().trim().max(160).nullable().optional(),
   reference_number: z.string().trim().max(80).nullable().optional(),
   description: z.string().trim().max(500).nullable().optional(),
 });

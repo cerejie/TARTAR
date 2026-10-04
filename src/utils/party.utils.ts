@@ -20,3 +20,10 @@ export const resolveParty = async (
   );
   return { id, name };
 };
+
+export const resolveOptionalParty = async (
+  records: readonly IParty[],
+  typed: string | null | undefined,
+  create: (values: IPartyInput, id?: string) => Promise<unknown>
+): Promise<Pick<IParty, "id" | "name"> | null> =>
+  typed?.trim() ? resolveParty(records, typed, create) : null;

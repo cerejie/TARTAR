@@ -16,12 +16,15 @@ import type {
   ISaleResubmitInput,
 } from "../../../models/data/sale/sale.request";
 import type { ISale } from "../../../models/data/sale/sale.response";
+import { customerListKey } from "../../../keys/query.keys";
+import { customerServices } from "../../../services/data/party.services";
 import saleServices from "../../../services/data/sale.services";
 import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
 import { todayIso } from "../../../utils/format.utils";
+import { resolveOptionalParty } from "../../../utils/party.utils";
 import { derivePaymentValues } from "../../../utils/payment.utils";
 import { useModal } from "../../common/modal.hook";
 import { useMutation } from "../../common/mutation.hook";
@@ -63,6 +66,8 @@ const resubmitDepositSection: IFieldSection<ISaleResubmitInput> = {
   ],
 };
 
+const saleWithCustomerKeys = [...saleInvalidateKeys, customerListKey];
+
 export const useSaleFormHook = () => {
   const formModal = useModal(saleFormModalKey);
   const editModal = useModal<ISale>(saleEditModalKey);
@@ -75,7 +80,7 @@ export const useSaleFormHook = () => {
 
   const { branchOptions, defaultBranch } = useBranchListHook();
   const { farmSectionOptions } = useFarmSectionListHook();
-  const { customerOptions } = useCustomerListHook();
+  const { customers, customerOptions } = useCustomerListHook();
   const { optionsFor: incomeSourceOptionsFor } = useIncomeSourceListHook();
   const { paymentFields, paymentDefaultsOf } = useBankAccountListHook();
   const { userNameOf } = useUserListHook();
@@ -86,11 +91,27 @@ export const useSaleFormHook = () => {
   const rejectRow = rejectModal.modal.data;
   const resubmitRow = resubmitModal.modal.data;
 
+  const withCustomer = async <TInput extends ISaleInput>({
+    customer_name,
+    ...values
+  }: TInput): Promise<Omit<TInput, "customer_name">> => {
+    const customer = await resolveOptionalParty(
+      customers,
+      customer_name,
+      customerServices.create
+    );
+    return { ...values, customer_id: customer?.id ?? null };
+  };
+
+  const customerNameOf = (customerId: string | null | undefined) =>
+    customers.find((customer) => customer.id === customerId)?.name ?? "";
+
   const createMutation = useMutation(
-    (values: ISaleInput) => saleServices.create(values, createdBy),
+    async (values: ISaleInput) =>
+      saleServices.create(await withCustomer(values), createdBy),
     {
       successMessage: "Sale recorded",
-      invalidate: saleInvalidateKeys,
+      invalidate: saleWithCustomerKeys,
       onSuccess: () => {
         formModal.closeModal();
         setPagination({ pageNumber: 1 });
@@ -100,11 +121,15 @@ export const useSaleFormHook = () => {
   );
 
   const updateMutation = useMutation(
-    (payload: { id: string; values: ISaleInput }) =>
-      saleServices.update(payload.id, editRow?.version ?? 0, payload.values),
+    async (payload: { id: string; values: ISaleInput }) =>
+      saleServices.update(
+        payload.id,
+        editRow?.version ?? 0,
+        await withCustomer(payload.values)
+      ),
     {
       successMessage: "Sale updated",
-      invalidate: saleInvalidateKeys,
+      invalidate: saleWithCustomerKeys,
       onSuccess: editModal.closeModal,
     }
   );
@@ -130,15 +155,15 @@ export const useSaleFormHook = () => {
   );
 
   const resubmitMutation = useMutation(
-    (payload: { id: string; values: ISaleResubmitInput }) =>
+    async (payload: { id: string; values: ISaleResubmitInput }) =>
       saleServices.resubmit(
         payload.id,
         resubmitRow?.version ?? 0,
-        payload.values
+        await withCustomer(payload.values)
       ),
     {
       successMessage: "Sale resubmitted — awaiting verification",
-      invalidate: saleInvalidateKeys,
+      invalidate: saleWithCustomerKeys,
       onSuccess: resubmitModal.closeModal,
     }
   );
@@ -196,11 +221,10 @@ export const useSaleFormHook = () => {
       title: "Accounting",
       fields: [
         {
-          name: "customer_id",
+          name: "customer_name",
           label: "Customer",
-          type: "select",
+          type: "creatable",
           span: "half",
-          allowClear: true,
           options: customerOptions,
         },
         ...paymentFields<ISaleInput>("Cash account"),
@@ -214,6 +238,7 @@ export const useSaleFormHook = () => {
     txn_date: todayIso(),
     income_source: defaultIncomeSource,
     customer_id: null,
+    customer_name: "",
     cash_account: null,
     bank_id: null,
     bank_account_id: null,
@@ -228,6 +253,7 @@ export const useSaleFormHook = () => {
     amount: row.amount,
     income_source: row.income_source ?? defaultIncomeSource,
     customer_id: row.customer_id,
+    customer_name: customerNameOf(row.customer_id),
     ...paymentDefaultsOf(row),
     reference_number: row.reference_number ?? "",
     description: row.description ?? "",

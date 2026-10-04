@@ -12,7 +12,9 @@ import {
   transactionSortKey,
 } from "../../../keys/table.keys";
 import {
+  customerListKey,
   scopedKey,
+  supplierListKey,
   transactionAuditKey,
   transactionListKey,
   transactionSummaryKey,
@@ -38,6 +40,10 @@ import type {
   ITransactionSummary,
 } from "../../../models/data/transaction/transaction.response";
 import type { TransactionType } from "../../../enums/transaction.enum";
+import {
+  customerServices,
+  supplierServices,
+} from "../../../services/data/party.services";
 import transactionServices from "../../../services/data/transaction.services";
 import {
   selectUserId,
@@ -58,6 +64,7 @@ import {
 } from "../../../utils/filter.utils";
 import { todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
+import { resolveOptionalParty } from "../../../utils/party.utils";
 import { derivePaymentValues } from "../../../utils/payment.utils";
 import { usePermissions } from "../../account/account.permission.hook";
 import { useLedgerFilters } from "../../common/filter.hook";
@@ -191,8 +198,8 @@ export const useTransactionListHook = () => {
   const { filters } = useLedgerFilters("page");
   const { branchOptions, branchName, defaultBranch } = useBranchListHook();
   const { farmSectionOptions } = useFarmSectionListHook();
-  const { customerOptions } = useCustomerListHook();
-  const { supplierOptions } = useSupplierListHook();
+  const { customers, customerOptions } = useCustomerListHook();
+  const { suppliers, supplierOptions } = useSupplierListHook();
   const { userById, userNameOf } = useUserListHook();
   const { paymentFields, paymentLabelOf } = useBankAccountListHook();
   const { labelOf: incomeSourceLabelOf } = useIncomeSourceListHook();
@@ -206,12 +213,36 @@ export const useTransactionListHook = () => {
 
   const summaryQuery = useQuery(...transactionSummaryQueryOf(effectiveFilters));
 
+  const prepare = async ({
+    customer_name,
+    supplier_name,
+    ...values
+  }: ITransactionInput): Promise<ITransactionInput> => {
+    const customer = customerTypes.includes(values.type)
+      ? await resolveOptionalParty(customers, customer_name, customerServices.create)
+      : null;
+    const supplier = supplierTypes.includes(values.type)
+      ? await resolveOptionalParty(suppliers, supplier_name, supplierServices.create)
+      : null;
+
+    return normalize({
+      ...values,
+      customer_id: customer?.id ?? null,
+      supplier_id: supplier?.id ?? null,
+    });
+  };
+
   const createMutation = useMutation(
-    (values: ITransactionInput) =>
-      transactionServices.create(normalize(values), createdBy),
+    async (values: ITransactionInput) =>
+      transactionServices.create(await prepare(values), createdBy),
     {
       successMessage: "Transaction recorded",
-      invalidate: [transactionListKey, transactionSummaryKey],
+      invalidate: [
+        transactionListKey,
+        transactionSummaryKey,
+        customerListKey,
+        supplierListKey,
+      ],
       onSuccess: () => {
         formModal.closeModal();
         setPagination({ pageNumber: 1 });
@@ -287,18 +318,16 @@ export const useTransactionListHook = () => {
       fields: [
         ...paymentFields<ITransactionInput>("Cash account"),
         {
-          name: "customer_id",
+          name: "customer_name",
           label: "Customer",
-          type: "select",
-          allowClear: true,
+          type: "creatable",
           options: customerOptions,
           hidden: (values) => !customerTypes.includes(values.type),
         },
         {
-          name: "supplier_id",
+          name: "supplier_name",
           label: "Supplier",
-          type: "select",
-          allowClear: true,
+          type: "creatable",
           options: supplierOptions,
           hidden: (values) => !supplierTypes.includes(values.type),
         },
@@ -315,6 +344,8 @@ export const useTransactionListHook = () => {
     expense_type: null,
     customer_id: null,
     supplier_id: null,
+    customer_name: "",
+    supplier_name: "",
     cash_account: null,
     bank_id: null,
     bank_account_id: null,

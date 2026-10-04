@@ -105,3 +105,54 @@ export const switchText = "flex min-w-0 flex-col gap-0.5";
 export const switchLabel = "text-sm font-medium text-foreground";
 
 export const switchDescription = "text-xs text-muted-foreground";
+
+export const fieldSheetAnchor = "relative min-w-0";
+
+export const fieldSheetProxy =
+  "pointer-events-none absolute top-0 left-0 size-px text-base opacity-0";
+
+export const fieldSheetTrigger =
+  "flex min-h-11 w-full min-w-0 items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-left text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 pressed:bg-muted/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30";
+
+export const fieldSheetTriggerText = cva("min-w-0 flex-1", {
+  variants: {
+    filled: { true: "text-foreground", false: "text-muted-foreground" },
+    multiline: { true: "line-clamp-2 whitespace-pre-line", false: "truncate" },
+  },
+  defaultVariants: { filled: false, multiline: false },
+});
+
+export const fieldSheetTriggerAffix =
+  "shrink-0 text-muted-foreground [&_svg]:size-4";
+
+export const fieldSheetContent =
+  "max-h-[calc(0.92*var(--visual-viewport-height))] gap-0 rounded-t-sheet bg-panel pb-safe data-[side=bottom]:bottom-(--keyboard-inset) in-data-keyboard-open:pb-0";
+
+export const fieldSheetHandle =
+  "mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-muted-foreground/30";
+
+export const fieldSheetBody = "flex min-h-0 flex-col gap-3 px-4 pt-4 pb-4";
+
+export const fieldSheetLabel = "text-sm font-medium text-muted-foreground";
+
+export const fieldSheetInputGroup =
+  "h-14 rounded-xl border-2 border-primary px-1 has-[[data-slot=input-group-control]:focus-visible]:border-primary has-[[data-slot=input-group-control]:focus-visible]:ring-0";
+
+export const fieldSheetInput = "text-base md:text-base";
+
+export const fieldSheetTextarea =
+  "min-h-28 rounded-xl border-2 border-primary px-4 py-3 text-base focus-visible:border-primary focus-visible:ring-0 md:text-base";
+
+export const fieldSheetList =
+  "-mx-2 flex max-h-[45dvh] flex-col overflow-y-auto overscroll-contain outline-none";
+
+export const fieldSheetOption =
+  "flex min-h-12 cursor-default items-center gap-3 rounded-lg px-2 text-base text-foreground outline-none focus-visible:bg-muted pressed:bg-muted selected:font-semibold selected:text-primary";
+
+export const fieldSheetOptionCheck = "ml-auto size-4 shrink-0 text-primary";
+
+export const fieldSheetEmpty = "px-2 py-3 text-sm text-muted-foreground";
+
+export const fieldSheetSave = "h-12 w-full rounded-full text-base font-semibold";
+
+export const fieldSheetClear = "h-11 w-full rounded-full";

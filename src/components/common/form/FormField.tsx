@@ -45,6 +45,7 @@ import {
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/cn.utils";
+import FieldSheetControl from "./FieldSheetControl";
 import { useIsCompact } from "../../../hook/common/breakpoint.hook";
 import type {
   IFieldConfig,
@@ -65,13 +66,11 @@ import {
   fieldSelectClearable,
   fieldSpan,
 } from "../../../styles/form/form.styles";
+import { asNumber, asText, usesFieldSheet } from "../../../utils/field.utils";
 import { formatDate, toAmount } from "../../../utils/format.utils";
 import { fuzzyOptions } from "../../../utils/fuzzy.utils";
 
 const isoDate = /^\d{4}-\d{2}-\d{2}/;
-
-const asText = (value: unknown): string =>
-  typeof value === "string" || typeof value === "number" ? String(value) : "";
 
 const asList = (value: unknown): string[] =>
   Array.isArray(value)
@@ -102,10 +101,12 @@ const creatablePlaceholder = <TValues extends FieldValues>(
   config.placeholder ??
   `Select or type ${withArticle(config.label.toLowerCase())}`;
 
-const asNumber = (text: string): number | null => {
-  if (text === "") return null;
-  const amount = Number(text);
-  return Number.isFinite(amount) ? amount : null;
+const sheetPlaceholder = <TValues extends FieldValues>(
+  config: IFieldConfig<TValues>
+) => {
+  if (config.type === "select") return selectPlaceholder(config);
+  if (config.type === "creatable") return creatablePlaceholder(config);
+  return config.placeholder ?? `Enter ${withArticle(config.label.toLowerCase())}`;
 };
 
 type IEnterKeyHint = "next" | "done";
@@ -475,7 +476,16 @@ const FormField = <TValues extends FieldValues>({
             {config.label}
             {config.required ? <span className={fieldRequired}>*</span> : null}
           </FieldLabel>
-          {renderControl(config, field, fieldState.invalid, native, enterKeyHint)}
+          {native && usesFieldSheet(config) ? (
+            <FieldSheetControl
+              config={config}
+              field={field}
+              invalid={fieldState.invalid}
+              placeholder={sheetPlaceholder(config)}
+            />
+          ) : (
+            renderControl(config, field, fieldState.invalid, native, enterKeyHint)
+          )}
           {config.hint ? <FieldDescription>{config.hint}</FieldDescription> : null}
           <FieldError errors={[fieldState.error]} />
         </Field>

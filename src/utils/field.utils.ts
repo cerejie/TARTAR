@@ -12,6 +12,36 @@ const keyboardFieldTypes: readonly IFieldType[] = [
   "amount",
 ];
 
+const sheetFieldTypes: readonly IFieldType[] = [
+  "text",
+  "textarea",
+  "number",
+  "amount",
+  "select",
+  "creatable",
+];
+
+export const searchableOptionCount = 8;
+
+export const asText = (value: unknown): string =>
+  typeof value === "string" || typeof value === "number" ? String(value) : "";
+
+export const asNumber = (text: string): number | null => {
+  if (text === "") return null;
+  const amount = Number(text);
+  return Number.isFinite(amount) ? amount : null;
+};
+
+export const usesFieldSheet = <TValues extends FieldValues>(
+  config: IFieldConfig<TValues>
+): boolean => sheetFieldTypes.includes(config.type) && !config.autoComplete;
+
+export const sheetHasInput = <TValues extends FieldValues>(
+  config: IFieldConfig<TValues>
+): boolean =>
+  config.type !== "select" ||
+  (config.options?.length ?? 0) > searchableOptionCount;
+
 export const lastKeyboardFieldOf = <TValues extends FieldValues>(
   fields: readonly IFieldConfig<TValues>[],
   values: TValues

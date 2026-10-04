@@ -16,6 +16,7 @@ import {
 import {
   payableListKey,
   scopedKey,
+  supplierListKey,
   voucherListKey,
 } from "../../../keys/query.keys";
 import {
@@ -42,6 +43,7 @@ import {
   voucherDisbursementKind,
   type IVoucher,
 } from "../../../models/data/voucher/voucher.response";
+import { supplierServices } from "../../../services/data/party.services";
 import voucherServices from "../../../services/data/voucher.services";
 import {
   selectUserId,
@@ -60,6 +62,7 @@ import {
 } from "../../../utils/filter.utils";
 import { formatMoney, todayIso } from "../../../utils/format.utils";
 import { toOptions } from "../../../utils/option.utils";
+import { resolveParty } from "../../../utils/party.utils";
 import { derivePaymentValues } from "../../../utils/payment.utils";
 import { printVoucher } from "../../../utils/print.utils";
 import {
@@ -202,7 +205,7 @@ export const useVoucherListHook = () => {
   const { filters } = useLedgerFilters("vouchers");
   const { branches, branchOptions, branchName, defaultBranch } =
     useBranchListHook();
-  const { supplierOptions } = useSupplierListHook();
+  const { suppliers, supplierOptions } = useSupplierListHook();
   const { userNameOf } = useUserListHook();
   const { accountLabelOf, accountDefaultsOfLabel, bankAccountFields } =
     useBankAccountListHook();
@@ -230,17 +233,30 @@ export const useVoucherListHook = () => {
     }
   );
 
+  const withPayee = async (values: IVoucherInput): Promise<IVoucherInput> => {
+    if (values.kind !== "purchase") return { ...values, supplier_id: null };
+
+    const supplier = await resolveParty(
+      suppliers,
+      values.payee,
+      supplierServices.create
+    );
+    return { ...values, supplier_id: supplier.id, payee: supplier.name };
+  };
+
   const createMutation = useMutation(
-    (values: IVoucherInput) =>
-      voucherServices.create(
-        { ...values, check_bank: accountLabelOf(values.bank_account_id) },
+    async (values: IVoucherInput) => {
+      const prepared = await withPayee(values);
+      return voucherServices.create(
+        { ...prepared, check_bank: accountLabelOf(prepared.bank_account_id) },
         createdBy
-      ),
+      );
+    },
     {
       successMessage: permissions.isManager
         ? "Voucher saved — approved"
         : "Voucher submitted for approval",
-      invalidate: [voucherListKey],
+      invalidate: [voucherListKey, supplierListKey],
       onSuccess: () => {
         formModal.closeModal();
         setPagination({ pageNumber: 1 });
@@ -250,14 +266,16 @@ export const useVoucherListHook = () => {
   );
 
   const updateMutation = useMutation(
-    (payload: { id: string; values: IVoucherInput }) =>
-      voucherServices.update(payload.id, {
-        ...payload.values,
-        check_bank: accountLabelOf(payload.values.bank_account_id),
-      }),
+    async (payload: { id: string; values: IVoucherInput }) => {
+      const prepared = await withPayee(payload.values);
+      return voucherServices.update(payload.id, {
+        ...prepared,
+        check_bank: accountLabelOf(prepared.bank_account_id),
+      });
+    },
     {
       successMessage: "Voucher updated",
-      invalidate: [voucherListKey, payableListKey],
+      invalidate: [voucherListKey, payableListKey, supplierListKey],
       onSuccess: editModal.closeModal,
     }
   );
@@ -331,7 +349,13 @@ export const useVoucherListHook = () => {
           required: true,
           options: branchOptions,
         },
-        { name: "payee", label: "Payee", type: "text", required: true },
+        {
+          name: "payee",
+          label: "Payee",
+          type: "creatable",
+          required: true,
+          options: supplierOptions,
+        },
         {
           name: "amount",
           label: "Invoice amount",
@@ -339,14 +363,6 @@ export const useVoucherListHook = () => {
           required: true,
           prefix: "₱",
           hint: "Invoice total as billed.",
-        },
-        {
-          name: "supplier_id",
-          label: "Supplier",
-          type: "select",
-          allowClear: true,
-          options: supplierOptions,
-          hidden: (values) => values.kind !== "purchase",
         },
         {
           name: "due_date",
