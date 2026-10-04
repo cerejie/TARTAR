@@ -1,5 +1,5 @@
 # ROADMAP — Collection removal, print fixes, offline completeness (2026-10-03)
-Updated: 2026-10-04 (O2 done)
+Updated: 2026-10-04 (Z probes done; v2.80 user UI requests; Z sweep pending)
 
 The previous roadmap (Visual fixes, V1–V10) is archived as `.claude/state/ROADMAP-VISUAL-2026-10-03-DONE.md`. The
 Native-feel mobile PWA roadmap stays parked as `.claude/state/ROADMAP-PWA-SUSPENDED.md`. When this roadmap finishes,
@@ -342,9 +342,33 @@ Given by the user on 2026-10-03 unless marked otherwise.
   (new `transactionServices.getAllAudits` dataset `transactionAuditKey`, `transactionAuditFetcherOf`, invalidated by
   sale / disbursement writes). `admin.home.hook.ts` alerts reuse `dashboardAlertsQueryOf`.
 
+- [x] U1 User UI requests, out of roadmap (Development v2.80): phone list rows get a visible divider
+  (`dataList` → `foreground/10`); phone users list shows the role above the approval tag and hides branches /
+  created (`listHidden`); unpaid due dates red + semibold on receivables / payables / purchases (`DueDateCell`);
+  avatars only for users — every other name cell is `NameCell`; users upload / change / remove their own photo from
+  Account settings (`account.avatar.hook.ts`, `image.utils.ts` 256 px webp, `FileButton`, `ProfileAvatar`; online
+  only; initials until migration 35 is applied); phone rows drop the ⋮ menu when the detail sheet carries the same
+  actions (`DataTableList`), and sheets show enabled danger actions as a full-width button under the primary
+  (`SheetActions`); minimum browser = iOS / Safari 16.4 (Tailwind v4 needs `color-mix`, `@container`,
+  `@property`): `utils/browser.utils.ts` feature-detects and `main.tsx` renders `UnsupportedBrowserView` instead of
+  `App` (checked in Chrome with `color-mix` faked off; a real iOS 15 device unconfirmed).
+
+- Z progress (2026-10-04, not yet done): offline probes complete — O1 (admin / emp / acc × phone / desk) and O2
+  phone (admin / emp) from the previous session; this session O2 acc phone re-run alone (84-request suspect did not
+  reproduce: all-branches Customer / Supplier Ledger filled, ₱1,799.00 matches, 0 "not saved") and O2 desk admin /
+  emp / acc (prime 310 / 110 / 132 requests; 0 "not saved" except the admin next-month dashboard, expected; ledger
+  labels match rows). Probe misses, not defects: desk edit-history trigger, report-type tabs, emp / acc dashboard
+  nav, acc voucher source / next-month dashboard (unconfirmed). Prints verified (all-branches title unconfirmed:
+  QA accounts see one branch). Logged: probed offline in dev, installed-PWA cold start unconfirmed. Sweep
+  `tartar-sweep-final3` is INVALID for Z: source edits (v2.80) hot-reloaded mid-run — admin desk aborted after 8
+  surfaces, emp phone after 1 (timeouts), and the rest mixes pre / post v2.80 code.
+
 ## Next
-1. Z Final re-sweep + offline probe, all roles (include a statement print and an all-branches print — P1 could not
-   exercise them: the QA accounts see one branch).
+1. Z Final — remaining step only: with v2.80 committed and NO source edits during the run, full sweep into
+   `OUT=C:/Users/CER/AppData/Local/Temp/tartar-sweep-final4` (Bash `run_in_background`, timeout 3600000; no probe
+   while it runs), confirm every role × device has its full surface count (log ends `done: … contact sheets`), open
+   every contact sheet (viewed = total), grep for "Collection", log "looked: <sheets>, <result>" and "swept, device
+   unconfirmed". Then mark Z done and commit. A defect becomes a new phase before Z.
 2. USER DECISIONS — hard-stop, not an autopilot phase: see Open.
 
 ## Open
@@ -359,8 +383,11 @@ Given by the user on 2026-10-03 unless marked otherwise.
     input ships (client follow-up listed at the end of the proposal).
   - The archived audit roadmap's Open items: H1 sign-ups off, H2 max rows, SEC-03 CSP enforce, SEC-05 send-push
     redeploy, QA-02 / DATA-01 RPC migrations — see `.claude/state/ROADMAP-AUDIT-2026-10-03-DONE.md` § Open.
+  - Avatar migration proposal (written in U1, `.claude/state/proposals/migration-35-user-avatar.sql`):
+    `users.avatar_path`, public `avatars` bucket (2 MB, jpeg / png / webp), own-folder storage policies,
+    `set_own_avatar`. Until applied the avatar query fails alone and everyone shows initials.
 - Carried, not a decision: the Visual roadmap's "Recorded by" hypothesis (needs a DB read) — see the archived file.
 
 ## State
-Branch: mobilel-app-native · Last commit Development v2.77 (O1 Offline variants of the paged lists) · Uncommitted: O2 (suggested as Development v2.78) · Last check: O2, build + lint clean, tests 160 / 160, offline probe admin / emp / acc phone (V9 method): branch switch QA Test ↔ All branches, customer / supplier ledger, payment detail, edit history, faked month change (Date +28 days, reload) — dashboard honestly not saved, Branch Summary November derived (₱0), lists cached; voucher source not exercised (no rejected voucher in QA data). Previous check O1, build + lint clean, tests 156 / 156, offline probe admin phone + desk (V9 method) on every list: page 2 / load more, each sort, This month, name search — 0 "not saved". Run any sweep or probe
-with Bash `run_in_background` and `timeout` 3600000.
+Branch: main · Last commit Development v2.79 (phone list rows; O2 committed as v2.78) · Uncommitted: U1 (suggested as Development v2.80) · Last check: U1, `npx tsc -b` + lint clean (src), visual changes compiled — user to confirm on device; Z offline probes all clean (see Z progress). Run any sweep or probe
+with Bash `run_in_background` and `timeout` 3600000, never two at once, and never edit `src/` while one runs.
