@@ -7,6 +7,12 @@ type IPushRequest = {
   body: string;
   url: string;
   tag: string;
+  actor_id?: string | null;
+};
+
+type IActorAvatarRow = {
+  avatar_path: string | null;
+  updated_at: string;
 };
 
 type IPushSubscriptionRow = {
@@ -14,6 +20,8 @@ type IPushSubscriptionRow = {
   p256dh: string;
   auth: string;
 };
+
+const avatarBucket = "avatars";
 
 const goneStatusCodes: readonly number[] = [404, 410];
 
@@ -54,6 +62,19 @@ const supabase = createClient(
 );
 
 const pushSecret = requiredEnv("PUSH_SECRET");
+
+const actorIconOf = async (actorId: string | null | undefined): Promise<string | undefined> => {
+  if (!actorId) return undefined;
+  const { data, error } = await supabase
+    .from("users")
+    .select("avatar_path, updated_at")
+    .eq("id", actorId)
+    .maybeSingle();
+  const actor = data as IActorAvatarRow | null;
+  if (error || !actor?.avatar_path) return undefined;
+  const { data: file } = supabase.storage.from(avatarBucket).getPublicUrl(actor.avatar_path);
+  return `${file.publicUrl}?v=${encodeURIComponent(actor.updated_at)}`;
+};
 
 type IDelivery = {
   endpoint: string;
@@ -118,6 +139,7 @@ Deno.serve(async (request) => {
     body: input.body,
     url: input.url,
     tag: input.tag,
+    icon: await actorIconOf(input.actor_id),
   });
   const subscriptions = (data ?? []) as IPushSubscriptionRow[];
   const deliveries = await Promise.all(

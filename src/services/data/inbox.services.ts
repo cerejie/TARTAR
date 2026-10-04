@@ -5,14 +5,13 @@ import type { IMutationResult } from "../../models/common/query.model";
 import type { IInboxItem } from "../../models/data/inbox/inbox.response";
 
 const table = "notifications";
-const columns = "id, title, body, url, tag, created_at, read_at, pending";
 const inboxLimit = 50;
 
 const inboxServices = {
   getList: async (): Promise<IInboxItem[]> => {
     const { data, error } = await supabase
       .from(table)
-      .select(columns)
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(inboxLimit);
     if (error) throw toError(error);

@@ -9,6 +9,7 @@ export interface IInboxItem {
   created_at: string;
   read_at: string | null;
   pending: boolean;
+  actor_id?: string | null;
 }
 
 export type InboxKind = "voucher" | "payment" | "sale" | "other";

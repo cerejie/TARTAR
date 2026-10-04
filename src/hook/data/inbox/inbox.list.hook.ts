@@ -6,6 +6,7 @@ import {
   selectUserId,
   useAccountStore,
 } from "../../../store/data/account/account.store";
+import { useAvatarUrls } from "../../account/account.avatar.hook";
 import { useMutation } from "../../common/mutation.hook";
 import { useQuery } from "../../common/query.hook";
 
@@ -23,6 +24,7 @@ export const useInboxListHook = () => {
   const navigate = useNavigate();
   const isAuthenticated = useAccountStore(selectIsAuthenticated);
   const userId = useAccountStore(selectUserId);
+  const avatarUrlOf = useAvatarUrls();
 
   const inboxQuery = useQuery<IInboxItem[]>(
     scopedKey(inboxListKey, userId),
@@ -48,6 +50,7 @@ export const useInboxListHook = () => {
     refreshing: inboxQuery.isRefreshing,
     error: inboxQuery.error ? inboxLoadError : null,
     retry: inboxQuery.refetch,
+    actorAvatarOf: (item: IInboxItem) => avatarUrlOf(item.actor_id ?? undefined),
     markingAllRead: markReadMutation.loading,
     openItem: (item: IInboxItem) => {
       if (!item.read_at) void markReadMutation.mutate([item.id]);

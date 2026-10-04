@@ -13,9 +13,11 @@ type IPushMessage = {
   body: string;
   url: string;
   tag?: string;
+  icon?: string;
 };
 
 const adminScope = "/admin";
+const appIcon = "/icon-192.png";
 const fallbackMessage: IPushMessage = { title: "TARTAR", body: "", url: "/" };
 
 const isAdminPath = (pathname: string): boolean =>
@@ -32,6 +34,7 @@ const pushMessageOf = (data: PushMessageData | null): IPushMessage => {
       body: candidate.body ?? fallbackMessage.body,
       url: candidate.url ?? fallbackMessage.url,
       tag: candidate.tag,
+      icon: candidate.icon,
     };
   } catch {
     return { ...fallbackMessage, body: data.text() };
@@ -74,7 +77,7 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(message.title, {
       body: message.body,
       tag: message.tag,
-      icon: "/icon-192.png",
+      icon: message.icon ?? appIcon,
       data: { url: message.url },
     })
   );

@@ -85,6 +85,7 @@ const InboxFeed = ({ section, markAll = true, onOpen }: IProps) => {
             description={item.body || undefined}
             meta={<InboxMeta item={item} now={now} />}
             icon={<KindIcon className={inboxIcon} />}
+            imageSrc={inbox.actorAvatarOf(item)}
             unread={!item.read_at}
             pending={item.pending}
             onPress={() => {
