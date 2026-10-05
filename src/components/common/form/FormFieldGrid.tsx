@@ -24,11 +24,11 @@ const FormFieldGrid = <TValues extends FieldValues>({
         .map((field) => (
           <FormField
             key={String(field.name)}
-            config={
-              field.optionsOf
-                ? { ...field, options: field.optionsOf(values) }
-                : field
-            }
+            config={{
+              ...field,
+              options: field.optionsOf?.(values) ?? field.options,
+              span: field.spanOf?.(values) ?? field.span,
+            }}
             control={control}
             enterKeyHint={field.name === lastKeyboardField ? "done" : "next"}
           />

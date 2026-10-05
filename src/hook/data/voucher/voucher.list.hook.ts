@@ -390,7 +390,7 @@ export const useVoucherListHook = () => {
           name: "check_number",
           label: "Check number",
           type: "text",
-          hint: "Optional — only when this purchase is paid by check.",
+          hint: "Optional",
           hidden: (values) =>
             values.type === "check" || values.kind !== "purchase",
         },

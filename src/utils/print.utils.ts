@@ -132,7 +132,8 @@ export const printVoucher = (
 <head>
   <meta charset="utf-8" />
   <title>Voucher ${escapeHtml(voucher.voucher_no ?? "")}</title>
-  <style>${baseStyles}
+  <style>@page { margin: 0; }${baseStyles}
+    body { margin: 0; }
     .sheet { border: 1px solid ${printPalette.text}; }
     .head { text-align: center; border-bottom: 1px solid ${printPalette.text}; padding: 6px 0; }
     .head h1 { font-size: 22px; letter-spacing: .02em; }
@@ -141,18 +142,21 @@ export const printVoucher = (
     .title h2 { margin: 0; padding: 6px 12px; font-size: 16px; letter-spacing: .04em; }
     .meta { border-collapse: collapse; width: auto; }
     .meta td { padding: 3px 10px; font-weight: 700; text-align: right; }
-    .meta td.value { font-weight: 400; min-width: 200px; border-left: 1px solid ${printPalette.text}; border-bottom: 1px solid ${printPalette.text}; }
+    .meta td.value { font-weight: 400; min-width: 200px; border-left: 1px solid ${printPalette.text}; }
+    .meta tr:first-child td.value { border-bottom: 1px solid ${printPalette.text}; }
     .payee { padding: 28px 12px 12px; font-size: 30px; font-weight: 800; border-bottom: 1px solid ${printPalette.text}; }
-    table.body td, table.body th { border: 1px solid ${printPalette.text}; }
-    table.body th { font-size: 20px; padding: 4px; text-align: center; }
+    table.body > tbody > tr > * { border-left: 1px solid ${printPalette.text}; }
+    table.body > tbody > tr > :first-child { border-left: none; }
+    table.body th { font-size: 20px; padding: 4px; text-align: center; border-bottom: 1px solid ${printPalette.text}; }
     table.body td.particulars { padding: 0; vertical-align: top; width: 66%; }
     .purpose { text-align: center; padding: 36px 12px; text-transform: uppercase; letter-spacing: .04em; }
     table.lines td { padding: 1px 8px; border-top: 1px solid ${printPalette.text}; }
     table.lines td.line-label { text-align: right; font-weight: 700; width: 50%; border-right: 1px solid ${printPalette.text}; }
     table.body td.net { text-align: center; font-size: 34px; font-weight: 800; vertical-align: middle; }
-    table.grid td { border: 1px solid ${printPalette.text}; padding: 8px; width: 33%; vertical-align: top; }
+    table.grid td { border-top: 1px solid ${printPalette.text}; border-left: 1px solid ${printPalette.text}; padding: 8px; width: 33%; vertical-align: top; }
+    table.grid td:first-child { border-left: none; }
     table.grid .cap { color: ${printPalette.text}; }
-    .received { padding: 10px 8px 2px; }
+    .received { padding: 10px 8px 2px; border-top: 1px solid ${printPalette.text}; }
     .sign { margin-top: 56px; display: flex; justify-content: space-between; }
     .sign div { width: 220px; text-align: center; }
     .sign .name { font-weight: 600; min-height: 20px; }

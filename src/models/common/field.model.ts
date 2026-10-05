@@ -13,7 +13,7 @@ export type IFieldType =
   | "date"
   | "checkbox";
 
-export type IFieldSpan = "half" | "full";
+export type IFieldSpan = "third" | "half" | "full";
 
 export interface IFieldOption {
   value: string;
@@ -25,6 +25,7 @@ export interface IFieldConfig<TValues extends FieldValues = FieldValues> {
   label: string;
   type: IFieldType;
   span?: IFieldSpan;
+  spanOf?: (values: TValues) => IFieldSpan;
   required?: boolean;
   options?: IFieldOption[];
   optionsOf?: (values: TValues) => IFieldOption[];

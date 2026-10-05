@@ -10,6 +10,7 @@ import type { DefaultValues } from "react-hook-form";
 import type { DisbursementKind } from "../enums/transaction.enum";
 import type {
   IFieldConfig,
+  IFieldSpan,
   IFieldOption,
   IFieldSection,
 } from "../models/common/field.model";
@@ -84,7 +85,8 @@ const checkNumberField: IFieldConfig<IDisbursementInput> = {
   name: "check_number",
   label: "Check number",
   type: "text",
-  hint: "Optional — only when this purchase is paid by check.",
+  span: "half",
+  hint: "Optional",
 };
 
 const paymentSection = (
@@ -230,6 +232,9 @@ export const disbursementEditDefaultsOf = (
       : "",
   };
 };
+
+export const paymentSpanOf = (values: IDisbursementInput): IFieldSpan =>
+  values.cash_account === "bank_account" && values.bank_id ? "third" : "half";
 
 export const withCheckNumberChange = (
   row: IDisbursement,
