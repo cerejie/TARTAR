@@ -8,6 +8,7 @@ import type {
 const keyboardFieldTypes: readonly IFieldType[] = [
   "text",
   "password",
+  "phone",
   "number",
   "amount",
 ];
@@ -15,6 +16,7 @@ const keyboardFieldTypes: readonly IFieldType[] = [
 const sheetFieldTypes: readonly IFieldType[] = [
   "text",
   "textarea",
+  "phone",
   "number",
   "amount",
   "select",
@@ -30,6 +32,36 @@ export const asNumber = (text: string): number | null => {
   if (text === "") return null;
   const amount = Number(text);
   return Number.isFinite(amount) ? amount : null;
+};
+
+export const phoneLength = 11;
+
+export const asPhone = (text: string): string =>
+  text.replace(/\D/g, "").slice(0, phoneLength);
+
+export const sanitizeAmount = (text: string): string => {
+  const [whole = "", ...rest] = text.replace(/[^\d.]/g, "").split(".");
+  if (rest.length === 0) return whole;
+  return `${whole}.${rest.join("").slice(0, 2)}`;
+};
+
+export const asAmountText = (value: unknown): string => {
+  const amount = typeof value === "number" ? value : asNumber(asText(value));
+  return amount === null ? "" : amount.toFixed(2);
+};
+
+export const sanitizeDraft = (type: IFieldType, text: string): string => {
+  if (type === "amount") return sanitizeAmount(text);
+  if (type === "phone") return asPhone(text);
+  return text;
+};
+
+export const inputModeOf = <TValues extends FieldValues>(
+  config: IFieldConfig<TValues>
+): IFieldConfig<TValues>["inputMode"] => {
+  if (config.type === "amount") return "decimal";
+  if (config.type === "number" || config.type === "phone") return "numeric";
+  return config.inputMode;
 };
 
 export const usesFieldSheet = <TValues extends FieldValues>(

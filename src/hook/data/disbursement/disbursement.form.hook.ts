@@ -24,7 +24,6 @@ import {
   disbursementEditDefaultsOf,
   disbursementSectionsOf,
   isDisbursementRejected,
-  paymentSpanOf,
   withCheckNumberChange,
 } from "../../../utils/disbursement.utils";
 import { nameKey } from "../../../utils/fuzzy.utils";
@@ -121,13 +120,11 @@ export const useDisbursementFormHook = (
 
   const disbursementPaymentFields = paymentFields<IDisbursementInput>(
     "Paid from"
-  ).map((field) => ({
-    ...field,
-    ...(field.name === "cash_account"
-      ? { required: true, allowClear: false }
-      : {}),
-    spanOf: paymentSpanOf,
-  }));
+  ).map((field) =>
+    field.name === "cash_account"
+      ? { ...field, required: true, allowClear: false }
+      : field
+  );
 
   const sections = disbursementSectionsOf(kind, {
     branchOptions,

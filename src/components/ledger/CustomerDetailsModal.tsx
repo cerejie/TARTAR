@@ -18,9 +18,8 @@ const fields: IFieldConfig<IPartyInput>[] = [
   {
     name: "contact",
     label: "Contact number",
-    type: "text",
-    inputMode: "tel",
-    placeholder: "e.g. 0917 123 4567",
+    type: "phone",
+    placeholder: "e.g. 09171234567",
   },
   { name: "address", label: "Address", type: "textarea" },
 ];

@@ -17,6 +17,7 @@ import AppButton from "../button/AppButton";
 import type {
   IFieldConfig,
   IFieldOption,
+  IFieldType,
 } from "../../../models/common/field.model";
 import {
   fieldNumberInput,
@@ -35,7 +36,12 @@ import {
   fieldSheetSave,
   fieldSheetTextarea,
 } from "../../../styles/form/form.styles";
-import { sheetHasInput } from "../../../utils/field.utils";
+import {
+  inputModeOf,
+  phoneLength,
+  sanitizeDraft,
+  sheetHasInput,
+} from "../../../utils/field.utils";
 import { fuzzyOptions } from "../../../utils/fuzzy.utils";
 
 type IProps<TValues extends FieldValues> = {
@@ -50,14 +56,10 @@ type IProps<TValues extends FieldValues> = {
   onClose: () => void;
 };
 
-const isNumeric = (type: string) => type === "number" || type === "amount";
-
-const inputModeOf = <TValues extends FieldValues>(
-  config: IFieldConfig<TValues>
-): IFieldConfig<TValues>["inputMode"] => {
-  if (config.type === "amount") return "decimal";
-  if (config.type === "number") return "numeric";
-  return config.inputMode;
+const htmlTypeOf = (type: IFieldType) => {
+  if (type === "number") return "number";
+  if (type === "phone") return "tel";
+  return "text";
 };
 
 const focusOnOpen = (element: HTMLInputElement | HTMLTextAreaElement | null) => {
@@ -87,6 +89,7 @@ const FieldSheet = <TValues extends FieldValues>({
   const options: IFieldOption[] = config.options ?? [];
   const isSelect = config.type === "select";
   const isCreatable = config.type === "creatable";
+  const isNumber = config.type === "number";
   const hasList = isSelect || isCreatable;
   const hasInput = sheetHasInput(config);
   const listOptions = hasInput ? fuzzyOptions(options, draft) : options;
@@ -166,18 +169,21 @@ const FieldSheet = <TValues extends FieldValues>({
               ref={attachInput}
               id={fieldId}
               aria-invalid={invalid}
-              type={isNumeric(config.type) ? "number" : "text"}
+              type={htmlTypeOf(config.type)}
               inputMode={inputModeOf(config)}
-              min={isNumeric(config.type) ? 0 : undefined}
+              min={isNumber ? 0 : undefined}
               max={config.max}
+              maxLength={config.type === "phone" ? phoneLength : undefined}
               enterKeyHint={isSelect ? "search" : "done"}
               className={cn(
                 fieldSheetInput,
-                isNumeric(config.type) && fieldNumberInput
+                isNumber && fieldNumberInput
               )}
               value={draft}
               placeholder={isSelect ? "Search" : config.placeholder}
-              onChange={(event) => onDraftChange(event.target.value)}
+              onChange={(event) =>
+                onDraftChange(sanitizeDraft(config.type, event.target.value))
+              }
               onKeyDown={handleEnter}
             />
             {draft ? (

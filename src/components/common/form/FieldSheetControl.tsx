@@ -12,8 +12,15 @@ import {
   fieldSheetTriggerAffix,
   fieldSheetTriggerText,
 } from "../../../styles/form/form.styles";
-import { asNumber, asText, sheetHasInput } from "../../../utils/field.utils";
-import { toAmount } from "../../../utils/format.utils";
+import {
+  asAmountText,
+  asNumber,
+  asPhone,
+  asText,
+  inputModeOf,
+  sheetHasInput,
+} from "../../../utils/field.utils";
+import { formatAmountInput, toAmount } from "../../../utils/format.utils";
 
 type IProps<TValues extends FieldValues> = {
   config: IFieldConfig<TValues>;
@@ -28,6 +35,7 @@ const committedValueOf = <TValues extends FieldValues>(
 ): unknown => {
   if (config.type === "amount") return toAmount(asNumber(draft));
   if (config.type === "number") return asNumber(draft);
+  if (config.type === "phone") return asPhone(draft);
   if (config.type === "creatable") return draft.trim();
   return draft;
 };
@@ -46,9 +54,12 @@ const FieldSheetControl = <TValues extends FieldValues>({
 
   const value = asText(field.value);
   const isSelect = config.type === "select";
+  const isAmount = config.type === "amount";
   const shownText = isSelect
     ? (config.options?.find((option) => option.value === value)?.label ?? "")
-    : value;
+    : isAmount
+      ? formatAmountInput(field.value)
+      : value;
   const hasValue = shownText !== "";
   const hasChevron = isSelect || config.type === "creatable";
 
@@ -64,7 +75,7 @@ const FieldSheetControl = <TValues extends FieldValues>({
       proxyRef.current?.focus({ preventScroll: true });
       focusingProxy.current = false;
     }
-    openSheet(isSelect ? "" : value);
+    openSheet(isSelect ? "" : isAmount ? asAmountText(field.value) : value);
   };
 
   const handleProxyFocus = () => {
@@ -85,7 +96,7 @@ const FieldSheetControl = <TValues extends FieldValues>({
         ref={proxyRef}
         aria-hidden
         tabIndex={-1}
-        inputMode={config.type === "amount" ? "decimal" : undefined}
+        inputMode={inputModeOf(config)}
         className={fieldSheetProxy}
         onFocus={handleProxyFocus}
       />

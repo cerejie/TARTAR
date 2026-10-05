@@ -5,6 +5,7 @@ export type IFieldType =
   | "text"
   | "textarea"
   | "password"
+  | "phone"
   | "number"
   | "amount"
   | "select"
@@ -13,7 +14,7 @@ export type IFieldType =
   | "date"
   | "checkbox";
 
-export type IFieldSpan = "third" | "half" | "full";
+export type IFieldSpan = "half" | "full";
 
 export interface IFieldOption {
   value: string;

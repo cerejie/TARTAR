@@ -6,6 +6,17 @@ const peso = new Intl.NumberFormat("en-PH", {
   minimumFractionDigits: 2,
 });
 
+const amountInput = new Intl.NumberFormat("en-PH", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+export const formatAmountInput = (value: unknown): string => {
+  if (value === null || value === undefined || value === "") return "";
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amountInput.format(amount) : "";
+};
+
 export const formatMoney = (
   value: number | string | null | undefined
 ): string => {

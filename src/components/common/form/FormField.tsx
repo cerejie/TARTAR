@@ -45,6 +45,7 @@ import {
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/cn.utils";
+import AmountControl from "./AmountControl";
 import FieldSheetControl from "./FieldSheetControl";
 import PasswordControl from "./PasswordControl";
 import { useIsCompact } from "../../../hook/common/breakpoint.hook";
@@ -67,8 +68,14 @@ import {
   fieldSelectClearable,
   fieldSpan,
 } from "../../../styles/form/form.styles";
-import { asNumber, asText, usesFieldSheet } from "../../../utils/field.utils";
-import { formatDate, toAmount } from "../../../utils/format.utils";
+import {
+  asNumber,
+  asPhone,
+  asText,
+  phoneLength,
+  usesFieldSheet,
+} from "../../../utils/field.utils";
+import { formatDate } from "../../../utils/format.utils";
 import { fuzzyOptions } from "../../../utils/fuzzy.utils";
 
 const isoDate = /^\d{4}-\d{2}-\d{2}/;
@@ -154,8 +161,32 @@ const renderControl = <TValues extends FieldValues>(
           enterKeyHint={enterKeyHint}
         />
       );
-    case "number":
+    case "phone":
+      return (
+        <Input
+          {...field}
+          id={fieldId}
+          aria-invalid={invalid}
+          type="tel"
+          inputMode="numeric"
+          autoComplete={config.autoComplete ?? "tel"}
+          maxLength={phoneLength}
+          enterKeyHint={enterKeyHint}
+          value={asPhone(asText(field.value))}
+          placeholder={config.placeholder}
+          onChange={(event) => field.onChange(asPhone(event.target.value))}
+        />
+      );
     case "amount":
+      return (
+        <AmountControl
+          config={config}
+          field={field}
+          invalid={invalid}
+          enterKeyHint={enterKeyHint}
+        />
+      );
+    case "number":
       return (
         <InputGroup>
           {config.prefix ? (
@@ -172,16 +203,13 @@ const renderControl = <TValues extends FieldValues>(
             className={fieldNumberInput}
             min={0}
             max={config.max}
-            step={config.type === "amount" ? 0.01 : 1}
-            inputMode={config.type === "amount" ? "decimal" : "numeric"}
+            step={1}
+            inputMode="numeric"
             enterKeyHint={enterKeyHint}
             value={asText(field.value)}
             placeholder={config.placeholder}
             onChange={(event) => field.onChange(asNumber(event.target.value))}
-            onBlur={() => {
-              if (config.type === "amount") field.onChange(toAmount(field.value));
-              field.onBlur();
-            }}
+            onBlur={field.onBlur}
           />
         </InputGroup>
       );

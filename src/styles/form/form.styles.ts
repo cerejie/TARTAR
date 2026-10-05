@@ -4,15 +4,11 @@ import { moneyLevel } from "../common/money.styles";
 
 export const entityForm = "flex flex-col gap-6";
 
-export const formGrid = "grid grid-cols-1 gap-4 md:grid-cols-6";
+export const formGrid = "grid grid-cols-1 gap-4 md:grid-cols-2";
 
 export const fieldSpan = cva("min-w-0", {
   variants: {
-    span: {
-      third: "md:col-span-2",
-      half: "md:col-span-3",
-      full: "md:col-span-6",
-    },
+    span: { half: "", full: "md:col-span-2" },
   },
   defaultVariants: { span: "full" },
 });
