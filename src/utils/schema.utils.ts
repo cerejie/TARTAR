@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { phoneLength } from "./field.utils";
+import { asPhone, phoneLength, phonePrefix } from "./field.utils";
 
 export const amountField = z.coerce
   .number({ message: "Enter a valid amount" })
@@ -36,12 +36,12 @@ export const optionalPhone = z
   .string()
   .nullable()
   .optional()
-  .transform((value) => (value ?? "").replace(/\D/g, ""))
+  .transform((value) => asPhone(value ?? ""))
   .refine(
     (digits) => digits === "" || digits.length === phoneLength,
-    `Enter an ${phoneLength}-digit number`
+    `Enter ${phoneLength} digits after ${phonePrefix}`
   )
-  .transform((digits) => digits || null);
+  .transform((digits) => (digits ? `${phonePrefix}${digits}` : null));
 
 export const optionalAmountField = z.coerce
   .number({ message: "Enter a valid amount" })

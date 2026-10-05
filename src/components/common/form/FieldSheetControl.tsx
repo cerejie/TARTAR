@@ -52,9 +52,10 @@ const FieldSheetControl = <TValues extends FieldValues>({
   const proxyRef = useRef<HTMLInputElement | null>(null);
   const focusingProxy = useRef(false);
 
-  const value = asText(field.value);
   const isSelect = config.type === "select";
   const isAmount = config.type === "amount";
+  const value =
+    config.type === "phone" ? asPhone(asText(field.value)) : asText(field.value);
   const shownText = isSelect
     ? (config.options?.find((option) => option.value === value)?.label ?? "")
     : isAmount

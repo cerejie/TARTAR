@@ -74,6 +74,7 @@ import {
   asText,
   phoneLength,
   usesFieldSheet,
+  withPhonePrefix,
 } from "../../../utils/field.utils";
 import { formatDate } from "../../../utils/format.utils";
 import { fuzzyOptions } from "../../../utils/fuzzy.utils";
@@ -163,19 +164,24 @@ const renderControl = <TValues extends FieldValues>(
       );
     case "phone":
       return (
-        <Input
-          {...field}
-          id={fieldId}
-          aria-invalid={invalid}
-          type="tel"
-          inputMode="numeric"
-          autoComplete={config.autoComplete ?? "tel"}
-          maxLength={phoneLength}
-          enterKeyHint={enterKeyHint}
-          value={asPhone(asText(field.value))}
-          placeholder={config.placeholder}
-          onChange={(event) => field.onChange(asPhone(event.target.value))}
-        />
+        <InputGroup>
+          <InputGroupAddon>
+            <InputGroupText>{config.prefix}</InputGroupText>
+          </InputGroupAddon>
+          <InputGroupInput
+            {...field}
+            id={fieldId}
+            aria-invalid={invalid}
+            type="tel"
+            inputMode="numeric"
+            autoComplete={config.autoComplete ?? "tel-national"}
+            maxLength={phoneLength}
+            enterKeyHint={enterKeyHint}
+            value={asPhone(asText(field.value))}
+            placeholder={config.placeholder}
+            onChange={(event) => field.onChange(asPhone(event.target.value))}
+          />
+        </InputGroup>
       );
     case "amount":
       return (
@@ -444,11 +450,12 @@ const renderControl = <TValues extends FieldValues>(
 };
 
 const FormField = <TValues extends FieldValues>({
-  config,
+  config: baseConfig,
   control,
   enterKeyHint,
 }: IProps<TValues>) => {
   const native = useIsCompact();
+  const config = withPhonePrefix(baseConfig);
 
   if (config.type === "checkbox") {
     return (

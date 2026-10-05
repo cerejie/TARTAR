@@ -34,10 +34,25 @@ export const asNumber = (text: string): number | null => {
   return Number.isFinite(amount) ? amount : null;
 };
 
-export const phoneLength = 11;
+export const phoneLength = 10;
 
-export const asPhone = (text: string): string =>
-  text.replace(/\D/g, "").slice(0, phoneLength);
+export const phonePrefix = "+63";
+
+const countryCode = phonePrefix.slice(1);
+
+export const asPhone = (text: string): string => {
+  const digits = text.replace(/\D/g, "");
+  const local =
+    digits.length > phoneLength && digits.startsWith(countryCode)
+      ? digits.slice(countryCode.length)
+      : digits;
+  return local.replace(/^0/, "").slice(0, phoneLength);
+};
+
+export const withPhonePrefix = <TValues extends FieldValues>(
+  config: IFieldConfig<TValues>
+): IFieldConfig<TValues> =>
+  config.type === "phone" ? { ...config, prefix: phonePrefix } : config;
 
 export const sanitizeAmount = (text: string): string => {
   const [whole = "", ...rest] = text.replace(/[^\d.]/g, "").split(".");

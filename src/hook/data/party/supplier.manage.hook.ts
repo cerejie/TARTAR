@@ -34,7 +34,7 @@ export const supplierFormFields: IFieldConfig<IPartyInput>[] = [
     name: "contact",
     label: "Contact number",
     type: "phone",
-    placeholder: "e.g. 09171234567",
+    placeholder: "9171234567",
   },
   { name: "address", label: "Address", type: "textarea" },
 ];
