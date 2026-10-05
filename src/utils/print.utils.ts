@@ -185,7 +185,7 @@ export const printVoucher = (
     </table>
     <table class="grid">${voucherGridRow([
       ["Bank Name:", isCheck ? voucher.check_bank ?? "" : ""],
-      ["Check No.:", isCheck ? voucher.check_number ?? "" : ""],
+      ["Check No.:", voucher.check_number ?? ""],
       [
         "Date of Check:",
         isCheck && voucher.check_due_date ? formatDate(voucher.check_due_date) : "",

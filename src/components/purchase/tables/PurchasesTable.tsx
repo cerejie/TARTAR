@@ -456,6 +456,7 @@ const PurchasesTable = () => {
         modalKey={printModalKey}
         title="Print purchases"
         onPrint={printPeriod}
+        withContent
       />
     </>
   );

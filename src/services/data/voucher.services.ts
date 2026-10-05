@@ -46,7 +46,7 @@ const voucherRowOf = (values: IVoucherInput) => {
     supplier_id: isPurchase ? values.supplier_id ?? null : null,
     due_date: isPurchase ? values.due_date ?? null : null,
     check_bank: isCheck ? values.check_bank ?? null : null,
-    check_number: isCheck ? values.check_number ?? null : null,
+    check_number: isCheck || isPurchase ? values.check_number || null : null,
     check_due_date: isCheck ? values.check_due_date ?? null : null,
   };
 };

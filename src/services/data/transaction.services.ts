@@ -68,6 +68,11 @@ const breakdownArgs = (values: IDisbursementInput) => {
   };
 };
 
+const checkNumberArgs = (checkNumber: string | null | undefined) =>
+  checkNumber === undefined || checkNumber === null
+    ? {}
+    : { p_check_number: checkNumber };
+
 const payablesOf = async (
   vouchers: readonly IVoucher[]
 ): Promise<Map<string, IDisbursementPayable>> => {
@@ -362,6 +367,7 @@ const transactionServices = {
         p_created_by: createdBy,
         p_due_date: values.due_date ?? null,
         ...breakdownArgs(values),
+        ...checkNumberArgs(values.check_number || null),
       },
     }),
 
@@ -391,6 +397,7 @@ const transactionServices = {
         p_expense_type: kind === "expense" ? values.expense_type ?? null : null,
         p_due_date: values.due_date ?? null,
         ...breakdownArgs(values),
+        ...checkNumberArgs(values.check_number),
       },
     }),
 

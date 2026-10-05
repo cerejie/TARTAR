@@ -2,6 +2,8 @@ import {
   monthLabels,
   monthValues,
   periodPrintSchema,
+  printContentLabels,
+  printContentValues,
   printPeriodLabels,
   printPeriodValues,
 } from "../../models/common/period.model";
@@ -20,6 +22,7 @@ import type { IFieldConfig } from "../../models/common/field.model";
 import type {
   IDateRange,
   IPeriodPrintInput,
+  PrintContent,
 } from "../../models/common/period.model";
 
 const isCustom = (values: IPeriodPrintInput) => values.period === "custom";
@@ -28,8 +31,18 @@ const isDated = (values: IPeriodPrintInput) =>
   !isCustom(values) && !isMonthly(values);
 
 const periodPrintFieldsOf = (
-  years: readonly string[]
+  years: readonly string[],
+  withContent: boolean
 ): IFieldConfig<IPeriodPrintInput>[] => [
+  {
+    name: "content",
+    label: "What to print",
+    type: "select",
+    required: true,
+    allowClear: false,
+    options: toOptions(printContentValues, printContentLabels),
+    hidden: () => !withContent,
+  },
   {
     name: "period",
     label: "Period",
@@ -90,16 +103,18 @@ const periodPrintDefaultsOf = (): DefaultValues<IPeriodPrintInput> => ({
   ...currentMonthYear(),
   date_from: todayIso(),
   date_to: todayIso(),
+  content: "both",
 });
 
 export const usePeriodPrint = (
   modalKey: string,
-  onPrint: (range: IDateRange) => Promise<void>
+  onPrint: (range: IDateRange, content: PrintContent) => Promise<void>,
+  withContent: boolean
 ) => {
   const { modal, closeModal } = useModal(modalKey);
 
   const printMutation = useMutation(
-    (values: IPeriodPrintInput) => onPrint(rangeOfPeriod(values)),
+    (values: IPeriodPrintInput) => onPrint(rangeOfPeriod(values), values.content),
     { onSuccess: closeModal }
   );
 
@@ -107,7 +122,7 @@ export const usePeriodPrint = (
     open: modal.visible,
     closeModal,
     periodPrintSchema,
-    periodPrintFields: periodPrintFieldsOf(recentYears()),
+    periodPrintFields: periodPrintFieldsOf(recentYears(), withContent),
     periodPrintDefaults: periodPrintDefaultsOf(),
     submitting: printMutation.loading,
     submitPrint: (values: IPeriodPrintInput) => {

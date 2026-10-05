@@ -29,7 +29,10 @@ import type {
   IQuerySpec,
 } from "../../../models/common/query.model";
 import type { ISortOption } from "../../../models/common/table.model";
-import type { IDateRange } from "../../../models/common/period.model";
+import type {
+  IDateRange,
+  PrintContent,
+} from "../../../models/common/period.model";
 import type { IDisbursementInput } from "../../../models/data/transaction/transaction.request";
 import {
   sumCounted,
@@ -60,6 +63,8 @@ import {
 import { printReport } from "../../../utils/print.utils";
 import {
   disbursementPrintDocument,
+  printsPurchaseVouchers,
+  printsPurchasesDue,
   purchasePrintDocument,
 } from "../../../utils/report.utils";
 import { vouchersPath } from "../../../utils/route.utils";
@@ -272,23 +277,29 @@ export const useDisbursementListHook = (
     { successMessage: `${title} deleted`, invalidate }
   );
 
-  const printPurchases = async (range: IDateRange) => {
+  const printPurchases = async (range: IDateRange, content: PrintContent) => {
     const rangeFilters = scopedFilters(
       { dateFrom: range.from, dateTo: range.to },
       scopeBranch
     );
     const [due, vouchered] = await Promise.all([
-      transactionServices.getPurchasesDueAll(rangeFilters),
-      transactionServices.getDisbursementAll(kind, {
-        ...rangeFilters,
-        dateBasis: "voucher",
-      }),
+      printsPurchasesDue(content)
+        ? transactionServices.getPurchasesDueAll(rangeFilters)
+        : [],
+      printsPurchaseVouchers(content)
+        ? transactionServices.getDisbursementAll(kind, {
+            ...rangeFilters,
+            dateBasis: "voucher",
+          })
+        : [],
     ]);
-    printReport(purchasePrintDocument(due, vouchered, range, printScope));
+    printReport(
+      purchasePrintDocument(due, vouchered, range, printScope, content)
+    );
   };
 
-  const printPeriod = async (range: IDateRange) => {
-    if (kind === "purchase") return printPurchases(range);
+  const printPeriod = async (range: IDateRange, content: PrintContent) => {
+    if (kind === "purchase") return printPurchases(range, content);
 
     const rows = await transactionServices.getDisbursementAll(
       kind,

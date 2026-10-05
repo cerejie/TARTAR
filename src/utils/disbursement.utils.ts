@@ -80,9 +80,17 @@ const dueDateField: IFieldConfig<IDisbursementInput> = {
   span: "half",
 };
 
+const checkNumberField: IFieldConfig<IDisbursementInput> = {
+  name: "check_number",
+  label: "Check number",
+  type: "text",
+  hint: "Optional — only when this purchase is paid by check.",
+};
+
 const paymentSection = (
   lookups: IDisbursementLookups,
-  payeeLabel: string
+  payeeLabel: string,
+  trailingFields: readonly IFieldConfig<IDisbursementInput>[] = []
 ): IFieldSection<IDisbursementInput> => ({
   key: "payment",
   title: "Payment",
@@ -95,6 +103,7 @@ const paymentSection = (
       options: lookups.payeeOptions,
     },
     ...lookups.paymentFields,
+    ...trailingFields,
   ],
 });
 
@@ -149,7 +158,7 @@ const purchaseSections = (
       dueDateField,
     ],
   },
-  paymentSection(lookups, "Supplier"),
+  paymentSection(lookups, "Supplier", [checkNumberField]),
   {
     key: "breakdown",
     title: "Voucher breakdown",
@@ -182,7 +191,7 @@ export const disbursementDefaultsOf = (
   };
 
   return kind === "purchase"
-    ? { ...blank, vatable: true }
+    ? { ...blank, vatable: true, check_number: "" }
     : { ...blank, expense_type: "" };
 };
 
@@ -205,7 +214,11 @@ export const disbursementEditDefaultsOf = (
   };
 
   if (kind === "purchase") {
-    return { ...voucherBreakdownOf(row.voucher), ...recorded };
+    return {
+      ...voucherBreakdownOf(row.voucher),
+      ...recorded,
+      check_number: row.voucher?.check_number ?? "",
+    };
   }
 
   return {
@@ -217,3 +230,12 @@ export const disbursementEditDefaultsOf = (
       : "",
   };
 };
+
+export const withCheckNumberChange = (
+  row: IDisbursement,
+  values: IDisbursementInput
+): IDisbursementInput =>
+  values.check_number === undefined ||
+  (values.check_number ?? "") === (row.voucher?.check_number ?? "")
+    ? { ...values, check_number: undefined }
+    : { ...values, check_number: values.check_number ?? "" };

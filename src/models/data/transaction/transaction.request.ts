@@ -64,6 +64,7 @@ const disbursementBase = z.object({
   supplier_id: z.string().uuid().nullable().optional(),
   payee: z.string().trim().max(160).nullable().optional(),
   description: z.string().trim().max(500).nullable().optional(),
+  check_number: z.string().trim().max(60).nullable().optional(),
   ...voucherBreakdownShape,
 });
 

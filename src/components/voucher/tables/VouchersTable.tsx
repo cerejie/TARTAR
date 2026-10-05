@@ -337,7 +337,7 @@ const VouchersTable = () => {
         },
         {
           key: "check_number",
-          hidden: (voucher) => voucher.type !== "check",
+          hidden: (voucher) => !voucher.check_number,
           label: "Check number",
           render: (voucher) => voucher.check_number,
         },

@@ -51,6 +51,15 @@ export const monthLabels: Record<MonthValue, string> = {
   "12": "December",
 };
 
+export const printContentValues = ["both", "due", "vouchers"] as const;
+export type PrintContent = (typeof printContentValues)[number];
+
+export const printContentLabels: Record<PrintContent, string> = {
+  both: "Purchases due and purchase vouchers",
+  due: "Purchases due",
+  vouchers: "Purchase vouchers created",
+};
+
 export const periodPrintSchema = z
   .object({
     period: z.enum(printPeriodValues),
@@ -59,6 +68,7 @@ export const periodPrintSchema = z
     year: z.string().regex(/^\d{4}$/, "Pick a year"),
     date_from: isoDateField,
     date_to: isoDateField,
+    content: z.enum(printContentValues),
   })
   .refine(
     (values) => values.period !== "custom" || values.date_from <= values.date_to,
@@ -66,6 +76,8 @@ export const periodPrintSchema = z
   );
 
 export type IPeriodPrintInput = z.infer<typeof periodPrintSchema>;
+
+export type IPeriodInput = Omit<IPeriodPrintInput, "content">;
 
 export interface IDateRange {
   from: string;

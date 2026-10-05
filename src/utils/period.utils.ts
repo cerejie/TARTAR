@@ -4,7 +4,7 @@ import { monthValues, quickDateValues } from "../models/common/period.model";
 import type {
   IDateRange,
   IMonthYear,
-  IPeriodPrintInput,
+  IPeriodInput,
   PrintPeriod,
   QuickDate,
 } from "../models/common/period.model";
@@ -22,7 +22,7 @@ const quickDatePeriods: Record<QuickDate, Exclude<PrintPeriod, "custom">> = {
   month: "monthly",
 };
 
-export const rangeOfPeriod = (values: IPeriodPrintInput): IDateRange => {
+export const rangeOfPeriod = (values: IPeriodInput): IDateRange => {
   if (values.period === "custom")
     return { from: values.date_from, to: values.date_to };
 

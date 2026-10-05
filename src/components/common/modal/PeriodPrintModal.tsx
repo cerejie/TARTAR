@@ -3,15 +3,22 @@ import EntityFormModal from "../form/EntityFormModal";
 import type {
   IDateRange,
   IPeriodPrintInput,
+  PrintContent,
 } from "../../../models/common/period.model";
 
 type IProps = {
   modalKey: string;
   title: string;
-  onPrint: (range: IDateRange) => Promise<void>;
+  onPrint: (range: IDateRange, content: PrintContent) => Promise<void>;
+  withContent?: boolean;
 };
 
-const PeriodPrintModal = ({ modalKey, title, onPrint }: IProps) => {
+const PeriodPrintModal = ({
+  modalKey,
+  title,
+  onPrint,
+  withContent = false,
+}: IProps) => {
   const {
     open,
     closeModal,
@@ -20,7 +27,7 @@ const PeriodPrintModal = ({ modalKey, title, onPrint }: IProps) => {
     periodPrintDefaults,
     submitting,
     submitPrint,
-  } = usePeriodPrint(modalKey, onPrint);
+  } = usePeriodPrint(modalKey, onPrint, withContent);
 
   return (
     <EntityFormModal<IPeriodPrintInput>

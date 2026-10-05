@@ -24,6 +24,7 @@ import {
   disbursementEditDefaultsOf,
   disbursementSectionsOf,
   isDisbursementRejected,
+  withCheckNumberChange,
 } from "../../../utils/disbursement.utils";
 import { nameKey } from "../../../utils/fuzzy.utils";
 import { resolveParty } from "../../../utils/party.utils";
@@ -138,7 +139,7 @@ export const useDisbursementFormHook = (
       transactionServices.updateDisbursement(
         payload.row.id,
         kind,
-        await prepare(payload.values),
+        withCheckNumberChange(payload.row, await prepare(payload.values)),
         payload.row.version ?? 0,
         payload.row.voucher?.status ?? null
       ),
