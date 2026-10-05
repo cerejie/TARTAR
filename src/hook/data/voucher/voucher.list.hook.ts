@@ -388,9 +388,9 @@ export const useVoucherListHook = () => {
         },
         {
           name: "check_number",
-          label: "Check number",
+          label: "Check number (optional)",
           type: "text",
-          hint: "Optional",
+          placeholder: "Enter a check number",
           hidden: (values) =>
             values.type === "check" || values.kind !== "purchase",
         },

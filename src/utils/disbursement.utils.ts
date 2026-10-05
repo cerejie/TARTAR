@@ -82,11 +82,11 @@ const dueDateField: IFieldConfig<IDisbursementInput> = {
 
 const checkNumberField: IFieldConfig<IDisbursementInput> = {
   name: "check_number",
-  label: "Check number",
+  label: "Check number (optional)",
   type: "text",
   spanOf: (values) =>
     values.cash_account === "bank_account" && !values.bank_id ? "full" : "half",
-  hint: "Optional",
+  placeholder: "Enter a check number",
 };
 
 const paymentSection = (
