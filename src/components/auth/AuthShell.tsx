@@ -1,5 +1,6 @@
 import { CloudCog, FileCheck2, Store } from "lucide-react";
 import type { ReactNode } from "react";
+import { cn } from "@/utils/cn.utils";
 import {
   authBrand,
   authCard,
@@ -13,6 +14,7 @@ import {
   authHeroTitle,
   authHeroWave,
   authHeroWordmark,
+  authHeadingMobileHidden,
   authMain,
   authMark,
   authMarkGlyph,
@@ -35,10 +37,13 @@ const features = [
 type IProps = {
   title: string;
   subtitle: string;
+  hideHeadingOnMobile?: boolean;
   children: ReactNode;
 };
 
-const AuthShell = ({ title, subtitle, children }: IProps) => {
+const AuthShell = ({ title, subtitle, hideHeadingOnMobile = false, children }: IProps) => {
+  const headingVisibility = hideHeadingOnMobile ? authHeadingMobileHidden : undefined;
+
   return (
     <div className={authPage}>
       <div className={authCard}>
@@ -78,8 +83,8 @@ const AuthShell = ({ title, subtitle, children }: IProps) => {
               <BrandWordmark className={authWordmark} />
             </div>
 
-            <h2 className={authTitle}>{title}</h2>
-            <p className={authSubtitle}>{subtitle}</p>
+            <h2 className={cn(authTitle, headingVisibility)}>{title}</h2>
+            <p className={cn(authSubtitle, headingVisibility)}>{subtitle}</p>
 
             {children}
           </div>

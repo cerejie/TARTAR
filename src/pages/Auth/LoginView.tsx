@@ -41,6 +41,7 @@ const LoginView = () => {
     <AuthShell
       title="Welcome back"
       subtitle="Sign in to continue managing your business."
+      hideHeadingOnMobile
     >
       <form className={authForm} onSubmit={onSubmit} noValidate>
         <FormField config={emailField} control={control} enterKeyHint="next" />

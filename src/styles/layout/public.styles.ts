@@ -59,6 +59,8 @@ export const authTitle =
 export const authSubtitle =
   "mt-2 block max-w-[34ch] text-section leading-relaxed text-muted-foreground min-[960px]:max-w-none min-[960px]:text-emphasis";
 
+export const authHeadingMobileHidden = "max-[959px]:sr-only";
+
 export const authForm = [
   "mt-8 flex flex-col gap-6 min-[960px]:mt-7 min-[960px]:gap-4",
   "[&_[data-slot=field-label]]:text-body [&_[data-slot=field-label]]:font-medium [&_[data-slot=field-label]]:text-foreground",
