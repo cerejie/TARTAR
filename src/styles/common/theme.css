@@ -195,6 +195,8 @@
   --font-sans: "Plus Jakarta Sans Variable", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-heading: "Plus Jakarta Sans Variable", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
+  --text-nano: 0.625rem;
+  --text-nano--line-height: 0.75rem;
   --text-micro: 0.6875rem;
   --text-micro--line-height: 1rem;
   --text-caption: 0.75rem;

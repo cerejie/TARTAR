@@ -9,9 +9,9 @@ description: "Write a commit message in this repo's house style — title `Devel
 
 - **Suggest** — after **every** response that changed files in this repo, end the reply with a
   suggested commit message in a fenced `txt` block, ready to copy. Always suggest; never run
-  `git add` or `git commit` for it. Before every suggestion run
-  `git log --oneline --grep="^Development v" -1` — the user may have committed since the last
-  one — and title it that version +0.1. Never reuse a version that is already committed. The
+  `git add` or `git commit` for it. Before every suggestion apply the version rule under
+  **Title** — the user may have committed since the last one — so `vite.config.ts` and the
+  title agree. Never reuse a version that is already committed. The
   description covers every uncommitted change, not only this turn's. If the change is not yet
   commit-worthy (build or lint failing), say so instead.
 - **Commit** — only when the user types `/commit` or asks to commit. Follow the Rules below.
@@ -24,11 +24,14 @@ Development v<X.Y>
 <Prefix>: <Short title>
 ```
 
-**Title** — always `Development v<X.Y>`, nothing else. The version is the most recent
-`Development v` commit on the current branch plus 0.1 (`v1.0` -> `v1.1`, `v1.9` -> `v1.10`).
-Find it with `git log --oneline --grep="^Development v" -1`. The Tailwind + shadcn migration
-restarts the series at `v1.0`; while that is the latest, count from it, not from older `v2.x`
-commits. If the user names a version, use theirs.
+**Title** — always `Development v<X.YY>`, nothing else. The number is the app version shown
+under the TARTAR logo: `__APP_VERSION__` in `vite.config.ts`, always two decimals. Every commit
+bumps it by 0.01 (`v1.00` -> `v1.01`, `v1.99` -> `v2.00`) and the title carries the same
+number. Find the last committed one with `git log --oneline --grep="^Development v" -1`: if
+`vite.config.ts` still holds that version, bump it by 0.01 as part of the change; otherwise it
+was already bumped since the last commit, so keep it. The series restarted at `v1.00` on
+2026-11-09 — the one-decimal commits up to `v2.92` are the previous series and never the base.
+If the user names a version, use theirs and set `vite.config.ts` to match.
 
 **Description** — one `<Prefix>: <Short title>` line per logical change, usually one. The
 short title is Title Case, ≤60 characters, no trailing period. No bullets, no paragraphs.
@@ -48,9 +51,9 @@ short title is Title Case, ≤60 characters, no trailing period. No bullets, no 
 ## Example
 
 ```
-Development v1.0
+Development v1.00
 
-Refactor: Tailwind And Shadcn Foundation
+Feature: App Version Under Logo
 ```
 
 ## Rules

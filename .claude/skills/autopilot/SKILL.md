@@ -83,10 +83,11 @@ check on a phone".
    "compiled, visuals unconfirmed", never "renders".
 7. **Commit.** Update the roadmap (tick Done with paths, rewrite Next, update State) first so it
    rides in the same commit. Then, per the `commit` skill's Format:
-   - version = `git log --oneline --grep="^Development v" -1` + 0.1;
-   - stage only the paths this run touched plus the roadmap and `.claude/state/autopilot/` —
-     never `git add -A`;
-   - title `Development v<X.Y>`, blank line, one `<Prefix>: <Title>` line per change, blank
+   - version = the `commit` skill's Title rule: `__APP_VERSION__` in `vite.config.ts`, bumped
+     0.01 past `git log --oneline --grep="^Development v" -1`;
+   - stage only the paths this run touched plus `vite.config.ts`, the roadmap and
+     `.claude/state/autopilot/` — never `git add -A`;
+   - title `Development v<X.YY>`, blank line, one `<Prefix>: <Title>` line per change, blank
      line, the harness `Co-Authored-By` trailer. Pass the message through a heredoc / `-F`
      file so lines survive.
 8. **Push and hand off.** Rewrite `NEXT_PROMPT.md` (shape below) and append the phase's

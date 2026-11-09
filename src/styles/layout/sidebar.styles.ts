@@ -15,3 +15,6 @@ export const sidebarMenuButton =
 export const sidebarAccount = "mt-2 border-t border-sidebar-border px-2 pt-3";
 
 export const sidebarFooter = "border-t border-sidebar-border p-1 empty:hidden compact:px-3";
+
+export const sidebarVersion =
+  "px-5 pt-1 pb-2 text-nano leading-none text-muted-foreground/80";

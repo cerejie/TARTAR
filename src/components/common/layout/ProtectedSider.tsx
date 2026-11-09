@@ -18,6 +18,7 @@ import {
   sidebarWordmark,
 } from "../../../styles/layout/sidebar.styles";
 import AccountSheetItems from "./AccountSheetItems";
+import AppVersion from "./AppVersion";
 import BrandMark from "./BrandMark";
 import BrandWordmark from "./BrandWordmark";
 import ProtectedMenu from "./ProtectedMenu";
@@ -46,6 +47,7 @@ const ProtectedSider = ({ account = false }: IProps) => {
             <div className={sidebarAccount}>
               <AccountSheetItems />
             </div>
+            <AppVersion />
           </>
         ) : null}
       </SidebarContent>
@@ -53,6 +55,7 @@ const ProtectedSider = ({ account = false }: IProps) => {
       {account ? null : (
         <SidebarFooter className={sidebarFooter}>
           <ProtectedMenu pinned />
+          <AppVersion />
         </SidebarFooter>
       )}
     </Sidebar>

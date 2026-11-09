@@ -391,9 +391,11 @@ is `RequirePermission`.
 
 After **every** response that changes files, end with a suggested commit message in a fenced
 `txt` block, in the house style of `.claude/skills/commit/SKILL.md` — title
-`Development v<X.Y>` — re-check `git log --oneline --grep="^Development v" -1` before
-every suggestion and add 0.1 (v1.0 committed -> v1.1) — description one
-`<Prefix>: <Title>` line per change. Always suggest; never commit unless asked.
+`Development v<X.YY>` — the same number as `__APP_VERSION__` in `vite.config.ts` (the
+version under the TARTAR logo). Every commit bumps it by 0.01 (v1.00 committed -> v1.01);
+re-check `git log --oneline --grep="^Development v" -1` before every suggestion and bump the
+file if it still holds the committed version — description one `<Prefix>: <Title>` line per
+change. Always suggest; never commit unless asked.
 
 ## Do not
 
