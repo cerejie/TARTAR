@@ -44,7 +44,8 @@ export const authMain =
 export const authPanel =
   "my-auto flex w-full max-w-[400px] flex-col animate-in fade-in-0 slide-in-from-bottom-2 duration-500 fill-mode-both motion-reduce:animate-none";
 
-export const authBrand = "mb-10 flex items-center gap-4 min-[960px]:mb-7";
+export const authBrand =
+  "mb-4 flex flex-col items-center gap-3 min-[960px]:mb-7 min-[960px]:flex-row min-[960px]:gap-4";
 
 export const authMark =
   "inline-flex size-14 shrink-0 items-center justify-center rounded-xl bg-brand text-on-brand shadow-md shadow-brand/25";

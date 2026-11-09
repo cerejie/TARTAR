@@ -18,7 +18,7 @@ const vendorChunkOf = (id: string): string | undefined =>
 export default defineConfig({
   define: {
     __APP_BUILT_AT__: JSON.stringify(new Date().toISOString()),
-    __APP_VERSION__: JSON.stringify('1.01'),
+    __APP_VERSION__: JSON.stringify('1.02'),
   },
   plugins: [
     react(),
